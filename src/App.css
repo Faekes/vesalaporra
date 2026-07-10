@@ -373,63 +373,146 @@ button:focus-visible {
   font-weight: 900;
 }
 
+@keyframes vesPitchBreath {
+  0% {
+    box-shadow:
+      0 28px 80px rgba(15, 23, 42, 0.9),
+      inset 0 0 0 1px rgba(226, 232, 240, 0.06);
+    transform: translateY(0);
+  }
+
+  50% {
+    box-shadow:
+      0 34px 96px rgba(15, 23, 42, 1),
+      0 0 38px rgba(34, 197, 94, 0.2),
+      inset 0 0 0 1px rgba(226, 232, 240, 0.12);
+    transform: translateY(-1px);
+  }
+
+  100% {
+    box-shadow:
+      0 28px 80px rgba(15, 23, 42, 0.9),
+      inset 0 0 0 1px rgba(226, 232, 240, 0.06);
+    transform: translateY(0);
+  }
+}
+
+@keyframes vesPitchSweep {
+  0% {
+    transform: translateX(-140%) rotate(10deg);
+    opacity: 0;
+  }
+
+  28% {
+    opacity: 0.52;
+  }
+
+  100% {
+    transform: translateX(260%) rotate(10deg);
+    opacity: 0;
+  }
+}
+
 .football-field {
   position: relative;
-  width: min(100%, 680px);
-  aspect-ratio: 0.78;
+  width: min(100%, 820px);
+  aspect-ratio: 1.05;
   margin: 28px auto 0;
   overflow: hidden;
-  border: 3px solid rgba(255, 255, 255, 0.76);
-  border-radius: 26px;
+  border: 0;
+  border-radius: 32px;
+
   background:
-    linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.025) 0 12.5%,
-      transparent 12.5% 25%,
-      rgba(255, 255, 255, 0.025) 25% 37.5%,
-      transparent 37.5% 50%,
-      rgba(255, 255, 255, 0.025) 50% 62.5%,
-      transparent 62.5% 75%,
-      rgba(255, 255, 255, 0.025) 75% 87.5%,
-      transparent 87.5% 100%
+    radial-gradient(
+      circle at 18% 0%,
+      rgba(187, 247, 208, 0.18),
+      transparent 38%
     ),
-    linear-gradient(180deg, #176c42 0%, #0b5134 100%);
+    radial-gradient(
+      circle at 82% 8%,
+      rgba(56, 189, 248, 0.14),
+      transparent 42%
+    ),
+    repeating-linear-gradient(
+      180deg,
+      rgba(15, 118, 110, 0.25) 0,
+      rgba(15, 118, 110, 0.25) 28px,
+      rgba(5, 46, 38, 0.6) 28px,
+      rgba(5, 46, 38, 0.6) 56px
+    ),
+    linear-gradient(
+      180deg,
+      rgba(15, 118, 110, 0.5) 0%,
+      rgba(6, 95, 70, 0.9) 45%,
+      rgba(6, 78, 59, 1) 100%
+    );
+
   box-shadow:
-    inset 0 0 60px rgba(0, 0, 0, 0.18),
-    0 22px 70px rgba(0, 0, 0, 0.24);
+    0 28px 80px rgba(15, 23, 42, 0.9),
+    inset 0 0 0 1px rgba(226, 232, 240, 0.06);
+
+  animation: vesPitchBreath 6.5s ease-in-out infinite;
 }
 
 .football-field::before {
   content: "";
   position: absolute;
-  inset: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.62);
+  inset: 24px;
+  z-index: 1;
+  border: 2px solid rgba(226, 232, 240, 0.6);
+  border-radius: 26px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    inset 0 0 44px rgba(2, 6, 23, 0.34);
   pointer-events: none;
+}
+
+.football-field::after {
+  content: "";
+  position: absolute;
+  top: -18%;
+  bottom: -18%;
+  left: 0;
+  width: 42%;
+  z-index: 2;
+
+  background:
+    linear-gradient(
+      100deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.08) 42%,
+      rgba(187, 247, 208, 0.14) 50%,
+      transparent 62%
+    );
+
+  pointer-events: none;
+  animation: vesPitchSweep 7.8s ease-in-out infinite;
 }
 
 .field-line {
   position: absolute;
-  z-index: 1;
-  background: rgba(255, 255, 255, 0.65);
+  z-index: 3;
+  background: rgba(226, 232, 240, 0.5);
   pointer-events: none;
 }
 
 .halfway-line {
   top: 50%;
-  right: 18px;
-  left: 18px;
+  right: 24px;
+  left: 24px;
   height: 2px;
+  transform: translateY(-50%);
 }
 
 .field-circle {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 105px;
-  height: 105px;
-  z-index: 1;
-  border: 2px solid rgba(255, 255, 255, 0.65);
-  border-radius: 50%;
+  width: 130px;
+  height: 130px;
+  z-index: 3;
+  border: 2px solid rgba(226, 232, 240, 0.5);
+  border-radius: 999px;
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
@@ -441,30 +524,13 @@ button:focus-visible {
   left: 50%;
   width: 7px;
   height: 7px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  background: rgba(226, 232, 240, 0.65);
   transform: translate(-50%, -50%);
 }
 
 .penalty-area {
-  position: absolute;
-  left: 50%;
-  width: 52%;
-  height: 15%;
-  z-index: 1;
-  border: 2px solid rgba(255, 255, 255, 0.65);
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
-.penalty-area-top {
-  top: 18px;
-  border-top: 0;
-}
-
-.penalty-area-bottom {
-  bottom: 18px;
-  border-bottom: 0;
+  display: none;
 }
 
 .field-slots {
