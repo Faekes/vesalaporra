@@ -178,15 +178,31 @@ function App() {
     Array.from({ length: 11 }, () => null),
   )
 
+  const [protagonistId, setProtagonistId] = useState(null)
+
   const lineupCount = lineup.filter(Boolean).length
 
+  const protagonist = protagonistId
+    ? playersById[protagonistId]
+    : null
+
   const togglePlayer = (playerId) => {
+    const playerIsAlreadySelected = lineup.includes(playerId)
+
+    if (
+      playerIsAlreadySelected &&
+      protagonistId === playerId
+    ) {
+      setProtagonistId(null)
+    }
+
     setLineup((currentLineup) => {
       const existingIndex = currentLineup.indexOf(playerId)
 
       if (existingIndex !== -1) {
         const nextLineup = [...currentLineup]
         nextLineup[existingIndex] = null
+
         return nextLineup
       }
 
@@ -205,12 +221,16 @@ function App() {
     })
   }
 
-  const removePlayerFromSlot = (slotIndex) => {
-    setLineup((currentLineup) => {
-      const nextLineup = [...currentLineup]
-      nextLineup[slotIndex] = null
-      return nextLineup
-    })
+  const toggleProtagonist = (playerId) => {
+    if (!lineup.includes(playerId)) {
+      return
+    }
+
+    setProtagonistId((currentProtagonistId) =>
+      currentProtagonistId === playerId
+        ? null
+        : playerId,
+    )
   }
 
   const handleDragStart = (event, playerId) => {
@@ -221,7 +241,8 @@ function App() {
   const handleDrop = (event, targetSlotIndex) => {
     event.preventDefault()
 
-    const playerId = event.dataTransfer.getData('text/plain')
+    const playerId =
+      event.dataTransfer.getData('text/plain')
 
     if (!playersById[playerId]) {
       return
@@ -229,16 +250,20 @@ function App() {
 
     setLineup((currentLineup) => {
       const nextLineup = [...currentLineup]
-      const sourceSlotIndex = nextLineup.indexOf(playerId)
+
+      const sourceSlotIndex =
+        nextLineup.indexOf(playerId)
 
       if (sourceSlotIndex === targetSlotIndex) {
         return currentLineup
       }
 
-      const displacedPlayerId = nextLineup[targetSlotIndex]
+      const displacedPlayerId =
+        nextLineup[targetSlotIndex]
 
       if (sourceSlotIndex !== -1) {
-        nextLineup[sourceSlotIndex] = displacedPlayerId
+        nextLineup[sourceSlotIndex] =
+          displacedPlayerId
       }
 
       nextLineup[targetSlotIndex] = playerId
@@ -259,10 +284,17 @@ function App() {
           </div>
         </div>
 
-        <nav className="main-nav" aria-label="Navegació principal">
+        <nav
+          className="main-nav"
+          aria-label="Navegació principal"
+        >
           <button
             type="button"
-            className={activePage === 'play' ? 'nav-button active' : 'nav-button'}
+            className={
+              activePage === 'play'
+                ? 'nav-button active'
+                : 'nav-button'
+            }
             onClick={() => setActivePage('play')}
           >
             JUGA
@@ -299,7 +331,10 @@ function App() {
           <section className="play-page">
             <header className="match-header">
               <div>
-                <span className="eyebrow">PROPER PARTIT</span>
+                <span className="eyebrow">
+                  PROPER PARTIT
+                </span>
+
                 <h1>BARÇA · RIVAL</h1>
               </div>
 
@@ -312,11 +347,16 @@ function App() {
             <section className="prediction-card score-card">
               <div className="section-heading">
                 <div>
-                  <span className="step-number">01</span>
+                  <span className="step-number">
+                    01
+                  </span>
+
                   <h2>Pronostica el resultat</h2>
                 </div>
 
-                <span className="status-pill">PENDENT</span>
+                <span className="status-pill">
+                  PENDENT
+                </span>
               </div>
 
               <div className="scoreboard">
@@ -327,7 +367,9 @@ function App() {
                     <button
                       type="button"
                       onClick={() =>
-                        setBarcaScore((score) => Math.max(0, score - 1))
+                        setBarcaScore((score) =>
+                          Math.max(0, score - 1),
+                        )
                       }
                     >
                       −
@@ -337,14 +379,20 @@ function App() {
 
                     <button
                       type="button"
-                      onClick={() => setBarcaScore((score) => score + 1)}
+                      onClick={() =>
+                        setBarcaScore(
+                          (score) => score + 1,
+                        )
+                      }
                     >
                       +
                     </button>
                   </div>
                 </div>
 
-                <span className="score-separator">:</span>
+                <span className="score-separator">
+                  :
+                </span>
 
                 <div className="score-team">
                   <strong>RIVAL</strong>
@@ -353,7 +401,9 @@ function App() {
                     <button
                       type="button"
                       onClick={() =>
-                        setRivalScore((score) => Math.max(0, score - 1))
+                        setRivalScore((score) =>
+                          Math.max(0, score - 1),
+                        )
                       }
                     >
                       −
@@ -363,7 +413,11 @@ function App() {
 
                     <button
                       type="button"
-                      onClick={() => setRivalScore((score) => score + 1)}
+                      onClick={() =>
+                        setRivalScore(
+                          (score) => score + 1,
+                        )
+                      }
                     >
                       +
                     </button>
@@ -375,7 +429,9 @@ function App() {
             <section className="prediction-card lineup-card">
               <div className="section-heading lotto-heading">
                 <div className="lotto-heading-main">
-                  <span className="step-number">02</span>
+                  <span className="step-number">
+                    02
+                  </span>
 
                   <img
                     src="/fcb/HANSI_FLICK.png"
@@ -385,7 +441,10 @@ function App() {
 
                   <div className="lotto-title-copy">
                     <h2>La Lotto Flick</h2>
-                    <span className="formation-label">4-3-3 FIX</span>
+
+                    <span className="formation-label">
+                      4-3-3 FIX
+                    </span>
                   </div>
                 </div>
 
@@ -395,14 +454,18 @@ function App() {
               </div>
 
               <p className="section-help">
-                Arrossega una xapa fins a una posició del 4-3-3 o toca-la per
-                afegir-la al primer espai lliure.
+                Arrossega una xapa fins a una posició del
+                4-3-3 o toca-la per afegir-la al primer
+                espai lliure.
               </p>
 
               <div className="football-field">
                 <div className="field-line halfway-line"></div>
+
                 <div className="field-circle"></div>
+
                 <div className="penalty-area penalty-area-top"></div>
+
                 <div className="penalty-area penalty-area-bottom"></div>
 
                 <div className="field-slots formation-433">
@@ -413,38 +476,67 @@ function App() {
                       aria-label={line.label}
                     >
                       {line.slots.map((slotIndex) => {
-                        const playerId = lineup[slotIndex]
+                        const playerId =
+                          lineup[slotIndex]
+
                         const player = playerId
                           ? playersById[playerId]
                           : null
+
+                        const isProtagonist =
+                          Boolean(player) &&
+                          protagonistId === player.id
+
+                        const fieldSlotClassName = [
+                          'field-slot',
+                          player ? 'occupied' : '',
+                          isProtagonist
+                            ? 'protagonist'
+                            : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')
 
                         return (
                           <button
                             key={slotIndex}
                             type="button"
                             className={
-                              player
-                                ? 'field-slot occupied'
-                                : 'field-slot'
+                              fieldSlotClassName
                             }
                             draggable={Boolean(player)}
                             onDragStart={(event) => {
                               if (player) {
-                                handleDragStart(event, player.id)
+                                handleDragStart(
+                                  event,
+                                  player.id,
+                                )
                               }
                             }}
-                            onDragOver={(event) => event.preventDefault()}
+                            onDragOver={(event) =>
+                              event.preventDefault()
+                            }
                             onDrop={(event) =>
-                              handleDrop(event, slotIndex)
+                              handleDrop(
+                                event,
+                                slotIndex,
+                              )
                             }
                             onClick={() => {
                               if (player) {
-                                removePlayerFromSlot(slotIndex)
+                                toggleProtagonist(
+                                  player.id,
+                                )
                               }
                             }}
+                            aria-pressed={
+                              player
+                                ? isProtagonist
+                                : undefined
+                            }
                             aria-label={
                               player
-                                ? `Treure ${player.name} del camp`
+                                ? `Seleccionar ${player.name} com a protagonista`
                                 : `Posició lliure ${slotIndex + 1}`
                             }
                           >
@@ -456,12 +548,23 @@ function App() {
                                   alt=""
                                 />
 
+                                {isProtagonist && (
+                                  <span
+                                    className="protagonist-crown"
+                                    aria-hidden="true"
+                                  >
+                                    ★
+                                  </span>
+                                )}
+
                                 <small className="field-player-name">
                                   {player.shortName}
                                 </small>
                               </>
                             ) : (
-                              <span className="field-slot-plus">+</span>
+                              <span className="field-slot-plus">
+                                +
+                              </span>
                             )}
                           </button>
                         )
@@ -473,13 +576,19 @@ function App() {
 
               <div className="player-tray">
                 <div className="player-tray-header">
-                  <strong>23 XAPES DEL BARÇA</strong>
-                  <span>{players.length} jugadors</span>
+                  <strong>
+                    23 XAPES DEL BARÇA
+                  </strong>
+
+                  <span>
+                    {players.length} jugadors
+                  </span>
                 </div>
 
                 <div className="player-badges">
                   {players.map((player) => {
-                    const isSelected = lineup.includes(player.id)
+                    const isSelected =
+                      lineup.includes(player.id)
 
                     return (
                       <button
@@ -492,9 +601,14 @@ function App() {
                         }
                         draggable
                         onDragStart={(event) =>
-                          handleDragStart(event, player.id)
+                          handleDragStart(
+                            event,
+                            player.id,
+                          )
                         }
-                        onClick={() => togglePlayer(player.id)}
+                        onClick={() =>
+                          togglePlayer(player.id)
+                        }
                         aria-pressed={isSelected}
                       >
                         <img
@@ -503,7 +617,9 @@ function App() {
                           alt=""
                         />
 
-                        <span>{player.name}</span>
+                        <span>
+                          {player.name}
+                        </span>
                       </button>
                     )
                   })}
@@ -514,38 +630,98 @@ function App() {
             <section className="prediction-card protagonist-card">
               <div className="section-heading">
                 <div>
-                  <span className="step-number">03</span>
+                  <span className="step-number">
+                    03
+                  </span>
+
                   <h2>Marca el protagonista</h2>
                 </div>
 
-                <span className="status-pill">PENDENT</span>
+                <span
+                  className={
+                    protagonist
+                      ? 'status-pill completed'
+                      : 'status-pill'
+                  }
+                >
+                  {protagonist
+                    ? 'FET'
+                    : 'PENDENT'}
+                </span>
               </div>
 
               <p className="section-help">
-                Tria un jugador del teu onze i pronostica gol o assistència.
+                Tria un jugador del teu onze. Encertes si
+                marca o dona una assistència.
               </p>
 
-              <div className="marker-options">
-                <button type="button" className="marker-option">
-                  <span className="marker-icon">⚽</span>
+              <div
+                className={
+                  protagonist
+                    ? 'protagonist-showcase selected'
+                    : 'protagonist-showcase'
+                }
+              >
+                {protagonist ? (
+                  <>
+                    <div className="protagonist-image-wrap">
+                      <img
+                        src={protagonist.image}
+                        className="protagonist-showcase-image"
+                        alt=""
+                      />
 
-                  <span>
-                    <strong>GOL</strong>
-                    <small>Marcarà</small>
-                  </span>
-                </button>
+                      <span
+                        className="protagonist-showcase-star"
+                        aria-hidden="true"
+                      >
+                        ★
+                      </span>
+                    </div>
 
-                <button
-                  type="button"
-                  className="marker-option assist-option"
-                >
-                  <span className="marker-icon assist-marker">A</span>
+                    <div className="protagonist-showcase-copy">
+                      <span className="protagonist-kicker">
+                        EL TEU PROTAGONISTA
+                      </span>
 
-                  <span>
-                    <strong>ASSISTÈNCIA</strong>
-                    <small>Donarà l'assistència</small>
-                  </span>
-                </button>
+                      <strong>
+                        {protagonist.name}
+                      </strong>
+
+                      <span className="protagonist-rule">
+                        ⚽ MARCA
+                        <span>O</span>
+                        🎯 ASSISTEIX
+                      </span>
+
+                      <small>
+                        Encertaràs si fa una de les dues
+                        coses durant el partit.
+                      </small>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="protagonist-empty-icon">
+                      ★
+                    </div>
+
+                    <div className="protagonist-showcase-copy">
+                      <span className="protagonist-kicker">
+                        FALTA UN ÚLTIM PAS
+                      </span>
+
+                      <strong>
+                        Tria el teu protagonista
+                      </strong>
+
+                      <small>
+                        Toca una de les 11 xapes que tens
+                        col·locades al camp.
+                      </small>
+                    </div>
+                  </>
+                )}
               </div>
             </section>
 
@@ -555,12 +731,21 @@ function App() {
                   RESULTAT {barcaScore}-{rivalScore}
                 </span>
 
-                <span>XI {lineupCount}/11</span>
+                <span>
+                  XI {lineupCount}/11
+                </span>
 
-                <span>PROTAGONISTA —</span>
+                <span>
+                  {protagonist
+                    ? `PROTAGONISTA ${protagonist.shortName.toUpperCase()}`
+                    : 'PROTAGONISTA —'}
+                </span>
               </div>
 
-              <button type="button" className="confirm-button">
+              <button
+                type="button"
+                className="confirm-button"
+              >
                 CONFIRMAR PORRA
               </button>
             </section>
@@ -569,22 +754,30 @@ function App() {
 
         {activePage === 'ranking' && (
           <section className="placeholder-page">
-            <span className="eyebrow">VESALAPORRA</span>
+            <span className="eyebrow">
+              VESALAPORRA
+            </span>
+
             <h1>RÀNQUING</h1>
 
             <p>
-              La classificació general viurà aquí, com una pàgina pròpia.
+              La classificació general viurà aquí, com
+              una pàgina pròpia.
             </p>
           </section>
         )}
 
         {activePage === 'profile' && (
           <section className="placeholder-page">
-            <span className="eyebrow">VESALAPORRA</span>
+            <span className="eyebrow">
+              VESALAPORRA
+            </span>
+
             <h1>PERFIL</h1>
 
             <p>
-              Estadístiques, historial, assoliments, insígnies i medalles.
+              Estadístiques, historial, assoliments,
+              insígnies i medalles.
             </p>
           </section>
         )}
