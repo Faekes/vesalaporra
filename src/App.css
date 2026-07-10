@@ -24,12 +24,16 @@ html {
 }
 
 body {
-  margin: 0;
+  display: block;
   min-width: 320px;
   min-height: 100vh;
-  display: block;
+  margin: 0;
   background:
-    radial-gradient(circle at 50% 0%, rgba(26, 48, 112, 0.24), transparent 34rem),
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(26, 48, 112, 0.24),
+      transparent 34rem
+    ),
     linear-gradient(180deg, #090d1a 0%, #070913 100%);
   color: #f7f8ff;
 }
@@ -53,10 +57,22 @@ button:focus-visible {
   min-height: 100vh;
 }
 
+/* =========================================================
+   APP
+   ========================================================= */
+
 .app-shell {
   width: 100%;
   min-height: 100vh;
 }
+
+.app-main {
+  width: 100%;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .app-header {
   position: sticky;
@@ -89,7 +105,11 @@ button:focus-visible {
   border: 2px solid rgba(255, 206, 55, 0.8);
   border-radius: 50%;
   background:
-    radial-gradient(circle at 30% 25%, rgba(255, 221, 89, 0.55), transparent 24%),
+    radial-gradient(
+      circle at 30% 25%,
+      rgba(255, 221, 89, 0.55),
+      transparent 24%
+    ),
     linear-gradient(145deg, #1d2f82 0 46%, #a40f3c 46% 100%);
   color: #ffe477;
   font-size: 22px;
@@ -127,9 +147,9 @@ button:focus-visible {
 
 .nav-button {
   position: relative;
+  padding: 10px 16px;
   border: 0;
   border-radius: 999px;
-  padding: 10px 16px;
   background: transparent;
   color: #7f89a5;
   font-size: 13px;
@@ -142,8 +162,8 @@ button:focus-visible {
 }
 
 .nav-button:hover {
-  color: #ffffff;
   background: rgba(255, 255, 255, 0.055);
+  color: #ffffff;
 }
 
 .nav-button:active {
@@ -151,8 +171,8 @@ button:focus-visible {
 }
 
 .nav-button.active {
-  color: #ffe46d;
   background: rgba(255, 210, 58, 0.09);
+  color: #ffe46d;
 }
 
 .nav-button.active::after {
@@ -166,15 +186,19 @@ button:focus-visible {
   background: linear-gradient(90deg, #f4c72f, #f5744b);
 }
 
-.app-main {
-  width: 100%;
-}
+/* =========================================================
+   JUGA
+   ========================================================= */
 
 .play-page {
   width: min(100% - 32px, 980px);
   margin: 0 auto;
   padding: clamp(28px, 5vw, 58px) 0 72px;
 }
+
+/* =========================================================
+   PARTIT
+   ========================================================= */
 
 .match-header {
   display: flex;
@@ -198,8 +222,8 @@ button:focus-visible {
   color: #ffffff;
   font-size: clamp(30px, 6vw, 56px);
   font-weight: 950;
-  letter-spacing: -0.05em;
   line-height: 0.94;
+  letter-spacing: -0.05em;
 }
 
 .deadline {
@@ -224,6 +248,10 @@ button:focus-visible {
   letter-spacing: 0.02em;
 }
 
+/* =========================================================
+   CARDS GENERALS
+   ========================================================= */
+
 .prediction-card {
   margin-top: 18px;
   padding: clamp(20px, 4vw, 30px);
@@ -231,7 +259,11 @@ button:focus-visible {
   border: 1px solid rgba(255, 255, 255, 0.085);
   border-radius: 24px;
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.018)
+    ),
     rgba(13, 17, 34, 0.92);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.035),
@@ -300,9 +332,16 @@ button:focus-visible {
   line-height: 1.55;
 }
 
+/* =========================================================
+   RESULTAT
+   ========================================================= */
+
 .scoreboard {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto
+    minmax(0, 1fr);
   align-items: end;
   gap: clamp(10px, 4vw, 28px);
   margin-top: 28px;
@@ -373,6 +412,67 @@ button:focus-visible {
   font-weight: 900;
 }
 
+/* =========================================================
+   LA LOTTO FLICK
+   ========================================================= */
+
+.lotto-heading {
+  align-items: center;
+}
+
+.lotto-heading-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.flick-avatar {
+  display: block;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  border: 2px solid rgba(255, 214, 63, 0.55);
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 18%;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 4px rgba(255, 211, 54, 0.07),
+    0 10px 30px rgba(0, 0, 0, 0.28);
+}
+
+.lotto-title-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.lotto-title-copy h2 {
+  margin: 0;
+  font-size: clamp(22px, 4vw, 32px);
+  font-weight: 950;
+  letter-spacing: -0.035em;
+}
+
+.formation-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 211, 54, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 211, 54, 0.07);
+  color: #f5d34b;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.11em;
+}
+
+/* =========================================================
+   CAMP
+   ========================================================= */
+
 @keyframes vesPitchBreath {
   0% {
     box-shadow:
@@ -421,7 +521,6 @@ button:focus-visible {
   overflow: hidden;
   border: 0;
   border-radius: 32px;
-
   background:
     radial-gradient(
       circle at 18% 0%,
@@ -446,11 +545,9 @@ button:focus-visible {
       rgba(6, 95, 70, 0.9) 45%,
       rgba(6, 78, 59, 1) 100%
     );
-
   box-shadow:
     0 28px 80px rgba(15, 23, 42, 0.9),
     inset 0 0 0 1px rgba(226, 232, 240, 0.06);
-
   animation: vesPitchBreath 6.5s ease-in-out infinite;
 }
 
@@ -473,9 +570,8 @@ button:focus-visible {
   top: -18%;
   bottom: -18%;
   left: 0;
-  width: 42%;
   z-index: 2;
-
+  width: 42%;
   background:
     linear-gradient(
       100deg,
@@ -484,7 +580,6 @@ button:focus-visible {
       rgba(187, 247, 208, 0.14) 50%,
       transparent 62%
     );
-
   pointer-events: none;
   animation: vesPitchSweep 7.8s ease-in-out infinite;
 }
@@ -508,9 +603,9 @@ button:focus-visible {
   position: absolute;
   top: 50%;
   left: 50%;
+  z-index: 3;
   width: 130px;
   height: 130px;
-  z-index: 3;
   border: 2px solid rgba(226, 232, 240, 0.5);
   border-radius: 999px;
   transform: translate(-50%, -50%);
@@ -533,102 +628,149 @@ button:focus-visible {
   display: none;
 }
 
+/* =========================================================
+   FORMACIÓ FIXA 4-3-3
+   DAVANTERS 3
+   MIG 3
+   DEFENSA 4
+   PORTER 1
+   ========================================================= */
+
 .field-slots {
   position: absolute;
-  inset: 8%;
+  inset: 7% 8% 6%;
   z-index: 5;
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(5, 1fr);
-  align-items: center;
-  justify-items: center;
 }
 
+.formation-433 {
+  display: grid;
+  grid-template-rows:
+    minmax(0, 1fr)
+    minmax(0, 1fr)
+    minmax(0, 1fr)
+    minmax(0, 0.85fr);
+  align-items: center;
+  gap: 2%;
+}
+
+.formation-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.formation-forwards {
+  justify-content: space-around;
+  padding: 0 10%;
+}
+
+.formation-midfielders {
+  justify-content: space-around;
+  padding: 0 14%;
+}
+
+.formation-defenders {
+  justify-content: space-between;
+  padding: 0 2%;
+}
+
+.formation-goalkeeper {
+  justify-content: center;
+}
+
+/* =========================================================
+   SLOTS I XAPES AL CAMP
+   ========================================================= */
+
 .field-slot {
+  position: relative;
   display: grid;
   place-items: center;
-  width: clamp(44px, 8vw, 62px);
-  height: clamp(44px, 8vw, 62px);
-  border: 2px dashed rgba(255, 255, 255, 0.42);
+  width: clamp(62px, 8.5vw, 82px);
+  height: clamp(62px, 8.5vw, 82px);
+  padding: 0;
+  overflow: visible;
+  border: 2px dashed rgba(255, 255, 255, 0.45);
   border-radius: 50%;
-  background: rgba(3, 22, 14, 0.22);
+  background: rgba(3, 22, 14, 0.26);
   color: rgba(255, 255, 255, 0.68);
   backdrop-filter: blur(3px);
   transition:
     transform 160ms ease,
     background 160ms ease,
-    border-color 160ms ease;
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .field-slot:hover {
-  transform: scale(1.06);
+  z-index: 10;
   border-color: #ffe05c;
   background: rgba(255, 210, 53, 0.13);
+  transform: scale(1.07);
 }
 
-.field-slot span {
+.field-slot.occupied {
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.field-slot.occupied:hover {
+  background: transparent;
+  box-shadow: none;
+}
+
+.field-slot-plus {
   margin-top: -3px;
   font-size: 28px;
   font-weight: 300;
 }
 
-.field-slot:nth-child(1) {
-  grid-column: 3 / span 2;
-  grid-row: 5;
+.field-player-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 3px solid #f4d04b;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 22%;
+  background: #f7ecd3;
+  box-shadow:
+    0 0 0 3px rgba(8, 11, 22, 0.7),
+    0 8px 20px rgba(0, 0, 0, 0.38);
+  user-select: none;
+  pointer-events: none;
 }
 
-.field-slot:nth-child(2) {
-  grid-column: 1 / span 2;
-  grid-row: 4;
+.field-player-name {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  z-index: 12;
+  max-width: 105px;
+  padding: 3px 7px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 999px;
+  background: rgba(5, 10, 22, 0.88);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.field-slot:nth-child(3) {
-  grid-column: 3 / span 2;
-  grid-row: 4;
-}
-
-.field-slot:nth-child(4) {
-  grid-column: 5 / span 2;
-  grid-row: 4;
-}
-
-.field-slot:nth-child(5) {
-  grid-column: 1 / span 2;
-  grid-row: 3;
-}
-
-.field-slot:nth-child(6) {
-  grid-column: 3 / span 2;
-  grid-row: 3;
-}
-
-.field-slot:nth-child(7) {
-  grid-column: 5 / span 2;
-  grid-row: 3;
-}
-
-.field-slot:nth-child(8) {
-  grid-column: 1 / span 2;
-  grid-row: 2;
-}
-
-.field-slot:nth-child(9) {
-  grid-column: 3 / span 2;
-  grid-row: 2;
-}
-
-.field-slot:nth-child(10) {
-  grid-column: 5 / span 2;
-  grid-row: 2;
-}
-
-.field-slot:nth-child(11) {
-  grid-column: 3 / span 2;
-  grid-row: 1;
-}
+/* =========================================================
+   SAFATA DE LES 23 XAPES
+   ========================================================= */
 
 .player-tray {
-  margin-top: 24px;
+  margin-top: 28px;
 }
 
 .player-tray-header {
@@ -636,7 +778,7 @@ button:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .player-tray-header strong {
@@ -652,52 +794,103 @@ button:focus-visible {
 }
 
 .player-badges {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding: 4px 2px 12px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 18px 12px;
+  padding: 8px 2px 12px;
 }
 
 .player-badge {
+  position: relative;
   display: flex;
-  flex: 0 0 auto;
+  flex-direction: column;
   align-items: center;
-  gap: 9px;
-  min-height: 48px;
-  padding: 6px 13px 6px 7px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.035);
+  justify-content: flex-start;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: #dce1ed;
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 10px;
+  font-weight: 850;
+  text-align: center;
   transition:
     transform 160ms ease,
-    border-color 160ms ease,
-    background 160ms ease;
+    opacity 160ms ease,
+    filter 160ms ease;
 }
 
 .player-badge:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255, 214, 63, 0.38);
-  background: rgba(255, 210, 58, 0.07);
+  background: transparent;
+  transform: translateY(-4px) scale(1.03);
 }
 
 .player-badge-avatar {
+  display: block;
+  width: clamp(68px, 8vw, 92px);
+  height: clamp(68px, 8vw, 92px);
+  border: 3px solid rgba(255, 216, 66, 0.82);
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 22%;
+  background: #f7ecd3;
+  box-shadow:
+    0 0 0 3px rgba(25, 45, 120, 0.75),
+    0 9px 24px rgba(0, 0, 0, 0.3);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    filter 160ms ease;
+  user-select: none;
+  pointer-events: none;
+}
+
+.player-badge > span {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  color: #cbd2e3;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-badge.selected {
+  opacity: 0.38;
+  filter: saturate(0.6);
+}
+
+.player-badge.selected .player-badge-avatar {
+  border-color: rgba(129, 170, 255, 0.55);
+  box-shadow:
+    0 0 0 3px rgba(38, 72, 154, 0.42),
+    0 6px 16px rgba(0, 0, 0, 0.22);
+}
+
+.player-badge.selected::after {
+  content: "✓";
+  position: absolute;
+  top: 2px;
+  right: 12%;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 2px solid rgba(255, 216, 66, 0.55);
+  width: 22px;
+  height: 22px;
+  border: 2px solid #091020;
   border-radius: 50%;
-  background:
-    linear-gradient(135deg, #162d81 0 50%, #9e123f 50% 100%);
-  color: #ffe579;
-  font-size: 13px;
+  background: #f3cf40;
+  color: #171204;
+  font-size: 12px;
   font-weight: 950;
 }
+
+/* =========================================================
+   PROTAGONISTA
+   ========================================================= */
 
 .marker-options {
   display: grid;
@@ -725,9 +918,9 @@ button:focus-visible {
 }
 
 .marker-option:hover {
-  transform: translateY(-2px);
   border-color: rgba(255, 212, 59, 0.34);
   background: rgba(255, 212, 59, 0.065);
+  transform: translateY(-2px);
 }
 
 .marker-icon {
@@ -766,13 +959,21 @@ button:focus-visible {
   font-weight: 600;
 }
 
+/* =========================================================
+   CONFIRMAR
+   ========================================================= */
+
 .confirm-section {
   margin-top: 22px;
   padding: 20px;
   border: 1px solid rgba(255, 211, 54, 0.15);
   border-radius: 22px;
   background:
-    linear-gradient(135deg, rgba(42, 66, 143, 0.16), rgba(143, 15, 62, 0.1)),
+    linear-gradient(
+      135deg,
+      rgba(42, 66, 143, 0.16),
+      rgba(143, 15, 62, 0.1)
+    ),
     #0d1122;
 }
 
@@ -797,10 +998,16 @@ button:focus-visible {
   min-height: 58px;
   border: 0;
   border-radius: 16px;
-  background: linear-gradient(110deg, #efc52f 0%, #ffde63 55%, #f7aa38 100%);
+  background:
+    linear-gradient(
+      110deg,
+      #efc52f 0%,
+      #ffde63 55%,
+      #f7aa38 100%
+    );
   color: #191406;
   font-size: 14px;
-  font-weight: 1000;
+  font-weight: 950;
   letter-spacing: 0.075em;
   box-shadow:
     0 12px 34px rgba(255, 193, 35, 0.18),
@@ -816,6 +1023,10 @@ button:focus-visible {
     0 16px 42px rgba(255, 193, 35, 0.26),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
+
+/* =========================================================
+   RÀNQUING I PERFIL PROVISIONALS
+   ========================================================= */
 
 .placeholder-page {
   display: flex;
@@ -844,6 +1055,10 @@ button:focus-visible {
   font-size: 16px;
   line-height: 1.6;
 }
+
+/* =========================================================
+   TABLET I MÒBIL
+   ========================================================= */
 
 @media (max-width: 760px) {
   .app-header {
@@ -905,8 +1120,8 @@ button:focus-visible {
   }
 
   .prediction-card {
-    border-radius: 19px;
     padding: 18px 15px;
+    border-radius: 19px;
   }
 
   .section-heading {
@@ -932,6 +1147,8 @@ button:focus-visible {
     font-size: 13px;
   }
 
+  /* Resultat */
+
   .scoreboard {
     gap: 7px;
     margin-top: 22px;
@@ -955,38 +1172,49 @@ button:focus-visible {
     font-size: 26px;
   }
 
- .football-field {
-  width: 100%;
-  aspect-ratio: 0.82;
-  margin-top: 22px;
-  border-radius: 26px;
-}
+  /* Lotto Flick */
 
-.football-field::before {
-  inset: 16px;
-  border-radius: 21px;
-}
+  .lotto-heading-main {
+    gap: 9px;
+  }
 
-.halfway-line {
-  right: 16px;
-  left: 16px;
-}
+  .flick-avatar {
+    width: 46px;
+    height: 46px;
+    flex-basis: 46px;
+  }
+
+  .lotto-title-copy {
+    gap: 3px;
+  }
+
+  .lotto-title-copy h2 {
+    font-size: 19px;
+  }
+
+  .formation-label {
+    min-height: 18px;
+    padding: 3px 6px;
+    font-size: 8px;
+  }
+
+  /* Camp */
+
+  .football-field {
+    width: 100%;
+    aspect-ratio: 0.82;
+    margin-top: 22px;
+    border-radius: 26px;
+  }
 
   .football-field::before {
-    inset: 11px;
+    inset: 14px;
+    border-radius: 21px;
   }
 
   .halfway-line {
-    right: 11px;
-    left: 11px;
-  }
-
-  .penalty-area-top {
-    top: 11px;
-  }
-
-  .penalty-area-bottom {
-    bottom: 11px;
+    right: 14px;
+    left: 14px;
   }
 
   .field-circle {
@@ -994,18 +1222,63 @@ button:focus-visible {
     height: 78px;
   }
 
-  .field-slot {
-    width: clamp(38px, 12vw, 52px);
-    height: clamp(38px, 12vw, 52px);
+  .field-slots {
+    inset: 5% 5% 4%;
   }
 
-  .field-slot span {
+  .formation-433 {
+    gap: 1%;
+  }
+
+  .formation-forwards {
+    padding: 0 7%;
+  }
+
+  .formation-midfielders {
+    padding: 0 10%;
+  }
+
+  .formation-defenders {
+    padding: 0;
+  }
+
+  .field-slot {
+    width: clamp(48px, 14vw, 62px);
+    height: clamp(48px, 14vw, 62px);
+  }
+
+  .field-slot-plus {
     font-size: 22px;
   }
 
-  .player-badges {
-    margin-right: -15px;
+  .field-player-name {
+    top: calc(100% + 3px);
+    max-width: 72px;
+    padding: 2px 5px;
+    font-size: 7px;
   }
+
+  /* Selector de xapes */
+
+  .player-badges {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 15px 7px;
+  }
+
+  .player-badge-avatar {
+    width: clamp(58px, 17vw, 76px);
+    height: clamp(58px, 17vw, 76px);
+  }
+
+  .player-badge > span {
+    font-size: 8px;
+  }
+
+  .player-badge.selected::after {
+    right: 8%;
+  }
+
+  /* Protagonista */
 
   .marker-options {
     grid-template-columns: 1fr;
@@ -1015,6 +1288,8 @@ button:focus-visible {
     min-height: 72px;
   }
 
+  /* Confirmació */
+
   .prediction-summary {
     justify-content: flex-start;
     gap: 8px 14px;
@@ -1022,10 +1297,14 @@ button:focus-visible {
 
   .confirm-section {
     position: relative;
-    border-radius: 19px;
     padding: 15px;
+    border-radius: 19px;
   }
 }
+
+/* =========================================================
+   MÒBIL PETIT
+   ========================================================= */
 
 @media (max-width: 430px) {
   .brand-copy {
@@ -1067,5 +1346,73 @@ button:focus-visible {
   .lineup-counter {
     padding: 6px 8px;
     font-size: 9px;
+  }
+
+  .lotto-heading {
+    gap: 8px;
+  }
+
+  .lotto-heading-main {
+    gap: 7px;
+  }
+
+  .flick-avatar {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+
+  .lotto-title-copy h2 {
+    font-size: 17px;
+  }
+
+  .football-field {
+    aspect-ratio: 0.76;
+  }
+
+  .field-slots {
+    inset: 5% 3% 4%;
+  }
+
+  .field-slot {
+    width: clamp(44px, 14vw, 56px);
+    height: clamp(44px, 14vw, 56px);
+  }
+
+  .player-badges {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px 8px;
+  }
+
+  .player-badge-avatar {
+    width: clamp(66px, 22vw, 82px);
+    height: clamp(66px, 22vw, 82px);
+  }
+
+  .player-badge > span {
+    font-size: 9px;
+  }
+}
+
+/* =========================================================
+   ACCESSIBILITAT: REDUIR ANIMACIONS
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .football-field {
+    animation: none;
+  }
+
+  .football-field::after {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
