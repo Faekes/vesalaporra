@@ -955,11 +955,22 @@ button:focus-visible {
     font-size: 26px;
   }
 
-  .football-field {
-    width: 100%;
-    margin-top: 22px;
-    border-radius: 20px;
-  }
+ .football-field {
+  width: 100%;
+  aspect-ratio: 0.82;
+  margin-top: 22px;
+  border-radius: 26px;
+}
+
+.football-field::before {
+  inset: 16px;
+  border-radius: 21px;
+}
+
+.halfway-line {
+  right: 16px;
+  left: 16px;
+}
 
   .football-field::before {
     inset: 11px;
