@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { supabase } from './lib/supabaseClient'
 import './App.css'
 
 const players = [
@@ -655,6 +656,37 @@ function RankingAvatar({
   )
 }
 
+function AuthAvatar({ imageUrl, displayName }) {
+  const [avatarFailed, setAvatarFailed] =
+    useState(false)
+
+  useEffect(() => {
+    setAvatarFailed(false)
+  }, [imageUrl])
+
+  return (
+    <span
+      className="auth-avatar"
+      aria-hidden="true"
+    >
+      {!avatarFailed && imageUrl ? (
+        <img
+          src={imageUrl}
+          alt=""
+          referrerPolicy="no-referrer"
+          onError={() =>
+            setAvatarFailed(true)
+          }
+        />
+      ) : (
+        <span>
+          {getRankingInitials(displayName)}
+        </span>
+      )}
+    </span>
+  )
+}
+
 
 const profileDemoMatches = [
   {
@@ -1127,6 +1159,21 @@ function App() {
   const [profileTab, setProfileTab] =
     useState('overview')
 
+  const [authSession, setAuthSession] =
+    useState(null)
+
+  const [authLoading, setAuthLoading] =
+    useState(true)
+
+  const [authActionLoading, setAuthActionLoading] =
+    useState(false)
+
+  const [authError, setAuthError] =
+    useState('')
+
+  const [accountMenuOpen, setAccountMenuOpen] =
+    useState(false)
+
   const [barcaScore, setBarcaScore] = useState(0)
   const [rivalScore, setRivalScore] = useState(0)
   const [scoreTouched, setScoreTouched] =
@@ -1150,6 +1197,25 @@ function App() {
 
   const [countdown, setCountdown] =
     useState(getCountdown)
+
+  const authUser = authSession?.user ?? null
+
+  const authMetadata =
+    authUser?.user_metadata ?? {}
+
+  const authDisplayName = String(
+    authMetadata.full_name ||
+      authMetadata.name ||
+      authUser?.email?.split('@')[0] ||
+      'Culer',
+  ).trim()
+
+  const authAvatarUrl =
+    authMetadata.avatar_url ||
+    authMetadata.picture ||
+    null
+
+  const authEmail = authUser?.email || ''
 
   const lineupCount = lineup.filter(Boolean).length
   const lineupIsComplete = lineupCount === 11
@@ -1180,7 +1246,7 @@ function App() {
     protagonist && protagonistScoring,
   )
 
-  const confirmButtonLabel = countdown.isClosed
+  const predictionConfirmLabel = countdown.isClosed
     ? 'PORRA TANCADA'
     : !scoreTouched
       ? 'PRONOSTICA EL RESULTAT'
@@ -1192,6 +1258,14 @@ function App() {
           : protagonistIsComplete
             ? 'CONFIRMAR RESULTAT + PROTAGONISTA'
             : 'CONFIRMAR RESULTAT'
+
+  const confirmButtonLabel =
+    !countdown.isClosed &&
+    scoreTouched &&
+    !authLoading &&
+    !authUser
+      ? 'ENTRA AMB GOOGLE PER CONFIRMAR'
+      : predictionConfirmLabel
 
   const rankingRows = [
     ...rankingDemoUsers,
@@ -1322,6 +1396,139 @@ function App() {
           : sectionId,
     )
   }
+
+  const handleGoogleSignIn = async () => {
+    if (authActionLoading) {
+      return
+    }
+
+    setAuthError('')
+    setAuthActionLoading(true)
+
+    try {
+      const redirectTo =
+        `${window.location.origin}/auth/callback`
+
+      const { error } =
+        await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo,
+          },
+        })
+
+      if (error) {
+        throw error
+      }
+    } catch (error) {
+      setAuthError(
+        error?.message ||
+          'No s’ha pogut obrir Google. Torna-ho a provar.',
+      )
+      setAuthActionLoading(false)
+    }
+  }
+
+  const handleSignOut = async () => {
+    if (authActionLoading) {
+      return
+    }
+
+    setAuthError('')
+    setAuthActionLoading(true)
+
+    try {
+      const { error } =
+        await supabase.auth.signOut()
+
+      if (error) {
+        throw error
+      }
+
+      setAccountMenuOpen(false)
+    } catch (error) {
+      setAuthError(
+        error?.message ||
+          'No s’ha pogut tancar la sessió.',
+      )
+    } finally {
+      setAuthActionLoading(false)
+    }
+  }
+
+  const handleConfirmPrediction = () => {
+    if (!authUser) {
+      handleGoogleSignIn()
+    }
+  }
+
+  useEffect(() => {
+    let isMounted = true
+
+    const cleanCallbackUrl = () => {
+      if (
+        window.location.pathname ===
+        '/auth/callback'
+      ) {
+        window.history.replaceState(
+          {},
+          document.title,
+          '/',
+        )
+      }
+    }
+
+    const loadSession = async () => {
+      const { data, error } =
+        await supabase.auth.getSession()
+
+      if (!isMounted) {
+        return
+      }
+
+      if (error) {
+        setAuthError(error.message)
+      }
+
+      setAuthSession(data.session ?? null)
+      setAuthLoading(false)
+
+      if (data.session) {
+        cleanCallbackUrl()
+      }
+    }
+
+    loadSession()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (event, nextSession) => {
+        if (!isMounted) {
+          return
+        }
+
+        setAuthSession(nextSession ?? null)
+        setAuthLoading(false)
+        setAuthActionLoading(false)
+
+        if (event === 'SIGNED_IN') {
+          setAuthError('')
+          setAccountMenuOpen(false)
+          cleanCallbackUrl()
+        }
+
+        if (event === 'SIGNED_OUT') {
+          setAccountMenuOpen(false)
+        }
+      },
+    )
+
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+    }
+  }, [])
 
   useEffect(() => {
     const countdownInterval = window.setInterval(
@@ -1612,57 +1819,167 @@ function App() {
           </div>
         </div>
 
-        <nav
-          className="main-nav"
-          aria-label="Navegació principal"
-        >
-          <button
-            type="button"
-            className={
-              activePage === 'play'
-                ? 'nav-button active'
-                : 'nav-button'
-            }
-            onClick={() =>
-              setActivePage('play')
-            }
+        <div className="header-actions">
+          <nav
+            className="main-nav"
+            aria-label="Navegació principal"
           >
-            JUGA
-          </button>
+            <button
+              type="button"
+              className={
+                activePage === 'play'
+                  ? 'nav-button active'
+                  : 'nav-button'
+              }
+              onClick={() =>
+                setActivePage('play')
+              }
+            >
+              JUGA
+            </button>
 
-          <button
-            type="button"
-            className={
-              activePage === 'ranking'
-                ? 'nav-button active'
-                : 'nav-button'
-            }
-            onClick={() =>
-              setActivePage('ranking')
-            }
-          >
-            RÀNQUING
-          </button>
+            <button
+              type="button"
+              className={
+                activePage === 'ranking'
+                  ? 'nav-button active'
+                  : 'nav-button'
+              }
+              onClick={() =>
+                setActivePage('ranking')
+              }
+            >
+              RÀNQUING
+            </button>
 
-          <button
-            type="button"
-            className={
-              activePage === 'profile'
-                ? 'nav-button active'
-                : 'nav-button'
-            }
-            onClick={() => {
-              setSelectedProfileUserId(
-                CURRENT_RANKING_USER_ID,
-              )
-              setProfileTab('overview')
-              setActivePage('profile')
-            }}
-          >
-            PERFIL
-          </button>
-        </nav>
+            <button
+              type="button"
+              className={
+                activePage === 'profile'
+                  ? 'nav-button active'
+                  : 'nav-button'
+              }
+              onClick={() => {
+                setSelectedProfileUserId(
+                  CURRENT_RANKING_USER_ID,
+                )
+                setProfileTab('overview')
+                setActivePage('profile')
+              }}
+            >
+              PERFIL
+            </button>
+          </nav>
+
+          <div className="auth-area">
+            <button
+              type="button"
+              className={
+                authUser
+                  ? 'auth-account-button signed-in'
+                  : 'auth-account-button'
+              }
+              disabled={
+                authLoading ||
+                authActionLoading
+              }
+              onClick={() => {
+                if (authUser) {
+                  setAccountMenuOpen(
+                    (currentValue) =>
+                      !currentValue,
+                  )
+                } else {
+                  handleGoogleSignIn()
+                }
+              }}
+              aria-expanded={
+                authUser
+                  ? accountMenuOpen
+                  : undefined
+              }
+            >
+              {authUser ? (
+                <AuthAvatar
+                  imageUrl={authAvatarUrl}
+                  displayName={authDisplayName}
+                />
+              ) : (
+                <span
+                  className="auth-google-mark"
+                  aria-hidden="true"
+                >
+                  G
+                </span>
+              )}
+
+              <span className="auth-account-copy">
+                <small>
+                  {authUser
+                    ? 'SESSIÓ ACTIVA'
+                    : 'ACCÉS'}
+                </small>
+
+                <strong>
+                  {authLoading
+                    ? 'COMPROVANT...'
+                    : authActionLoading
+                      ? 'OBRINT GOOGLE...'
+                      : authUser
+                        ? authDisplayName
+                        : 'ENTRA AMB GOOGLE'}
+                </strong>
+              </span>
+            </button>
+
+            {authUser && accountMenuOpen && (
+              <div className="auth-menu">
+                <div className="auth-menu-identity">
+                  <AuthAvatar
+                    imageUrl={authAvatarUrl}
+                    displayName={authDisplayName}
+                  />
+
+                  <span>
+                    <strong>
+                      {authDisplayName}
+                    </strong>
+
+                    <small>
+                      {authEmail}
+                    </small>
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  disabled={authActionLoading}
+                >
+                  TANCA SESSIÓ
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </header>
+
+      {authError && (
+        <div
+          className="auth-error-banner"
+          role="alert"
+        >
+          <strong>GOOGLE AUTH</strong>
+          <span>{authError}</span>
+          <button
+            type="button"
+            onClick={() => setAuthError('')}
+            aria-label="Tanca l’avís d’error"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       <main className="app-main">
         {activePage === 'play' && (
@@ -2608,7 +2925,7 @@ function App() {
                           key={player.id}
                           value={player.id}
                         >
-                          {`${player.name} · +${scoring.hitPoints} si encerta · ${scoring.missPoints} si falla`}
+                          {`${player.name} · +${scoring.hitPoints} si encertes · ${scoring.missPoints} si falles`}
                         </option>
                       )
                     },
@@ -2737,8 +3054,11 @@ function App() {
                 className="confirm-button"
                 disabled={
                   !scoreTouched ||
-                  countdown.isClosed
+                  countdown.isClosed ||
+                  authLoading ||
+                  authActionLoading
                 }
+                onClick={handleConfirmPrediction}
               >
                 {confirmButtonLabel}
               </button>
