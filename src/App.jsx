@@ -369,6 +369,11 @@ const getCountdown = () => {
 }
 
 
+const X_AUTO_LOGIN_STORAGE_KEY =
+  'vesalaporra_x_auto_login_started_at'
+
+const X_AUTO_LOGIN_COOLDOWN_MS = 15000
+
 const RANKING_PAGE_SIZE = 20
 const CURRENT_RANKING_USER_ID =
   'twitter-demo-cris'
@@ -1206,6 +1211,8 @@ function App() {
   const authDisplayName = String(
     authMetadata.full_name ||
       authMetadata.name ||
+      authMetadata.user_name ||
+      authMetadata.preferred_username ||
       authUser?.email?.split('@')[0] ||
       'Culer',
   ).trim()
@@ -1213,6 +1220,8 @@ function App() {
   const authAvatarUrl =
     authMetadata.avatar_url ||
     authMetadata.picture ||
+    authMetadata.profile_image_url ||
+    authMetadata.profile_image_url_https ||
     null
 
   const authEmail = authUser?.email || ''
@@ -1264,7 +1273,7 @@ function App() {
     scoreTouched &&
     !authLoading &&
     !authUser
-      ? 'ENTRA AMB GOOGLE PER CONFIRMAR'
+      ? 'ENTRA PER CONFIRMAR'
       : predictionConfirmLabel
 
   const rankingRows = [
@@ -1397,7 +1406,12 @@ function App() {
     )
   }
 
-  const handleGoogleSignIn = async () => {
+  const handleOAuthSignIn = async (
+    provider,
+    {
+      automatic = false,
+    } = {},
+  ) => {
     if (authActionLoading) {
       return
     }
@@ -1405,13 +1419,20 @@ function App() {
     setAuthError('')
     setAuthActionLoading(true)
 
+    if (provider === 'x' && automatic) {
+      window.sessionStorage.setItem(
+        X_AUTO_LOGIN_STORAGE_KEY,
+        String(Date.now()),
+      )
+    }
+
     try {
       const redirectTo =
         `${window.location.origin}/auth/callback`
 
       const { error } =
         await supabase.auth.signInWithOAuth({
-          provider: 'google',
+          provider,
           options: {
             redirectTo,
           },
@@ -1421,13 +1442,31 @@ function App() {
         throw error
       }
     } catch (error) {
+      if (provider === 'x') {
+        window.sessionStorage.removeItem(
+          X_AUTO_LOGIN_STORAGE_KEY,
+        )
+      }
+
+      const providerLabel =
+        provider === 'x'
+          ? 'X'
+          : 'Google'
+
       setAuthError(
         error?.message ||
-          'No s’ha pogut obrir Google. Torna-ho a provar.',
+          `No s’ha pogut obrir ${providerLabel}. Torna-ho a provar.`,
       )
       setAuthActionLoading(false)
     }
   }
+
+  const handleGoogleSignIn = () =>
+    handleOAuthSignIn('google')
+
+  const handleXSignIn = () =>
+    handleOAuthSignIn('x')
+
 
   const handleSignOut = async () => {
     if (authActionLoading) {
@@ -1458,17 +1497,19 @@ function App() {
 
   const handleConfirmPrediction = () => {
     if (!authUser) {
-      handleGoogleSignIn()
+      handleXSignIn()
     }
   }
 
   useEffect(() => {
     let isMounted = true
 
-    const cleanCallbackUrl = () => {
+    const cleanAuthUrl = () => {
       if (
         window.location.pathname ===
-        '/auth/callback'
+          '/auth/callback' ||
+        window.location.pathname ===
+          '/entra-x'
       ) {
         window.history.replaceState(
           {},
@@ -1478,7 +1519,85 @@ function App() {
       }
     }
 
+    const readOAuthErrorFromUrl = () => {
+      const queryParams =
+        new URLSearchParams(
+          window.location.search,
+        )
+
+      const hashParams =
+        new URLSearchParams(
+          window.location.hash.replace(
+            /^#/,
+            '',
+          ),
+        )
+
+      return (
+        queryParams.get(
+          'error_description',
+        ) ||
+        queryParams.get('error') ||
+        hashParams.get(
+          'error_description',
+        ) ||
+        hashParams.get('error') ||
+        ''
+      )
+    }
+
+    const maybeStartAutomaticXSignIn =
+      async () => {
+        if (
+          window.location.pathname !==
+          '/entra-x'
+        ) {
+          return
+        }
+
+        const previousAttemptAt =
+          Number(
+            window.sessionStorage.getItem(
+              X_AUTO_LOGIN_STORAGE_KEY,
+            ) || 0,
+          )
+
+        const hasRecentAttempt =
+          Date.now() -
+            previousAttemptAt <
+          X_AUTO_LOGIN_COOLDOWN_MS
+
+        if (hasRecentAttempt) {
+          return
+        }
+
+        await handleOAuthSignIn(
+          'x',
+          {
+            automatic: true,
+          },
+        )
+      }
+
     const loadSession = async () => {
+      const oauthError =
+        readOAuthErrorFromUrl()
+
+      if (oauthError) {
+        window.sessionStorage.removeItem(
+          X_AUTO_LOGIN_STORAGE_KEY,
+        )
+
+        if (isMounted) {
+          setAuthError(oauthError)
+          setAuthLoading(false)
+          setAuthActionLoading(false)
+          cleanAuthUrl()
+        }
+
+        return
+      }
+
       const { data, error } =
         await supabase.auth.getSession()
 
@@ -1494,8 +1613,16 @@ function App() {
       setAuthLoading(false)
 
       if (data.session) {
-        cleanCallbackUrl()
+        window.sessionStorage.removeItem(
+          X_AUTO_LOGIN_STORAGE_KEY,
+        )
+        setActivePage('play')
+        cleanAuthUrl()
+
+        return
       }
+
+      await maybeStartAutomaticXSignIn()
     }
 
     loadSession()
@@ -1513,9 +1640,13 @@ function App() {
         setAuthActionLoading(false)
 
         if (event === 'SIGNED_IN') {
+          window.sessionStorage.removeItem(
+            X_AUTO_LOGIN_STORAGE_KEY,
+          )
           setAuthError('')
           setAccountMenuOpen(false)
-          cleanCallbackUrl()
+          setActivePage('play')
+          cleanAuthUrl()
         }
 
         if (event === 'SIGNED_OUT') {
@@ -1529,6 +1660,7 @@ function App() {
       subscription.unsubscribe()
     }
   }, [])
+
 
   useEffect(() => {
     const countdownInterval = window.setInterval(
@@ -1872,65 +2004,70 @@ function App() {
           </nav>
 
           <div className="auth-area">
-            <button
-              type="button"
-              className={
-                authUser
-                  ? 'auth-account-button signed-in'
-                  : 'auth-account-button'
-              }
-              disabled={
-                authLoading ||
-                authActionLoading
-              }
-              onClick={() => {
-                if (authUser) {
+            {authUser ? (
+              <button
+                type="button"
+                className="auth-account-button signed-in"
+                disabled={
+                  authLoading ||
+                  authActionLoading
+                }
+                onClick={() =>
                   setAccountMenuOpen(
                     (currentValue) =>
                       !currentValue,
                   )
-                } else {
-                  handleGoogleSignIn()
                 }
-              }}
-              aria-expanded={
-                authUser
-                  ? accountMenuOpen
-                  : undefined
-              }
-            >
-              {authUser ? (
+                aria-label={`Obre el compte de ${authDisplayName}`}
+                aria-expanded={accountMenuOpen}
+                title={authDisplayName}
+              >
                 <AuthAvatar
                   imageUrl={authAvatarUrl}
                   displayName={authDisplayName}
                 />
-              ) : (
-                <span
-                  className="auth-google-mark"
-                  aria-hidden="true"
+              </button>
+            ) : (
+              <div
+                className="auth-provider-buttons"
+                aria-label="Opcions d’accés"
+              >
+                <button
+                  type="button"
+                  className="auth-provider-button x"
+                  disabled={
+                    authLoading ||
+                    authActionLoading
+                  }
+                  onClick={handleXSignIn}
+                  aria-label="Entra amb X"
+                  title="Entra amb X"
                 >
-                  G
-                </span>
-              )}
+                  <span aria-hidden="true">
+                    𝕏
+                  </span>
+                </button>
 
-              <span className="auth-account-copy">
-                <small>
-                  {authUser
-                    ? 'SESSIÓ ACTIVA'
-                    : 'ACCÉS'}
-                </small>
-
-                <strong>
-                  {authLoading
-                    ? 'COMPROVANT...'
-                    : authActionLoading
-                      ? 'OBRINT GOOGLE...'
-                      : authUser
-                        ? authDisplayName
-                        : 'ENTRA AMB GOOGLE'}
-                </strong>
-              </span>
-            </button>
+                <button
+                  type="button"
+                  className="auth-provider-button google"
+                  disabled={
+                    authLoading ||
+                    authActionLoading
+                  }
+                  onClick={handleGoogleSignIn}
+                  aria-label="Entra amb Google"
+                  title="Entra amb Google"
+                >
+                  <span
+                    className="auth-google-mark"
+                    aria-hidden="true"
+                  >
+                    G
+                  </span>
+                </button>
+              </div>
+            )}
 
             {authUser && accountMenuOpen && (
               <div className="auth-menu">
@@ -1969,7 +2106,7 @@ function App() {
           className="auth-error-banner"
           role="alert"
         >
-          <strong>GOOGLE AUTH</strong>
+          <strong>ACCÉS</strong>
           <span>{authError}</span>
           <button
             type="button"
@@ -3047,7 +3184,85 @@ function App() {
                     ? `PROTAGONISTA ${protagonist.shortName.toUpperCase()} · +${protagonistScoring.hitPoints}/${protagonistScoring.missPoints}`
                     : 'PROTAGONISTA OPCIONAL'}
                 </span>
+
+                <button
+                  type="button"
+                  className="section-info-button confirm-info-button"
+                  onClick={() =>
+                    toggleInfoSection('confirm')
+                  }
+                  aria-label="Informació sobre les combinacions de la porra"
+                  aria-expanded={
+                    openInfoSection === 'confirm'
+                  }
+                  title="Què és obligatori i què és opcional?"
+                >
+                  i
+                </button>
               </div>
+
+              {openInfoSection === 'confirm' && (
+                <div
+                  className="confirm-info-panel"
+                  role="note"
+                >
+                  <strong className="confirm-info-title">
+                    ENVIA LA PORRA COM TU VULGUIS
+                  </strong>
+
+                  <p className="confirm-info-intro">
+                    <strong>
+                      Només el resultat és obligatori.
+                    </strong>{' '}
+                    La Lotto Flick i el protagonista són
+                    opcionals i els pots afegir per separat
+                    o combinar-los.
+                  </p>
+
+                  <div className="confirm-info-options">
+                    <div className="confirm-info-option">
+                      <strong>
+                        RESULTAT
+                      </strong>
+
+                      <span>
+                        La porra mínima i vàlida.
+                      </span>
+                    </div>
+
+                    <div className="confirm-info-option">
+                      <strong>
+                        RESULTAT + LOTTO FLICK
+                      </strong>
+
+                      <span>
+                        La Lotto s’inclou quan completes els
+                        11 titulars.
+                      </span>
+                    </div>
+
+                    <div className="confirm-info-option">
+                      <strong>
+                        RESULTAT + PROTAGONISTA
+                      </strong>
+
+                      <span>
+                        Afegeix qui marcarà o assistirà.
+                      </span>
+                    </div>
+
+                    <div className="confirm-info-option featured">
+                      <strong>
+                        PORRA COMPLETA
+                      </strong>
+
+                      <span>
+                        Resultat + 11 titulars + protagonista.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <button
                 type="button"
