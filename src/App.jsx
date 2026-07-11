@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 
 const players = [
@@ -178,72 +178,46 @@ function App() {
     Array.from({ length: 11 }, () => null),
   )
 
-  const [protagonistId, setProtagonistId] = useState(null)
+  const [selectedSlotIndex, setSelectedSlotIndex] =
+    useState(null)
+
+  const [selectedPlayerId, setSelectedPlayerId] =
+    useState(null)
+
+  const [protagonistType, setProtagonistType] =
+    useState(null)
+
+  const [protagonistId, setProtagonistId] =
+    useState(null)
 
   const lineupCount = lineup.filter(Boolean).length
+
+  const lineupPlayers = lineup
+    .filter(Boolean)
+    .map((playerId) => playersById[playerId])
+    .filter(Boolean)
 
   const protagonist = protagonistId
     ? playersById[protagonistId]
     : null
 
-  const togglePlayer = (playerId) => {
-    const playerIsAlreadySelected = lineup.includes(playerId)
+  const protagonistIsComplete =
+    Boolean(protagonistType) &&
+    Boolean(protagonist)
 
+  useEffect(() => {
     if (
-      playerIsAlreadySelected &&
-      protagonistId === playerId
+      protagonistId &&
+      !lineup.includes(protagonistId)
     ) {
       setProtagonistId(null)
     }
+  }, [lineup, protagonistId])
 
-    setLineup((currentLineup) => {
-      const existingIndex = currentLineup.indexOf(playerId)
-
-      if (existingIndex !== -1) {
-        const nextLineup = [...currentLineup]
-        nextLineup[existingIndex] = null
-
-        return nextLineup
-      }
-
-      const firstEmptyIndex = currentLineup.findIndex(
-        (slotPlayerId) => slotPlayerId === null,
-      )
-
-      if (firstEmptyIndex === -1) {
-        return currentLineup
-      }
-
-      const nextLineup = [...currentLineup]
-      nextLineup[firstEmptyIndex] = playerId
-
-      return nextLineup
-    })
-  }
-
-  const toggleProtagonist = (playerId) => {
-    if (!lineup.includes(playerId)) {
-      return
-    }
-
-    setProtagonistId((currentProtagonistId) =>
-      currentProtagonistId === playerId
-        ? null
-        : playerId,
-    )
-  }
-
-  const handleDragStart = (event, playerId) => {
-    event.dataTransfer.setData('text/plain', playerId)
-    event.dataTransfer.effectAllowed = 'move'
-  }
-
-  const handleDrop = (event, targetSlotIndex) => {
-    event.preventDefault()
-
-    const playerId =
-      event.dataTransfer.getData('text/plain')
-
+  const placePlayerInSlot = (
+    playerId,
+    targetSlotIndex,
+  ) => {
     if (!playersById[playerId]) {
       return
     }
@@ -254,12 +228,12 @@ function App() {
       const sourceSlotIndex =
         nextLineup.indexOf(playerId)
 
+      const displacedPlayerId =
+        nextLineup[targetSlotIndex]
+
       if (sourceSlotIndex === targetSlotIndex) {
         return currentLineup
       }
-
-      const displacedPlayerId =
-        nextLineup[targetSlotIndex]
 
       if (sourceSlotIndex !== -1) {
         nextLineup[sourceSlotIndex] =
@@ -270,17 +244,112 @@ function App() {
 
       return nextLineup
     })
+
+    setSelectedSlotIndex(null)
+    setSelectedPlayerId(null)
   }
+
+  const handleSlotClick = (slotIndex) => {
+    if (selectedPlayerId) {
+      placePlayerInSlot(
+        selectedPlayerId,
+        slotIndex,
+      )
+
+      return
+    }
+
+    setSelectedSlotIndex(
+      (currentSlotIndex) =>
+        currentSlotIndex === slotIndex
+          ? null
+          : slotIndex,
+    )
+  }
+
+  const handlePlayerClick = (playerId) => {
+    if (selectedSlotIndex !== null) {
+      placePlayerInSlot(
+        playerId,
+        selectedSlotIndex,
+      )
+
+      return
+    }
+
+    setSelectedPlayerId(
+      (currentPlayerId) =>
+        currentPlayerId === playerId
+          ? null
+          : playerId,
+    )
+  }
+
+  const handleDragStart = (
+    event,
+    playerId,
+  ) => {
+    event.dataTransfer.setData(
+      'text/plain',
+      playerId,
+    )
+
+    event.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDrop = (
+    event,
+    targetSlotIndex,
+  ) => {
+    event.preventDefault()
+
+    const playerId =
+      event.dataTransfer.getData(
+        'text/plain',
+      )
+
+    if (!playersById[playerId]) {
+      return
+    }
+
+    placePlayerInSlot(
+      playerId,
+      targetSlotIndex,
+    )
+  }
+
+  const selectProtagonistType = (type) => {
+    setProtagonistType(
+      (currentType) =>
+        currentType === type
+          ? null
+          : type,
+    )
+  }
+
+  const protagonistTypeLabel =
+    protagonistType === 'goal'
+      ? 'GOLEJADOR'
+      : protagonistType === 'assist'
+        ? 'ASSISTENT'
+        : null
 
   return (
     <div className="app-shell">
       <header className="app-header">
         <div className="brand">
-          <span className="brand-mark">V</span>
+          <span className="brand-mark">
+            V
+          </span>
 
           <div className="brand-copy">
-            <strong>VESALAPORRA</strong>
-            <span>La porra dels culers</span>
+            <strong>
+              VESALAPORRA
+            </strong>
+
+            <span>
+              La porra dels culers
+            </span>
           </div>
         </div>
 
@@ -295,7 +364,9 @@ function App() {
                 ? 'nav-button active'
                 : 'nav-button'
             }
-            onClick={() => setActivePage('play')}
+            onClick={() =>
+              setActivePage('play')
+            }
           >
             JUGA
           </button>
@@ -307,7 +378,9 @@ function App() {
                 ? 'nav-button active'
                 : 'nav-button'
             }
-            onClick={() => setActivePage('ranking')}
+            onClick={() =>
+              setActivePage('ranking')
+            }
           >
             RÀNQUING
           </button>
@@ -319,7 +392,9 @@ function App() {
                 ? 'nav-button active'
                 : 'nav-button'
             }
-            onClick={() => setActivePage('profile')}
+            onClick={() =>
+              setActivePage('profile')
+            }
           >
             PERFIL
           </button>
@@ -335,12 +410,19 @@ function App() {
                   PROPER PARTIT
                 </span>
 
-                <h1>BARÇA · RIVAL</h1>
+                <h1>
+                  BARÇA · RIVAL
+                </h1>
               </div>
 
               <div className="deadline">
-                <span>TANCA EN</span>
-                <strong>04:32:18</strong>
+                <span>
+                  TANCA EN
+                </span>
+
+                <strong>
+                  04:32:18
+                </strong>
               </div>
             </header>
 
@@ -351,7 +433,9 @@ function App() {
                     01
                   </span>
 
-                  <h2>Pronostica el resultat</h2>
+                  <h2>
+                    Pronostica el resultat
+                  </h2>
                 </div>
 
                 <span className="status-pill">
@@ -361,27 +445,36 @@ function App() {
 
               <div className="scoreboard">
                 <div className="score-team">
-                  <strong>BARÇA</strong>
+                  <strong>
+                    BARÇA
+                  </strong>
 
                   <div className="score-control">
                     <button
                       type="button"
                       onClick={() =>
-                        setBarcaScore((score) =>
-                          Math.max(0, score - 1),
+                        setBarcaScore(
+                          (score) =>
+                            Math.max(
+                              0,
+                              score - 1,
+                            ),
                         )
                       }
                     >
                       −
                     </button>
 
-                    <span>{barcaScore}</span>
+                    <span>
+                      {barcaScore}
+                    </span>
 
                     <button
                       type="button"
                       onClick={() =>
                         setBarcaScore(
-                          (score) => score + 1,
+                          (score) =>
+                            score + 1,
                         )
                       }
                     >
@@ -395,27 +488,36 @@ function App() {
                 </span>
 
                 <div className="score-team">
-                  <strong>RIVAL</strong>
+                  <strong>
+                    RIVAL
+                  </strong>
 
                   <div className="score-control">
                     <button
                       type="button"
                       onClick={() =>
-                        setRivalScore((score) =>
-                          Math.max(0, score - 1),
+                        setRivalScore(
+                          (score) =>
+                            Math.max(
+                              0,
+                              score - 1,
+                            ),
                         )
                       }
                     >
                       −
                     </button>
 
-                    <span>{rivalScore}</span>
+                    <span>
+                      {rivalScore}
+                    </span>
 
                     <button
                       type="button"
                       onClick={() =>
                         setRivalScore(
-                          (score) => score + 1,
+                          (score) =>
+                            score + 1,
                         )
                       }
                     >
@@ -440,7 +542,9 @@ function App() {
                   />
 
                   <div className="lotto-title-copy">
-                    <h2>La Lotto Flick</h2>
+                    <h2>
+                      La Lotto Flick
+                    </h2>
 
                     <span className="formation-label">
                       4-3-3 FIX
@@ -454,9 +558,10 @@ function App() {
               </div>
 
               <p className="section-help">
-                Arrossega una xapa fins a una posició del
-                4-3-3 o toca-la per afegir-la al primer
-                espai lliure.
+                Selecciona primer una posició o una
+                xapa. Després completa la parella
+                amb l'altre clic. També pots
+                arrossegar directament.
               </p>
 
               <div className="football-field">
@@ -475,100 +580,126 @@ function App() {
                       className={`formation-row formation-${line.id}`}
                       aria-label={line.label}
                     >
-                      {line.slots.map((slotIndex) => {
-                        const playerId =
-                          lineup[slotIndex]
+                      {line.slots.map(
+                        (slotIndex) => {
+                          const playerId =
+                            lineup[slotIndex]
 
-                        const player = playerId
-                          ? playersById[playerId]
-                          : null
+                          const player =
+                            playerId
+                              ? playersById[
+                                  playerId
+                                ]
+                              : null
 
-                        const isProtagonist =
-                          Boolean(player) &&
-                          protagonistId === player.id
+                          const isTargetSelected =
+                            selectedSlotIndex ===
+                            slotIndex
 
-                        const fieldSlotClassName = [
-                          'field-slot',
-                          player ? 'occupied' : '',
-                          isProtagonist
-                            ? 'protagonist'
-                            : '',
-                        ]
-                          .filter(Boolean)
-                          .join(' ')
+                          const isProtagonist =
+                            Boolean(player) &&
+                            protagonistId ===
+                              player.id
 
-                        return (
-                          <button
-                            key={slotIndex}
-                            type="button"
-                            className={
-                              fieldSlotClassName
-                            }
-                            draggable={Boolean(player)}
-                            onDragStart={(event) => {
-                              if (player) {
-                                handleDragStart(
-                                  event,
-                                  player.id,
-                                )
+                          const fieldSlotClassName =
+                            [
+                              'field-slot',
+                              player
+                                ? 'occupied'
+                                : '',
+                              isTargetSelected
+                                ? 'target-selected'
+                                : '',
+                              isProtagonist
+                                ? 'protagonist'
+                                : '',
+                            ]
+                              .filter(Boolean)
+                              .join(' ')
+
+                          return (
+                            <button
+                              key={slotIndex}
+                              type="button"
+                              className={
+                                fieldSlotClassName
                               }
-                            }}
-                            onDragOver={(event) =>
-                              event.preventDefault()
-                            }
-                            onDrop={(event) =>
-                              handleDrop(
+                              draggable={
+                                Boolean(player)
+                              }
+                              onDragStart={(
                                 event,
-                                slotIndex,
-                              )
-                            }
-                            onClick={() => {
-                              if (player) {
-                                toggleProtagonist(
-                                  player.id,
+                              ) => {
+                                if (
+                                  player
+                                ) {
+                                  handleDragStart(
+                                    event,
+                                    player.id,
+                                  )
+                                }
+                              }}
+                              onDragOver={(
+                                event,
+                              ) =>
+                                event.preventDefault()
+                              }
+                              onDrop={(
+                                event,
+                              ) =>
+                                handleDrop(
+                                  event,
+                                  slotIndex,
                                 )
                               }
-                            }}
-                            aria-pressed={
-                              player
-                                ? isProtagonist
-                                : undefined
-                            }
-                            aria-label={
-                              player
-                                ? `Seleccionar ${player.name} com a protagonista`
-                                : `Posició lliure ${slotIndex + 1}`
-                            }
-                          >
-                            {player ? (
-                              <>
-                                <img
-                                  src={player.image}
-                                  className="field-player-image"
-                                  alt=""
-                                />
+                              onClick={() =>
+                                handleSlotClick(
+                                  slotIndex,
+                                )
+                              }
+                              aria-pressed={
+                                isTargetSelected
+                              }
+                              aria-label={
+                                player
+                                  ? `Posició de ${player.name}`
+                                  : `Posició lliure ${slotIndex + 1}`
+                              }
+                            >
+                              {player ? (
+                                <>
+                                  <img
+                                    src={
+                                      player.image
+                                    }
+                                    className="field-player-image"
+                                    alt=""
+                                  />
 
-                                {isProtagonist && (
-                                  <span
-                                    className="protagonist-crown"
-                                    aria-hidden="true"
-                                  >
-                                    ★
-                                  </span>
-                                )}
+                                  {isProtagonist && (
+                                    <span
+                                      className="protagonist-crown"
+                                      aria-hidden="true"
+                                    >
+                                      ★
+                                    </span>
+                                  )}
 
-                                <small className="field-player-name">
-                                  {player.shortName}
-                                </small>
-                              </>
-                            ) : (
-                              <span className="field-slot-plus">
-                                +
-                              </span>
-                            )}
-                          </button>
-                        )
-                      })}
+                                  <small className="field-player-name">
+                                    {
+                                      player.shortName
+                                    }
+                                  </small>
+                                </>
+                              ) : (
+                                <span className="field-slot-plus">
+                                  +
+                                </span>
+                              )}
+                            </button>
+                          )
+                        },
+                      )}
                     </div>
                   ))}
                 </div>
@@ -587,29 +718,52 @@ function App() {
 
                 <div className="player-badges">
                   {players.map((player) => {
-                    const isSelected =
-                      lineup.includes(player.id)
+                    const isInLineup =
+                      lineup.includes(
+                        player.id,
+                      )
+
+                    const isPendingSelection =
+                      selectedPlayerId ===
+                      player.id
+
+                    const playerBadgeClassName =
+                      [
+                        'player-badge',
+                        isInLineup
+                          ? 'selected'
+                          : '',
+                        isPendingSelection
+                          ? 'pending-selection'
+                          : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')
 
                     return (
                       <button
                         key={player.id}
                         type="button"
                         className={
-                          isSelected
-                            ? 'player-badge selected'
-                            : 'player-badge'
+                          playerBadgeClassName
                         }
                         draggable
-                        onDragStart={(event) =>
+                        onDragStart={(
+                          event,
+                        ) =>
                           handleDragStart(
                             event,
                             player.id,
                           )
                         }
                         onClick={() =>
-                          togglePlayer(player.id)
+                          handlePlayerClick(
+                            player.id,
+                          )
                         }
-                        aria-pressed={isSelected}
+                        aria-pressed={
+                          isPendingSelection
+                        }
                       >
                         <img
                           src={player.image}
@@ -634,39 +788,161 @@ function App() {
                     03
                   </span>
 
-                  <h2>Marca el protagonista</h2>
+                  <h2>
+                    Marca el protagonista
+                  </h2>
                 </div>
 
                 <span
                   className={
-                    protagonist
+                    protagonistIsComplete
                       ? 'status-pill completed'
                       : 'status-pill'
                   }
                 >
-                  {protagonist
+                  {protagonistIsComplete
                     ? 'FET'
                     : 'PENDENT'}
                 </span>
               </div>
 
               <p className="section-help">
-                Tria un jugador del teu onze. Encertes si
-                marca o dona una assistència.
+                Decideix si pronostiques un
+                golejador o un assistent i tria
+                un dels jugadors que tens al camp.
               </p>
+
+              <div className="protagonist-type-tabs">
+                <button
+                  type="button"
+                  className={
+                    protagonistType ===
+                    'goal'
+                      ? 'protagonist-type-button active'
+                      : 'protagonist-type-button'
+                  }
+                  onClick={() =>
+                    selectProtagonistType(
+                      'goal',
+                    )
+                  }
+                >
+                  <span className="protagonist-type-icon">
+                    ⚽
+                  </span>
+
+                  <span>
+                    <strong>
+                      GOLEJADOR
+                    </strong>
+
+                    <small>
+                      Qui marcarà?
+                    </small>
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    protagonistType ===
+                    'assist'
+                      ? 'protagonist-type-button active assist'
+                      : 'protagonist-type-button assist'
+                  }
+                  onClick={() =>
+                    selectProtagonistType(
+                      'assist',
+                    )
+                  }
+                >
+                  <span className="protagonist-type-icon assist-icon">
+                    A
+                  </span>
+
+                  <span>
+                    <strong>
+                      ASSISTENT
+                    </strong>
+
+                    <small>
+                      Qui assistirà?
+                    </small>
+                  </span>
+                </button>
+              </div>
+
+              {protagonistType && (
+                <div className="protagonist-picker">
+                  <div className="protagonist-picker-copy">
+                    <span>
+                      {
+                        protagonistTypeLabel
+                      }
+                    </span>
+
+                    <strong>
+                      Tria un jugador del teu XI
+                    </strong>
+                  </div>
+
+                  <select
+                    value={
+                      protagonistId ?? ''
+                    }
+                    onChange={(event) =>
+                      setProtagonistId(
+                        event.target.value ||
+                          null,
+                      )
+                    }
+                    disabled={
+                      lineupPlayers.length ===
+                      0
+                    }
+                    aria-label={`Selecciona ${protagonistTypeLabel?.toLowerCase()}`}
+                  >
+                    <option value="">
+                      {lineupPlayers.length ===
+                      0
+                        ? 'Primer completa jugadors al camp'
+                        : 'Selecciona jugador'}
+                    </option>
+
+                    {lineupPlayers.map(
+                      (player) => (
+                        <option
+                          key={
+                            player.id
+                          }
+                          value={
+                            player.id
+                          }
+                        >
+                          {
+                            player.name
+                          }
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </div>
+              )}
 
               <div
                 className={
-                  protagonist
+                  protagonistIsComplete
                     ? 'protagonist-showcase selected'
                     : 'protagonist-showcase'
                 }
               >
-                {protagonist ? (
+                {protagonistIsComplete ? (
                   <>
                     <div className="protagonist-image-wrap">
                       <img
-                        src={protagonist.image}
+                        src={
+                          protagonist.image
+                        }
                         className="protagonist-showcase-image"
                         alt=""
                       />
@@ -681,22 +957,29 @@ function App() {
 
                     <div className="protagonist-showcase-copy">
                       <span className="protagonist-kicker">
-                        EL TEU PROTAGONISTA
+                        {
+                          protagonistTypeLabel
+                        }{' '}
+                        ESCOLLIT
                       </span>
 
                       <strong>
-                        {protagonist.name}
+                        {
+                          protagonist.name
+                        }
                       </strong>
 
                       <span className="protagonist-rule">
-                        ⚽ MARCA
-                        <span>O</span>
-                        🎯 ASSISTEIX
+                        {protagonistType ===
+                        'goal'
+                          ? '⚽ HA DE MARCAR'
+                          : '🎯 HA DE DONAR UNA ASSISTÈNCIA'}
                       </span>
 
                       <small>
-                        Encertaràs si fa una de les dues
-                        coses durant el partit.
+                        Aquest pronòstic sortirà
+                        també al resum final de la
+                        teva porra.
                       </small>
                     </div>
                   </>
@@ -716,8 +999,9 @@ function App() {
                       </strong>
 
                       <small>
-                        Toca una de les 11 xapes que tens
-                        col·locades al camp.
+                        Obre GOLEJADOR o ASSISTENT
+                        i escull un jugador dels
+                        que tens al camp.
                       </small>
                     </div>
                   </>
@@ -728,7 +1012,8 @@ function App() {
             <section className="confirm-section">
               <div className="prediction-summary">
                 <span>
-                  RESULTAT {barcaScore}-{rivalScore}
+                  RESULTAT {barcaScore}-
+                  {rivalScore}
                 </span>
 
                 <span>
@@ -736,8 +1021,8 @@ function App() {
                 </span>
 
                 <span>
-                  {protagonist
-                    ? `PROTAGONISTA ${protagonist.shortName.toUpperCase()}`
+                  {protagonistIsComplete
+                    ? `${protagonistTypeLabel} ${protagonist.shortName.toUpperCase()}`
                     : 'PROTAGONISTA —'}
                 </span>
               </div>
@@ -758,11 +1043,13 @@ function App() {
               VESALAPORRA
             </span>
 
-            <h1>RÀNQUING</h1>
+            <h1>
+              RÀNQUING
+            </h1>
 
             <p>
-              La classificació general viurà aquí, com
-              una pàgina pròpia.
+              La classificació general viurà
+              aquí, com una pàgina pròpia.
             </p>
           </section>
         )}
@@ -773,11 +1060,14 @@ function App() {
               VESALAPORRA
             </span>
 
-            <h1>PERFIL</h1>
+            <h1>
+              PERFIL
+            </h1>
 
             <p>
-              Estadístiques, historial, assoliments,
-              insígnies i medalles.
+              Estadístiques, historial,
+              assoliments, insígnies i
+              medalles.
             </p>
           </section>
         )}
