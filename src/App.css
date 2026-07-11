@@ -2249,3 +2249,335 @@ button:focus-visible {
     font-size: 12px;
   }
 }
+
+/* =========================================================
+   PROTAGONISTA — APOSTA ÚNICA I GRUPS
+   ========================================================= */
+
+.protagonist-combined-rule {
+  display: grid;
+  grid-template-columns:
+    auto
+    minmax(0, 1fr)
+    auto;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  margin-top: 24px;
+  padding: 18px 20px;
+  overflow: hidden;
+  border:
+    1px solid
+    rgba(244, 208, 75, 0.3);
+  border-radius: 19px;
+  background:
+    radial-gradient(
+      circle at 7% 50%,
+      rgba(244, 208, 75, 0.18),
+      transparent 31%
+    ),
+    radial-gradient(
+      circle at 92% 12%,
+      rgba(177, 18, 65, 0.18),
+      transparent 36%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(29, 48, 132, 0.28),
+      rgba(129, 16, 60, 0.16)
+    ),
+    #0c1122;
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.045),
+    0 14px 36px
+      rgba(0, 0, 0, 0.22),
+    0 0 28px
+      rgba(244, 208, 75, 0.055);
+}
+
+.protagonist-combined-icons {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.protagonist-combined-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: 50%;
+}
+
+.protagonist-combined-icon.goal {
+  border:
+    1px solid
+    rgba(244, 208, 75, 0.35);
+  background:
+    rgba(244, 208, 75, 0.1);
+  font-size: 23px;
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.08);
+}
+
+.protagonist-combined-icon.assist {
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.16);
+  background:
+    linear-gradient(
+      135deg,
+      #ed2856,
+      #ad093d
+    );
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 950;
+  box-shadow:
+    0 8px 20px
+      rgba(180, 12, 63, 0.28),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.18);
+}
+
+.protagonist-combined-plus {
+  color: #697590;
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.protagonist-combined-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.protagonist-combined-copy > span {
+  color: #f0ca39;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+}
+
+.protagonist-combined-copy > strong {
+  color: #ffffff;
+  font-size:
+    clamp(17px, 3vw, 23px);
+  font-weight: 950;
+  letter-spacing: -0.02em;
+}
+
+.protagonist-combined-copy > small {
+  max-width: 520px;
+  color: #909ab4;
+  font-size: 11px;
+  font-weight: 680;
+  line-height: 1.45;
+}
+
+.protagonist-binary-pill {
+  min-width: max-content;
+  padding: 8px 11px;
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background:
+    rgba(255, 255, 255, 0.045);
+  color: #bbc3d7;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.09em;
+}
+
+.protagonist-picker-copy small {
+  color: #77839f;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.protagonist-group-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 2px;
+  padding: 7px 10px;
+  border: 1px solid;
+  border-radius: 999px;
+}
+
+.protagonist-group-chip > span {
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.095em;
+}
+
+.protagonist-group-chip > small {
+  color: inherit;
+  font-size: 9px;
+  font-weight: 800;
+  opacity: 0.76;
+}
+
+.protagonist-group-chip.group-special {
+  border-color:
+    rgba(255, 216, 73, 0.48);
+  background:
+    rgba(255, 207, 49, 0.1);
+  color: #ffe271;
+}
+
+.protagonist-group-chip.group-a {
+  border-color:
+    rgba(72, 220, 145, 0.4);
+  background:
+    rgba(72, 220, 145, 0.09);
+  color: #78e5ad;
+}
+
+.protagonist-group-chip.group-b {
+  border-color:
+    rgba(246, 196, 55, 0.4);
+  background:
+    rgba(246, 196, 55, 0.09);
+  color: #f5ce59;
+}
+
+.protagonist-group-chip.group-c {
+  border-color:
+    rgba(82, 145, 255, 0.42);
+  background:
+    rgba(82, 145, 255, 0.09);
+  color: #8bb4ff;
+}
+
+.protagonist-group-chip.group-d {
+  border-color:
+    rgba(238, 67, 102, 0.43);
+  background:
+    rgba(238, 67, 102, 0.09);
+  color: #ff839b;
+}
+
+.protagonist-group-chip.group-e {
+  border-color:
+    rgba(218, 224, 237, 0.3);
+  background:
+    rgba(218, 224, 237, 0.065);
+  color: #dce2ef;
+}
+
+.protagonist-score-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  width: min(100%, 440px);
+  margin-top: 5px;
+}
+
+.protagonist-score-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+  min-height: 70px;
+  padding: 10px 12px;
+  border: 1px solid;
+  border-radius: 14px;
+}
+
+.protagonist-score-box > span {
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.075em;
+}
+
+.protagonist-score-box > strong {
+  font-size: 27px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.protagonist-score-box.hit {
+  border-color:
+    rgba(67, 218, 137, 0.3);
+  background:
+    rgba(67, 218, 137, 0.075);
+  color: #72e3a8;
+}
+
+.protagonist-score-box.miss {
+  border-color:
+    rgba(238, 71, 101, 0.28);
+  background:
+    rgba(238, 71, 101, 0.07);
+  color: #ff8097;
+}
+
+.protagonist-single-score-note {
+  margin-top: 2px;
+}
+
+@media (max-width: 760px) {
+  .protagonist-combined-rule {
+    grid-template-columns:
+      auto
+      minmax(0, 1fr);
+    gap: 13px;
+    padding: 15px;
+  }
+
+  .protagonist-binary-pill {
+    grid-column: 1 / -1;
+    justify-self: flex-start;
+  }
+
+  .protagonist-combined-icon {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+
+  .protagonist-combined-icon.goal {
+    font-size: 19px;
+  }
+
+  .protagonist-combined-icon.assist {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 430px) {
+  .protagonist-combined-rule {
+    grid-template-columns: 1fr;
+  }
+
+  .protagonist-combined-icons {
+    justify-content: flex-start;
+  }
+
+  .protagonist-binary-pill {
+    grid-column: auto;
+  }
+
+  .protagonist-score-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .protagonist-score-box {
+    min-height: 60px;
+  }
+
+  .protagonist-score-box > strong {
+    font-size: 24px;
+  }
+}
+

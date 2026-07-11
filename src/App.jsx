@@ -73,6 +73,7 @@ const players = [
     name: 'Joan García',
     shortName: 'Joan García',
     image: '/fcb/JOAN_GARCIA.png',
+    isGoalkeeper: true,
   },
   {
     id: 'joao-cancelo',
@@ -139,6 +140,7 @@ const players = [
     name: 'Wojciech Szczęsny',
     shortName: 'Szczęsny',
     image: '/fcb/WOJCIECH_SZCZESNY.png',
+    isGoalkeeper: true,
   },
 ]
 
@@ -184,9 +186,6 @@ function App() {
   const [selectedPlayerId, setSelectedPlayerId] =
     useState(null)
 
-  const [protagonistType, setProtagonistType] =
-    useState(null)
-
   const [protagonistId, setProtagonistId] =
     useState(null)
 
@@ -197,19 +196,30 @@ function App() {
     .map((playerId) => playersById[playerId])
     .filter(Boolean)
 
+  const eligibleProtagonistPlayers = lineupPlayers.filter(
+    (player) => !player.isGoalkeeper,
+  )
+
   const protagonist = protagonistId
     ? playersById[protagonistId]
     : null
 
-  const protagonistIsComplete =
-    Boolean(protagonistType) &&
-    Boolean(protagonist)
+  const protagonistIsComplete = Boolean(protagonist)
 
   useEffect(() => {
-    if (
-      protagonistId &&
-      !lineup.includes(protagonistId)
-    ) {
+    if (!protagonistId) {
+      return
+    }
+
+    const protagonistPlayer =
+      playersById[protagonistId]
+
+    const isStillEligible =
+      lineup.includes(protagonistId) &&
+      protagonistPlayer &&
+      !protagonistPlayer.isGoalkeeper
+
+    if (!isStillEligible) {
       setProtagonistId(null)
     }
   }, [lineup, protagonistId])
@@ -317,22 +327,6 @@ function App() {
       targetSlotIndex,
     )
   }
-
-  const selectProtagonistType = (type) => {
-    setProtagonistType(
-      (currentType) =>
-        currentType === type
-          ? null
-          : type,
-    )
-  }
-
-  const protagonistTypeLabel =
-    protagonistType === 'goal'
-      ? 'GOLEJADOR'
-      : protagonistType === 'assist'
-        ? 'ASSISTENT'
-        : null
 
   return (
     <div className="app-shell">
@@ -807,127 +801,96 @@ function App() {
               </div>
 
               <p className="section-help">
-                Decideix si pronostiques un
-                golejador o un assistent i tria
-                un dels jugadors que tens al camp.
+                Tria un jugador del teu onze. Encertes si
+                marca o dona una assistència.
               </p>
 
               <div className="protagonist-type-tabs">
-                <button
-                  type="button"
-                  className={
-                    protagonistType ===
-                    'goal'
-                      ? 'protagonist-type-button active'
-                      : 'protagonist-type-button'
-                  }
-                  onClick={() =>
-                    selectProtagonistType(
-                      'goal',
-                    )
-                  }
-                >
+                <div className="protagonist-type-button active">
                   <span className="protagonist-type-icon">
                     ⚽
                   </span>
 
                   <span>
                     <strong>
-                      GOLEJADOR
+                      MARCA
                     </strong>
 
                     <small>
-                      Qui marcarà?
+                      Fa un gol
                     </small>
                   </span>
-                </button>
+                </div>
 
-                <button
-                  type="button"
-                  className={
-                    protagonistType ===
-                    'assist'
-                      ? 'protagonist-type-button active assist'
-                      : 'protagonist-type-button assist'
-                  }
-                  onClick={() =>
-                    selectProtagonistType(
-                      'assist',
-                    )
-                  }
-                >
+                <div className="protagonist-type-button active assist">
                   <span className="protagonist-type-icon assist-icon">
                     A
                   </span>
 
                   <span>
                     <strong>
-                      ASSISTENT
+                      ASSISTEIX
                     </strong>
 
                     <small>
-                      Qui assistirà?
+                      Dona una assistència
                     </small>
                   </span>
-                </button>
+                </div>
               </div>
 
-              {protagonistType && (
-                <div className="protagonist-picker">
-                  <div className="protagonist-picker-copy">
-                    <span>
-                      {
-                        protagonistTypeLabel
-                      }
-                    </span>
+              <div className="protagonist-picker">
+                <div className="protagonist-picker-copy">
+                  <span>
+                    PROTAGONISTA
+                  </span>
 
-                    <strong>
-                      Tria un jugador del teu XI
-                    </strong>
-                  </div>
-
-                  <select
-                    value={
-                      protagonistId ?? ''
-                    }
-                    onChange={(event) =>
-                      setProtagonistId(
-                        event.target.value ||
-                          null,
-                      )
-                    }
-                    disabled={
-                      lineupPlayers.length ===
-                      0
-                    }
-                    aria-label={`Selecciona ${protagonistTypeLabel?.toLowerCase()}`}
-                  >
-                    <option value="">
-                      {lineupPlayers.length ===
-                      0
-                        ? 'Primer completa jugadors al camp'
-                        : 'Selecciona jugador'}
-                    </option>
-
-                    {lineupPlayers.map(
-                      (player) => (
-                        <option
-                          key={
-                            player.id
-                          }
-                          value={
-                            player.id
-                          }
-                        >
-                          {
-                            player.name
-                          }
-                        </option>
-                      ),
-                    )}
-                  </select>
+                  <strong>
+                    Tria un jugador del teu XI
+                  </strong>
                 </div>
-              )}
+
+                <select
+                  value={
+                    protagonistId ?? ''
+                  }
+                  onChange={(event) =>
+                    setProtagonistId(
+                      event.target.value ||
+                        null,
+                    )
+                  }
+                  disabled={
+                    eligibleProtagonistPlayers.length ===
+                    0
+                  }
+                  aria-label="Selecciona el protagonista"
+                >
+                  <option value="">
+                    {eligibleProtagonistPlayers.length ===
+                    0
+                      ? 'Afegeix jugadors de camp al teu XI'
+                      : 'Selecciona jugador'}
+                  </option>
+
+                  {eligibleProtagonistPlayers.map(
+                    (player) => (
+                      <option
+                        key={
+                          player.id
+                        }
+                        value={
+                          player.id
+                        }
+                      >
+                        {
+                          player.name
+                        }
+                      </option>
+                    ),
+                  )}
+                </select>
+              </div>
 
               <div
                 className={
@@ -957,10 +920,7 @@ function App() {
 
                     <div className="protagonist-showcase-copy">
                       <span className="protagonist-kicker">
-                        {
-                          protagonistTypeLabel
-                        }{' '}
-                        ESCOLLIT
+                        PROTAGONISTA ESCOLLIT
                       </span>
 
                       <strong>
@@ -970,16 +930,12 @@ function App() {
                       </strong>
 
                       <span className="protagonist-rule">
-                        {protagonistType ===
-                        'goal'
-                          ? '⚽ HA DE MARCAR'
-                          : '🎯 HA DE DONAR UNA ASSISTÈNCIA'}
+                        ⚽ MARCA O 🎯 ASSISTEIX
                       </span>
 
                       <small>
-                        Aquest pronòstic sortirà
-                        també al resum final de la
-                        teva porra.
+                        Encertes si fa una de les dues coses
+                        durant el partit.
                       </small>
                     </div>
                   </>
@@ -999,9 +955,8 @@ function App() {
                       </strong>
 
                       <small>
-                        Obre GOLEJADOR o ASSISTENT
-                        i escull un jugador dels
-                        que tens al camp.
+                        Escull un jugador de camp del teu XI.
+                        Encertes si marca o dona una assistència.
                       </small>
                     </div>
                   </>
@@ -1022,7 +977,7 @@ function App() {
 
                 <span>
                   {protagonistIsComplete
-                    ? `${protagonistTypeLabel} ${protagonist.shortName.toUpperCase()}`
+                    ? `PROTAGONISTA ${protagonist.shortName.toUpperCase()}`
                     : 'PROTAGONISTA —'}
                 </span>
               </div>
