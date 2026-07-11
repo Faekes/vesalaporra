@@ -367,6 +367,724 @@ const getCountdown = () => {
   }
 }
 
+
+const RANKING_PAGE_SIZE = 20
+const CURRENT_RANKING_USER_ID =
+  'twitter-demo-cris'
+
+const rankingNamedProfiles = [
+  {
+    displayName: 'Culer de Les Corts',
+    handle: 'culerdelescorts',
+  },
+  {
+    displayName: 'La Remuntada',
+    handle: 'laremuntada_fcb',
+  },
+  {
+    displayName: 'Pedri Potter',
+    handle: 'pedripotter8',
+  },
+  {
+    displayName: 'Senyera Blaugrana',
+    handle: 'senyerafcb',
+  },
+  {
+    displayName: 'Gol Nord 1899',
+    handle: 'golnord1899',
+  },
+  {
+    displayName: 'Culereta',
+    handle: 'culereta_bcn',
+  },
+  {
+    displayName: 'Més que una porra',
+    handle: 'mesqueunaporra',
+  },
+  {
+    displayName: 'La Masia Sempre',
+    handle: 'lamasiasempre',
+  },
+  {
+    displayName: 'Tiki Taka Culer',
+    handle: 'tikitakaculer',
+  },
+  {
+    displayName: 'Camp Nou Nights',
+    handle: 'campnounights',
+  },
+  {
+    displayName: 'Blaugrana 1902',
+    handle: 'blaugrana1902',
+  },
+  {
+    displayName: 'Culer del Poble',
+    handle: 'culerdelpoble',
+  },
+  {
+    displayName: 'Onze de Gala',
+    handle: 'onzegala',
+  },
+  {
+    displayName: 'Futbol i Seny',
+    handle: 'futboliseny',
+  },
+  {
+    displayName: 'Cris',
+    handle: 'cris',
+    isCurrentUser: true,
+  },
+  {
+    displayName: 'La Pilota d’Or',
+    handle: 'pilotadorfcb',
+  },
+  {
+    displayName: 'Culer Empedreït',
+    handle: 'culersempre',
+  },
+  {
+    displayName: 'ADN Barça',
+    handle: 'adnbarca',
+  },
+  {
+    displayName: 'Nit de Champions',
+    handle: 'nitchampions',
+  },
+  {
+    displayName: 'La Sotana Culer',
+    handle: 'sotanaculer',
+  },
+  {
+    displayName: 'Tribuna 1899',
+    handle: 'tribuna1899',
+  },
+  {
+    displayName: 'Passió Blaugrana',
+    handle: 'passioblaugrana',
+  },
+  {
+    displayName: 'Culer del Vallès',
+    handle: 'culervalles',
+  },
+  {
+    displayName: 'Fins al Final',
+    handle: 'finsalfinalfcb',
+  },
+  {
+    displayName: 'Tercer Anell',
+    handle: 'terceranell',
+  },
+  {
+    displayName: 'La Culerada',
+    handle: 'laculerada',
+  },
+  {
+    displayName: 'Sempre Barça',
+    handle: 'semprebarca',
+  },
+  {
+    displayName: 'El Nou Camp',
+    handle: 'elnoucamp',
+  },
+  {
+    displayName: 'Onze Culé',
+    handle: 'onzecule',
+  },
+  {
+    displayName: 'Orgull Blaugrana',
+    handle: 'orgullblaugrana',
+  },
+]
+
+const buildRankingDemoUsers = () => {
+  const generatedProfiles = Array.from(
+    {
+      length:
+        120 -
+        rankingNamedProfiles.length,
+    },
+    (_, generatedIndex) => {
+      const number =
+        generatedIndex +
+        rankingNamedProfiles.length +
+        1
+
+      return {
+        displayName: `Culer Blaugrana ${number}`,
+        handle: `culer_bcn_${number}`,
+      }
+    },
+  )
+
+  return [
+    ...rankingNamedProfiles,
+    ...generatedProfiles,
+  ].map((profile, index) => {
+    const generalResultPoints =
+      330 -
+      index * 2 +
+      ((index * 7) % 15) -
+      (index % 12 === 0 ? 8 : 0)
+
+    const generalXiPoints =
+      225 -
+      Math.floor(index * 1.45) +
+      ((index * 5) % 11) -
+      (index % 10 === 0 ? 6 : 0)
+
+    const generalProtagonistPoints =
+      145 -
+      Math.floor(index * 0.92) +
+      ((index * 3) % 9) -
+      (index % 8 === 0 ? 5 : 0)
+
+    const jornadaResultPoints =
+      50 -
+      Math.floor(index * 0.28) +
+      ((index * 5) % 13) -
+      (index % 7 === 0 ? 10 : 0)
+
+    const jornadaXiPoints =
+      25 -
+      Math.floor(index * 0.17) +
+      ((index * 4) % 10) -
+      (index % 9 === 0 ? 8 : 0)
+
+    const jornadaProtagonistPoints =
+      20 -
+      Math.floor(index * 0.12) +
+      ((index * 3) % 8) -
+      (index % 6 === 0 ? 5 : 0)
+
+    const id = profile.isCurrentUser
+      ? CURRENT_RANKING_USER_ID
+      : `twitter-demo-${index + 1}`
+
+    return {
+      id,
+      twitterId: `x-${index + 100000}`,
+      displayName: profile.displayName,
+      handle: `@${profile.handle}`,
+      handleSlug: profile.handle,
+      twitterAvatarUrl:
+        `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(
+          profile.handle,
+        )}`,
+      twitterUrl:
+        `https://x.com/${profile.handle}`,
+      isCurrentUser:
+        Boolean(profile.isCurrentUser),
+      general: {
+        resultPoints:
+          generalResultPoints,
+        xiPoints:
+          generalXiPoints,
+        protagonistPoints:
+          generalProtagonistPoints,
+        totalPoints:
+          generalResultPoints +
+          generalXiPoints +
+          generalProtagonistPoints,
+      },
+      jornada: {
+        resultPoints:
+          jornadaResultPoints,
+        xiPoints:
+          jornadaXiPoints,
+        protagonistPoints:
+          jornadaProtagonistPoints,
+        totalPoints:
+          jornadaResultPoints +
+          jornadaXiPoints +
+          jornadaProtagonistPoints,
+      },
+    }
+  })
+}
+
+const rankingDemoUsers =
+  buildRankingDemoUsers()
+
+const getRankingInitials = (name) =>
+  String(name || 'VP')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) =>
+      word.charAt(0).toUpperCase(),
+    )
+    .join('') || 'VP'
+
+function RankingAvatar({
+  user,
+  size = 'medium',
+}) {
+  const [avatarFailed, setAvatarFailed] =
+    useState(false)
+
+  useEffect(() => {
+    setAvatarFailed(false)
+  }, [user?.twitterAvatarUrl])
+
+  return (
+    <span
+      className={`ranking-avatar ranking-avatar-${size}`}
+      aria-hidden="true"
+    >
+      {!avatarFailed &&
+      user?.twitterAvatarUrl ? (
+        <img
+          src={user.twitterAvatarUrl}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
+          onError={() =>
+            setAvatarFailed(true)
+          }
+        />
+      ) : (
+        <span>
+          {getRankingInitials(
+            user?.displayName,
+          )}
+        </span>
+      )}
+    </span>
+  )
+}
+
+
+const profileDemoMatches = [
+  {
+    id: 'j8',
+    label: 'J8',
+    dateLabel: '18 OCT',
+    opponent: 'Atlético',
+    opponentShort: 'ATM',
+    actualHome: 2,
+    actualAway: 1,
+    xiBase: 9,
+    protagonist: 'Raphinha',
+    protagonistHitPoints: 10,
+    protagonistMissPoints: -10,
+  },
+  {
+    id: 'j7',
+    label: 'J7',
+    dateLabel: '04 OCT',
+    opponent: 'Sevilla',
+    opponentShort: 'SEV',
+    actualHome: 3,
+    actualAway: 0,
+    xiBase: 10,
+    protagonist: 'Pedri',
+    protagonistHitPoints: 20,
+    protagonistMissPoints: -10,
+  },
+  {
+    id: 'j6',
+    label: 'J6',
+    dateLabel: '27 SET',
+    opponent: 'Villarreal',
+    opponentShort: 'VIL',
+    actualHome: 2,
+    actualAway: 2,
+    xiBase: 8,
+    protagonist: 'Fermín',
+    protagonistHitPoints: 10,
+    protagonistMissPoints: -10,
+  },
+  {
+    id: 'j5',
+    label: 'J5',
+    dateLabel: '20 SET',
+    opponent: 'València',
+    opponentShort: 'VAL',
+    actualHome: 4,
+    actualAway: 1,
+    xiBase: 11,
+    protagonist: 'Lamine',
+    protagonistHitPoints: 5,
+    protagonistMissPoints: -15,
+  },
+  {
+    id: 'j4',
+    label: 'J4',
+    dateLabel: '13 SET',
+    opponent: 'Betis',
+    opponentShort: 'BET',
+    actualHome: 1,
+    actualAway: 0,
+    xiBase: 7,
+    protagonist: 'Cubarsí',
+    protagonistHitPoints: 50,
+    protagonistMissPoints: -5,
+  },
+  {
+    id: 'j3',
+    label: 'J3',
+    dateLabel: '30 AGO',
+    opponent: 'Athletic',
+    opponentShort: 'ATH',
+    actualHome: 3,
+    actualAway: 2,
+    xiBase: 9,
+    protagonist: 'Dani Olmo',
+    protagonistHitPoints: 20,
+    protagonistMissPoints: -10,
+  },
+  {
+    id: 'j2',
+    label: 'J2',
+    dateLabel: '23 AGO',
+    opponent: 'Real Sociedad',
+    opponentShort: 'RSO',
+    actualHome: 2,
+    actualAway: 0,
+    xiBase: 8,
+    protagonist: 'Gavi',
+    protagonistHitPoints: 50,
+    protagonistMissPoints: -5,
+  },
+  {
+    id: 'j1',
+    label: 'J1',
+    dateLabel: '16 AGO',
+    opponent: 'Mallorca',
+    opponentShort: 'MLL',
+    actualHome: 3,
+    actualAway: 1,
+    xiBase: 10,
+    protagonist: 'Ferran',
+    protagonistHitPoints: 10,
+    protagonistMissPoints: -10,
+  },
+]
+
+const profileXiPointsByHits = {
+  11: 50,
+  10: 25,
+  9: 10,
+  8: 5,
+  7: 0,
+  6: -5,
+  5: -10,
+  4: -15,
+  3: -20,
+  2: -25,
+  1: -30,
+  0: 30,
+}
+
+const getProfileSeed = (user) =>
+  String(
+    user?.twitterId ||
+      user?.handle ||
+      user?.id ||
+      'vesalaporra',
+  )
+    .split('')
+    .reduce(
+      (total, character) =>
+        total +
+        character.charCodeAt(0),
+      0,
+    )
+
+const getDemoResultSign = (
+  homeGoals,
+  awayGoals,
+) => {
+  if (homeGoals > awayGoals) {
+    return 'home'
+  }
+
+  if (homeGoals < awayGoals) {
+    return 'away'
+  }
+
+  return 'draw'
+}
+
+const getDemoResultPoints = (
+  predictedHome,
+  predictedAway,
+  actualHome,
+  actualAway,
+) => {
+  if (
+    predictedHome === actualHome &&
+    predictedAway === actualAway
+  ) {
+    return 50
+  }
+
+  let points = 0
+
+  if (
+    getDemoResultSign(
+      predictedHome,
+      predictedAway,
+    ) ===
+    getDemoResultSign(
+      actualHome,
+      actualAway,
+    )
+  ) {
+    points += 10
+  }
+
+  if (predictedHome === actualHome) {
+    points += 15
+  }
+
+  if (predictedAway === actualAway) {
+    points += 10
+  }
+
+  return points
+}
+
+const buildProfileDemoData = (
+  user,
+  generalPosition,
+) => {
+  const seed = getProfileSeed(user)
+
+  const history =
+    profileDemoMatches.map(
+      (match, index) => {
+        const homeVariation =
+          ((seed + index * 5) % 3) - 1
+
+        const awayVariation =
+          ((seed + index * 7) % 3) - 1
+
+        const predictedHome =
+          Math.max(
+            0,
+            match.actualHome +
+              homeVariation,
+          )
+
+        const predictedAway =
+          Math.max(
+            0,
+            match.actualAway +
+              awayVariation,
+          )
+
+        const xiHits =
+          Math.max(
+            0,
+            Math.min(
+              11,
+              match.xiBase +
+                (((seed + index * 3) % 3) -
+                  1),
+            ),
+          )
+
+        const protagonistHit =
+          (seed + index * 11) % 5 < 3
+
+        const resultPoints =
+          getDemoResultPoints(
+            predictedHome,
+            predictedAway,
+            match.actualHome,
+            match.actualAway,
+          )
+
+        const xiPoints =
+          profileXiPointsByHits[xiHits]
+
+        const protagonistPoints =
+          protagonistHit
+            ? match.protagonistHitPoints
+            : match.protagonistMissPoints
+
+        return {
+          ...match,
+          predictedHome,
+          predictedAway,
+          xiHits,
+          protagonistHit,
+          resultPoints,
+          xiPoints,
+          protagonistPoints,
+          totalPoints:
+            resultPoints +
+            xiPoints +
+            protagonistPoints,
+          isExact:
+            predictedHome ===
+              match.actualHome &&
+            predictedAway ===
+              match.actualAway,
+        }
+      },
+    )
+
+  const played =
+    18 + (seed % 11)
+
+  const exactScores =
+    history.filter(
+      (match) => match.isExact,
+    ).length +
+    (seed % 3)
+
+  const protagonistHits =
+    history.filter(
+      (match) =>
+        match.protagonistHit,
+    ).length
+
+  const averageXi =
+    history.reduce(
+      (total, match) =>
+        total + match.xiHits,
+      0,
+    ) / history.length
+
+  const bestMatch = [...history].sort(
+    (firstMatch, secondMatch) =>
+      secondMatch.totalPoints -
+      firstMatch.totalPoints,
+  )[0]
+
+  const bestXi = Math.max(
+    ...history.map(
+      (match) => match.xiHits,
+    ),
+  )
+
+  const bestProtagonistPoints =
+    Math.max(
+      ...history.map(
+        (match) =>
+          match.protagonistPoints,
+      ),
+    )
+
+  const longestStreak =
+    2 + (seed % 5)
+
+  const achievements = [
+    {
+      id: 'x-identity',
+      icon: '𝕏',
+      title: 'Culer d’X',
+      description:
+        'Identitat competitiva connectada a X.',
+      unlocked: true,
+      progress: 'DESBLOQUEJAT',
+    },
+    {
+      id: 'exact-score',
+      icon: '🎯',
+      title: 'Marcador clavat',
+      description:
+        'Encerta un resultat exacte.',
+      unlocked: exactScores >= 1,
+      progress: `${Math.min(
+        exactScores,
+        1,
+      )}/1`,
+    },
+    {
+      id: 'flick-reader',
+      icon: '🧠',
+      title: 'Llegeix Flick',
+      description:
+        'Encerta 10 titulars en una jornada.',
+      unlocked: bestXi >= 10,
+      progress: `${bestXi}/10`,
+    },
+    {
+      id: 'perfect-xi',
+      icon: '👑',
+      title: 'Onze perfecte',
+      description:
+        'Clava els 11 titulars del Barça.',
+      unlocked: bestXi === 11,
+      progress: `${bestXi}/11`,
+    },
+    {
+      id: 'protagonist',
+      icon: '⭐',
+      title: 'Protagonista',
+      description:
+        'Encerta tres marques o assistències.',
+      unlocked: protagonistHits >= 3,
+      progress: `${Math.min(
+        protagonistHits,
+        3,
+      )}/3`,
+    },
+    {
+      id: 'risk-master',
+      icon: '💎',
+      title: 'Risc premiat',
+      description:
+        'Guanya +50 amb un protagonista improbable.',
+      unlocked:
+        bestProtagonistPoints >= 50,
+      progress:
+        bestProtagonistPoints >= 50
+          ? 'DESBLOQUEJAT'
+          : `${bestProtagonistPoints}/50`,
+    },
+    {
+      id: 'streak',
+      icon: '🔥',
+      title: 'Ratxa culer',
+      description:
+        'Suma quatre jornades positives seguides.',
+      unlocked: longestStreak >= 4,
+      progress: `${Math.min(
+        longestStreak,
+        4,
+      )}/4`,
+    },
+    {
+      id: 'top-ten',
+      icon: '🏆',
+      title: 'Top 10',
+      description:
+        'Entra entre els deu millors del rànquing.',
+      unlocked:
+        generalPosition > 0 &&
+        generalPosition <= 10,
+      progress:
+        generalPosition > 0
+          ? `#${generalPosition}`
+          : '—',
+    },
+  ]
+
+  return {
+    history,
+    played,
+    exactScores,
+    protagonistHits,
+    averageXi,
+    bestMatch,
+    bestXi,
+    bestProtagonistPoints,
+    longestStreak,
+    achievements,
+    unlockedAchievements:
+      achievements.filter(
+        (achievement) =>
+          achievement.unlocked,
+      ).length,
+  }
+}
+
 const formation433 = [
   {
     id: 'forwards',
@@ -392,6 +1110,23 @@ const formation433 = [
 
 function App() {
   const [activePage, setActivePage] = useState('play')
+
+  const [rankingTab, setRankingTab] =
+    useState('general')
+
+  const [
+    visibleRankingCount,
+    setVisibleRankingCount,
+  ] = useState(RANKING_PAGE_SIZE)
+
+  const [
+    selectedProfileUserId,
+    setSelectedProfileUserId,
+  ] = useState(CURRENT_RANKING_USER_ID)
+
+  const [profileTab, setProfileTab] =
+    useState('overview')
+
   const [barcaScore, setBarcaScore] = useState(0)
   const [rivalScore, setRivalScore] = useState(0)
   const [scoreTouched, setScoreTouched] =
@@ -458,6 +1193,127 @@ function App() {
             ? 'CONFIRMAR RESULTAT + PROTAGONISTA'
             : 'CONFIRMAR RESULTAT'
 
+  const rankingRows = [
+    ...rankingDemoUsers,
+  ].sort((firstUser, secondUser) => {
+    const firstPoints =
+      firstUser[rankingTab]
+    const secondPoints =
+      secondUser[rankingTab]
+
+    return (
+      secondPoints.totalPoints -
+        firstPoints.totalPoints ||
+      secondPoints.resultPoints -
+        firstPoints.resultPoints ||
+      secondPoints.xiPoints -
+        firstPoints.xiPoints ||
+      secondPoints.protagonistPoints -
+        firstPoints.protagonistPoints ||
+      firstUser.id.localeCompare(
+        secondUser.id,
+      )
+    )
+  })
+
+  const visibleRankingRows =
+    rankingRows.slice(
+      0,
+      visibleRankingCount,
+    )
+
+  const rankingHasMore =
+    visibleRankingCount <
+    rankingRows.length
+
+  const currentRankingPosition =
+    rankingRows.findIndex(
+      (user) => user.isCurrentUser,
+    ) + 1
+
+  const currentRankingUser =
+    rankingRows.find(
+      (user) => user.isCurrentUser,
+    ) || rankingRows[0]
+
+  const selectedProfileUser =
+    rankingDemoUsers.find(
+      (user) =>
+        user.id ===
+        selectedProfileUserId,
+    ) || currentRankingUser
+
+  const generalRankingRows = [
+    ...rankingDemoUsers,
+  ].sort((firstUser, secondUser) => {
+    const firstPoints =
+      firstUser.general
+    const secondPoints =
+      secondUser.general
+
+    return (
+      secondPoints.totalPoints -
+        firstPoints.totalPoints ||
+      secondPoints.resultPoints -
+        firstPoints.resultPoints ||
+      secondPoints.xiPoints -
+        firstPoints.xiPoints ||
+      secondPoints.protagonistPoints -
+        firstPoints.protagonistPoints ||
+      firstUser.id.localeCompare(
+        secondUser.id,
+      )
+    )
+  })
+
+  const selectedProfilePosition =
+    generalRankingRows.findIndex(
+      (user) =>
+        user.id ===
+        selectedProfileUser?.id,
+    ) + 1
+
+  const selectedProfileData =
+    selectedProfileUser
+      ? buildProfileDemoData(
+          selectedProfileUser,
+          selectedProfilePosition,
+        )
+      : null
+
+  const loadMoreRanking = () => {
+    setVisibleRankingCount(
+      (currentCount) =>
+        Math.min(
+          currentCount +
+            RANKING_PAGE_SIZE,
+          rankingRows.length,
+        ),
+    )
+  }
+
+  const changeRankingTab = (
+    nextTab,
+  ) => {
+    setRankingTab(nextTab)
+    setVisibleRankingCount(
+      RANKING_PAGE_SIZE,
+    )
+  }
+
+  const openRankingProfile = (
+    userId,
+  ) => {
+    setSelectedProfileUserId(userId)
+    setProfileTab('overview')
+    setActivePage('profile')
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  }
+
   const toggleInfoSection = (sectionId) => {
     setOpenInfoSection(
       (currentSectionId) =>
@@ -478,6 +1334,58 @@ function App() {
     return () =>
       window.clearInterval(countdownInterval)
   }, [])
+
+  useEffect(() => {
+    if (
+      activePage !== 'ranking' ||
+      !rankingHasMore
+    ) {
+      return undefined
+    }
+
+    const handleRankingScroll = () => {
+      const viewportBottom =
+        window.scrollY +
+        window.innerHeight
+
+      const documentHeight =
+        document.documentElement
+          .scrollHeight
+
+      if (
+        documentHeight -
+          viewportBottom <
+        260
+      ) {
+        setVisibleRankingCount(
+          (currentCount) =>
+            Math.min(
+              currentCount +
+                RANKING_PAGE_SIZE,
+              rankingRows.length,
+            ),
+        )
+      }
+    }
+
+    window.addEventListener(
+      'scroll',
+      handleRankingScroll,
+      {
+        passive: true,
+      },
+    )
+
+    return () =>
+      window.removeEventListener(
+        'scroll',
+        handleRankingScroll,
+      )
+  }, [
+    activePage,
+    rankingHasMore,
+    rankingRows.length,
+  ])
 
   useEffect(() => {
     if (!protagonistId) {
@@ -743,9 +1651,13 @@ function App() {
                 ? 'nav-button active'
                 : 'nav-button'
             }
-            onClick={() =>
+            onClick={() => {
+              setSelectedProfileUserId(
+                CURRENT_RANKING_USER_ID,
+              )
+              setProfileTab('overview')
               setActivePage('profile')
-            }
+            }}
           >
             PERFIL
           </button>
@@ -1835,39 +2747,1109 @@ function App() {
         )}
 
         {activePage === 'ranking' && (
-          <section className="placeholder-page">
-            <span className="eyebrow">
-              VESALAPORRA
-            </span>
+          <section className="ranking-page">
+            <header className="ranking-hero">
+              <div className="ranking-hero-top">
+                <div>
+                  <span className="ranking-kicker">
+                    LA CLASSIFICACIÓ DE LA CULERADA
+                  </span>
 
-            <h1>
-              RÀNQUING
-            </h1>
+                  <h1>
+                    RÀNQUING
+                  </h1>
 
-            <p>
-              La classificació general viurà
-              aquí, com una pàgina pròpia.
-            </p>
+                  <p>
+                    Identitat X, rivalitat culer i punts
+                    transparents partit rere partit.
+                  </p>
+                </div>
+
+                <span className="ranking-x-origin">
+                  <strong>
+                    𝕏
+                  </strong>
+
+                  IDENTITAT X
+                </span>
+              </div>
+
+              {currentRankingUser && (
+                <button
+                  type="button"
+                  className="ranking-current-user"
+                  onClick={() =>
+                    openRankingProfile(
+                      currentRankingUser.id,
+                    )
+                  }
+                >
+                  <RankingAvatar
+                    user={currentRankingUser}
+                    size="large"
+                  />
+
+                  <span className="ranking-current-copy">
+                    <small>
+                      LA TEVA POSICIÓ
+                    </small>
+
+                    <strong>
+                      {
+                        currentRankingUser.displayName
+                      }
+                    </strong>
+
+                    <span>
+                      {
+                        currentRankingUser.handle
+                      }
+                    </span>
+                  </span>
+
+                  <span className="ranking-current-stat">
+                    <small>
+                      POSICIÓ
+                    </small>
+
+                    <strong>
+                      #
+                      {
+                        currentRankingPosition
+                      }
+                    </strong>
+                  </span>
+
+                  <span className="ranking-current-stat points">
+                    <small>
+                      PUNTS
+                    </small>
+
+                    <strong>
+                      {
+                        currentRankingUser[
+                          rankingTab
+                        ].totalPoints
+                      }
+                    </strong>
+                  </span>
+                </button>
+              )}
+            </header>
+
+            <div
+              className="ranking-tabs"
+              role="tablist"
+              aria-label="Tipus de rànquing"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={
+                  rankingTab === 'general'
+                }
+                className={
+                  rankingTab === 'general'
+                    ? 'ranking-tab active'
+                    : 'ranking-tab'
+                }
+                onClick={() =>
+                  changeRankingTab(
+                    'general',
+                  )
+                }
+              >
+                GENERAL
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={
+                  rankingTab === 'jornada'
+                }
+                className={
+                  rankingTab === 'jornada'
+                    ? 'ranking-tab active'
+                    : 'ranking-tab'
+                }
+                onClick={() =>
+                  changeRankingTab(
+                    'jornada',
+                  )
+                }
+              >
+                JORNADA
+              </button>
+            </div>
+
+            <section className="ranking-board">
+              <header className="ranking-board-heading">
+                <div>
+                  <span>
+                    {rankingTab === 'general'
+                      ? 'CLASSIFICACIÓ GENERAL'
+                      : 'ÚLTIMA JORNADA'}
+                  </span>
+
+                  <strong>
+                    {
+                      visibleRankingRows.length
+                    }
+                    {' '}culers carregats
+                  </strong>
+                </div>
+
+                <small>
+                  20 EN 20 · SENSE LÍMIT
+                </small>
+              </header>
+
+              <div
+                className="ranking-table-head"
+                aria-hidden="true"
+              >
+                <span>
+                  POS
+                </span>
+
+                <span>
+                  CULER
+                </span>
+
+                <span>
+                  RESULTAT
+                </span>
+
+                <span>
+                  XI
+                </span>
+
+                <span>
+                  PROTAGONISTA
+                </span>
+
+                <span>
+                  PTS
+                </span>
+              </div>
+
+              <div className="ranking-list">
+                {visibleRankingRows.map(
+                  (user, index) => {
+                    const position =
+                      index + 1
+
+                    const points =
+                      user[rankingTab]
+
+                    const medal =
+                      position === 1
+                        ? '🥇'
+                        : position === 2
+                          ? '🥈'
+                          : position === 3
+                            ? '🥉'
+                            : null
+
+                    const rankingRowClassName =
+                      [
+                        'ranking-row',
+                        user.isCurrentUser
+                          ? 'current-user'
+                          : '',
+                        position <= 3
+                          ? 'podium'
+                          : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')
+
+                    return (
+                      <article
+                        key={`${rankingTab}-${user.id}`}
+                        className={
+                          rankingRowClassName
+                        }
+                      >
+                        <span className="ranking-position">
+                          {medal ? (
+                            <span className="ranking-medal">
+                              {medal}
+                            </span>
+                          ) : (
+                            position
+                          )}
+                        </span>
+
+                        <button
+                          type="button"
+                          className="ranking-identity"
+                          onClick={() =>
+                            openRankingProfile(
+                              user.id,
+                            )
+                          }
+                        >
+                          <RankingAvatar
+                            user={user}
+                          />
+
+                          <span className="ranking-identity-copy">
+                            <strong>
+                              {
+                                user.displayName
+                              }
+
+                              {user.isCurrentUser && (
+                                <span className="ranking-you-badge">
+                                  TU
+                                </span>
+                              )}
+                            </strong>
+
+                            <small>
+                              <span aria-hidden="true">
+                                𝕏
+                              </span>
+
+                              {user.handle}
+                            </small>
+                          </span>
+                        </button>
+
+                        <span
+                          className="ranking-breakdown result"
+                          data-label="RESULTAT"
+                        >
+                          {
+                            points.resultPoints
+                          }
+                        </span>
+
+                        <span
+                          className="ranking-breakdown xi"
+                          data-label="XI"
+                        >
+                          {points.xiPoints}
+                        </span>
+
+                        <span
+                          className="ranking-breakdown protagonist"
+                          data-label="PROTAGONISTA"
+                        >
+                          {
+                            points.protagonistPoints
+                          }
+                        </span>
+
+                        <strong
+                          className="ranking-total"
+                          data-label="PTS"
+                        >
+                          {
+                            points.totalPoints
+                          }
+                        </strong>
+                      </article>
+                    )
+                  },
+                )}
+              </div>
+
+              <div className="ranking-load-more">
+                {rankingHasMore ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={
+                        loadMoreRanking
+                      }
+                    >
+                      CARREGAR 20 MÉS
+                    </button>
+
+                    <small>
+                      També es carreguen automàticament
+                      quan baixes.
+                    </small>
+                  </>
+                ) : (
+                  <span>
+                    HAS ARRIBAT AL FINAL DEL RÀNQUING
+                  </span>
+                )}
+              </div>
+            </section>
           </section>
         )}
 
-        {activePage === 'profile' && (
-          <section className="placeholder-page">
-            <span className="eyebrow">
-              VESALAPORRA
-            </span>
+        {activePage === 'profile' &&
+          selectedProfileUser &&
+          selectedProfileData && (
+            <section className="profile-page">
+              <header
+                className={
+                  selectedProfileUser.isCurrentUser
+                    ? 'profile-hero own-profile'
+                    : 'profile-hero public-profile'
+                }
+              >
+                <div className="profile-identity-block">
+                  <RankingAvatar
+                    user={selectedProfileUser}
+                    size="profile"
+                  />
 
-            <h1>
-              PERFIL
-            </h1>
+                  <div className="profile-identity-copy">
+                    <span className="profile-kicker">
+                      {selectedProfileUser.isCurrentUser
+                        ? 'EL TEU PERFIL'
+                        : 'PERFIL PÚBLIC'}
+                    </span>
 
-            <p>
-              Estadístiques, historial,
-              assoliments, insígnies i
-              medalles.
-            </p>
-          </section>
-        )}
+                    <h1>
+                      {
+                        selectedProfileUser.displayName
+                      }
+                    </h1>
+
+                    <a
+                      href={
+                        selectedProfileUser.twitterUrl
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                      className="profile-x-handle"
+                    >
+                      <span aria-hidden="true">
+                        𝕏
+                      </span>
+
+                      {
+                        selectedProfileUser.handle
+                      }
+                    </a>
+
+                    <div className="profile-identity-badges">
+                      <span>
+                        IDENTITAT X
+                      </span>
+
+                      <span>
+                        CULER DES DE 2026
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="profile-hero-stats">
+                  <div>
+                    <span>
+                      POSICIÓ GENERAL
+                    </span>
+
+                    <strong>
+                      #
+                      {
+                        selectedProfilePosition
+                      }
+                    </strong>
+                  </div>
+
+                  <div className="gold">
+                    <span>
+                      PUNTS
+                    </span>
+
+                    <strong>
+                      {
+                        selectedProfileUser.general
+                          .totalPoints
+                      }
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="profile-hero-actions">
+                  <a
+                    href={
+                      selectedProfileUser.twitterUrl
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                    className="profile-action-button x"
+                  >
+                    <span aria-hidden="true">
+                      𝕏
+                    </span>
+
+                    VEURE A X
+                  </a>
+
+                  {!selectedProfileUser.isCurrentUser && (
+                    <button
+                      type="button"
+                      className="profile-action-button back"
+                      onClick={() =>
+                        setActivePage(
+                          'ranking',
+                        )
+                      }
+                    >
+                      ← RÀNQUING
+                    </button>
+                  )}
+                </div>
+              </header>
+
+              <nav
+                className="profile-tabs"
+                aria-label="Seccions del perfil"
+              >
+                <button
+                  type="button"
+                  className={
+                    profileTab === 'overview'
+                      ? 'profile-tab active'
+                      : 'profile-tab'
+                  }
+                  onClick={() =>
+                    setProfileTab(
+                      'overview',
+                    )
+                  }
+                >
+                  RESUM
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    profileTab === 'history'
+                      ? 'profile-tab active'
+                      : 'profile-tab'
+                  }
+                  onClick={() =>
+                    setProfileTab(
+                      'history',
+                    )
+                  }
+                >
+                  HISTORIAL
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    profileTab === 'achievements'
+                      ? 'profile-tab active'
+                      : 'profile-tab'
+                  }
+                  onClick={() =>
+                    setProfileTab(
+                      'achievements',
+                    )
+                  }
+                >
+                  MEDALLES
+                </button>
+              </nav>
+
+              {profileTab === 'overview' && (
+                <div className="profile-overview">
+                  <section className="profile-main-stats">
+                    <article>
+                      <span>
+                        POSICIÓ
+                      </span>
+
+                      <strong>
+                        #
+                        {
+                          selectedProfilePosition
+                        }
+                      </strong>
+
+                      <small>
+                        classificació general
+                      </small>
+                    </article>
+
+                    <article className="featured">
+                      <span>
+                        PUNTS TOTALS
+                      </span>
+
+                      <strong>
+                        {
+                          selectedProfileUser.general
+                            .totalPoints
+                        }
+                      </strong>
+
+                      <small>
+                        temporada actual
+                      </small>
+                    </article>
+
+                    <article>
+                      <span>
+                        PORRES
+                      </span>
+
+                      <strong>
+                        {
+                          selectedProfileData.played
+                        }
+                      </strong>
+
+                      <small>
+                        partits jugats
+                      </small>
+                    </article>
+
+                    <article>
+                      <span>
+                        EXACTES
+                      </span>
+
+                      <strong>
+                        {
+                          selectedProfileData.exactScores
+                        }
+                      </strong>
+
+                      <small>
+                        marcadors clavats
+                      </small>
+                    </article>
+                  </section>
+
+                  <section className="profile-breakdown-card">
+                    <header>
+                      <div>
+                        <span>
+                          PUNTS PER CATEGORIA
+                        </span>
+
+                        <strong>
+                          D’on surt la puntuació
+                        </strong>
+                      </div>
+
+                      <small>
+                        TOTAL{' '}
+                        {
+                          selectedProfileUser.general
+                            .totalPoints
+                        }
+                      </small>
+                    </header>
+
+                    {[
+                      {
+                        key: 'result',
+                        label: 'RESULTAT',
+                        value:
+                          selectedProfileUser.general
+                            .resultPoints,
+                        className: 'result',
+                      },
+                      {
+                        key: 'xi',
+                        label: 'LOTTO FLICK',
+                        value:
+                          selectedProfileUser.general
+                            .xiPoints,
+                        className: 'xi',
+                      },
+                      {
+                        key: 'protagonist',
+                        label: 'PROTAGONISTA',
+                        value:
+                          selectedProfileUser.general
+                            .protagonistPoints,
+                        className:
+                          'protagonist',
+                      },
+                    ].map((item) => {
+                      const totalPoints =
+                        Math.max(
+                          1,
+                          selectedProfileUser.general
+                            .totalPoints,
+                        )
+
+                      const percentage =
+                        Math.max(
+                          0,
+                          Math.min(
+                            100,
+                            Math.round(
+                              (item.value /
+                                totalPoints) *
+                                100,
+                            ),
+                          ),
+                        )
+
+                      return (
+                        <div
+                          key={item.key}
+                          className="profile-breakdown-row"
+                        >
+                          <span>
+                            {item.label}
+                          </span>
+
+                          <div className="profile-breakdown-track">
+                            <span
+                              className={`profile-breakdown-fill ${item.className}`}
+                              style={{
+                                width: `${percentage}%`,
+                              }}
+                            ></span>
+                          </div>
+
+                          <strong>
+                            {item.value}
+                          </strong>
+                        </div>
+                      )
+                    })}
+                  </section>
+
+                  <section className="profile-performance-grid">
+                    <article>
+                      <span className="profile-performance-icon">
+                        🎯
+                      </span>
+
+                      <div>
+                        <small>
+                          RESULTATS EXACTES
+                        </small>
+
+                        <strong>
+                          {
+                            selectedProfileData.exactScores
+                          }
+                        </strong>
+
+                        <span>
+                          de{' '}
+                          {
+                            selectedProfileData.played
+                          }{' '}
+                          porres
+                        </span>
+                      </div>
+                    </article>
+
+                    <article>
+                      <span className="profile-performance-icon">
+                        🧠
+                      </span>
+
+                      <div>
+                        <small>
+                          MITJANA LOTTO
+                        </small>
+
+                        <strong>
+                          {
+                            selectedProfileData.averageXi.toFixed(
+                              1,
+                            )
+                          }
+                          /11
+                        </strong>
+
+                        <span>
+                          lectura de titulars
+                        </span>
+                      </div>
+                    </article>
+
+                    <article>
+                      <span className="profile-performance-icon">
+                        ⭐
+                      </span>
+
+                      <div>
+                        <small>
+                          PROTAGONISTES
+                        </small>
+
+                        <strong>
+                          {
+                            selectedProfileData.protagonistHits
+                          }
+                          /
+                          {
+                            selectedProfileData.history
+                              .length
+                          }
+                        </strong>
+
+                        <span>
+                          encerts recents
+                        </span>
+                      </div>
+                    </article>
+
+                    <article>
+                      <span className="profile-performance-icon">
+                        🔥
+                      </span>
+
+                      <div>
+                        <small>
+                          MILLOR RATXA
+                        </small>
+
+                        <strong>
+                          {
+                            selectedProfileData.longestStreak
+                          }
+                        </strong>
+
+                        <span>
+                          jornades positives
+                        </span>
+                      </div>
+                    </article>
+                  </section>
+
+                  <section className="profile-records-section">
+                    <header>
+                      <div>
+                        <span>
+                          MILLORS ACTUACIONS
+                        </span>
+
+                        <strong>
+                          Els tres records del perfil
+                        </strong>
+                      </div>
+                    </header>
+
+                    <div className="profile-records-grid">
+                      <article className="profile-record-card gold">
+                        <span className="profile-record-ordinal">
+                          01
+                        </span>
+
+                        <span className="profile-record-icon">
+                          🏆
+                        </span>
+
+                        <strong>
+                          {
+                            selectedProfileData.bestMatch
+                              .totalPoints
+                          }{' '}
+                          PTS
+                        </strong>
+
+                        <small>
+                          Millor jornada
+                        </small>
+
+                        <p>
+                          {
+                            selectedProfileData.bestMatch
+                              .label
+                          }{' '}
+                          · Barça vs{' '}
+                          {
+                            selectedProfileData.bestMatch
+                              .opponent
+                          }
+                        </p>
+                      </article>
+
+                      <article className="profile-record-card silver">
+                        <span className="profile-record-ordinal">
+                          02
+                        </span>
+
+                        <span className="profile-record-icon">
+                          🧠
+                        </span>
+
+                        <strong>
+                          {
+                            selectedProfileData.bestXi
+                          }
+                          /11
+                        </strong>
+
+                        <small>
+                          Millor Lotto Flick
+                        </small>
+
+                        <p>
+                          Titulars encertats en una
+                          sola jornada.
+                        </p>
+                      </article>
+
+                      <article className="profile-record-card bronze">
+                        <span className="profile-record-ordinal">
+                          03
+                        </span>
+
+                        <span className="profile-record-icon">
+                          ⭐
+                        </span>
+
+                        <strong>
+                          +
+                          {
+                            selectedProfileData.bestProtagonistPoints
+                          }
+                        </strong>
+
+                        <small>
+                          Millor protagonista
+                        </small>
+
+                        <p>
+                          Premi màxim aconseguit amb
+                          una marca o assistència.
+                        </p>
+                      </article>
+                    </div>
+                  </section>
+                </div>
+              )}
+
+              {profileTab === 'history' && (
+                <section className="profile-history-card">
+                  <header>
+                    <div>
+                      <span>
+                        HISTORIAL DE PORRES
+                      </span>
+
+                      <strong>
+                        Últims partits puntuats
+                      </strong>
+                    </div>
+
+                    <small>
+                      {
+                        selectedProfileData.history
+                          .length
+                      }{' '}
+                      JORNADES
+                    </small>
+                  </header>
+
+                  <div className="profile-history-list">
+                    {selectedProfileData.history.map(
+                      (match) => (
+                        <article
+                          key={match.id}
+                          className="profile-history-row"
+                        >
+                          <div className="profile-history-match">
+                            <span className="profile-opponent-badge">
+                              {
+                                match.opponentShort
+                              }
+                            </span>
+
+                            <div>
+                              <small>
+                                {match.label} ·{' '}
+                                {match.dateLabel}
+                              </small>
+
+                              <strong>
+                                Barça vs{' '}
+                                {
+                                  match.opponent
+                                }
+                              </strong>
+                            </div>
+                          </div>
+
+                          <div className="profile-history-score">
+                            <span>
+                              PRONÒSTIC
+                            </span>
+
+                            <strong>
+                              {
+                                match.predictedHome
+                              }
+                              -
+                              {
+                                match.predictedAway
+                              }
+                            </strong>
+
+                            <small>
+                              REAL{' '}
+                              {
+                                match.actualHome
+                              }
+                              -
+                              {
+                                match.actualAway
+                              }
+                            </small>
+                          </div>
+
+                          <div className="profile-history-details">
+                            <span className="result">
+                              RESULTAT{' '}
+                              {match.resultPoints >=
+                              0
+                                ? '+'
+                                : ''}
+                              {
+                                match.resultPoints
+                              }
+                            </span>
+
+                            <span className="xi">
+                              XI {match.xiHits}/11 ·{' '}
+                              {match.xiPoints >= 0
+                                ? '+'
+                                : ''}
+                              {match.xiPoints}
+                            </span>
+
+                            <span
+                              className={
+                                match.protagonistHit
+                                  ? 'protagonist hit'
+                                  : 'protagonist miss'
+                              }
+                            >
+                              {
+                                match.protagonist
+                              }{' '}
+                              ·{' '}
+                              {match.protagonistPoints >=
+                              0
+                                ? '+'
+                                : ''}
+                              {
+                                match.protagonistPoints
+                              }
+                            </span>
+                          </div>
+
+                          <strong
+                            className={
+                              match.totalPoints >= 0
+                                ? 'profile-history-total positive'
+                                : 'profile-history-total negative'
+                            }
+                          >
+                            {match.totalPoints >= 0
+                              ? '+'
+                              : ''}
+                            {
+                              match.totalPoints
+                            }
+                            <small>
+                              PTS
+                            </small>
+                          </strong>
+                        </article>
+                      ),
+                    )}
+                  </div>
+                </section>
+              )}
+
+              {profileTab === 'achievements' && (
+                <section className="profile-achievements-section">
+                  <header className="profile-achievements-hero">
+                    <div className="profile-achievements-trophy">
+                      🏅
+                    </div>
+
+                    <div>
+                      <span>
+                        VITRINA DEL CULER
+                      </span>
+
+                      <strong>
+                        {
+                          selectedProfileData.unlockedAchievements
+                        }
+                        /
+                        {
+                          selectedProfileData.achievements
+                            .length
+                        }{' '}
+                        medalles
+                      </strong>
+
+                      <p>
+                        Assoliments públics que expliquen
+                        com competeix aquest perfil.
+                      </p>
+                    </div>
+                  </header>
+
+                  <div className="profile-achievements-grid">
+                    {selectedProfileData.achievements.map(
+                      (achievement) => (
+                        <article
+                          key={achievement.id}
+                          className={
+                            achievement.unlocked
+                              ? 'profile-achievement unlocked'
+                              : 'profile-achievement locked'
+                          }
+                        >
+                          <span className="profile-achievement-icon">
+                            {
+                              achievement.icon
+                            }
+                          </span>
+
+                          <div>
+                            <span>
+                              {achievement.unlocked
+                                ? 'DESBLOQUEJADA'
+                                : 'PENDENT'}
+                            </span>
+
+                            <strong>
+                              {
+                                achievement.title
+                              }
+                            </strong>
+
+                            <p>
+                              {
+                                achievement.description
+                              }
+                            </p>
+                          </div>
+
+                          <small>
+                            {
+                              achievement.progress
+                            }
+                          </small>
+                        </article>
+                      ),
+                    )}
+                  </div>
+                </section>
+              )}
+            </section>
+          )}
       </main>
     </div>
   )
