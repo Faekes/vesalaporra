@@ -155,7 +155,7 @@ const protagonistScoringByPlayerId = {
     groupKey: "special",
     goalContributions: 41,
     hitPoints: 5,
-    missPoints: -15,
+    missPoints: -5,
     order: 1,
   },
   "fermin-lopez": {
@@ -262,18 +262,18 @@ const protagonistScoringByPlayerId = {
     missPoints: -5,
     order: 14,
   },
-  "alejandro-balde": {
-    groupLabel: "GRUP D",
-    groupKey: "d",
-    goalContributions: 3,
+   gavi: {
+    groupLabel: "GRUP E",
+    groupKey: "e",
+    goalContributions: 1,
     hitPoints: 40,
     missPoints: -5,
     order: 15,
   },
-  gavi: {
-    groupLabel: "GRUP E",
-    groupKey: "e",
-    goalContributions: 1,
+  "alejandro-balde": {
+    groupLabel: "GRUP D",
+    groupKey: "d",
+    goalContributions: 3,
     hitPoints: 50,
     missPoints: -5,
     order: 16,
