@@ -2193,16 +2193,8 @@ function App() {
                     displayName={profileDisplayName}
                   />
 
-                  <span>
+                                  <span>
                     <strong>{profileDisplayName}</strong>
-
-                    <small>
-                      {authIsX && providerHandleSlug
-                        ? `@${providerHandleSlug}`
-                        : authProvider === "google"
-                          ? "COMPTE GOOGLE"
-                          : "COMPTE VESALAPORRA"}
-                    </small>
                   </span>
                 </div>
 
@@ -3087,24 +3079,10 @@ function App() {
                 >
                   <RankingAvatar user={currentRankingUser} size="large" />
 
-                  <span className="ranking-current-copy">
+                                <span className="ranking-current-copy">
                     <small>LA TEVA POSICIÓ</small>
 
                     <strong>{currentRankingUser.displayName}</strong>
-
-                    <span className="ranking-current-source">
-                      {currentRankingUser.hasXIdentity ? (
-                        <>
-                          <span aria-hidden="true">𝕏</span>
-                          {currentRankingUser.handle}
-                        </>
-                      ) : (
-                        <>
-                          <GoogleMark className="ranking-provider-mark google" />
-                          COMPTE GOOGLE
-                        </>
-                      )}
-                    </span>
                   </span>
 
                   <span className="ranking-current-stat">
@@ -3230,7 +3208,7 @@ function App() {
                       >
                         <RankingAvatar user={user} />
 
-                        <span className="ranking-identity-copy">
+                                              <span className="ranking-identity-copy">
                           <strong>
                             {user.displayName}
 
@@ -3239,19 +3217,14 @@ function App() {
                             )}
                           </strong>
 
-                          <small>
-                            {user.hasXIdentity ? (
-                              <>
+                          {!user.isCurrentUser &&
+                            user.hasXIdentity &&
+                            user.handle && (
+                              <small>
                                 <span aria-hidden="true">𝕏</span>
                                 {user.handle}
-                              </>
-                            ) : (
-                              <>
-                                <GoogleMark className="ranking-provider-mark google" />
-                                COMPTE GOOGLE
-                              </>
+                              </small>
                             )}
-                          </small>
                         </span>
                       </button>
 
@@ -3323,7 +3296,8 @@ function App() {
 
                     <h1>{selectedProfileUser.displayName}</h1>
 
-                    {selectedProfileUser.hasXIdentity &&
+                                        {!isOwnAuthenticatedProfile &&
+                    selectedProfileUser.hasXIdentity &&
                     selectedProfileUser.twitterUrl ? (
                       <a
                         href={selectedProfileUser.twitterUrl}
@@ -3335,11 +3309,6 @@ function App() {
 
                         {selectedProfileUser.handle}
                       </a>
-                    ) : isOwnAuthenticatedProfile ? (
-                      <span className="profile-account-source">
-                        <GoogleMark className="profile-provider-mark google" />
-                        COMPTE GOOGLE
-                      </span>
                     ) : null}
 
                     {isOwnAuthenticatedProfile ? (
