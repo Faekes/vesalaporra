@@ -2218,8 +2218,6 @@ function App() {
                   <span>PROPER PARTIT</span>
 
                   <strong>{matchData.kickoffLabel}</strong>
-
-                  <small>Hora de Barcelona</small>
                 </div>
 
                 <div
@@ -2329,7 +2327,9 @@ function App() {
                       <small>{matchData.homeLocation}</small>
                     </span>
                   </div>
+                </div>
 
+                <div className="score-center-controls">
                   <div className="score-control">
                     <button
                       type="button"
@@ -2362,25 +2362,10 @@ function App() {
                       +
                     </button>
                   </div>
-                </div>
 
-                <span className="score-separator" aria-hidden="true">
-                  :
-                </span>
-
-                <div className="score-team away">
-                  <div className="score-team-label">
-                    <span
-                      className="team-color-dot team-color-dot-al-ahly"
-                      aria-hidden="true"
-                    ></span>
-
-                    <span className="score-team-copy">
-                      <strong>{matchData.awayName}</strong>
-
-                      <small>{matchData.awayCountry}</small>
-                    </span>
-                  </div>
+                  <span className="score-separator" aria-hidden="true">
+                    :
+                  </span>
 
                   <div className="score-control">
                     <button
@@ -2415,17 +2400,34 @@ function App() {
                     </button>
                   </div>
                 </div>
+
+                <div className="score-team away">
+                  <div className="score-team-label">
+                    <span
+                      className="team-color-dot team-color-dot-al-ahly"
+                      aria-hidden="true"
+                    ></span>
+
+                    <span className="score-team-copy">
+                      <strong>{matchData.awayName}</strong>
+
+                      <small>{matchData.awayCountry}</small>
+                    </span>
+                  </div>
+                </div>
               </div>
             </section>
 
             <section className="prediction-card lineup-card">
               <div className="section-heading lotto-heading">
                 <div className="lotto-heading-main">
-                  <img
-                    src="/fcb/HANSI_FLICK.png"
-                    className="flick-avatar"
-                    alt="Hansi Flick"
-                  />
+                  <span className="flick-avatar-shell">
+                    <img
+                      src="/fcb/HANSI_FLICK.png"
+                      className="flick-avatar"
+                      alt="Hansi Flick"
+                    />
+                  </span>
 
                   <div className="lotto-title-copy">
                     <h2>La Lotto Flick</h2>
