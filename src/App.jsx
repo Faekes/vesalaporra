@@ -2899,7 +2899,7 @@ function App() {
                       <strong>Tria el teu protagonista</strong>
 
                       <small>
-                        Escull qualsevol dels 21 jugadors de camp. Veuràs els punts que et pot donar o treure cada jugador
+                        Escull qui creus que marcarà o assistirà. Veuràs els punts que et pot donar o treure cada jugador.
                       </small>
                     </div>
                   </>
