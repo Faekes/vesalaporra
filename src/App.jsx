@@ -368,6 +368,7 @@ const getTeamBadgeBackground = (teamId) => {
 };
 
 const matchData = {
+  id: "barcelona-al-ahly-2026-08-19",
   homeTeamId: "barcelona",
   homeName: "Barça",
   homeLocation: "Barcelona",
@@ -377,6 +378,11 @@ const matchData = {
   kickoffLabel: "DIMECRES · 19 AGOST 2026 · 21:00",
   kickoffAt: "2026-08-19T21:00:00+02:00",
 };
+
+const PREDICTION_CELEBRATION_MS = 5600;
+
+const getPredictionStorageKey = (userId) =>
+  `vesalaporra_prediction_${String(userId)}_${matchData.id}`;
 
 const getCountdown = () => {
   const remainingMilliseconds = Math.max(
@@ -739,6 +745,359 @@ function GoogleMark({ className = "" }) {
         />
       </svg>
     </span>
+  );
+}
+
+
+const NOTES_MATCH_DATA = {
+  id: "j8-atletico-2026",
+  eyebrow: "ÚLTIM PARTIT PUNTUAT",
+  title: "Barça 2–1 Atlético",
+  dateLabel: "18 OCTUBRE 2026",
+};
+
+const RATING_SCALE = [
+  { stars: 1, value: 0, label: "Pèssim" },
+  { stars: 2, value: 2, label: "Fluixet" },
+  { stars: 3, value: 4, label: "Ni fu ni fa" },
+  { stars: 4, value: 6, label: "Correcte" },
+  { stars: 5, value: 8, label: "Notable" },
+  { stars: 6, value: 10, label: "Magistral" },
+];
+
+const RATING_VALUE_BY_STARS = Object.fromEntries(
+  RATING_SCALE.map((rating) => [rating.stars, rating.value]),
+);
+
+const VESALAPORRA_ADMIN_USER_IDS = String(
+  import.meta.env.VITE_VESALAPORRA_ADMIN_USER_IDS ||
+    import.meta.env.VITE_VESALAPORRA_ADMIN_USER_ID ||
+    "",
+)
+  .split(",")
+  .map((userId) => userId.trim())
+  .filter(Boolean);
+
+const DEFAULT_MATCH_ROLE_BY_PLAYER_ID = {
+  "joan-garcia": "T",
+  "jules-kounde": "T",
+  "pau-cubarsi": "T",
+  "ronald-araujo": "T",
+  "alejandro-balde": "T",
+  pedri: "T",
+  "frenkie-de-jong": "T",
+  "fermin-lopez": "T",
+  "lamine-yamal": "T",
+  raphinha: "T",
+  "anthony-gordon": "T",
+  gavi: "S",
+  "ferran-torres": "S",
+  "dani-olmo": "S",
+  "joao-cancelo": "S",
+  "karim-adeyemi": "S",
+};
+
+const DEFAULT_MATCH_GOALS_BY_PLAYER_ID = {
+  "lamine-yamal": 1,
+  raphinha: 1,
+};
+
+const DEFAULT_MATCH_ASSISTS_BY_PLAYER_ID = {
+  pedri: 1,
+  "fermin-lopez": 1,
+};
+
+const createInitialOfficialMatchStats = () =>
+  Object.fromEntries(
+    players.map((player) => [
+      player.id,
+      {
+        role: DEFAULT_MATCH_ROLE_BY_PLAYER_ID[player.id] || null,
+        goals: DEFAULT_MATCH_GOALS_BY_PLAYER_ID[player.id] || 0,
+        assists: DEFAULT_MATCH_ASSISTS_BY_PLAYER_ID[player.id] || 0,
+      },
+    ]),
+  );
+
+const SEASON_RATING_AVERAGE_BY_PLAYER_ID = {
+  "lamine-yamal": 8.9,
+  pedri: 8.7,
+  raphinha: 8.5,
+  "fermin-lopez": 8.2,
+  "pau-cubarsi": 8.1,
+  "joan-garcia": 7.9,
+  "frenkie-de-jong": 7.8,
+  "jules-kounde": 7.7,
+  "dani-olmo": 7.6,
+  "ferran-torres": 7.5,
+  "anthony-gordon": 7.4,
+  "karim-adeyemi": 7.3,
+  gavi: 7.2,
+  "alejandro-balde": 7.1,
+  "ronald-araujo": 7,
+  "joao-cancelo": 6.9,
+  "eric-garcia": 6.8,
+  "marc-bernal": 6.7,
+  "marc-casado": 6.6,
+  "gerard-martin": 6.5,
+  "andreas-christensen": 6.4,
+  "jofre-torrents": 6.3,
+  "wojciech-szczesny": 6.2,
+};
+
+const SEASON_PLAYER_STATS_BY_ID = Object.fromEntries(
+  players.map((player, index) => {
+    const starts = Math.max(0, 28 - Math.floor(index * 0.72));
+    const substituteAppearances = Math.max(0, 3 + ((index * 3) % 9));
+    const goals = Math.max(
+      0,
+      protagonistScoringByPlayerId[player.id]
+        ? Math.round(
+            protagonistScoringByPlayerId[player.id].goalContributions * 0.58,
+          )
+        : index % 7 === 0
+          ? 1
+          : 0,
+    );
+    const assists = Math.max(
+      0,
+      protagonistScoringByPlayerId[player.id]
+        ? Math.round(
+            protagonistScoringByPlayerId[player.id].goalContributions * 0.42,
+          )
+        : index % 9 === 0
+          ? 1
+          : 0,
+    );
+
+    return [
+      player.id,
+      {
+        starts,
+        substituteAppearances,
+        goals,
+        assists,
+      },
+    ];
+  }),
+);
+
+const MATCH_COMMUNITY_RATING_BY_PLAYER_ID = Object.fromEntries(
+  players.map((player, index) => {
+    const average = Math.max(
+      4.8,
+      Math.min(
+        9.4,
+        (SEASON_RATING_AVERAGE_BY_PLAYER_ID[player.id] || 6.5) +
+          (((index * 7) % 7) - 3) * 0.13,
+      ),
+    );
+    const voteCount = 84 + ((index * 37) % 119);
+
+    return [
+      player.id,
+      {
+        average,
+        voteCount,
+        totalValue: average * voteCount,
+      },
+    ];
+  }),
+);
+
+const SEASON_COMMUNITY_RATING_BY_PLAYER_ID = Object.fromEntries(
+  players.map((player, index) => {
+    const average = SEASON_RATING_AVERAGE_BY_PLAYER_ID[player.id] || 6;
+    const voteCount = 610 + ((index * 79) % 970);
+
+    return [
+      player.id,
+      {
+        average,
+        voteCount,
+        totalValue: average * voteCount,
+      },
+    ];
+  }),
+);
+
+const ADMIN_SCORING_TOOLS = [
+  {
+    id: "starter",
+    icon: "T",
+    label: "Titular",
+  },
+  {
+    id: "substitute",
+    icon: "S",
+    label: "Suplent que ha jugat",
+  },
+  {
+    id: "goal",
+    icon: "⚽",
+    label: "Gol",
+  },
+  {
+    id: "assist",
+    icon: "A",
+    label: "Assistència",
+  },
+];
+
+const getRatingValueFromStars = (stars) =>
+  RATING_VALUE_BY_STARS[Number(stars)] ?? null;
+
+const getStarsFromAverage = (average) => {
+  if (!Number.isFinite(average)) {
+    return 0;
+  }
+
+  return Math.max(1, Math.min(6, Math.round(average / 2) + 1));
+};
+
+const getCombinedRatingSummary = (communitySummary, selectedStars) => {
+  const safeCommunitySummary = communitySummary || {
+    average: 0,
+    voteCount: 0,
+    totalValue: 0,
+  };
+
+  const selectedValue = getRatingValueFromStars(selectedStars);
+
+  if (selectedValue === null) {
+    return safeCommunitySummary;
+  }
+
+  const voteCount = safeCommunitySummary.voteCount + 1;
+  const totalValue = safeCommunitySummary.totalValue + selectedValue;
+
+  return {
+    average: totalValue / voteCount,
+    voteCount,
+    totalValue,
+  };
+};
+
+const formatRatingAverage = (average) =>
+  Number(average || 0).toLocaleString("ca-ES", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+
+function PlayerNotesAvatar({ player, className = "" }) {
+  return (
+    <span className={`notes-player-avatar ${className}`.trim()}>
+      <img src={player.image} alt="" loading="lazy" decoding="async" />
+    </span>
+  );
+}
+
+function ProtagonistEventIcon({ type, count = null, className = "" }) {
+  const isGoal = type === "goal";
+  const eventLabel = isGoal ? "Gol" : "Assistència";
+
+  return (
+    <span
+      className={`protagonist-event-stat ${type} ${className}`.trim()}
+      aria-label={count === null ? eventLabel : `${eventLabel}: ${count}`}
+    >
+      <span
+        className={`protagonist-combined-icon ${isGoal ? "goal" : "assist"}`}
+        aria-hidden="true"
+      >
+        {isGoal ? "⚽" : "A"}
+      </span>
+
+      {count !== null && (
+        <strong className="protagonist-event-count">{count}</strong>
+      )}
+    </span>
+  );
+}
+
+function PlayerNotesStats({ stats, mode }) {
+  if (!stats) {
+    return null;
+  }
+
+  if (mode === "season") {
+    return (
+      <div
+        className="notes-player-stats season"
+        aria-label="Estadístiques de temporada"
+      >
+        <span className="notes-stat-chip starter">T {stats.starts}</span>
+        <span className="notes-stat-chip substitute">
+          S {stats.substituteAppearances}
+        </span>
+        <ProtagonistEventIcon type="goal" count={stats.goals} />
+        <ProtagonistEventIcon type="assist" count={stats.assists} />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="notes-player-stats match"
+      aria-label="Participació en el partit"
+    >
+      {stats.role && (
+        <span
+          className={`notes-stat-chip ${
+            stats.role === "T" ? "starter" : "substitute"
+          }`}
+        >
+          {stats.role}
+        </span>
+      )}
+
+      {Array.from({ length: stats.goals }, (_, index) => (
+        <ProtagonistEventIcon key={`goal-${index}`} type="goal" />
+      ))}
+
+      {Array.from({ length: stats.assists }, (_, index) => (
+        <ProtagonistEventIcon key={`assist-${index}`} type="assist" />
+      ))}
+    </div>
+  );
+}
+
+function RatingStars({ value, onRate, readOnly = false }) {
+  return (
+    <div
+      className={readOnly ? "notes-stars read-only" : "notes-stars"}
+      aria-label={`${value || 0} de 6 estrelles`}
+    >
+      {Array.from({ length: 6 }, (_, index) => {
+        const starNumber = index + 1;
+        const isActive = starNumber <= value;
+
+        if (readOnly) {
+          return (
+            <span
+              key={starNumber}
+              className={isActive ? "notes-star active" : "notes-star"}
+              aria-hidden="true"
+            >
+              ★
+            </span>
+          );
+        }
+
+        return (
+          <button
+            key={starNumber}
+            type="button"
+            className={isActive ? "notes-star active" : "notes-star"}
+            onClick={() => onRate(starNumber)}
+            aria-label={`Valora amb ${starNumber} estrelles`}
+            aria-pressed={value === starNumber}
+          >
+            ★
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -1162,7 +1521,33 @@ function App() {
 
   const [countdown, setCountdown] = useState(getCountdown);
 
+  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
+
+  const [predictionConfirmed, setPredictionConfirmed] = useState(false);
+
+  const [confirmedPrediction, setConfirmedPrediction] = useState(null);
+
+  const [confirmationAnimationActive, setConfirmationAnimationActive] =
+    useState(false);
+
+  const confirmationAnimationTimerRef = useRef(null);
+
+  const [notesTab, setNotesTab] = useState("match");
+
+  const [notesRatingsByPlayerId, setNotesRatingsByPlayerId] = useState({});
+
+  const [officialMatchStatsByPlayerId, setOfficialMatchStatsByPlayerId] =
+    useState(createInitialOfficialMatchStats);
+
+  const [selectedAdminTool, setSelectedAdminTool] = useState(null);
+
   const authUser = authSession?.user ?? null;
+
+  const isAdmin =
+    import.meta.env.DEV ||
+    Boolean(
+      authUser && VESALAPORRA_ADMIN_USER_IDS.includes(String(authUser.id)),
+    );
 
   const authMetadata = authUser?.user_metadata ?? {};
 
@@ -1239,22 +1624,13 @@ function App() {
 
   const protagonistIsComplete = Boolean(protagonist && protagonistScoring);
 
-  const predictionConfirmLabel = countdown.isClosed
-    ? "PORRA TANCADA"
-    : !scoreTouched
-      ? "PRONOSTICA EL RESULTAT"
-      : lineupIsComplete && protagonistIsComplete
-        ? "CONFIRMAR PORRA COMPLETA"
-        : lineupIsComplete
-          ? "CONFIRMAR RESULTAT + XI"
-          : protagonistIsComplete
-            ? "CONFIRMAR RESULTAT + PROTAGONISTA"
-            : "CONFIRMAR RESULTAT";
-
-  const confirmButtonLabel =
-    !countdown.isClosed && scoreTouched && !authLoading && !authUser
-      ? "ENTRA PER CONFIRMAR"
-      : predictionConfirmLabel;
+  const confirmButtonLabel = predictionConfirmed
+    ? "PRONÒSTIC CONFIRMAT"
+    : countdown.isClosed
+      ? "PORRA TANCADA"
+      : !authLoading && !authUser
+        ? "ENTRA PER CONFIRMAR"
+        : "CONFIRMA EL TEU PRONÒSTIC";
 
   const rankingUsers = rankingDemoUsers.map((user) => {
     if (!user.isCurrentUser || !authUser) {
@@ -1358,6 +1734,72 @@ function App() {
     authUser && selectedProfileUser?.isCurrentUser,
   );
 
+  const notesMatchRows = players
+    .filter((player) => {
+      const stats = officialMatchStatsByPlayerId[player.id];
+
+      return stats?.role === "T" || stats?.role === "S";
+    })
+    .map((player) => {
+      const ownStars = notesRatingsByPlayerId[player.id] || 0;
+      const ratingSummary = getCombinedRatingSummary(
+        MATCH_COMMUNITY_RATING_BY_PLAYER_ID[player.id],
+        ownStars,
+      );
+
+      return {
+        player,
+        stats: officialMatchStatsByPlayerId[player.id],
+        ownStars,
+        displayStars: ownStars,
+        average: ratingSummary.average,
+        voteCount: ratingSummary.voteCount,
+      };
+    });
+
+  const notesSeasonRows = players
+    .map((player) => {
+      const ratingSummary =
+        SEASON_COMMUNITY_RATING_BY_PLAYER_ID[player.id] || null;
+      const average = ratingSummary?.average || 0;
+
+      return {
+        player,
+        stats: SEASON_PLAYER_STATS_BY_ID[player.id],
+        ownStars: 0,
+        displayStars: getStarsFromAverage(average),
+        average,
+        voteCount: ratingSummary?.voteCount || 0,
+      };
+    })
+    .sort(
+      (firstRow, secondRow) =>
+        secondRow.average - firstRow.average ||
+        secondRow.voteCount - firstRow.voteCount ||
+        firstRow.player.name.localeCompare(secondRow.player.name, "ca"),
+    );
+
+  const visibleNotesRows =
+    notesTab === "match" ? notesMatchRows : notesSeasonRows;
+
+  const adminStarterCount = Object.values(officialMatchStatsByPlayerId).filter(
+    (stats) => stats.role === "T",
+  ).length;
+
+  const adminSubstituteCount = Object.values(
+    officialMatchStatsByPlayerId,
+  ).filter((stats) => stats.role === "S").length;
+
+  const adminGoalCount = Object.values(officialMatchStatsByPlayerId).reduce(
+    (total, stats) => total + stats.goals,
+    0,
+  );
+
+  const adminAssistCount = Object.values(officialMatchStatsByPlayerId).reduce(
+    (total, stats) => total + stats.assists,
+    0,
+  );
+
   const loadMoreRanking = () => {
     setVisibleRankingCount((currentCount) =>
       Math.min(currentCount + RANKING_PAGE_SIZE, rankingRows.length),
@@ -1384,6 +1826,101 @@ function App() {
     setOpenInfoSection((currentSectionId) =>
       currentSectionId === sectionId ? null : sectionId,
     );
+  };
+
+  const handleRatePlayer = (playerId, stars) => {
+    if (!authUser) {
+      handleXSignIn();
+      return;
+    }
+
+    setNotesRatingsByPlayerId((currentRatings) => ({
+      ...currentRatings,
+      [playerId]: stars,
+    }));
+  };
+
+  const applyAdminToolToPlayer = (playerId, toolId) => {
+    if (!isAdmin || !playersById[playerId]) {
+      return;
+    }
+
+    setOfficialMatchStatsByPlayerId((currentStatsByPlayerId) => {
+      const currentStats = currentStatsByPlayerId[playerId] || {
+        role: null,
+        goals: 0,
+        assists: 0,
+      };
+
+      const nextStats = { ...currentStats };
+
+      if (toolId === "starter") {
+        nextStats.role = "T";
+      }
+
+      if (toolId === "substitute") {
+        nextStats.role = "S";
+      }
+
+      if (toolId === "goal") {
+        nextStats.goals += 1;
+      }
+
+      if (toolId === "assist") {
+        nextStats.assists += 1;
+      }
+
+      return {
+        ...currentStatsByPlayerId,
+        [playerId]: nextStats,
+      };
+    });
+  };
+
+  const clearAdminPlayerRole = (playerId) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    setOfficialMatchStatsByPlayerId((currentStatsByPlayerId) => ({
+      ...currentStatsByPlayerId,
+      [playerId]: {
+        ...currentStatsByPlayerId[playerId],
+        role: null,
+      },
+    }));
+  };
+
+  const decrementAdminPlayerStat = (playerId, statKey) => {
+    if (!isAdmin || !["goals", "assists"].includes(statKey)) {
+      return;
+    }
+
+    setOfficialMatchStatsByPlayerId((currentStatsByPlayerId) => ({
+      ...currentStatsByPlayerId,
+      [playerId]: {
+        ...currentStatsByPlayerId[playerId],
+        [statKey]: Math.max(
+          0,
+          Number(currentStatsByPlayerId[playerId]?.[statKey] || 0) - 1,
+        ),
+      },
+    }));
+  };
+
+  const handleAdminToolDragStart = (event, toolId) => {
+    event.dataTransfer.setData("text/plain", toolId);
+    event.dataTransfer.effectAllowed = "copy";
+  };
+
+  const handleAdminPlayerDrop = (event, playerId) => {
+    event.preventDefault();
+
+    const toolId = event.dataTransfer.getData("text/plain");
+
+    if (ADMIN_SCORING_TOOLS.some((tool) => tool.id === toolId)) {
+      applyAdminToolToPlayer(playerId, toolId);
+    }
   };
 
   const handleOAuthSignIn = async (provider, { automatic = false } = {}) => {
@@ -1703,9 +2240,78 @@ function App() {
   };
 
   const handleConfirmPrediction = () => {
+    if (
+      predictionConfirmed ||
+      countdown.isClosed ||
+      !scoreTouched ||
+      authLoading ||
+      authActionLoading
+    ) {
+      return;
+    }
+
     if (!authUser) {
       handleXSignIn();
+      return;
     }
+
+    setConfirmationDialogOpen(true);
+  };
+
+  const handleCancelPredictionConfirmation = () => {
+    setConfirmationDialogOpen(false);
+  };
+
+  const handleFinalizePrediction = () => {
+    if (
+      !authUser ||
+      predictionConfirmed ||
+      countdown.isClosed ||
+      !scoreTouched
+    ) {
+      return;
+    }
+
+    const predictionSnapshot = {
+      matchId: matchData.id,
+      confirmedAt: new Date().toISOString(),
+      barcaScore,
+      rivalScore,
+      lineup: [...lineup],
+      protagonistId,
+    };
+
+    try {
+      window.localStorage.setItem(
+        getPredictionStorageKey(authUser.id),
+        JSON.stringify(predictionSnapshot),
+      );
+    } catch (error) {
+      console.warn(
+        "No s’ha pogut conservar el pronòstic al navegador:",
+        error,
+      );
+    }
+
+    setConfirmedPrediction(predictionSnapshot);
+    setPredictionConfirmed(true);
+    setConfirmationDialogOpen(false);
+    setSelectedSlotIndex(null);
+    setSelectedPlayerId(null);
+    setConfirmationAnimationActive(false);
+
+    window.requestAnimationFrame(() => {
+      setConfirmationAnimationActive(true);
+    });
+
+    if (confirmationAnimationTimerRef.current) {
+      window.clearTimeout(confirmationAnimationTimerRef.current);
+    }
+
+    confirmationAnimationTimerRef.current = window.setTimeout(() => {
+      setConfirmationAnimationActive(false);
+      confirmationAnimationTimerRef.current = null;
+    }, PREDICTION_CELEBRATION_MS);
   };
 
   useEffect(() => {
@@ -1945,6 +2551,80 @@ function App() {
   }, [authUser?.id]);
 
   useEffect(() => {
+    const resetPredictionDraft = () => {
+      setBarcaScore(0);
+      setRivalScore(0);
+      setScoreTouched(false);
+      setLineup(Array.from({ length: 11 }, () => null));
+      setProtagonistId(null);
+      setSelectedSlotIndex(null);
+      setSelectedPlayerId(null);
+      setPredictionConfirmed(false);
+      setConfirmedPrediction(null);
+      setConfirmationDialogOpen(false);
+      setConfirmationAnimationActive(false);
+    };
+
+    if (!authUser) {
+      resetPredictionDraft();
+      return;
+    }
+
+    const storageKey = getPredictionStorageKey(authUser.id);
+
+    try {
+      const storedPrediction = window.localStorage.getItem(storageKey);
+
+      if (!storedPrediction) {
+        resetPredictionDraft();
+        return;
+      }
+
+      const parsedPrediction = JSON.parse(storedPrediction);
+
+      if (
+        parsedPrediction?.matchId !== matchData.id ||
+        !Number.isFinite(parsedPrediction?.barcaScore) ||
+        !Number.isFinite(parsedPrediction?.rivalScore) ||
+        !Array.isArray(parsedPrediction?.lineup)
+      ) {
+        window.localStorage.removeItem(storageKey);
+        resetPredictionDraft();
+        return;
+      }
+
+      const restoredLineup = Array.from(
+        { length: 11 },
+        (_, index) => parsedPrediction.lineup[index] || null,
+      );
+
+      setBarcaScore(parsedPrediction.barcaScore);
+      setRivalScore(parsedPrediction.rivalScore);
+      setScoreTouched(true);
+      setLineup(restoredLineup);
+      setProtagonistId(parsedPrediction.protagonistId || null);
+      setConfirmedPrediction({
+        ...parsedPrediction,
+        lineup: restoredLineup,
+      });
+      setPredictionConfirmed(true);
+    } catch (error) {
+      console.warn("No s’ha pogut restaurar el pronòstic confirmat:", error);
+      window.localStorage.removeItem(storageKey);
+      resetPredictionDraft();
+    }
+  }, [authUser?.id]);
+
+  useEffect(
+    () => () => {
+      if (confirmationAnimationTimerRef.current) {
+        window.clearTimeout(confirmationAnimationTimerRef.current);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
     const countdownInterval = window.setInterval(() => {
       setCountdown(getCountdown());
     }, 1000);
@@ -1993,8 +2673,14 @@ function App() {
     }
   }, [protagonistId]);
 
+  useEffect(() => {
+    if (activePage === "scoring" && !isAdmin) {
+      setActivePage("play");
+    }
+  }, [activePage, isAdmin]);
+
   const placePlayerInSlot = (playerId, targetSlotIndex) => {
-    if (!playersById[playerId]) {
+    if (predictionConfirmed || !playersById[playerId]) {
       return;
     }
 
@@ -2023,7 +2709,7 @@ function App() {
   };
 
   const removePlayerFromLineup = (playerId) => {
-    if (!playersById[playerId]) {
+    if (predictionConfirmed || !playersById[playerId]) {
       return;
     }
 
@@ -2038,6 +2724,10 @@ function App() {
   };
 
   const handleSlotClick = (slotIndex) => {
+    if (predictionConfirmed) {
+      return;
+    }
+
     const fieldPlayerId = lineup[slotIndex];
 
     if (selectedPlayerId) {
@@ -2065,6 +2755,10 @@ function App() {
   };
 
   const handlePlayerClick = (playerId) => {
+    if (predictionConfirmed) {
+      return;
+    }
+
     const isInLineup = lineup.includes(playerId);
 
     if (isInLineup && selectedPlayerId === playerId) {
@@ -2087,6 +2781,10 @@ function App() {
   const handlePlayerBadgeDrop = (event, targetPlayerId) => {
     event.preventDefault();
 
+    if (predictionConfirmed) {
+      return;
+    }
+
     const draggedPlayerId = event.dataTransfer.getData("text/plain");
 
     if (
@@ -2098,6 +2796,11 @@ function App() {
   };
 
   const handleDragStart = (event, playerId) => {
+    if (predictionConfirmed) {
+      event.preventDefault();
+      return;
+    }
+
     event.dataTransfer.setData("text/plain", playerId);
 
     event.dataTransfer.effectAllowed = "move";
@@ -2105,6 +2808,10 @@ function App() {
 
   const handleDrop = (event, targetSlotIndex) => {
     event.preventDefault();
+
+    if (predictionConfirmed) {
+      return;
+    }
 
     const playerId = event.dataTransfer.getData("text/plain");
 
@@ -2137,7 +2844,17 @@ function App() {
               }
               onClick={() => setActivePage("play")}
             >
-              JUGA
+              LA PORRA
+            </button>
+
+            <button
+              type="button"
+              className={
+                activePage === "notes" ? "nav-button active" : "nav-button"
+              }
+              onClick={() => setActivePage("notes")}
+            >
+              LES NOTES
             </button>
 
             <button
@@ -2163,6 +2880,22 @@ function App() {
             >
               PERFIL
             </button>
+
+            {isAdmin && (
+              <button
+                type="button"
+                className={
+                  activePage === "scoring"
+                    ? "nav-button admin active"
+                    : "nav-button admin"
+                }
+                onClick={() => setActivePage("scoring")}
+                title="Puntuacions oficials"
+              >
+                <span className="admin-nav-full">PUNTUACIONS</span>
+                <span className="admin-nav-short">PTS</span>
+              </button>
+            )}
           </nav>
 
           <div className="auth-area">
@@ -2254,7 +2987,13 @@ function App() {
 
       <main className="app-main">
         {activePage === "play" && (
-          <section className="play-page">
+          <section
+            className={
+              predictionConfirmed
+                ? "play-page prediction-locked"
+                : "play-page"
+            }
+          >
             <section className="prediction-card score-card">
               <div className="section-heading score-heading">
                 <div>
@@ -2406,7 +3145,12 @@ function App() {
                   <div className="score-control">
                     <button
                       type="button"
+                      disabled={predictionConfirmed}
                       onClick={() => {
+                        if (predictionConfirmed) {
+                          return;
+                        }
+
                         setScoreTouched(true);
                         setBarcaScore((score) => Math.max(0, score - 1));
                       }}
@@ -2418,7 +3162,12 @@ function App() {
                     <button
                       type="button"
                       className="score-value"
-                      onClick={() => setScoreTouched(true)}
+                      disabled={predictionConfirmed}
+                      onClick={() => {
+                        if (!predictionConfirmed) {
+                          setScoreTouched(true);
+                        }
+                      }}
                       aria-label={`Confirmar ${barcaScore} gols del Barça`}
                     >
                       {barcaScore}
@@ -2426,7 +3175,12 @@ function App() {
 
                     <button
                       type="button"
+                      disabled={predictionConfirmed}
                       onClick={() => {
+                        if (predictionConfirmed) {
+                          return;
+                        }
+
                         setScoreTouched(true);
                         setBarcaScore((score) => score + 1);
                       }}
@@ -2443,7 +3197,12 @@ function App() {
                   <div className="score-control">
                     <button
                       type="button"
+                      disabled={predictionConfirmed}
                       onClick={() => {
+                        if (predictionConfirmed) {
+                          return;
+                        }
+
                         setScoreTouched(true);
                         setRivalScore((score) => Math.max(0, score - 1));
                       }}
@@ -2455,7 +3214,12 @@ function App() {
                     <button
                       type="button"
                       className="score-value"
-                      onClick={() => setScoreTouched(true)}
+                      disabled={predictionConfirmed}
+                      onClick={() => {
+                        if (!predictionConfirmed) {
+                          setScoreTouched(true);
+                        }
+                      }}
                       aria-label={`Confirmar ${rivalScore} gols de l'Al-Ahly`}
                     >
                       {rivalScore}
@@ -2463,7 +3227,12 @@ function App() {
 
                     <button
                       type="button"
+                      disabled={predictionConfirmed}
                       onClick={() => {
+                        if (predictionConfirmed) {
+                          return;
+                        }
+
                         setScoreTouched(true);
                         setRivalScore((score) => score + 1);
                       }}
@@ -2665,7 +3434,8 @@ function App() {
                             key={slotIndex}
                             type="button"
                             className={fieldSlotClassName}
-                            draggable={Boolean(player)}
+                            disabled={predictionConfirmed}
+                            draggable={!predictionConfirmed && Boolean(player)}
                             onDragStart={(event) => {
                               if (player) {
                                 handleDragStart(event, player.id);
@@ -2739,7 +3509,8 @@ function App() {
                         key={player.id}
                         type="button"
                         className={playerBadgeClassName}
-                        draggable
+                        disabled={predictionConfirmed}
+                        draggable={!predictionConfirmed}
                         onDragStart={(event) =>
                           handleDragStart(event, player.id)
                         }
@@ -2891,6 +3662,7 @@ function App() {
 
                 <select
                   value={protagonistId ?? ""}
+                  disabled={predictionConfirmed}
                   onChange={(event) =>
                     setProtagonistId(event.target.value || null)
                   }
@@ -2984,7 +3756,15 @@ function App() {
               </div>
             </section>
 
-            <section className="confirm-section">
+            <section
+              className={[
+                "confirm-section",
+                confirmationDialogOpen ? "confirming" : "",
+                predictionConfirmed ? "confirmed" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
               <div className="prediction-summary">
                 <span>
                   {scoreTouched
@@ -3065,12 +3845,396 @@ function App() {
                   !scoreTouched ||
                   countdown.isClosed ||
                   authLoading ||
-                  authActionLoading
+                  authActionLoading ||
+                  predictionConfirmed
                 }
                 onClick={handleConfirmPrediction}
               >
                 {confirmButtonLabel}
               </button>
+            </section>
+          </section>
+        )}
+
+        {activePage === "notes" && (
+          <section className="notes-page">
+            <header className="notes-hero">
+              <div className="notes-hero-copy">
+                <span className="notes-kicker">LA VEU DE LA CULERADA</span>
+
+                <div className="notes-title-row">
+                  <h1>LES NOTES</h1>
+
+                  <button
+                    type="button"
+                    className="section-info-button notes-info-button"
+                    onClick={() => toggleInfoSection("notes")}
+                    aria-label="Informació sobre Les Notes"
+                    aria-expanded={openInfoSection === "notes"}
+                    title="Com funcionen les valoracions?"
+                  >
+                    i
+                  </button>
+                </div>
+
+                <p>
+                  Valora els jugadors de l’últim partit i consulta la nota
+                  acumulada de tota la temporada.
+                </p>
+              </div>
+
+              <div className="notes-match-chip">
+                <span>{NOTES_MATCH_DATA.eyebrow}</span>
+                <strong>{NOTES_MATCH_DATA.title}</strong>
+                <small>{NOTES_MATCH_DATA.dateLabel}</small>
+              </div>
+            </header>
+
+            <div
+              className="notes-tabs"
+              role="tablist"
+              aria-label="Tipus de notes"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={notesTab === "match"}
+                className={
+                  notesTab === "match" ? "notes-tab active" : "notes-tab"
+                }
+                onClick={() => setNotesTab("match")}
+              >
+                LES NOTES DEL PARTIT
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={notesTab === "season"}
+                className={
+                  notesTab === "season" ? "notes-tab active" : "notes-tab"
+                }
+                onClick={() => setNotesTab("season")}
+              >
+                LES NOTES DE LA TEMPORADA
+              </button>
+            </div>
+
+            {openInfoSection === "notes" && (
+              <section className="notes-information-panel" role="note">
+                <div>
+                  <span>COM FUNCIONEN LES NOTES</span>
+                  <strong>Una valoració per jugador i partit</strong>
+                </div>
+
+                <p>
+                  Només es poden valorar els jugadors marcats oficialment com
+                  a titulars o suplents que han jugat. Pots canviar la teva
+                  valoració mentre el partit continuï obert per votar.
+                </p>
+
+                <div className="notes-scale-grid">
+                  {RATING_SCALE.map((rating) => (
+                    <div key={rating.stars} className="notes-scale-item">
+                      <span>{"★".repeat(rating.stars)}</span>
+                      <strong>{rating.label}</strong>
+                      <small>{rating.value} punts</small>
+                    </div>
+                  ))}
+                </div>
+
+                <p>
+                  La nota del partit és la mitjana de totes les valoracions. La
+                  nota de temporada acumula totes les jornades i ordena els
+                  jugadors de millor a pitjor mitjana.
+                </p>
+              </section>
+            )}
+
+            <section className="notes-board">
+              <header className="notes-board-heading">
+                <div>
+                  <span>
+                    {notesTab === "match"
+                      ? "VALORA L’ÚLTIM PARTIT"
+                      : "CLASSIFICACIÓ DE LA TEMPORADA"}
+                  </span>
+
+                  <strong>
+                    {notesTab === "match"
+                      ? `${visibleNotesRows.length} jugadors puntuables`
+                      : `${visibleNotesRows.length} jugadors ordenats per nota`}
+                  </strong>
+                </div>
+
+                <small>MITJANA SOBRE 10</small>
+              </header>
+
+              <div className="notes-player-list">
+                {visibleNotesRows.map((row, index) => (
+                  <article
+                    key={`${notesTab}-${row.player.id}`}
+                    className={
+                      notesTab === "season"
+                        ? "notes-player-row season-row"
+                        : "notes-player-row"
+                    }
+                  >
+                    {notesTab === "season" && (
+                      <span className="notes-season-position">
+                        {index + 1}
+                      </span>
+                    )}
+
+                    <div className="notes-player-identity">
+                      <PlayerNotesAvatar player={row.player} />
+
+                      <div className="notes-player-copy">
+                        <strong>{row.player.name}</strong>
+
+                        <PlayerNotesStats
+                          stats={row.stats}
+                          mode={notesTab}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="notes-rating-area">
+                      <RatingStars
+                        value={row.displayStars}
+                        readOnly={notesTab === "season"}
+                        onRate={(stars) =>
+                          handleRatePlayer(row.player.id, stars)
+                        }
+                      />
+
+                      <div className="notes-average">
+                        <strong>{formatRatingAverage(row.average)}</strong>
+                        <span>MITJANA</span>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          </section>
+        )}
+
+        {activePage === "scoring" && isAdmin && (
+          <section className="admin-scoring-page">
+            <header className="admin-scoring-hero">
+              <div>
+                <span className="admin-scoring-kicker">ÀREA PRIVADA</span>
+                <h1>PUNTUACIONS</h1>
+                <p>
+                  Assigna la participació, els gols i les assistències. Aquesta
+                  realitat oficial alimenta Les Notes del partit.
+                </p>
+              </div>
+
+              <div className="admin-match-summary">
+                <span>{NOTES_MATCH_DATA.eyebrow}</span>
+                <strong>{NOTES_MATCH_DATA.title}</strong>
+                <small>{NOTES_MATCH_DATA.dateLabel}</small>
+              </div>
+            </header>
+
+            <section className="admin-tools-card">
+              <header>
+                <div>
+                  <span>EINES OFICIALS</span>
+                  <strong>Arrossega una icona sobre cada jugador</strong>
+                </div>
+
+                <small>
+                  També pots seleccionar una eina i aplicar-la des de la
+                  targeta del jugador.
+                </small>
+              </header>
+
+              <div className="admin-tool-tray">
+                {ADMIN_SCORING_TOOLS.map((tool) => (
+                  <button
+                    key={tool.id}
+                    type="button"
+                    draggable
+                    className={
+                      selectedAdminTool === tool.id
+                        ? `admin-tool ${tool.id} selected`
+                        : `admin-tool ${tool.id}`
+                    }
+                    onDragStart={(event) =>
+                      handleAdminToolDragStart(event, tool.id)
+                    }
+                    onClick={() =>
+                      setSelectedAdminTool((currentTool) =>
+                        currentTool === tool.id ? null : tool.id,
+                      )
+                    }
+                    aria-pressed={selectedAdminTool === tool.id}
+                  >
+                    {tool.id === "goal" || tool.id === "assist" ? (
+                      <ProtagonistEventIcon type={tool.id} />
+                    ) : (
+                      <span>{tool.icon}</span>
+                    )}
+                    <strong>{tool.label}</strong>
+                  </button>
+                ))}
+              </div>
+
+              <div className="admin-live-summary">
+                <span>TITULARS <strong>{adminStarterCount}</strong></span>
+                <span>SUPLENTS <strong>{adminSubstituteCount}</strong></span>
+                <span>GOLS <strong>{adminGoalCount}</strong></span>
+                <span>ASSISTÈNCIES <strong>{adminAssistCount}</strong></span>
+              </div>
+            </section>
+
+            <section className="admin-player-board">
+              <header>
+                <div>
+                  <span>PLANTILLA DEL BARÇA</span>
+                  <strong>Font oficial del partit</strong>
+                </div>
+
+                <small>T i S són excloents</small>
+              </header>
+
+              <div className="admin-player-grid">
+                {players.map((player) => {
+                  const stats = officialMatchStatsByPlayerId[player.id] || {
+                    role: null,
+                    goals: 0,
+                    assists: 0,
+                  };
+
+                  const selectedToolLabel = ADMIN_SCORING_TOOLS.find(
+                    (tool) => tool.id === selectedAdminTool,
+                  )?.label;
+
+                  return (
+                    <article key={player.id} className="admin-player-card">
+                      <div className="admin-player-identity">
+                        <PlayerNotesAvatar
+                          player={player}
+                          className="admin"
+                        />
+
+                        <div>
+                          <strong>{player.name}</strong>
+                          <small>
+                            {stats.role === "T"
+                              ? "TITULAR"
+                              : stats.role === "S"
+                                ? "SUPLENT AMB MINUTS"
+                                : "SENSE PARTICIPACIÓ MARCADA"}
+                          </small>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        className={
+                          selectedAdminTool
+                            ? "admin-player-drop-target armed"
+                            : "admin-player-drop-target"
+                        }
+                        onDragOver={(event) => event.preventDefault()}
+                        onDrop={(event) =>
+                          handleAdminPlayerDrop(event, player.id)
+                        }
+                        onClick={() => {
+                          if (selectedAdminTool) {
+                            applyAdminToolToPlayer(
+                              player.id,
+                              selectedAdminTool,
+                            );
+                          }
+                        }}
+                      >
+                        <span aria-hidden="true">＋</span>
+                        <small>
+                          {selectedToolLabel
+                            ? `APLICA ${selectedToolLabel.toUpperCase()}`
+                            : "ARROSSEGA AQUÍ"}
+                        </small>
+                      </button>
+
+                      <div className="admin-player-current-stats">
+                        <div className="admin-role-controls">
+                          <span
+                            className={
+                              stats.role === "T"
+                                ? "admin-current-chip starter active"
+                                : "admin-current-chip starter"
+                            }
+                          >
+                            T
+                          </span>
+
+                          <span
+                            className={
+                              stats.role === "S"
+                                ? "admin-current-chip substitute active"
+                                : "admin-current-chip substitute"
+                            }
+                          >
+                            S
+                          </span>
+
+                          {stats.role && (
+                            <button
+                              type="button"
+                              className="admin-clear-role"
+                              onClick={() => clearAdminPlayerRole(player.id)}
+                              aria-label={`Elimina la participació de ${player.name}`}
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="admin-count-control">
+                          <ProtagonistEventIcon
+                            type="goal"
+                            count={stats.goals}
+                            className="admin-event-stat"
+                          />
+                          <button
+                            type="button"
+                            disabled={stats.goals === 0}
+                            onClick={() =>
+                              decrementAdminPlayerStat(player.id, "goals")
+                            }
+                            aria-label={`Resta un gol a ${player.name}`}
+                          >
+                            −
+                          </button>
+                        </div>
+
+                        <div className="admin-count-control">
+                          <ProtagonistEventIcon
+                            type="assist"
+                            count={stats.assists}
+                            className="admin-event-stat"
+                          />
+                          <button
+                            type="button"
+                            disabled={stats.assists === 0}
+                            onClick={() =>
+                              decrementAdminPlayerStat(player.id, "assists")
+                            }
+                            aria-label={`Resta una assistència a ${player.name}`}
+                          >
+                            −
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
             </section>
           </section>
         )}
@@ -3886,6 +5050,89 @@ function App() {
             </section>
           )}
       </main>
+
+      {confirmationDialogOpen && !predictionConfirmed && (
+        <div className="prediction-confirm-dialog-backdrop">
+          <section
+            className="prediction-confirm-dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="prediction-confirm-dialog-title"
+            aria-describedby="prediction-confirm-dialog-description"
+          >
+            <span className="prediction-confirm-dialog-kicker">
+              CONFIRMACIÓ DEFINITIVA
+            </span>
+
+            <h2 id="prediction-confirm-dialog-title">N’ESTÀS SEGUR?</h2>
+
+            <p id="prediction-confirm-dialog-description">
+              Quan confirmis el pronòstic ja no el podràs modificar fins que
+              s’obri una jornada nova.
+            </p>
+
+            <div className="prediction-confirm-dialog-summary">
+              <span>RESULTAT {barcaScore}-{rivalScore}</span>
+              <span>XI {lineupCount}/11</span>
+              <span>
+                {protagonistIsComplete
+                  ? `PROTAGONISTA ${protagonist.shortName.toUpperCase()}`
+                  : "SENSE PROTAGONISTA"}
+              </span>
+            </div>
+
+            <div className="prediction-confirm-dialog-actions">
+              <button
+                type="button"
+                className="prediction-confirm-yes"
+                onClick={handleFinalizePrediction}
+              >
+                SÍ, CONFIRMA’L
+              </button>
+
+              <button
+                type="button"
+                className="prediction-confirm-no"
+                onClick={handleCancelPredictionConfirmation}
+              >
+                NO, TORNA ENRERE
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {confirmationAnimationActive && confirmedPrediction && (
+        <div className="prediction-celebration-overlay" aria-hidden="true">
+          <section className="prediction-celebration-card">
+            <span className="prediction-celebration-kicker">
+              PRONÒSTIC ENREGISTRAT
+            </span>
+
+            <strong>VISCA EL BARÇA!</strong>
+
+            <div className="prediction-celebration-summary">
+              <span>
+                RESULTAT {confirmedPrediction.barcaScore}-
+                {confirmedPrediction.rivalScore}
+              </span>
+
+              <span>
+                XI {confirmedPrediction.lineup.filter(Boolean).length}/11
+              </span>
+
+              <span>
+                {confirmedPrediction.protagonistId &&
+                playersById[confirmedPrediction.protagonistId]
+                  ? `PROTAGONISTA ${playersById[
+                      confirmedPrediction.protagonistId
+                    ].shortName.toUpperCase()}`
+                  : "SENSE PROTAGONISTA"}
+              </span>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
