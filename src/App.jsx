@@ -911,7 +911,7 @@ const getDemoResultPoints = (
   return points;
 };
 
-const buildProfileDemoData = (user, generalPosition) => {
+const buildProfileDemoData = (user, generalPosition, jornadaPosition) => {
   const seed = getProfileSeed(user);
 
   const history = profileDemoMatches.map((match, index) => {
@@ -984,6 +984,8 @@ const buildProfileDemoData = (user, generalPosition) => {
 
   const longestStreak = 2 + (seed % 5);
 
+  const jornadaWins = jornadaPosition === 1 ? 1 : 0;
+
   const identityAchievement = user?.hasXIdentity
     ? {
         id: "x-identity",
@@ -1047,13 +1049,13 @@ const buildProfileDemoData = (user, generalPosition) => {
           ? "DESBLOQUEJAT"
           : `${bestProtagonistPoints}/50`,
     },
-    {
-      id: "streak",
-      icon: "🔥",
-      title: "Ratxa culer",
-      description: "Suma quatre jornades positives seguides.",
-      unlocked: longestStreak >= 4,
-      progress: `${Math.min(longestStreak, 4)}/4`,
+     {
+      id: "jornada-winner",
+      icon: "🥇",
+      title: "Guanyador de jornada",
+      description: "Acaba primer a la classificació d’una jornada.",
+      unlocked: jornadaPosition === 1,
+      progress: jornadaPosition > 0 ? `#${jornadaPosition}` : "—",
     },
     {
       id: "top-ten",
@@ -1075,6 +1077,7 @@ const buildProfileDemoData = (user, generalPosition) => {
     bestXi,
     bestProtagonistPoints,
     longestStreak,
+    jornadaWins,
     achievements,
     unlockedAchievements: achievements.filter(
       (achievement) => achievement.unlocked,
@@ -1323,8 +1326,32 @@ function App() {
       (user) => user.id === selectedProfileUser?.id,
     ) + 1;
 
+  const jornadaRankingRows = [...rankingUsers].sort(
+    (firstUser, secondUser) => {
+      const firstPoints = firstUser.jornada;
+      const secondPoints = secondUser.jornada;
+
+      return (
+        secondPoints.totalPoints - firstPoints.totalPoints ||
+        secondPoints.resultPoints - firstPoints.resultPoints ||
+        secondPoints.xiPoints - firstPoints.xiPoints ||
+        secondPoints.protagonistPoints - firstPoints.protagonistPoints ||
+        firstUser.id.localeCompare(secondUser.id)
+      );
+    },
+  );
+
+  const selectedProfileJornadaPosition =
+    jornadaRankingRows.findIndex(
+      (user) => user.id === selectedProfileUser?.id,
+    ) + 1;
+
   const selectedProfileData = selectedProfileUser
-    ? buildProfileDemoData(selectedProfileUser, selectedProfilePosition)
+    ? buildProfileDemoData(
+        selectedProfileUser,
+        selectedProfilePosition,
+        selectedProfileJornadaPosition,
+      )
     : null;
 
   const isOwnAuthenticatedProfile = Boolean(
@@ -3648,15 +3675,15 @@ function App() {
                       </div>
                     </article>
 
-                    <article>
-                      <span className="profile-performance-icon">🔥</span>
+                                      <article>
+                      <span className="profile-performance-icon">🥇</span>
 
                       <div>
-                        <small>MILLOR RATXA</small>
+                        <small>JORNADES GUANYADES</small>
 
-                        <strong>{selectedProfileData.longestStreak}</strong>
+                        <strong>{selectedProfileData.jornadaWins}</strong>
 
-                        <span>jornades positives</span>
+                        <span>primers llocs de jornada</span>
                       </div>
                     </article>
                   </section>
