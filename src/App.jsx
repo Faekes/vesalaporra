@@ -322,14 +322,9 @@ const protagonistScoringByPlayerId = {
 
 const matchData = {
   homeName: "Barça",
-  homeShortName: "BARÇA",
-  homeCrest:
-    "https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_%28crest%29.svg",
+  homeLocation: "Barcelona",
   awayName: "Al-Ahly",
-  awayShortName: "AL-AHLY",
   awayCountry: "Egipte",
-  awayCrest:
-    "https://upload.wikimedia.org/wikipedia/ar/2/21/Al_Ahly_SC_logo_23.svg",
   kickoffLabel: "DIMECRES · 19 AGOST 2026 · 21:00",
   kickoffAt: "2026-08-19T21:00:00+02:00",
 };
@@ -2192,103 +2187,9 @@ function App() {
       <main className="app-main">
         {activePage === "play" && (
           <section className="play-page">
-            <header className="match-header">
-              <div className="match-main">
-                <span className="eyebrow">PROPER PARTIT</span>
-
-                <div className="match-clubs">
-                  <div className="match-club home">
-                    <img
-                      src={matchData.homeCrest}
-                      className="match-club-crest"
-                      alt={`Escut del ${matchData.homeName}`}
-                    />
-
-                    <div className="match-club-copy">
-                      <strong>{matchData.homeName}</strong>
-
-                      <span>Barcelona</span>
-                    </div>
-                  </div>
-
-                  <span className="match-versus">VS</span>
-
-                  <div className="match-club away">
-                    <img
-                      src={matchData.awayCrest}
-                      className="match-club-crest"
-                      alt={`Escut de ${matchData.awayName}`}
-                    />
-
-                    <div className="match-club-copy">
-                      <strong>{matchData.awayName}</strong>
-
-                      <span>{matchData.awayCountry}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="match-kickoff">
-                  <span className="match-kickoff-icon">◷</span>
-
-                  <strong>{matchData.kickoffLabel}</strong>
-
-                  <span>Hora de Barcelona</span>
-                </div>
-              </div>
-
-              <div
-                className={countdown.isClosed ? "deadline closed" : "deadline"}
-              >
-                <span className="deadline-title">
-                  {countdown.isClosed ? "ESTAT" : "TANCA EN"}
-                </span>
-
-                {countdown.isClosed ? (
-                  <strong className="deadline-closed">PORRA TANCADA</strong>
-                ) : (
-                  <div className="countdown-grid">
-                    <div className="countdown-unit">
-                      <strong>{String(countdown.days).padStart(2, "0")}</strong>
-
-                      <span>DIES</span>
-                    </div>
-
-                    <div className="countdown-unit">
-                      <strong>
-                        {String(countdown.hours).padStart(2, "0")}
-                      </strong>
-
-                      <span>HORES</span>
-                    </div>
-
-                    <div className="countdown-unit">
-                      <strong>
-                        {String(countdown.minutes).padStart(2, "0")}
-                      </strong>
-
-                      <span>MIN</span>
-                    </div>
-
-                    <div className="countdown-unit">
-                      <strong>
-                        {String(countdown.seconds).padStart(2, "0")}
-                      </strong>
-
-                      <span>SEG</span>
-                    </div>
-                  </div>
-                )}
-
-                <small>19 AGOST · 21:00</small>
-              </div>
-            </header>
-
             <section className="prediction-card score-card">
-              <div className="section-heading">
+              <div className="section-heading score-heading">
                 <div>
-                  <span className="step-number">01</span>
-
                   <h2>Pronostica el resultat</h2>
 
                   <button
@@ -2310,6 +2211,68 @@ function App() {
                 >
                   {scoreTouched ? "FET" : "PENDENT"}
                 </span>
+              </div>
+
+              <div className="score-match-overview">
+                <div className="score-match-date">
+                  <span>PROPER PARTIT</span>
+
+                  <strong>{matchData.kickoffLabel}</strong>
+
+                  <small>Hora de Barcelona</small>
+                </div>
+
+                <div
+                  className={
+                    countdown.isClosed
+                      ? "score-deadline closed"
+                      : "score-deadline"
+                  }
+                >
+                  <span className="score-deadline-title">
+                    {countdown.isClosed ? "ESTAT" : "TANCA EN"}
+                  </span>
+
+                  {countdown.isClosed ? (
+                    <strong className="score-deadline-closed">
+                      PORRA TANCADA
+                    </strong>
+                  ) : (
+                    <div className="score-countdown-grid">
+                      <div className="score-countdown-unit">
+                        <strong>
+                          {String(countdown.days).padStart(2, "0")}
+                        </strong>
+
+                        <span>DIES</span>
+                      </div>
+
+                      <div className="score-countdown-unit">
+                        <strong>
+                          {String(countdown.hours).padStart(2, "0")}
+                        </strong>
+
+                        <span>HORES</span>
+                      </div>
+
+                      <div className="score-countdown-unit">
+                        <strong>
+                          {String(countdown.minutes).padStart(2, "0")}
+                        </strong>
+
+                        <span>MIN</span>
+                      </div>
+
+                      <div className="score-countdown-unit">
+                        <strong>
+                          {String(countdown.seconds).padStart(2, "0")}
+                        </strong>
+
+                        <span>SEG</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {openInfoSection === "score" && (
@@ -2353,11 +2316,18 @@ function App() {
               )}
 
               <div className="scoreboard">
-                <div className="score-team">
+                <div className="score-team home">
                   <div className="score-team-label">
-                    <img src={matchData.homeCrest} alt="" />
+                    <span
+                      className="team-color-dot team-color-dot-barca"
+                      aria-hidden="true"
+                    ></span>
 
-                    <strong>{matchData.homeShortName}</strong>
+                    <span className="score-team-copy">
+                      <strong>{matchData.homeName}</strong>
+
+                      <small>{matchData.homeLocation}</small>
+                    </span>
                   </div>
 
                   <div className="score-control">
@@ -2367,6 +2337,7 @@ function App() {
                         setScoreTouched(true);
                         setBarcaScore((score) => Math.max(0, score - 1));
                       }}
+                      aria-label="Resta un gol al Barça"
                     >
                       −
                     </button>
@@ -2386,19 +2357,29 @@ function App() {
                         setScoreTouched(true);
                         setBarcaScore((score) => score + 1);
                       }}
+                      aria-label="Suma un gol al Barça"
                     >
                       +
                     </button>
                   </div>
                 </div>
 
-                <span className="score-separator">:</span>
+                <span className="score-separator" aria-hidden="true">
+                  :
+                </span>
 
-                <div className="score-team">
+                <div className="score-team away">
                   <div className="score-team-label">
-                    <img src={matchData.awayCrest} alt="" />
+                    <span
+                      className="team-color-dot team-color-dot-al-ahly"
+                      aria-hidden="true"
+                    ></span>
 
-                    <strong>{matchData.awayShortName}</strong>
+                    <span className="score-team-copy">
+                      <strong>{matchData.awayName}</strong>
+
+                      <small>{matchData.awayCountry}</small>
+                    </span>
                   </div>
 
                   <div className="score-control">
@@ -2408,6 +2389,7 @@ function App() {
                         setScoreTouched(true);
                         setRivalScore((score) => Math.max(0, score - 1));
                       }}
+                      aria-label="Resta un gol a l'Al-Ahly"
                     >
                       −
                     </button>
@@ -2427,6 +2409,7 @@ function App() {
                         setScoreTouched(true);
                         setRivalScore((score) => score + 1);
                       }}
+                      aria-label="Suma un gol a l'Al-Ahly"
                     >
                       +
                     </button>
@@ -2704,8 +2687,6 @@ function App() {
             <section className="prediction-card protagonist-card">
               <div className="section-heading">
                 <div>
-                  <span className="step-number">03</span>
-
                   <h2>Marca el protagonista</h2>
 
                   <button
