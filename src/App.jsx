@@ -163,7 +163,7 @@ const protagonistScoringByPlayerId = {
     groupKey: "a",
     goalContributions: 30,
     hitPoints: 10,
-    missPoints: -10,
+    missPoints: -5,
     order: 2,
   },
   raphinha: {
@@ -171,7 +171,7 @@ const protagonistScoringByPlayerId = {
     groupKey: "a",
     goalContributions: 26,
     hitPoints: 10,
-    missPoints: -10,
+    missPoints: -5,
     order: 3,
   },
   "ferran-torres": {
@@ -179,7 +179,7 @@ const protagonistScoringByPlayerId = {
     groupKey: "a",
     goalContributions: 23,
     hitPoints: 10,
-    missPoints: -10,
+    missPoints: -5,
     order: 4,
   },
   "anthony-gordon": {
@@ -187,7 +187,7 @@ const protagonistScoringByPlayerId = {
     groupKey: "a",
     goalContributions: 22,
     hitPoints: 10,
-    missPoints: -10,
+    missPoints: -5,
     order: 5,
   },
   "dani-olmo": {
