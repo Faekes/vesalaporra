@@ -1,363 +1,354 @@
-import { useEffect, useState } from 'react'
-import { supabase } from './lib/supabaseClient'
-import './App.css'
+import { useEffect, useRef, useState } from "react";
+import { supabase } from "./lib/supabaseClient";
+import "./App.css";
 
 const players = [
   {
-    id: 'karim-adeyemi',
-    name: 'Karim Adeyemi',
-    shortName: 'Adeyemi',
-    image: '/fcb/KARIM_ADEYEMI.png',
+    id: "karim-adeyemi",
+    name: "Karim Adeyemi",
+    shortName: "Adeyemi",
+    image: "/fcb/KARIM_ADEYEMI.png",
   },
   {
-    id: 'alejandro-balde',
-    name: 'Alejandro Balde',
-    shortName: 'Balde',
-    image: '/fcb/ALEJANDRO_BALDE.png',
+    id: "alejandro-balde",
+    name: "Alejandro Balde",
+    shortName: "Balde",
+    image: "/fcb/ALEJANDRO_BALDE.png",
   },
   {
-    id: 'andreas-christensen',
-    name: 'Andreas Christensen',
-    shortName: 'Christensen',
-    image: '/fcb/ANDREAS_CHRISTENSEN.png',
+    id: "andreas-christensen",
+    name: "Andreas Christensen",
+    shortName: "Christensen",
+    image: "/fcb/ANDREAS_CHRISTENSEN.png",
   },
   {
-    id: 'anthony-gordon',
-    name: 'Anthony Gordon',
-    shortName: 'Gordon',
-    image: '/fcb/ANTHONY_GORDON.png',
+    id: "anthony-gordon",
+    name: "Anthony Gordon",
+    shortName: "Gordon",
+    image: "/fcb/ANTHONY_GORDON.png",
   },
   {
-    id: 'dani-olmo',
-    name: 'Dani Olmo',
-    shortName: 'Dani Olmo',
-    image: '/fcb/DANI_OLMO.png',
+    id: "dani-olmo",
+    name: "Dani Olmo",
+    shortName: "Dani Olmo",
+    image: "/fcb/DANI_OLMO.png",
   },
   {
-    id: 'eric-garcia',
-    name: 'Eric Garcia',
-    shortName: 'Eric',
-    image: '/fcb/ERIC_GARCIA.png',
+    id: "eric-garcia",
+    name: "Eric Garcia",
+    shortName: "Eric",
+    image: "/fcb/ERIC_GARCIA.png",
   },
   {
-    id: 'fermin-lopez',
-    name: 'Fermín López',
-    shortName: 'Fermín',
-    image: '/fcb/FERMIN_LOPEZ.png',
+    id: "fermin-lopez",
+    name: "Fermín López",
+    shortName: "Fermín",
+    image: "/fcb/FERMIN_LOPEZ.png",
   },
   {
-    id: 'ferran-torres',
-    name: 'Ferran Torres',
-    shortName: 'Ferran',
-    image: '/fcb/FERRAN_TORRES.png',
+    id: "ferran-torres",
+    name: "Ferran Torres",
+    shortName: "Ferran",
+    image: "/fcb/FERRAN_TORRES.png",
   },
   {
-    id: 'frenkie-de-jong',
-    name: 'Frenkie de Jong',
-    shortName: 'De Jong',
-    image: '/fcb/FRENKIE_DE_JONG.png',
+    id: "frenkie-de-jong",
+    name: "Frenkie de Jong",
+    shortName: "De Jong",
+    image: "/fcb/FRENKIE_DE_JONG.png",
   },
   {
-    id: 'gavi',
-    name: 'Gavi',
-    shortName: 'Gavi',
-    image: '/fcb/GAVI.png',
+    id: "gavi",
+    name: "Gavi",
+    shortName: "Gavi",
+    image: "/fcb/GAVI.png",
   },
   {
-    id: 'gerard-martin',
-    name: 'Gerard Martín',
-    shortName: 'Gerard',
-    image: '/fcb/GERARD_MARTIN.png',
+    id: "gerard-martin",
+    name: "Gerard Martín",
+    shortName: "Gerard",
+    image: "/fcb/GERARD_MARTIN.png",
   },
   {
-    id: 'joan-garcia',
-    name: 'Joan García',
-    shortName: 'Joan García',
-    image: '/fcb/JOAN_GARCIA.png',
+    id: "joan-garcia",
+    name: "Joan García",
+    shortName: "Joan García",
+    image: "/fcb/JOAN_GARCIA.png",
     isGoalkeeper: true,
   },
   {
-    id: 'joao-cancelo',
-    name: 'João Cancelo',
-    shortName: 'Cancelo',
-    image: '/fcb/JOAO_CANCELO.png',
+    id: "joao-cancelo",
+    name: "João Cancelo",
+    shortName: "Cancelo",
+    image: "/fcb/JOAO_CANCELO.png",
   },
   {
-    id: 'jofre-torrents',
-    name: 'Jofre Torrents',
-    shortName: 'Jofre',
-    image: '/fcb/JOFRE_TORRENTS.png',
+    id: "jofre-torrents",
+    name: "Jofre Torrents",
+    shortName: "Jofre",
+    image: "/fcb/JOFRE_TORRENTS.png",
   },
   {
-    id: 'jules-kounde',
-    name: 'Jules Koundé',
-    shortName: 'Koundé',
-    image: '/fcb/JULES_KOUNDE.png',
+    id: "jules-kounde",
+    name: "Jules Koundé",
+    shortName: "Koundé",
+    image: "/fcb/JULES_KOUNDE.png",
   },
   {
-    id: 'lamine-yamal',
-    name: 'Lamine Yamal',
-    shortName: 'Lamine',
-    image: '/fcb/LAMINE_YAMAL.png',
+    id: "lamine-yamal",
+    name: "Lamine Yamal",
+    shortName: "Lamine",
+    image: "/fcb/LAMINE_YAMAL.png",
   },
   {
-    id: 'marc-bernal',
-    name: 'Marc Bernal',
-    shortName: 'Bernal',
-    image: '/fcb/MARC_BERNAL.png',
+    id: "marc-bernal",
+    name: "Marc Bernal",
+    shortName: "Bernal",
+    image: "/fcb/MARC_BERNAL.png",
   },
   {
-    id: 'marc-casado',
-    name: 'Marc Casadó',
-    shortName: 'Casadó',
-    image: '/fcb/MARC_CASADO.png',
+    id: "marc-casado",
+    name: "Marc Casadó",
+    shortName: "Casadó",
+    image: "/fcb/MARC_CASADO.png",
   },
   {
-    id: 'pau-cubarsi',
-    name: 'Pau Cubarsí',
-    shortName: 'Cubarsí',
-    image: '/fcb/PAU_CUBARSI.png',
+    id: "pau-cubarsi",
+    name: "Pau Cubarsí",
+    shortName: "Cubarsí",
+    image: "/fcb/PAU_CUBARSI.png",
   },
   {
-    id: 'pedri',
-    name: 'Pedri',
-    shortName: 'Pedri',
-    image: '/fcb/PEDRI.png',
+    id: "pedri",
+    name: "Pedri",
+    shortName: "Pedri",
+    image: "/fcb/PEDRI.png",
   },
   {
-    id: 'raphinha',
-    name: 'Raphinha',
-    shortName: 'Raphinha',
-    image: '/fcb/RAPHINHA.png',
+    id: "raphinha",
+    name: "Raphinha",
+    shortName: "Raphinha",
+    image: "/fcb/RAPHINHA.png",
   },
   {
-    id: 'ronald-araujo',
-    name: 'Ronald Araújo',
-    shortName: 'Araújo',
-    image: '/fcb/RONALD_ARAUJO.png',
+    id: "ronald-araujo",
+    name: "Ronald Araújo",
+    shortName: "Araújo",
+    image: "/fcb/RONALD_ARAUJO.png",
   },
   {
-    id: 'wojciech-szczesny',
-    name: 'Wojciech Szczęsny',
-    shortName: 'Szczęsny',
-    image: '/fcb/WOJCIECH_SZCZESNY.png',
+    id: "wojciech-szczesny",
+    name: "Wojciech Szczęsny",
+    shortName: "Szczęsny",
+    image: "/fcb/WOJCIECH_SZCZESNY.png",
     isGoalkeeper: true,
   },
-]
+];
 
 const playersById = Object.fromEntries(
   players.map((player) => [player.id, player]),
-)
+);
 
 const protagonistScoringByPlayerId = {
-  'lamine-yamal': {
-    groupLabel: 'YAMAL SPECIAL',
-    groupKey: 'special',
+  "lamine-yamal": {
+    groupLabel: "YAMAL SPECIAL",
+    groupKey: "special",
     goalContributions: 41,
     hitPoints: 5,
     missPoints: -15,
     order: 1,
   },
-  'fermin-lopez': {
-    groupLabel: 'GRUP A',
-    groupKey: 'a',
+  "fermin-lopez": {
+    groupLabel: "GRUP A",
+    groupKey: "a",
     goalContributions: 30,
     hitPoints: 10,
     missPoints: -10,
     order: 2,
   },
   raphinha: {
-    groupLabel: 'GRUP A',
-    groupKey: 'a',
+    groupLabel: "GRUP A",
+    groupKey: "a",
     goalContributions: 26,
     hitPoints: 10,
     missPoints: -10,
     order: 3,
   },
-  'ferran-torres': {
-    groupLabel: 'GRUP A',
-    groupKey: 'a',
+  "ferran-torres": {
+    groupLabel: "GRUP A",
+    groupKey: "a",
     goalContributions: 23,
     hitPoints: 10,
     missPoints: -10,
     order: 4,
   },
-  'anthony-gordon': {
-    groupLabel: 'GRUP A',
-    groupKey: 'a',
+  "anthony-gordon": {
+    groupLabel: "GRUP A",
+    groupKey: "a",
     goalContributions: 22,
     hitPoints: 10,
     missPoints: -10,
     order: 5,
   },
-  'dani-olmo': {
-    groupLabel: 'GRUP B',
-    groupKey: 'b',
+  "dani-olmo": {
+    groupLabel: "GRUP B",
+    groupKey: "b",
     goalContributions: 17,
     hitPoints: 20,
     missPoints: -10,
     order: 6,
   },
-  'karim-adeyemi': {
-    groupLabel: 'GRUP B',
-    groupKey: 'b',
+  "karim-adeyemi": {
+    groupLabel: "GRUP B",
+    groupKey: "b",
     goalContributions: 16,
     hitPoints: 20,
     missPoints: -10,
     order: 7,
   },
   pedri: {
-    groupLabel: 'GRUP B',
-    groupKey: 'b',
+    groupLabel: "GRUP B",
+    groupKey: "b",
     goalContributions: 13,
     hitPoints: 20,
     missPoints: -10,
     order: 8,
   },
-  'frenkie-de-jong': {
-    groupLabel: 'GRUP C',
-    groupKey: 'c',
+  "frenkie-de-jong": {
+    groupLabel: "GRUP C",
+    groupKey: "c",
     goalContributions: 9,
     hitPoints: 30,
     missPoints: -10,
     order: 9,
   },
-  'jules-kounde': {
-    groupLabel: 'GRUP C',
-    groupKey: 'c',
+  "jules-kounde": {
+    groupLabel: "GRUP C",
+    groupKey: "c",
     goalContributions: 7,
     hitPoints: 30,
     missPoints: -10,
     order: 10,
   },
-  'marc-bernal': {
-    groupLabel: 'GRUP C',
-    groupKey: 'c',
+  "marc-bernal": {
+    groupLabel: "GRUP C",
+    groupKey: "c",
     goalContributions: 6,
     hitPoints: 30,
     missPoints: -10,
     order: 11,
   },
-  'joao-cancelo': {
-    groupLabel: 'GRUP D',
-    groupKey: 'd',
+  "joao-cancelo": {
+    groupLabel: "GRUP D",
+    groupKey: "d",
     goalContributions: 4,
     hitPoints: 40,
     missPoints: -5,
     order: 12,
   },
-  'ronald-araujo': {
-    groupLabel: 'GRUP D',
-    groupKey: 'd',
+  "ronald-araujo": {
+    groupLabel: "GRUP D",
+    groupKey: "d",
     goalContributions: 4,
     hitPoints: 40,
     missPoints: -5,
     order: 13,
   },
-  'eric-garcia': {
-    groupLabel: 'GRUP D',
-    groupKey: 'd',
+  "eric-garcia": {
+    groupLabel: "GRUP D",
+    groupKey: "d",
     goalContributions: 3,
     hitPoints: 40,
     missPoints: -5,
     order: 14,
   },
-  'alejandro-balde': {
-    groupLabel: 'GRUP D',
-    groupKey: 'd',
+  "alejandro-balde": {
+    groupLabel: "GRUP D",
+    groupKey: "d",
     goalContributions: 3,
     hitPoints: 40,
     missPoints: -5,
     order: 15,
   },
   gavi: {
-    groupLabel: 'GRUP E',
-    groupKey: 'e',
+    groupLabel: "GRUP E",
+    groupKey: "e",
     goalContributions: 1,
     hitPoints: 50,
     missPoints: -5,
     order: 16,
   },
-  'gerard-martin': {
-    groupLabel: 'GRUP E',
-    groupKey: 'e',
+  "gerard-martin": {
+    groupLabel: "GRUP E",
+    groupKey: "e",
     goalContributions: 1,
     hitPoints: 50,
     missPoints: -5,
     order: 17,
   },
-  'marc-casado': {
-    groupLabel: 'GRUP E',
-    groupKey: 'e',
+  "marc-casado": {
+    groupLabel: "GRUP E",
+    groupKey: "e",
     goalContributions: 1,
     hitPoints: 50,
     missPoints: -5,
     order: 18,
   },
-  'pau-cubarsi': {
-    groupLabel: 'GRUP E',
-    groupKey: 'e',
+  "pau-cubarsi": {
+    groupLabel: "GRUP E",
+    groupKey: "e",
     goalContributions: 1,
     hitPoints: 50,
     missPoints: -5,
     order: 19,
   },
-  'andreas-christensen': {
-    groupLabel: 'GRUP E',
-    groupKey: 'e',
+  "andreas-christensen": {
+    groupLabel: "GRUP E",
+    groupKey: "e",
     goalContributions: 0,
     hitPoints: 50,
     missPoints: -5,
     order: 20,
   },
-  'jofre-torrents': {
-    groupLabel: 'GRUP E',
-    groupKey: 'e',
+  "jofre-torrents": {
+    groupLabel: "GRUP E",
+    groupKey: "e",
     goalContributions: 0,
     hitPoints: 50,
     missPoints: -5,
     order: 21,
   },
-}
+};
 
 const matchData = {
-  homeName: 'Barça',
-  homeShortName: 'BARÇA',
+  homeName: "Barça",
+  homeShortName: "BARÇA",
   homeCrest:
-    'https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_%28crest%29.svg',
-  awayName: 'Al-Ahly',
-  awayShortName: 'AL-AHLY',
-  awayCountry: 'Egipte',
+    "https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_%28crest%29.svg",
+  awayName: "Al-Ahly",
+  awayShortName: "AL-AHLY",
+  awayCountry: "Egipte",
   awayCrest:
-    'https://upload.wikimedia.org/wikipedia/ar/2/21/Al_Ahly_SC_logo_23.svg',
-  kickoffLabel: 'DIMECRES · 19 AGOST 2026 · 21:00',
-  kickoffAt: '2026-08-19T21:00:00+02:00',
-}
+    "https://upload.wikimedia.org/wikipedia/ar/2/21/Al_Ahly_SC_logo_23.svg",
+  kickoffLabel: "DIMECRES · 19 AGOST 2026 · 21:00",
+  kickoffAt: "2026-08-19T21:00:00+02:00",
+};
 
 const getCountdown = () => {
   const remainingMilliseconds = Math.max(
     0,
-    new Date(matchData.kickoffAt).getTime() -
-      Date.now(),
-  )
+    new Date(matchData.kickoffAt).getTime() - Date.now(),
+  );
 
-  const totalSeconds = Math.floor(
-    remainingMilliseconds / 1000,
-  )
+  const totalSeconds = Math.floor(remainingMilliseconds / 1000);
 
-  const days = Math.floor(
-    totalSeconds / 86400,
-  )
+  const days = Math.floor(totalSeconds / 86400);
 
-  const hours = Math.floor(
-    (totalSeconds % 86400) / 3600,
-  )
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
 
-  const minutes = Math.floor(
-    (totalSeconds % 3600) / 60,
-  )
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
 
-  const seconds = totalSeconds % 60
+  const seconds = totalSeconds % 60;
 
   return {
     days,
@@ -365,440 +356,454 @@ const getCountdown = () => {
     minutes,
     seconds,
     isClosed: remainingMilliseconds <= 0,
-  }
-}
+  };
+};
 
+const X_AUTO_LOGIN_STORAGE_KEY = "vesalaporra_x_auto_login_started_at";
 
-const X_AUTO_LOGIN_STORAGE_KEY =
-  'vesalaporra_x_auto_login_started_at'
+const X_AUTO_LOGIN_COOLDOWN_MS = 15000;
 
-const X_AUTO_LOGIN_COOLDOWN_MS = 15000
+const PROFILE_AVATAR_BUCKET = "vesalaporra-profile-avatars";
 
-const RANKING_PAGE_SIZE = 20
-const CURRENT_RANKING_USER_ID =
-  'twitter-demo-cris'
+const PROFILE_AVATAR_MAX_BYTES = 2 * 1024 * 1024;
+
+const PROFILE_NAME_MIN_LENGTH = 2;
+const PROFILE_NAME_MAX_LENGTH = 32;
+
+const RANKING_PAGE_SIZE = 20;
+const CURRENT_RANKING_USER_ID = "twitter-demo-cris";
 
 const rankingNamedProfiles = [
   {
-    displayName: 'Culer de Les Corts',
-    handle: 'culerdelescorts',
+    displayName: "Culer de Les Corts",
+    handle: "culerdelescorts",
   },
   {
-    displayName: 'La Remuntada',
-    handle: 'laremuntada_fcb',
+    displayName: "La Remuntada",
+    handle: "laremuntada_fcb",
   },
   {
-    displayName: 'Pedri Potter',
-    handle: 'pedripotter8',
+    displayName: "Pedri Potter",
+    handle: "pedripotter8",
   },
   {
-    displayName: 'Senyera Blaugrana',
-    handle: 'senyerafcb',
+    displayName: "Senyera Blaugrana",
+    handle: "senyerafcb",
   },
   {
-    displayName: 'Gol Nord 1899',
-    handle: 'golnord1899',
+    displayName: "Gol Nord 1899",
+    handle: "golnord1899",
   },
   {
-    displayName: 'Culereta',
-    handle: 'culereta_bcn',
+    displayName: "Culereta",
+    handle: "culereta_bcn",
   },
   {
-    displayName: 'Més que una porra',
-    handle: 'mesqueunaporra',
+    displayName: "Més que una porra",
+    handle: "mesqueunaporra",
   },
   {
-    displayName: 'La Masia Sempre',
-    handle: 'lamasiasempre',
+    displayName: "La Masia Sempre",
+    handle: "lamasiasempre",
   },
   {
-    displayName: 'Tiki Taka Culer',
-    handle: 'tikitakaculer',
+    displayName: "Tiki Taka Culer",
+    handle: "tikitakaculer",
   },
   {
-    displayName: 'Camp Nou Nights',
-    handle: 'campnounights',
+    displayName: "Camp Nou Nights",
+    handle: "campnounights",
   },
   {
-    displayName: 'Blaugrana 1902',
-    handle: 'blaugrana1902',
+    displayName: "Blaugrana 1902",
+    handle: "blaugrana1902",
   },
   {
-    displayName: 'Culer del Poble',
-    handle: 'culerdelpoble',
+    displayName: "Culer del Poble",
+    handle: "culerdelpoble",
   },
   {
-    displayName: 'Onze de Gala',
-    handle: 'onzegala',
+    displayName: "Onze de Gala",
+    handle: "onzegala",
   },
   {
-    displayName: 'Futbol i Seny',
-    handle: 'futboliseny',
+    displayName: "Futbol i Seny",
+    handle: "futboliseny",
   },
   {
-    displayName: 'Cris',
-    handle: 'cris',
+    displayName: "Cris",
+    handle: "cris",
     isCurrentUser: true,
   },
   {
-    displayName: 'La Pilota d’Or',
-    handle: 'pilotadorfcb',
+    displayName: "La Pilota d’Or",
+    handle: "pilotadorfcb",
   },
   {
-    displayName: 'Culer Empedreït',
-    handle: 'culersempre',
+    displayName: "Culer Empedreït",
+    handle: "culersempre",
   },
   {
-    displayName: 'ADN Barça',
-    handle: 'adnbarca',
+    displayName: "ADN Barça",
+    handle: "adnbarca",
   },
   {
-    displayName: 'Nit de Champions',
-    handle: 'nitchampions',
+    displayName: "Nit de Champions",
+    handle: "nitchampions",
   },
   {
-    displayName: 'La Sotana Culer',
-    handle: 'sotanaculer',
+    displayName: "La Sotana Culer",
+    handle: "sotanaculer",
   },
   {
-    displayName: 'Tribuna 1899',
-    handle: 'tribuna1899',
+    displayName: "Tribuna 1899",
+    handle: "tribuna1899",
   },
   {
-    displayName: 'Passió Blaugrana',
-    handle: 'passioblaugrana',
+    displayName: "Passió Blaugrana",
+    handle: "passioblaugrana",
   },
   {
-    displayName: 'Culer del Vallès',
-    handle: 'culervalles',
+    displayName: "Culer del Vallès",
+    handle: "culervalles",
   },
   {
-    displayName: 'Fins al Final',
-    handle: 'finsalfinalfcb',
+    displayName: "Fins al Final",
+    handle: "finsalfinalfcb",
   },
   {
-    displayName: 'Tercer Anell',
-    handle: 'terceranell',
+    displayName: "Tercer Anell",
+    handle: "terceranell",
   },
   {
-    displayName: 'La Culerada',
-    handle: 'laculerada',
+    displayName: "La Culerada",
+    handle: "laculerada",
   },
   {
-    displayName: 'Sempre Barça',
-    handle: 'semprebarca',
+    displayName: "Sempre Barça",
+    handle: "semprebarca",
   },
   {
-    displayName: 'El Nou Camp',
-    handle: 'elnoucamp',
+    displayName: "El Nou Camp",
+    handle: "elnoucamp",
   },
   {
-    displayName: 'Onze Culé',
-    handle: 'onzecule',
+    displayName: "Onze Culé",
+    handle: "onzecule",
   },
   {
-    displayName: 'Orgull Blaugrana',
-    handle: 'orgullblaugrana',
+    displayName: "Orgull Blaugrana",
+    handle: "orgullblaugrana",
   },
-]
+];
 
 const buildRankingDemoUsers = () => {
   const generatedProfiles = Array.from(
     {
-      length:
-        120 -
-        rankingNamedProfiles.length,
+      length: 120 - rankingNamedProfiles.length,
     },
     (_, generatedIndex) => {
-      const number =
-        generatedIndex +
-        rankingNamedProfiles.length +
-        1
+      const number = generatedIndex + rankingNamedProfiles.length + 1;
 
       return {
         displayName: `Culer Blaugrana ${number}`,
         handle: `culer_bcn_${number}`,
-      }
+      };
     },
-  )
+  );
 
-  return [
-    ...rankingNamedProfiles,
-    ...generatedProfiles,
-  ].map((profile, index) => {
-    const generalResultPoints =
-      330 -
-      index * 2 +
-      ((index * 7) % 15) -
-      (index % 12 === 0 ? 8 : 0)
+  return [...rankingNamedProfiles, ...generatedProfiles].map(
+    (profile, index) => {
+      const generalResultPoints =
+        330 - index * 2 + ((index * 7) % 15) - (index % 12 === 0 ? 8 : 0);
 
-    const generalXiPoints =
-      225 -
-      Math.floor(index * 1.45) +
-      ((index * 5) % 11) -
-      (index % 10 === 0 ? 6 : 0)
+      const generalXiPoints =
+        225 -
+        Math.floor(index * 1.45) +
+        ((index * 5) % 11) -
+        (index % 10 === 0 ? 6 : 0);
 
-    const generalProtagonistPoints =
-      145 -
-      Math.floor(index * 0.92) +
-      ((index * 3) % 9) -
-      (index % 8 === 0 ? 5 : 0)
+      const generalProtagonistPoints =
+        145 -
+        Math.floor(index * 0.92) +
+        ((index * 3) % 9) -
+        (index % 8 === 0 ? 5 : 0);
 
-    const jornadaResultPoints =
-      50 -
-      Math.floor(index * 0.28) +
-      ((index * 5) % 13) -
-      (index % 7 === 0 ? 10 : 0)
+      const jornadaResultPoints =
+        50 -
+        Math.floor(index * 0.28) +
+        ((index * 5) % 13) -
+        (index % 7 === 0 ? 10 : 0);
 
-    const jornadaXiPoints =
-      25 -
-      Math.floor(index * 0.17) +
-      ((index * 4) % 10) -
-      (index % 9 === 0 ? 8 : 0)
+      const jornadaXiPoints =
+        25 -
+        Math.floor(index * 0.17) +
+        ((index * 4) % 10) -
+        (index % 9 === 0 ? 8 : 0);
 
-    const jornadaProtagonistPoints =
-      20 -
-      Math.floor(index * 0.12) +
-      ((index * 3) % 8) -
-      (index % 6 === 0 ? 5 : 0)
+      const jornadaProtagonistPoints =
+        20 -
+        Math.floor(index * 0.12) +
+        ((index * 3) % 8) -
+        (index % 6 === 0 ? 5 : 0);
 
-    const id = profile.isCurrentUser
-      ? CURRENT_RANKING_USER_ID
-      : `twitter-demo-${index + 1}`
+      const id = profile.isCurrentUser
+        ? CURRENT_RANKING_USER_ID
+        : `twitter-demo-${index + 1}`;
 
-    return {
-      id,
-      twitterId: `x-${index + 100000}`,
-      displayName: profile.displayName,
-      handle: `@${profile.handle}`,
-      handleSlug: profile.handle,
-      twitterAvatarUrl:
-        `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(
+      return {
+        id,
+        twitterId: `x-${index + 100000}`,
+        displayName: profile.displayName,
+        handle: `@${profile.handle}`,
+        handleSlug: profile.handle,
+        twitterAvatarUrl: `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(
           profile.handle,
         )}`,
-      twitterUrl:
-        `https://x.com/${profile.handle}`,
-      isCurrentUser:
-        Boolean(profile.isCurrentUser),
-      general: {
-        resultPoints:
-          generalResultPoints,
-        xiPoints:
-          generalXiPoints,
-        protagonistPoints:
-          generalProtagonistPoints,
-        totalPoints:
-          generalResultPoints +
-          generalXiPoints +
-          generalProtagonistPoints,
-      },
-      jornada: {
-        resultPoints:
-          jornadaResultPoints,
-        xiPoints:
-          jornadaXiPoints,
-        protagonistPoints:
-          jornadaProtagonistPoints,
-        totalPoints:
-          jornadaResultPoints +
-          jornadaXiPoints +
-          jornadaProtagonistPoints,
-      },
-    }
-  })
-}
+        twitterUrl: `https://x.com/${profile.handle}`,
+        hasXIdentity: true,
+        identityProvider: "x",
+        identityLabel: "X",
+        joinedYear: 2026,
+        isCurrentUser: Boolean(profile.isCurrentUser),
+        general: {
+          resultPoints: generalResultPoints,
+          xiPoints: generalXiPoints,
+          protagonistPoints: generalProtagonistPoints,
+          totalPoints:
+            generalResultPoints + generalXiPoints + generalProtagonistPoints,
+        },
+        jornada: {
+          resultPoints: jornadaResultPoints,
+          xiPoints: jornadaXiPoints,
+          protagonistPoints: jornadaProtagonistPoints,
+          totalPoints:
+            jornadaResultPoints + jornadaXiPoints + jornadaProtagonistPoints,
+        },
+      };
+    },
+  );
+};
 
-const rankingDemoUsers =
-  buildRankingDemoUsers()
+const rankingDemoUsers = buildRankingDemoUsers();
 
 const getRankingInitials = (name) =>
-  String(name || 'VP')
+  String(name || "VP")
     .trim()
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
-    .map((word) =>
-      word.charAt(0).toUpperCase(),
-    )
-    .join('') || 'VP'
+    .map((word) => word.charAt(0).toUpperCase())
+    .join("") || "VP";
 
-function RankingAvatar({
-  user,
-  size = 'medium',
-}) {
-  const [avatarFailed, setAvatarFailed] =
-    useState(false)
+const getSafePublicDisplayName = (candidates, privateEmail) => {
+  const normalizedPrivateEmail = String(privateEmail || "")
+    .trim()
+    .toLowerCase();
+
+  const privateEmailLocalPart = normalizedPrivateEmail.split("@")[0] || "";
+
+  const safeCandidate = candidates.find((candidate) => {
+    const normalizedCandidate = String(candidate || "").trim();
+
+    if (!normalizedCandidate) {
+      return false;
+    }
+
+    const normalizedCandidateLower = normalizedCandidate.toLowerCase();
+
+    return (
+      !normalizedCandidate.includes("@") &&
+      normalizedCandidateLower !== normalizedPrivateEmail &&
+      normalizedCandidateLower !== privateEmailLocalPart
+    );
+  });
+
+  return String(safeCandidate || "Culer").trim();
+};
+
+function RankingAvatar({ user, size = "medium" }) {
+  const [avatarFailed, setAvatarFailed] = useState(false);
 
   useEffect(() => {
-    setAvatarFailed(false)
-  }, [user?.twitterAvatarUrl])
+    setAvatarFailed(false);
+  }, [user?.twitterAvatarUrl]);
 
   return (
     <span
       className={`ranking-avatar ranking-avatar-${size}`}
       aria-hidden="true"
     >
-      {!avatarFailed &&
-      user?.twitterAvatarUrl ? (
+      {!avatarFailed && user?.twitterAvatarUrl ? (
         <img
           src={user.twitterAvatarUrl}
           alt=""
           loading="lazy"
           decoding="async"
           referrerPolicy="no-referrer"
-          onError={() =>
-            setAvatarFailed(true)
-          }
+          onError={() => setAvatarFailed(true)}
         />
       ) : (
-        <span>
-          {getRankingInitials(
-            user?.displayName,
-          )}
-        </span>
+        <span>{getRankingInitials(user?.displayName)}</span>
       )}
     </span>
-  )
+  );
 }
 
 function AuthAvatar({ imageUrl, displayName }) {
-  const [avatarFailed, setAvatarFailed] =
-    useState(false)
+  const [avatarFailed, setAvatarFailed] = useState(false);
 
   useEffect(() => {
-    setAvatarFailed(false)
-  }, [imageUrl])
+    setAvatarFailed(false);
+  }, [imageUrl]);
 
   return (
-    <span
-      className="auth-avatar"
-      aria-hidden="true"
-    >
+    <span className="auth-avatar" aria-hidden="true">
       {!avatarFailed && imageUrl ? (
         <img
           src={imageUrl}
           alt=""
           referrerPolicy="no-referrer"
-          onError={() =>
-            setAvatarFailed(true)
-          }
+          onError={() => setAvatarFailed(true)}
         />
       ) : (
-        <span>
-          {getRankingInitials(displayName)}
-        </span>
+        <span>{getRankingInitials(displayName)}</span>
       )}
     </span>
-  )
+  );
 }
 
+function GoogleMark({ className = "" }) {
+  return (
+    <span className={className} aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+        <path
+          fill="#4285F4"
+          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09Z"
+        />
+        <path
+          fill="#34A853"
+          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23Z"
+        />
+        <path
+          fill="#FBBC05"
+          d="M5.84 14.1A6.6 6.6 0 0 1 5.49 12c0-.73.13-1.44.35-2.1V7.06H2.18A11 11 0 0 0 1 12c0 1.77.43 3.45 1.18 4.94l3.66-2.84Z"
+        />
+        <path
+          fill="#EA4335"
+          d="M12 5.37c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06L5.84 9.9C6.71 7.3 9.14 5.37 12 5.37Z"
+        />
+      </svg>
+    </span>
+  );
+}
 
 const profileDemoMatches = [
   {
-    id: 'j8',
-    label: 'J8',
-    dateLabel: '18 OCT',
-    opponent: 'Atlético',
-    opponentShort: 'ATM',
+    id: "j8",
+    label: "J8",
+    dateLabel: "18 OCT",
+    opponent: "Atlético",
+    opponentShort: "ATM",
     actualHome: 2,
     actualAway: 1,
     xiBase: 9,
-    protagonist: 'Raphinha',
+    protagonist: "Raphinha",
     protagonistHitPoints: 10,
     protagonistMissPoints: -10,
   },
   {
-    id: 'j7',
-    label: 'J7',
-    dateLabel: '04 OCT',
-    opponent: 'Sevilla',
-    opponentShort: 'SEV',
+    id: "j7",
+    label: "J7",
+    dateLabel: "04 OCT",
+    opponent: "Sevilla",
+    opponentShort: "SEV",
     actualHome: 3,
     actualAway: 0,
     xiBase: 10,
-    protagonist: 'Pedri',
+    protagonist: "Pedri",
     protagonistHitPoints: 20,
     protagonistMissPoints: -10,
   },
   {
-    id: 'j6',
-    label: 'J6',
-    dateLabel: '27 SET',
-    opponent: 'Villarreal',
-    opponentShort: 'VIL',
+    id: "j6",
+    label: "J6",
+    dateLabel: "27 SET",
+    opponent: "Villarreal",
+    opponentShort: "VIL",
     actualHome: 2,
     actualAway: 2,
     xiBase: 8,
-    protagonist: 'Fermín',
+    protagonist: "Fermín",
     protagonistHitPoints: 10,
     protagonistMissPoints: -10,
   },
   {
-    id: 'j5',
-    label: 'J5',
-    dateLabel: '20 SET',
-    opponent: 'València',
-    opponentShort: 'VAL',
+    id: "j5",
+    label: "J5",
+    dateLabel: "20 SET",
+    opponent: "València",
+    opponentShort: "VAL",
     actualHome: 4,
     actualAway: 1,
     xiBase: 11,
-    protagonist: 'Lamine',
+    protagonist: "Lamine",
     protagonistHitPoints: 5,
     protagonistMissPoints: -15,
   },
   {
-    id: 'j4',
-    label: 'J4',
-    dateLabel: '13 SET',
-    opponent: 'Betis',
-    opponentShort: 'BET',
+    id: "j4",
+    label: "J4",
+    dateLabel: "13 SET",
+    opponent: "Betis",
+    opponentShort: "BET",
     actualHome: 1,
     actualAway: 0,
     xiBase: 7,
-    protagonist: 'Cubarsí',
+    protagonist: "Cubarsí",
     protagonistHitPoints: 50,
     protagonistMissPoints: -5,
   },
   {
-    id: 'j3',
-    label: 'J3',
-    dateLabel: '30 AGO',
-    opponent: 'Athletic',
-    opponentShort: 'ATH',
+    id: "j3",
+    label: "J3",
+    dateLabel: "30 AGO",
+    opponent: "Athletic",
+    opponentShort: "ATH",
     actualHome: 3,
     actualAway: 2,
     xiBase: 9,
-    protagonist: 'Dani Olmo',
+    protagonist: "Dani Olmo",
     protagonistHitPoints: 20,
     protagonistMissPoints: -10,
   },
   {
-    id: 'j2',
-    label: 'J2',
-    dateLabel: '23 AGO',
-    opponent: 'Real Sociedad',
-    opponentShort: 'RSO',
+    id: "j2",
+    label: "J2",
+    dateLabel: "23 AGO",
+    opponent: "Real Sociedad",
+    opponentShort: "RSO",
     actualHome: 2,
     actualAway: 0,
     xiBase: 8,
-    protagonist: 'Gavi',
+    protagonist: "Gavi",
     protagonistHitPoints: 50,
     protagonistMissPoints: -5,
   },
   {
-    id: 'j1',
-    label: 'J1',
-    dateLabel: '16 AGO',
-    opponent: 'Mallorca',
-    opponentShort: 'MLL',
+    id: "j1",
+    label: "J1",
+    dateLabel: "16 AGO",
+    opponent: "Mallorca",
+    opponentShort: "MLL",
     actualHome: 3,
     actualAway: 1,
     xiBase: 10,
-    protagonist: 'Ferran',
+    protagonist: "Ferran",
     protagonistHitPoints: 10,
     protagonistMissPoints: -10,
   },
-]
+];
 
 const profileXiPointsByHits = {
   11: 50,
@@ -813,37 +818,24 @@ const profileXiPointsByHits = {
   2: -25,
   1: -30,
   0: 30,
-}
+};
 
 const getProfileSeed = (user) =>
-  String(
-    user?.twitterId ||
-      user?.handle ||
-      user?.id ||
-      'vesalaporra',
-  )
-    .split('')
-    .reduce(
-      (total, character) =>
-        total +
-        character.charCodeAt(0),
-      0,
-    )
+  String(user?.twitterId || user?.handle || user?.id || "vesalaporra")
+    .split("")
+    .reduce((total, character) => total + character.charCodeAt(0), 0);
 
-const getDemoResultSign = (
-  homeGoals,
-  awayGoals,
-) => {
+const getDemoResultSign = (homeGoals, awayGoals) => {
   if (homeGoals > awayGoals) {
-    return 'home'
+    return "home";
   }
 
   if (homeGoals < awayGoals) {
-    return 'away'
+    return "away";
   }
 
-  return 'draw'
-}
+  return "draw";
+};
 
 const getDemoResultPoints = (
   predictedHome,
@@ -851,257 +843,183 @@ const getDemoResultPoints = (
   actualHome,
   actualAway,
 ) => {
-  if (
-    predictedHome === actualHome &&
-    predictedAway === actualAway
-  ) {
-    return 50
+  if (predictedHome === actualHome && predictedAway === actualAway) {
+    return 50;
   }
 
-  let points = 0
+  let points = 0;
 
   if (
-    getDemoResultSign(
-      predictedHome,
-      predictedAway,
-    ) ===
-    getDemoResultSign(
-      actualHome,
-      actualAway,
-    )
+    getDemoResultSign(predictedHome, predictedAway) ===
+    getDemoResultSign(actualHome, actualAway)
   ) {
-    points += 10
+    points += 10;
   }
 
   if (predictedHome === actualHome) {
-    points += 15
+    points += 15;
   }
 
   if (predictedAway === actualAway) {
-    points += 10
+    points += 10;
   }
 
-  return points
-}
+  return points;
+};
 
-const buildProfileDemoData = (
-  user,
-  generalPosition,
-) => {
-  const seed = getProfileSeed(user)
+const buildProfileDemoData = (user, generalPosition) => {
+  const seed = getProfileSeed(user);
 
-  const history =
-    profileDemoMatches.map(
-      (match, index) => {
-        const homeVariation =
-          ((seed + index * 5) % 3) - 1
+  const history = profileDemoMatches.map((match, index) => {
+    const homeVariation = ((seed + index * 5) % 3) - 1;
 
-        const awayVariation =
-          ((seed + index * 7) % 3) - 1
+    const awayVariation = ((seed + index * 7) % 3) - 1;
 
-        const predictedHome =
-          Math.max(
-            0,
-            match.actualHome +
-              homeVariation,
-          )
+    const predictedHome = Math.max(0, match.actualHome + homeVariation);
 
-        const predictedAway =
-          Math.max(
-            0,
-            match.actualAway +
-              awayVariation,
-          )
+    const predictedAway = Math.max(0, match.actualAway + awayVariation);
 
-        const xiHits =
-          Math.max(
-            0,
-            Math.min(
-              11,
-              match.xiBase +
-                (((seed + index * 3) % 3) -
-                  1),
-            ),
-          )
+    const xiHits = Math.max(
+      0,
+      Math.min(11, match.xiBase + (((seed + index * 3) % 3) - 1)),
+    );
 
-        const protagonistHit =
-          (seed + index * 11) % 5 < 3
+    const protagonistHit = (seed + index * 11) % 5 < 3;
 
-        const resultPoints =
-          getDemoResultPoints(
-            predictedHome,
-            predictedAway,
-            match.actualHome,
-            match.actualAway,
-          )
+    const resultPoints = getDemoResultPoints(
+      predictedHome,
+      predictedAway,
+      match.actualHome,
+      match.actualAway,
+    );
 
-        const xiPoints =
-          profileXiPointsByHits[xiHits]
+    const xiPoints = profileXiPointsByHits[xiHits];
 
-        const protagonistPoints =
-          protagonistHit
-            ? match.protagonistHitPoints
-            : match.protagonistMissPoints
+    const protagonistPoints = protagonistHit
+      ? match.protagonistHitPoints
+      : match.protagonistMissPoints;
 
-        return {
-          ...match,
-          predictedHome,
-          predictedAway,
-          xiHits,
-          protagonistHit,
-          resultPoints,
-          xiPoints,
-          protagonistPoints,
-          totalPoints:
-            resultPoints +
-            xiPoints +
-            protagonistPoints,
-          isExact:
-            predictedHome ===
-              match.actualHome &&
-            predictedAway ===
-              match.actualAway,
-        }
-      },
-    )
+    return {
+      ...match,
+      predictedHome,
+      predictedAway,
+      xiHits,
+      protagonistHit,
+      resultPoints,
+      xiPoints,
+      protagonistPoints,
+      totalPoints: resultPoints + xiPoints + protagonistPoints,
+      isExact:
+        predictedHome === match.actualHome &&
+        predictedAway === match.actualAway,
+    };
+  });
 
-  const played =
-    18 + (seed % 11)
+  const played = 18 + (seed % 11);
 
   const exactScores =
-    history.filter(
-      (match) => match.isExact,
-    ).length +
-    (seed % 3)
+    history.filter((match) => match.isExact).length + (seed % 3);
 
-  const protagonistHits =
-    history.filter(
-      (match) =>
-        match.protagonistHit,
-    ).length
+  const protagonistHits = history.filter(
+    (match) => match.protagonistHit,
+  ).length;
 
   const averageXi =
-    history.reduce(
-      (total, match) =>
-        total + match.xiHits,
-      0,
-    ) / history.length
+    history.reduce((total, match) => total + match.xiHits, 0) / history.length;
 
   const bestMatch = [...history].sort(
     (firstMatch, secondMatch) =>
-      secondMatch.totalPoints -
-      firstMatch.totalPoints,
-  )[0]
+      secondMatch.totalPoints - firstMatch.totalPoints,
+  )[0];
 
-  const bestXi = Math.max(
-    ...history.map(
-      (match) => match.xiHits,
-    ),
-  )
+  const bestXi = Math.max(...history.map((match) => match.xiHits));
 
-  const bestProtagonistPoints =
-    Math.max(
-      ...history.map(
-        (match) =>
-          match.protagonistPoints,
-      ),
-    )
+  const bestProtagonistPoints = Math.max(
+    ...history.map((match) => match.protagonistPoints),
+  );
 
-  const longestStreak =
-    2 + (seed % 5)
+  const longestStreak = 2 + (seed % 5);
+
+  const identityAchievement = user?.hasXIdentity
+    ? {
+        id: "x-identity",
+        icon: "𝕏",
+        title: "Culer d’X",
+        description: "Identitat competitiva connectada a X.",
+        unlocked: true,
+        progress: "DESBLOQUEJAT",
+      }
+    : {
+        id: "verified-identity",
+        icon: "✓",
+        title: "Perfil verificat",
+        description: "Compte connectat i identificat a Vesalaporra.",
+        unlocked: true,
+        progress: "DESBLOQUEJAT",
+      };
 
   const achievements = [
+    identityAchievement,
     {
-      id: 'x-identity',
-      icon: '𝕏',
-      title: 'Culer d’X',
-      description:
-        'Identitat competitiva connectada a X.',
-      unlocked: true,
-      progress: 'DESBLOQUEJAT',
-    },
-    {
-      id: 'exact-score',
-      icon: '🎯',
-      title: 'Marcador clavat',
-      description:
-        'Encerta un resultat exacte.',
+      id: "exact-score",
+      icon: "🎯",
+      title: "Marcador clavat",
+      description: "Encerta un resultat exacte.",
       unlocked: exactScores >= 1,
-      progress: `${Math.min(
-        exactScores,
-        1,
-      )}/1`,
+      progress: `${Math.min(exactScores, 1)}/1`,
     },
     {
-      id: 'flick-reader',
-      icon: '🧠',
-      title: 'Llegeix Flick',
-      description:
-        'Encerta 10 titulars en una jornada.',
+      id: "flick-reader",
+      icon: "🧠",
+      title: "Llegeix Flick",
+      description: "Encerta 10 titulars en una jornada.",
       unlocked: bestXi >= 10,
       progress: `${bestXi}/10`,
     },
     {
-      id: 'perfect-xi',
-      icon: '👑',
-      title: 'Onze perfecte',
-      description:
-        'Clava els 11 titulars del Barça.',
+      id: "perfect-xi",
+      icon: "👑",
+      title: "Onze perfecte",
+      description: "Clava els 11 titulars del Barça.",
       unlocked: bestXi === 11,
       progress: `${bestXi}/11`,
     },
     {
-      id: 'protagonist',
-      icon: '⭐',
-      title: 'Protagonista',
-      description:
-        'Encerta tres marques o assistències.',
+      id: "protagonist",
+      icon: "⭐",
+      title: "Protagonista",
+      description: "Encerta tres marques o assistències.",
       unlocked: protagonistHits >= 3,
-      progress: `${Math.min(
-        protagonistHits,
-        3,
-      )}/3`,
+      progress: `${Math.min(protagonistHits, 3)}/3`,
     },
     {
-      id: 'risk-master',
-      icon: '💎',
-      title: 'Risc premiat',
-      description:
-        'Guanya +50 amb un protagonista improbable.',
-      unlocked:
-        bestProtagonistPoints >= 50,
+      id: "risk-master",
+      icon: "💎",
+      title: "Risc premiat",
+      description: "Guanya +50 amb un protagonista improbable.",
+      unlocked: bestProtagonistPoints >= 50,
       progress:
         bestProtagonistPoints >= 50
-          ? 'DESBLOQUEJAT'
+          ? "DESBLOQUEJAT"
           : `${bestProtagonistPoints}/50`,
     },
     {
-      id: 'streak',
-      icon: '🔥',
-      title: 'Ratxa culer',
-      description:
-        'Suma quatre jornades positives seguides.',
+      id: "streak",
+      icon: "🔥",
+      title: "Ratxa culer",
+      description: "Suma quatre jornades positives seguides.",
       unlocked: longestStreak >= 4,
-      progress: `${Math.min(
-        longestStreak,
-        4,
-      )}/4`,
+      progress: `${Math.min(longestStreak, 4)}/4`,
     },
     {
-      id: 'top-ten',
-      icon: '🏆',
-      title: 'Top 10',
-      description:
-        'Entra entre els deu millors del rànquing.',
-      unlocked:
-        generalPosition > 0 &&
-        generalPosition <= 10,
-      progress:
-        generalPosition > 0
-          ? `#${generalPosition}`
-          : '—',
+      id: "top-ten",
+      icon: "🏆",
+      title: "Top 10",
+      description: "Entra entre els deu millors del rànquing.",
+      unlocked: generalPosition > 0 && generalPosition <= 10,
+      progress: generalPosition > 0 ? `#${generalPosition}` : "—",
     },
-  ]
+  ];
 
   return {
     history,
@@ -1114,858 +1032,1039 @@ const buildProfileDemoData = (
     bestProtagonistPoints,
     longestStreak,
     achievements,
-    unlockedAchievements:
-      achievements.filter(
-        (achievement) =>
-          achievement.unlocked,
-      ).length,
-  }
-}
+    unlockedAchievements: achievements.filter(
+      (achievement) => achievement.unlocked,
+    ).length,
+  };
+};
 
 const formation433 = [
   {
-    id: 'forwards',
-    label: 'Davanters',
+    id: "forwards",
+    label: "Davanters",
     slots: [0, 1, 2],
   },
   {
-    id: 'midfielders',
-    label: 'Migcampistes',
+    id: "midfielders",
+    label: "Migcampistes",
     slots: [3, 4, 5],
   },
   {
-    id: 'defenders',
-    label: 'Defenses',
+    id: "defenders",
+    label: "Defenses",
     slots: [6, 7, 8, 9],
   },
   {
-    id: 'goalkeeper',
-    label: 'Porter',
+    id: "goalkeeper",
+    label: "Porter",
     slots: [10],
   },
-]
+];
 
 function App() {
-  const [activePage, setActivePage] = useState('play')
+  const [activePage, setActivePage] = useState("play");
 
-  const [rankingTab, setRankingTab] =
-    useState('general')
+  const [rankingTab, setRankingTab] = useState("general");
 
-  const [
-    visibleRankingCount,
-    setVisibleRankingCount,
-  ] = useState(RANKING_PAGE_SIZE)
+  const [visibleRankingCount, setVisibleRankingCount] =
+    useState(RANKING_PAGE_SIZE);
 
-  const [
-    selectedProfileUserId,
-    setSelectedProfileUserId,
-  ] = useState(CURRENT_RANKING_USER_ID)
+  const [selectedProfileUserId, setSelectedProfileUserId] = useState(
+    CURRENT_RANKING_USER_ID,
+  );
 
-  const [profileTab, setProfileTab] =
-    useState('overview')
+  const [profileTab, setProfileTab] = useState("overview");
 
-  const [authSession, setAuthSession] =
-    useState(null)
+  const [authSession, setAuthSession] = useState(null);
 
-  const [authLoading, setAuthLoading] =
-    useState(true)
+  const [authLoading, setAuthLoading] = useState(true);
 
-  const [authActionLoading, setAuthActionLoading] =
-    useState(false)
+  const [authActionLoading, setAuthActionLoading] = useState(false);
 
-  const [authError, setAuthError] =
-    useState('')
+  const [authError, setAuthError] = useState("");
 
-  const [accountMenuOpen, setAccountMenuOpen] =
-    useState(false)
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
-  const [barcaScore, setBarcaScore] = useState(0)
-  const [rivalScore, setRivalScore] = useState(0)
-  const [scoreTouched, setScoreTouched] =
-    useState(false)
+  const [authProfile, setAuthProfile] = useState(null);
 
-  const [lineup, setLineup] = useState(
-    Array.from({ length: 11 }, () => null),
-  )
+  const [profileLoading, setProfileLoading] = useState(false);
 
-  const [selectedSlotIndex, setSelectedSlotIndex] =
-    useState(null)
+  const [profileNameEditorOpen, setProfileNameEditorOpen] = useState(false);
 
-  const [selectedPlayerId, setSelectedPlayerId] =
-    useState(null)
+  const [profileDraftName, setProfileDraftName] = useState("");
 
-  const [protagonistId, setProtagonistId] =
-    useState(null)
+  const [profileActionLoading, setProfileActionLoading] = useState(false);
 
-  const [openInfoSection, setOpenInfoSection] =
-    useState(null)
+  const [profileFeedback, setProfileFeedback] = useState(null);
 
-  const [countdown, setCountdown] =
-    useState(getCountdown)
+  const profileAvatarInputRef = useRef(null);
 
-  const authUser = authSession?.user ?? null
+  const [barcaScore, setBarcaScore] = useState(0);
+  const [rivalScore, setRivalScore] = useState(0);
+  const [scoreTouched, setScoreTouched] = useState(false);
 
-  const authMetadata =
-    authUser?.user_metadata ?? {}
+  const [lineup, setLineup] = useState(Array.from({ length: 11 }, () => null));
 
-  const authDisplayName = String(
-    authMetadata.full_name ||
-      authMetadata.name ||
-      authMetadata.user_name ||
-      authMetadata.preferred_username ||
-      authUser?.email?.split('@')[0] ||
-      'Culer',
-  ).trim()
+  const [selectedSlotIndex, setSelectedSlotIndex] = useState(null);
 
-  const authAvatarUrl =
+  const [selectedPlayerId, setSelectedPlayerId] = useState(null);
+
+  const [protagonistId, setProtagonistId] = useState(null);
+
+  const [openInfoSection, setOpenInfoSection] = useState(null);
+
+  const [countdown, setCountdown] = useState(getCountdown);
+
+  const authUser = authSession?.user ?? null;
+
+  const authMetadata = authUser?.user_metadata ?? {};
+
+  const authProvider = String(
+    authUser?.app_metadata?.provider ||
+      authUser?.app_metadata?.providers?.[0] ||
+      "vesalaporra",
+  ).toLowerCase();
+
+  const authIsX = authProvider === "x" || authProvider === "twitter";
+
+  const providerDisplayName = getSafePublicDisplayName(
+    [
+      authMetadata.full_name,
+      authMetadata.name,
+      authMetadata.user_name,
+      authMetadata.preferred_username,
+    ],
+    authUser?.email,
+  );
+
+  const providerAvatarUrl =
     authMetadata.avatar_url ||
     authMetadata.picture ||
     authMetadata.profile_image_url ||
     authMetadata.profile_image_url_https ||
-    null
+    null;
 
-  const authEmail = authUser?.email || ''
+  const providerHandleSlug = String(
+    authMetadata.preferred_username ||
+      authMetadata.user_name ||
+      authMetadata.username ||
+      authMetadata.screen_name ||
+      "",
+  )
+    .replace(/^@/, "")
+    .trim();
 
-  const lineupCount = lineup.filter(Boolean).length
-  const lineupIsComplete = lineupCount === 11
+  const providerTwitterUrl =
+    authIsX && providerHandleSlug
+      ? `https://x.com/${providerHandleSlug}`
+      : null;
+
+  const profileDisplayName = getSafePublicDisplayName(
+    [authProfile?.displayName, providerDisplayName],
+    authUser?.email,
+  );
+
+  const profileAvatarUrl = authProfile?.avatarUrl || providerAvatarUrl || null;
+
+  const profileJoinedYear =
+    authProfile?.joinedYear ||
+    (authUser?.created_at ? new Date(authUser.created_at).getFullYear() : 2026);
+
+  const lineupCount = lineup.filter(Boolean).length;
+  const lineupIsComplete = lineupCount === 11;
 
   const eligibleProtagonistPlayers = players
     .filter(
       (player) =>
-        !player.isGoalkeeper &&
-        protagonistScoringByPlayerId[player.id],
+        !player.isGoalkeeper && protagonistScoringByPlayerId[player.id],
     )
     .sort(
       (firstPlayer, secondPlayer) =>
-        protagonistScoringByPlayerId[firstPlayer.id]
-          .order -
-        protagonistScoringByPlayerId[secondPlayer.id]
-          .order,
-    )
+        protagonistScoringByPlayerId[firstPlayer.id].order -
+        protagonistScoringByPlayerId[secondPlayer.id].order,
+    );
 
-  const protagonist = protagonistId
-    ? playersById[protagonistId]
-    : null
+  const protagonist = protagonistId ? playersById[protagonistId] : null;
 
   const protagonistScoring = protagonistId
     ? protagonistScoringByPlayerId[protagonistId]
-    : null
+    : null;
 
-  const protagonistIsComplete = Boolean(
-    protagonist && protagonistScoring,
-  )
+  const protagonistIsComplete = Boolean(protagonist && protagonistScoring);
 
   const predictionConfirmLabel = countdown.isClosed
-    ? 'PORRA TANCADA'
+    ? "PORRA TANCADA"
     : !scoreTouched
-      ? 'PRONOSTICA EL RESULTAT'
-      : lineupIsComplete &&
-          protagonistIsComplete
-        ? 'CONFIRMAR PORRA COMPLETA'
+      ? "PRONOSTICA EL RESULTAT"
+      : lineupIsComplete && protagonistIsComplete
+        ? "CONFIRMAR PORRA COMPLETA"
         : lineupIsComplete
-          ? 'CONFIRMAR RESULTAT + XI'
+          ? "CONFIRMAR RESULTAT + XI"
           : protagonistIsComplete
-            ? 'CONFIRMAR RESULTAT + PROTAGONISTA'
-            : 'CONFIRMAR RESULTAT'
+            ? "CONFIRMAR RESULTAT + PROTAGONISTA"
+            : "CONFIRMAR RESULTAT";
 
   const confirmButtonLabel =
-    !countdown.isClosed &&
-    scoreTouched &&
-    !authLoading &&
-    !authUser
-      ? 'ENTRA PER CONFIRMAR'
-      : predictionConfirmLabel
+    !countdown.isClosed && scoreTouched && !authLoading && !authUser
+      ? "ENTRA PER CONFIRMAR"
+      : predictionConfirmLabel;
 
-  const rankingRows = [
-    ...rankingDemoUsers,
-  ].sort((firstUser, secondUser) => {
-    const firstPoints =
-      firstUser[rankingTab]
-    const secondPoints =
-      secondUser[rankingTab]
+  const rankingUsers = rankingDemoUsers.map((user) => {
+    if (!user.isCurrentUser || !authUser) {
+      return user;
+    }
+
+    return {
+      ...user,
+      authUserId: authUser.id,
+      twitterId: authUser.id,
+      displayName: profileDisplayName,
+      handle: authIsX && providerHandleSlug ? `@${providerHandleSlug}` : "",
+      handleSlug: authIsX ? providerHandleSlug : "",
+      twitterAvatarUrl: profileAvatarUrl,
+      twitterUrl: providerTwitterUrl,
+      hasXIdentity: authIsX && Boolean(providerHandleSlug),
+      identityProvider: authProvider || "vesalaporra",
+      identityLabel: authIsX
+        ? "X"
+        : authProvider === "google"
+          ? "GOOGLE"
+          : "VESALAPORRA",
+      joinedYear: profileJoinedYear,
+    };
+  });
+
+  const rankingRows = [...rankingUsers].sort((firstUser, secondUser) => {
+    const firstPoints = firstUser[rankingTab];
+    const secondPoints = secondUser[rankingTab];
 
     return (
-      secondPoints.totalPoints -
-        firstPoints.totalPoints ||
-      secondPoints.resultPoints -
-        firstPoints.resultPoints ||
-      secondPoints.xiPoints -
-        firstPoints.xiPoints ||
-      secondPoints.protagonistPoints -
-        firstPoints.protagonistPoints ||
-      firstUser.id.localeCompare(
-        secondUser.id,
-      )
-    )
-  })
+      secondPoints.totalPoints - firstPoints.totalPoints ||
+      secondPoints.resultPoints - firstPoints.resultPoints ||
+      secondPoints.xiPoints - firstPoints.xiPoints ||
+      secondPoints.protagonistPoints - firstPoints.protagonistPoints ||
+      firstUser.id.localeCompare(secondUser.id)
+    );
+  });
 
-  const visibleRankingRows =
-    rankingRows.slice(
-      0,
-      visibleRankingCount,
-    )
+  const visibleRankingRows = rankingRows.slice(0, visibleRankingCount);
 
-  const rankingHasMore =
-    visibleRankingCount <
-    rankingRows.length
+  const rankingHasMore = visibleRankingCount < rankingRows.length;
 
   const currentRankingPosition =
-    rankingRows.findIndex(
-      (user) => user.isCurrentUser,
-    ) + 1
+    rankingRows.findIndex((user) => user.isCurrentUser) + 1;
 
   const currentRankingUser =
-    rankingRows.find(
-      (user) => user.isCurrentUser,
-    ) || rankingRows[0]
+    rankingRows.find((user) => user.isCurrentUser) || rankingRows[0];
 
   const selectedProfileUser =
-    rankingDemoUsers.find(
-      (user) =>
-        user.id ===
-        selectedProfileUserId,
-    ) || currentRankingUser
+    rankingUsers.find((user) => user.id === selectedProfileUserId) ||
+    currentRankingUser;
 
-  const generalRankingRows = [
-    ...rankingDemoUsers,
-  ].sort((firstUser, secondUser) => {
-    const firstPoints =
-      firstUser.general
-    const secondPoints =
-      secondUser.general
+  const generalRankingRows = [...rankingUsers].sort((firstUser, secondUser) => {
+    const firstPoints = firstUser.general;
+    const secondPoints = secondUser.general;
 
     return (
-      secondPoints.totalPoints -
-        firstPoints.totalPoints ||
-      secondPoints.resultPoints -
-        firstPoints.resultPoints ||
-      secondPoints.xiPoints -
-        firstPoints.xiPoints ||
-      secondPoints.protagonistPoints -
-        firstPoints.protagonistPoints ||
-      firstUser.id.localeCompare(
-        secondUser.id,
-      )
-    )
-  })
+      secondPoints.totalPoints - firstPoints.totalPoints ||
+      secondPoints.resultPoints - firstPoints.resultPoints ||
+      secondPoints.xiPoints - firstPoints.xiPoints ||
+      secondPoints.protagonistPoints - firstPoints.protagonistPoints ||
+      firstUser.id.localeCompare(secondUser.id)
+    );
+  });
 
   const selectedProfilePosition =
     generalRankingRows.findIndex(
-      (user) =>
-        user.id ===
-        selectedProfileUser?.id,
-    ) + 1
+      (user) => user.id === selectedProfileUser?.id,
+    ) + 1;
 
-  const selectedProfileData =
-    selectedProfileUser
-      ? buildProfileDemoData(
-          selectedProfileUser,
-          selectedProfilePosition,
-        )
-      : null
+  const selectedProfileData = selectedProfileUser
+    ? buildProfileDemoData(selectedProfileUser, selectedProfilePosition)
+    : null;
+
+  const isOwnAuthenticatedProfile = Boolean(
+    authUser && selectedProfileUser?.isCurrentUser,
+  );
 
   const loadMoreRanking = () => {
-    setVisibleRankingCount(
-      (currentCount) =>
-        Math.min(
-          currentCount +
-            RANKING_PAGE_SIZE,
-          rankingRows.length,
-        ),
-    )
-  }
+    setVisibleRankingCount((currentCount) =>
+      Math.min(currentCount + RANKING_PAGE_SIZE, rankingRows.length),
+    );
+  };
 
-  const changeRankingTab = (
-    nextTab,
-  ) => {
-    setRankingTab(nextTab)
-    setVisibleRankingCount(
-      RANKING_PAGE_SIZE,
-    )
-  }
+  const changeRankingTab = (nextTab) => {
+    setRankingTab(nextTab);
+    setVisibleRankingCount(RANKING_PAGE_SIZE);
+  };
 
-  const openRankingProfile = (
-    userId,
-  ) => {
-    setSelectedProfileUserId(userId)
-    setProfileTab('overview')
-    setActivePage('profile')
+  const openRankingProfile = (userId) => {
+    setSelectedProfileUserId(userId);
+    setProfileTab("overview");
+    setActivePage("profile");
 
     window.scrollTo({
       top: 0,
-      behavior: 'smooth',
-    })
-  }
+      behavior: "smooth",
+    });
+  };
 
   const toggleInfoSection = (sectionId) => {
-    setOpenInfoSection(
-      (currentSectionId) =>
-        currentSectionId === sectionId
-          ? null
-          : sectionId,
-    )
-  }
+    setOpenInfoSection((currentSectionId) =>
+      currentSectionId === sectionId ? null : sectionId,
+    );
+  };
 
-  const handleOAuthSignIn = async (
-    provider,
-    {
-      automatic = false,
-    } = {},
-  ) => {
+  const handleOAuthSignIn = async (provider, { automatic = false } = {}) => {
     if (authActionLoading) {
-      return
+      return;
     }
 
-    setAuthError('')
-    setAuthActionLoading(true)
+    setAuthError("");
+    setAuthActionLoading(true);
 
-    if (provider === 'x' && automatic) {
+    if (provider === "x" && automatic) {
       window.sessionStorage.setItem(
         X_AUTO_LOGIN_STORAGE_KEY,
         String(Date.now()),
-      )
+      );
     }
 
     try {
-      const redirectTo =
-        `${window.location.origin}/auth/callback`
+      const redirectTo = `${window.location.origin}/auth/callback`;
 
-      const { error } =
-        await supabase.auth.signInWithOAuth({
-          provider,
-          options: {
-            redirectTo,
-          },
-        })
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo,
+        },
+      });
 
       if (error) {
-        throw error
+        throw error;
       }
     } catch (error) {
-      if (provider === 'x') {
-        window.sessionStorage.removeItem(
-          X_AUTO_LOGIN_STORAGE_KEY,
-        )
+      if (provider === "x") {
+        window.sessionStorage.removeItem(X_AUTO_LOGIN_STORAGE_KEY);
       }
 
-      const providerLabel =
-        provider === 'x'
-          ? 'X'
-          : 'Google'
+      const providerLabel = provider === "x" ? "X" : "Google";
 
       setAuthError(
         error?.message ||
           `No s’ha pogut obrir ${providerLabel}. Torna-ho a provar.`,
-      )
-      setAuthActionLoading(false)
+      );
+      setAuthActionLoading(false);
     }
-  }
+  };
 
-  const handleGoogleSignIn = () =>
-    handleOAuthSignIn('google')
+  const handleGoogleSignIn = () => handleOAuthSignIn("google");
 
-  const handleXSignIn = () =>
-    handleOAuthSignIn('x')
+  const handleXSignIn = () => handleOAuthSignIn("x");
 
+  const persistProfile = async ({ displayName, avatarUrl, avatarPath }) => {
+    if (!authUser) {
+      throw new Error("Has d’entrar abans d’editar el perfil.");
+    }
+
+    const { error } = await supabase.from("profiles").upsert(
+      {
+        id: authUser.id,
+        display_name: displayName,
+        avatar_url: avatarUrl || null,
+        avatar_path: avatarPath || null,
+        provider: authProvider || "vesalaporra",
+        x_handle: authIsX && providerHandleSlug ? providerHandleSlug : null,
+      },
+      {
+        onConflict: "id",
+      },
+    );
+
+    if (error) {
+      throw error;
+    }
+  };
+
+  const handleSaveProfileName = async (event) => {
+    event.preventDefault();
+
+    if (!authUser || profileActionLoading) {
+      return;
+    }
+
+    const nextDisplayName = profileDraftName.trim();
+
+    const privateEmail = String(authUser.email || "")
+      .trim()
+      .toLowerCase();
+    const privateEmailLocalPart = privateEmail.split("@")[0] || "";
+    const normalizedNextDisplayName = nextDisplayName.toLowerCase();
+
+    if (
+      nextDisplayName.includes("@") ||
+      normalizedNextDisplayName === privateEmail ||
+      normalizedNextDisplayName === privateEmailLocalPart
+    ) {
+      setProfileFeedback({
+        type: "error",
+        message:
+          "El nom públic no pot ser una adreça de correu ni el seu identificador privat.",
+      });
+      return;
+    }
+
+    if (
+      nextDisplayName.length < PROFILE_NAME_MIN_LENGTH ||
+      nextDisplayName.length > PROFILE_NAME_MAX_LENGTH
+    ) {
+      setProfileFeedback({
+        type: "error",
+        message: `El nom ha de tenir entre ${PROFILE_NAME_MIN_LENGTH} i ${PROFILE_NAME_MAX_LENGTH} caràcters.`,
+      });
+      return;
+    }
+
+    setProfileActionLoading(true);
+    setProfileFeedback(null);
+
+    try {
+      await persistProfile({
+        displayName: nextDisplayName,
+        avatarUrl: profileAvatarUrl,
+        avatarPath: authProfile?.avatarPath || null,
+      });
+
+      const { data, error } = await supabase.auth.updateUser({
+        data: {
+          display_name: nextDisplayName,
+        },
+      });
+
+      if (error) {
+        console.warn(
+          "No s’ha pogut sincronitzar el nom amb auth metadata:",
+          error,
+        );
+      }
+
+      if (data?.user) {
+        setAuthSession((currentSession) =>
+          currentSession
+            ? {
+                ...currentSession,
+                user: data.user,
+              }
+            : currentSession,
+        );
+      }
+
+      setAuthProfile((currentProfile) => ({
+        ...(currentProfile || {}),
+        displayName: nextDisplayName,
+        avatarUrl: profileAvatarUrl,
+      }));
+      setProfileNameEditorOpen(false);
+      setProfileFeedback({
+        type: "success",
+        message: "Nom actualitzat correctament.",
+      });
+    } catch (error) {
+      setProfileFeedback({
+        type: "error",
+        message: error?.message || "No s’ha pogut guardar el nom.",
+      });
+    } finally {
+      setProfileActionLoading(false);
+    }
+  };
+
+  const handleProfileAvatarChange = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file || !authUser || profileActionLoading) {
+      return;
+    }
+
+    const allowedExtensions = {
+      "image/png": "png",
+      "image/jpeg": "jpg",
+      "image/webp": "webp",
+    };
+
+    const extension = allowedExtensions[file.type];
+
+    if (!extension) {
+      setProfileFeedback({
+        type: "error",
+        message: "L’avatar ha de ser PNG, JPG o WEBP.",
+      });
+      return;
+    }
+
+    if (file.size > PROFILE_AVATAR_MAX_BYTES) {
+      setProfileFeedback({
+        type: "error",
+        message: "L’avatar no pot superar els 2 MB.",
+      });
+      return;
+    }
+
+    setProfileActionLoading(true);
+    setProfileFeedback(null);
+
+    let uploadedPath = null;
+
+    try {
+      uploadedPath = `${authUser.id}/avatar-${Date.now()}.${extension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from(PROFILE_AVATAR_BUCKET)
+        .upload(uploadedPath, file, {
+          cacheControl: "3600",
+          contentType: file.type,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from(PROFILE_AVATAR_BUCKET)
+        .getPublicUrl(uploadedPath);
+
+      const nextAvatarUrl = publicUrlData?.publicUrl
+        ? `${publicUrlData.publicUrl}?v=${Date.now()}`
+        : null;
+
+      if (!nextAvatarUrl) {
+        throw new Error("No s’ha pogut obtenir la URL de l’avatar.");
+      }
+
+      await persistProfile({
+        displayName: profileDisplayName,
+        avatarUrl: nextAvatarUrl,
+        avatarPath: uploadedPath,
+      });
+
+      const { data, error } = await supabase.auth.updateUser({
+        data: {
+          avatar_url: nextAvatarUrl,
+        },
+      });
+
+      if (error) {
+        console.warn(
+          "No s’ha pogut sincronitzar l’avatar amb auth metadata:",
+          error,
+        );
+      }
+
+      if (data?.user) {
+        setAuthSession((currentSession) =>
+          currentSession
+            ? {
+                ...currentSession,
+                user: data.user,
+              }
+            : currentSession,
+        );
+      }
+
+      const previousAvatarPath = authProfile?.avatarPath;
+
+      setAuthProfile((currentProfile) => ({
+        ...(currentProfile || {}),
+        displayName: currentProfile?.displayName || profileDisplayName,
+        avatarUrl: nextAvatarUrl,
+        avatarPath: uploadedPath,
+      }));
+
+      if (previousAvatarPath && previousAvatarPath !== uploadedPath) {
+        await supabase.storage
+          .from(PROFILE_AVATAR_BUCKET)
+          .remove([previousAvatarPath]);
+      }
+
+      setProfileFeedback({
+        type: "success",
+        message: "Avatar actualitzat correctament.",
+      });
+    } catch (error) {
+      if (uploadedPath) {
+        await supabase.storage
+          .from(PROFILE_AVATAR_BUCKET)
+          .remove([uploadedPath]);
+      }
+
+      setProfileFeedback({
+        type: "error",
+        message: error?.message || "No s’ha pogut guardar l’avatar.",
+      });
+    } finally {
+      setProfileActionLoading(false);
+    }
+  };
 
   const handleSignOut = async () => {
     if (authActionLoading) {
-      return
+      return;
     }
 
-    setAuthError('')
-    setAuthActionLoading(true)
+    setAuthError("");
+    setAuthActionLoading(true);
 
     try {
-      const { error } =
-        await supabase.auth.signOut()
+      const { error } = await supabase.auth.signOut();
 
       if (error) {
-        throw error
+        throw error;
       }
 
-      setAccountMenuOpen(false)
+      setAccountMenuOpen(false);
     } catch (error) {
-      setAuthError(
-        error?.message ||
-          'No s’ha pogut tancar la sessió.',
-      )
+      setAuthError(error?.message || "No s’ha pogut tancar la sessió.");
     } finally {
-      setAuthActionLoading(false)
+      setAuthActionLoading(false);
     }
-  }
+  };
 
   const handleConfirmPrediction = () => {
     if (!authUser) {
-      handleXSignIn()
+      handleXSignIn();
     }
-  }
+  };
 
   useEffect(() => {
-    let isMounted = true
+    let isMounted = true;
 
     const cleanAuthUrl = () => {
       if (
-        window.location.pathname ===
-          '/auth/callback' ||
-        window.location.pathname ===
-          '/entra-x'
+        window.location.pathname === "/auth/callback" ||
+        window.location.pathname === "/entra-x"
       ) {
-        window.history.replaceState(
-          {},
-          document.title,
-          '/',
-        )
+        window.history.replaceState({}, document.title, "/");
       }
-    }
+    };
 
     const readOAuthErrorFromUrl = () => {
-      const queryParams =
-        new URLSearchParams(
-          window.location.search,
-        )
+      const queryParams = new URLSearchParams(window.location.search);
 
-      const hashParams =
-        new URLSearchParams(
-          window.location.hash.replace(
-            /^#/,
-            '',
-          ),
-        )
+      const hashParams = new URLSearchParams(
+        window.location.hash.replace(/^#/, ""),
+      );
 
       return (
-        queryParams.get(
-          'error_description',
-        ) ||
-        queryParams.get('error') ||
-        hashParams.get(
-          'error_description',
-        ) ||
-        hashParams.get('error') ||
-        ''
-      )
-    }
+        queryParams.get("error_description") ||
+        queryParams.get("error") ||
+        hashParams.get("error_description") ||
+        hashParams.get("error") ||
+        ""
+      );
+    };
 
-    const maybeStartAutomaticXSignIn =
-      async () => {
-        if (
-          window.location.pathname !==
-          '/entra-x'
-        ) {
-          return
-        }
-
-        const previousAttemptAt =
-          Number(
-            window.sessionStorage.getItem(
-              X_AUTO_LOGIN_STORAGE_KEY,
-            ) || 0,
-          )
-
-        const hasRecentAttempt =
-          Date.now() -
-            previousAttemptAt <
-          X_AUTO_LOGIN_COOLDOWN_MS
-
-        if (hasRecentAttempt) {
-          return
-        }
-
-        await handleOAuthSignIn(
-          'x',
-          {
-            automatic: true,
-          },
-        )
+    const maybeStartAutomaticXSignIn = async () => {
+      if (window.location.pathname !== "/entra-x") {
+        return;
       }
+
+      const previousAttemptAt = Number(
+        window.sessionStorage.getItem(X_AUTO_LOGIN_STORAGE_KEY) || 0,
+      );
+
+      const hasRecentAttempt =
+        Date.now() - previousAttemptAt < X_AUTO_LOGIN_COOLDOWN_MS;
+
+      if (hasRecentAttempt) {
+        return;
+      }
+
+      await handleOAuthSignIn("x", {
+        automatic: true,
+      });
+    };
 
     const loadSession = async () => {
-      const oauthError =
-        readOAuthErrorFromUrl()
+      const oauthError = readOAuthErrorFromUrl();
 
       if (oauthError) {
-        window.sessionStorage.removeItem(
-          X_AUTO_LOGIN_STORAGE_KEY,
-        )
+        window.sessionStorage.removeItem(X_AUTO_LOGIN_STORAGE_KEY);
 
         if (isMounted) {
-          setAuthError(oauthError)
-          setAuthLoading(false)
-          setAuthActionLoading(false)
-          cleanAuthUrl()
+          setAuthError(oauthError);
+          setAuthLoading(false);
+          setAuthActionLoading(false);
+          cleanAuthUrl();
         }
 
-        return
+        return;
       }
 
-      const { data, error } =
-        await supabase.auth.getSession()
+      const { data, error } = await supabase.auth.getSession();
 
       if (!isMounted) {
-        return
+        return;
       }
 
       if (error) {
-        setAuthError(error.message)
+        setAuthError(error.message);
       }
 
-      setAuthSession(data.session ?? null)
-      setAuthLoading(false)
+      setAuthSession(data.session ?? null);
+      setAuthLoading(false);
 
       if (data.session) {
-        window.sessionStorage.removeItem(
-          X_AUTO_LOGIN_STORAGE_KEY,
-        )
-        setActivePage('play')
-        cleanAuthUrl()
+        window.sessionStorage.removeItem(X_AUTO_LOGIN_STORAGE_KEY);
+        setActivePage("play");
+        cleanAuthUrl();
 
-        return
+        return;
       }
 
-      await maybeStartAutomaticXSignIn()
-    }
+      await maybeStartAutomaticXSignIn();
+    };
 
-    loadSession()
+    loadSession();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (event, nextSession) => {
-        if (!isMounted) {
-          return
-        }
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (!isMounted) {
+        return;
+      }
 
-        setAuthSession(nextSession ?? null)
-        setAuthLoading(false)
-        setAuthActionLoading(false)
+      setAuthSession(nextSession ?? null);
+      setAuthLoading(false);
+      setAuthActionLoading(false);
 
-        if (event === 'SIGNED_IN') {
-          window.sessionStorage.removeItem(
-            X_AUTO_LOGIN_STORAGE_KEY,
-          )
-          setAuthError('')
-          setAccountMenuOpen(false)
-          setActivePage('play')
-          cleanAuthUrl()
-        }
+      if (event === "SIGNED_IN") {
+        window.sessionStorage.removeItem(X_AUTO_LOGIN_STORAGE_KEY);
+        setAuthError("");
+        setAccountMenuOpen(false);
+        setActivePage("play");
+        cleanAuthUrl();
+      }
 
-        if (event === 'SIGNED_OUT') {
-          setAccountMenuOpen(false)
-        }
-      },
-    )
+      if (event === "SIGNED_OUT") {
+        setAccountMenuOpen(false);
+        setAuthProfile(null);
+        setProfileDraftName("");
+        setProfileNameEditorOpen(false);
+        setProfileFeedback(null);
+      }
+    });
 
     return () => {
-      isMounted = false
-      subscription.unsubscribe()
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    if (!authUser) {
+      setAuthProfile(null);
+      setProfileDraftName("");
+      setProfileLoading(false);
+      return undefined;
     }
-  }, [])
 
+    const fallbackProfile = {
+      displayName: providerDisplayName,
+      avatarUrl: providerAvatarUrl,
+      avatarPath: null,
+      provider: authProvider || "vesalaporra",
+      xHandle: authIsX && providerHandleSlug ? providerHandleSlug : null,
+      joinedYear: authUser.created_at
+        ? new Date(authUser.created_at).getFullYear()
+        : 2026,
+    };
+
+    const loadProfile = async () => {
+      setProfileLoading(true);
+
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select(
+            "id, display_name, avatar_url, avatar_path, provider, x_handle, created_at",
+          )
+          .eq("id", authUser.id)
+          .maybeSingle();
+
+        if (error) {
+          throw error;
+        }
+
+        let storedProfile = data;
+
+        if (!storedProfile) {
+          const { data: createdProfile, error: createError } = await supabase
+            .from("profiles")
+            .upsert(
+              {
+                id: authUser.id,
+                display_name: fallbackProfile.displayName,
+                avatar_url: fallbackProfile.avatarUrl,
+                avatar_path: null,
+                provider: fallbackProfile.provider,
+                x_handle: fallbackProfile.xHandle,
+              },
+              {
+                onConflict: "id",
+              },
+            )
+            .select(
+              "id, display_name, avatar_url, avatar_path, provider, x_handle, created_at",
+            )
+            .single();
+
+          if (createError) {
+            throw createError;
+          }
+
+          storedProfile = createdProfile;
+        }
+
+        if (!isCurrent) {
+          return;
+        }
+
+        const nextProfile = {
+          displayName:
+            storedProfile.display_name || fallbackProfile.displayName,
+          avatarUrl: storedProfile.avatar_url || fallbackProfile.avatarUrl,
+          avatarPath: storedProfile.avatar_path || null,
+          provider: storedProfile.provider || fallbackProfile.provider,
+          xHandle: storedProfile.x_handle || fallbackProfile.xHandle,
+          joinedYear: storedProfile.created_at
+            ? new Date(storedProfile.created_at).getFullYear()
+            : fallbackProfile.joinedYear,
+        };
+
+        setAuthProfile(nextProfile);
+        setProfileDraftName(nextProfile.displayName);
+      } catch (error) {
+        console.warn(
+          "Perfil públic no disponible; s’utilitzen les dades del proveïdor:",
+          error,
+        );
+
+        if (!isCurrent) {
+          return;
+        }
+
+        setAuthProfile(fallbackProfile);
+        setProfileDraftName(fallbackProfile.displayName);
+      } finally {
+        if (isCurrent) {
+          setProfileLoading(false);
+        }
+      }
+    };
+
+    loadProfile();
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [authUser?.id]);
 
   useEffect(() => {
-    const countdownInterval = window.setInterval(
-      () => {
-        setCountdown(getCountdown())
-      },
-      1000,
-    )
+    const countdownInterval = window.setInterval(() => {
+      setCountdown(getCountdown());
+    }, 1000);
 
-    return () =>
-      window.clearInterval(countdownInterval)
-  }, [])
+    return () => window.clearInterval(countdownInterval);
+  }, []);
 
   useEffect(() => {
-    if (
-      activePage !== 'ranking' ||
-      !rankingHasMore
-    ) {
-      return undefined
+    if (activePage !== "ranking" || !rankingHasMore) {
+      return undefined;
     }
 
     const handleRankingScroll = () => {
-      const viewportBottom =
-        window.scrollY +
-        window.innerHeight
+      const viewportBottom = window.scrollY + window.innerHeight;
 
-      const documentHeight =
-        document.documentElement
-          .scrollHeight
+      const documentHeight = document.documentElement.scrollHeight;
 
-      if (
-        documentHeight -
-          viewportBottom <
-        260
-      ) {
-        setVisibleRankingCount(
-          (currentCount) =>
-            Math.min(
-              currentCount +
-                RANKING_PAGE_SIZE,
-              rankingRows.length,
-            ),
-        )
+      if (documentHeight - viewportBottom < 260) {
+        setVisibleRankingCount((currentCount) =>
+          Math.min(currentCount + RANKING_PAGE_SIZE, rankingRows.length),
+        );
       }
-    }
+    };
 
-    window.addEventListener(
-      'scroll',
-      handleRankingScroll,
-      {
-        passive: true,
-      },
-    )
+    window.addEventListener("scroll", handleRankingScroll, {
+      passive: true,
+    });
 
-    return () =>
-      window.removeEventListener(
-        'scroll',
-        handleRankingScroll,
-      )
-  }, [
-    activePage,
-    rankingHasMore,
-    rankingRows.length,
-  ])
+    return () => window.removeEventListener("scroll", handleRankingScroll);
+  }, [activePage, rankingHasMore, rankingRows.length]);
 
   useEffect(() => {
     if (!protagonistId) {
-      return
+      return;
     }
 
-    const protagonistPlayer =
-      playersById[protagonistId]
+    const protagonistPlayer = playersById[protagonistId];
 
     const isStillEligible =
       protagonistPlayer &&
       !protagonistPlayer.isGoalkeeper &&
-      Boolean(
-        protagonistScoringByPlayerId[
-          protagonistId
-        ],
-      )
+      Boolean(protagonistScoringByPlayerId[protagonistId]);
 
     if (!isStillEligible) {
-      setProtagonistId(null)
+      setProtagonistId(null);
     }
-  }, [protagonistId])
+  }, [protagonistId]);
 
-  const placePlayerInSlot = (
-    playerId,
-    targetSlotIndex,
-  ) => {
+  const placePlayerInSlot = (playerId, targetSlotIndex) => {
     if (!playersById[playerId]) {
-      return
+      return;
     }
 
     setLineup((currentLineup) => {
-      const nextLineup = [...currentLineup]
+      const nextLineup = [...currentLineup];
 
-      const sourceSlotIndex =
-        nextLineup.indexOf(playerId)
+      const sourceSlotIndex = nextLineup.indexOf(playerId);
 
-      const displacedPlayerId =
-        nextLineup[targetSlotIndex]
+      const displacedPlayerId = nextLineup[targetSlotIndex];
 
       if (sourceSlotIndex === targetSlotIndex) {
-        return currentLineup
+        return currentLineup;
       }
 
       if (sourceSlotIndex !== -1) {
-        nextLineup[sourceSlotIndex] =
-          displacedPlayerId
+        nextLineup[sourceSlotIndex] = displacedPlayerId;
       }
 
-      nextLineup[targetSlotIndex] = playerId
+      nextLineup[targetSlotIndex] = playerId;
 
-      return nextLineup
-    })
+      return nextLineup;
+    });
 
-    setSelectedSlotIndex(null)
-    setSelectedPlayerId(null)
-  }
+    setSelectedSlotIndex(null);
+    setSelectedPlayerId(null);
+  };
 
   const removePlayerFromLineup = (playerId) => {
     if (!playersById[playerId]) {
-      return
+      return;
     }
 
     setLineup((currentLineup) =>
-      currentLineup.map(
-        (currentPlayerId) =>
-          currentPlayerId === playerId
-            ? null
-            : currentPlayerId,
+      currentLineup.map((currentPlayerId) =>
+        currentPlayerId === playerId ? null : currentPlayerId,
       ),
-    )
+    );
 
-    setSelectedSlotIndex(null)
-    setSelectedPlayerId(null)
-  }
+    setSelectedSlotIndex(null);
+    setSelectedPlayerId(null);
+  };
 
   const handleSlotClick = (slotIndex) => {
-    const fieldPlayerId = lineup[slotIndex]
+    const fieldPlayerId = lineup[slotIndex];
 
     if (selectedPlayerId) {
-      if (
-        fieldPlayerId &&
-        selectedPlayerId ===
-          fieldPlayerId
-      ) {
-        removePlayerFromLineup(
-          fieldPlayerId,
-        )
+      if (fieldPlayerId && selectedPlayerId === fieldPlayerId) {
+        removePlayerFromLineup(fieldPlayerId);
 
-        return
+        return;
       }
 
-      placePlayerInSlot(
-        selectedPlayerId,
-        slotIndex,
-      )
+      placePlayerInSlot(selectedPlayerId, slotIndex);
 
-      return
+      return;
     }
 
     if (fieldPlayerId) {
-      setSelectedPlayerId(
-        fieldPlayerId,
-      )
-      setSelectedSlotIndex(null)
+      setSelectedPlayerId(fieldPlayerId);
+      setSelectedSlotIndex(null);
 
-      return
+      return;
     }
 
-    setSelectedSlotIndex(
-      (currentSlotIndex) =>
-        currentSlotIndex === slotIndex
-          ? null
-          : slotIndex,
-    )
-  }
+    setSelectedSlotIndex((currentSlotIndex) =>
+      currentSlotIndex === slotIndex ? null : slotIndex,
+    );
+  };
 
   const handlePlayerClick = (playerId) => {
-    const isInLineup =
-      lineup.includes(playerId)
+    const isInLineup = lineup.includes(playerId);
 
-    if (
-      isInLineup &&
-      selectedPlayerId ===
-        playerId
-    ) {
-      removePlayerFromLineup(
-        playerId,
-      )
+    if (isInLineup && selectedPlayerId === playerId) {
+      removePlayerFromLineup(playerId);
 
-      return
+      return;
     }
 
     if (selectedSlotIndex !== null) {
-      placePlayerInSlot(
-        playerId,
-        selectedSlotIndex,
-      )
+      placePlayerInSlot(playerId, selectedSlotIndex);
 
-      return
+      return;
     }
 
-    setSelectedPlayerId(
-      (currentPlayerId) =>
-        currentPlayerId === playerId
-          ? null
-          : playerId,
-    )
-  }
+    setSelectedPlayerId((currentPlayerId) =>
+      currentPlayerId === playerId ? null : playerId,
+    );
+  };
 
-  const handlePlayerBadgeDrop = (
-    event,
-    targetPlayerId,
-  ) => {
-    event.preventDefault()
+  const handlePlayerBadgeDrop = (event, targetPlayerId) => {
+    event.preventDefault();
 
-    const draggedPlayerId =
-      event.dataTransfer.getData(
-        'text/plain',
-      )
+    const draggedPlayerId = event.dataTransfer.getData("text/plain");
 
     if (
-      draggedPlayerId ===
-        targetPlayerId &&
-      lineup.includes(
-        draggedPlayerId,
-      )
+      draggedPlayerId === targetPlayerId &&
+      lineup.includes(draggedPlayerId)
     ) {
-      removePlayerFromLineup(
-        draggedPlayerId,
-      )
+      removePlayerFromLineup(draggedPlayerId);
     }
-  }
+  };
 
-  const handleDragStart = (
-    event,
-    playerId,
-  ) => {
-    event.dataTransfer.setData(
-      'text/plain',
-      playerId,
-    )
+  const handleDragStart = (event, playerId) => {
+    event.dataTransfer.setData("text/plain", playerId);
 
-    event.dataTransfer.effectAllowed = 'move'
-  }
+    event.dataTransfer.effectAllowed = "move";
+  };
 
-  const handleDrop = (
-    event,
-    targetSlotIndex,
-  ) => {
-    event.preventDefault()
+  const handleDrop = (event, targetSlotIndex) => {
+    event.preventDefault();
 
-    const playerId =
-      event.dataTransfer.getData(
-        'text/plain',
-      )
+    const playerId = event.dataTransfer.getData("text/plain");
 
     if (!playersById[playerId]) {
-      return
+      return;
     }
 
-    placePlayerInSlot(
-      playerId,
-      targetSlotIndex,
-    )
-  }
+    placePlayerInSlot(playerId, targetSlotIndex);
+  };
 
   return (
     <div className="app-shell">
       <header className="app-header">
         <div className="brand">
-          <span className="brand-mark">
-            V
-          </span>
+          <span className="brand-mark">V</span>
 
           <div className="brand-copy">
-            <strong>
-              VESALAPORRA
-            </strong>
+            <strong>VESALAPORRA</strong>
 
-            <span>
-              La porra dels culers
-            </span>
+            <span>La porra dels culers</span>
           </div>
         </div>
 
         <div className="header-actions">
-          <nav
-            className="main-nav"
-            aria-label="Navegació principal"
-          >
+          <nav className="main-nav" aria-label="Navegació principal">
             <button
               type="button"
               className={
-                activePage === 'play'
-                  ? 'nav-button active'
-                  : 'nav-button'
+                activePage === "play" ? "nav-button active" : "nav-button"
               }
-              onClick={() =>
-                setActivePage('play')
-              }
+              onClick={() => setActivePage("play")}
             >
               JUGA
             </button>
@@ -1973,13 +2072,9 @@ function App() {
             <button
               type="button"
               className={
-                activePage === 'ranking'
-                  ? 'nav-button active'
-                  : 'nav-button'
+                activePage === "ranking" ? "nav-button active" : "nav-button"
               }
-              onClick={() =>
-                setActivePage('ranking')
-              }
+              onClick={() => setActivePage("ranking")}
             >
               RÀNQUING
             </button>
@@ -1987,16 +2082,12 @@ function App() {
             <button
               type="button"
               className={
-                activePage === 'profile'
-                  ? 'nav-button active'
-                  : 'nav-button'
+                activePage === "profile" ? "nav-button active" : "nav-button"
               }
               onClick={() => {
-                setSelectedProfileUserId(
-                  CURRENT_RANKING_USER_ID,
-                )
-                setProfileTab('overview')
-                setActivePage('profile')
+                setSelectedProfileUserId(CURRENT_RANKING_USER_ID);
+                setProfileTab("overview");
+                setActivePage("profile");
               }}
             >
               PERFIL
@@ -2008,23 +2099,17 @@ function App() {
               <button
                 type="button"
                 className="auth-account-button signed-in"
-                disabled={
-                  authLoading ||
-                  authActionLoading
-                }
+                disabled={authLoading || authActionLoading}
                 onClick={() =>
-                  setAccountMenuOpen(
-                    (currentValue) =>
-                      !currentValue,
-                  )
+                  setAccountMenuOpen((currentValue) => !currentValue)
                 }
-                aria-label={`Obre el compte de ${authDisplayName}`}
+                aria-label={`Obre el compte de ${profileDisplayName}`}
                 aria-expanded={accountMenuOpen}
-                title={authDisplayName}
+                title={profileDisplayName}
               >
                 <AuthAvatar
-                  imageUrl={authAvatarUrl}
-                  displayName={authDisplayName}
+                  imageUrl={profileAvatarUrl}
+                  displayName={profileDisplayName}
                 />
               </button>
             ) : (
@@ -2035,36 +2120,23 @@ function App() {
                 <button
                   type="button"
                   className="auth-provider-button x"
-                  disabled={
-                    authLoading ||
-                    authActionLoading
-                  }
+                  disabled={authLoading || authActionLoading}
                   onClick={handleXSignIn}
                   aria-label="Entra amb X"
                   title="Entra amb X"
                 >
-                  <span aria-hidden="true">
-                    𝕏
-                  </span>
+                  <span aria-hidden="true">𝕏</span>
                 </button>
 
                 <button
                   type="button"
                   className="auth-provider-button google"
-                  disabled={
-                    authLoading ||
-                    authActionLoading
-                  }
+                  disabled={authLoading || authActionLoading}
                   onClick={handleGoogleSignIn}
                   aria-label="Entra amb Google"
                   title="Entra amb Google"
                 >
-                  <span
-                    className="auth-google-mark"
-                    aria-hidden="true"
-                  >
-                    G
-                  </span>
+                  <GoogleMark className="auth-google-mark" />
                 </button>
               </div>
             )}
@@ -2073,17 +2145,19 @@ function App() {
               <div className="auth-menu">
                 <div className="auth-menu-identity">
                   <AuthAvatar
-                    imageUrl={authAvatarUrl}
-                    displayName={authDisplayName}
+                    imageUrl={profileAvatarUrl}
+                    displayName={profileDisplayName}
                   />
 
                   <span>
-                    <strong>
-                      {authDisplayName}
-                    </strong>
+                    <strong>{profileDisplayName}</strong>
 
                     <small>
-                      {authEmail}
+                      {authIsX && providerHandleSlug
+                        ? `@${providerHandleSlug}`
+                        : authProvider === "google"
+                          ? "COMPTE GOOGLE"
+                          : "COMPTE VESALAPORRA"}
                     </small>
                   </span>
                 </div>
@@ -2102,15 +2176,12 @@ function App() {
       </header>
 
       {authError && (
-        <div
-          className="auth-error-banner"
-          role="alert"
-        >
+        <div className="auth-error-banner" role="alert">
           <strong>ACCÉS</strong>
           <span>{authError}</span>
           <button
             type="button"
-            onClick={() => setAuthError('')}
+            onClick={() => setAuthError("")}
             aria-label="Tanca l’avís d’error"
           >
             ×
@@ -2119,13 +2190,11 @@ function App() {
       )}
 
       <main className="app-main">
-        {activePage === 'play' && (
+        {activePage === "play" && (
           <section className="play-page">
             <header className="match-header">
               <div className="match-main">
-                <span className="eyebrow">
-                  PROPER PARTIT
-                </span>
+                <span className="eyebrow">PROPER PARTIT</span>
 
                 <div className="match-clubs">
                   <div className="match-club home">
@@ -2136,19 +2205,13 @@ function App() {
                     />
 
                     <div className="match-club-copy">
-                      <strong>
-                        {matchData.homeName}
-                      </strong>
+                      <strong>{matchData.homeName}</strong>
 
-                      <span>
-                        Barcelona
-                      </span>
+                      <span>Barcelona</span>
                     </div>
                   </div>
 
-                  <span className="match-versus">
-                    VS
-                  </span>
+                  <span className="match-versus">VS</span>
 
                   <div className="match-club away">
                     <img
@@ -2158,128 +2221,82 @@ function App() {
                     />
 
                     <div className="match-club-copy">
-                      <strong>
-                        {matchData.awayName}
-                      </strong>
+                      <strong>{matchData.awayName}</strong>
 
-                      <span>
-                        {matchData.awayCountry}
-                      </span>
+                      <span>{matchData.awayCountry}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="match-kickoff">
-                  <span className="match-kickoff-icon">
-                    ◷
-                  </span>
+                  <span className="match-kickoff-icon">◷</span>
 
-                  <strong>
-                    {matchData.kickoffLabel}
-                  </strong>
+                  <strong>{matchData.kickoffLabel}</strong>
 
-                  <span>
-                    Hora de Barcelona
-                  </span>
+                  <span>Hora de Barcelona</span>
                 </div>
               </div>
 
               <div
-                className={
-                  countdown.isClosed
-                    ? 'deadline closed'
-                    : 'deadline'
-                }
+                className={countdown.isClosed ? "deadline closed" : "deadline"}
               >
                 <span className="deadline-title">
-                  {countdown.isClosed
-                    ? 'ESTAT'
-                    : 'TANCA EN'}
+                  {countdown.isClosed ? "ESTAT" : "TANCA EN"}
                 </span>
 
                 {countdown.isClosed ? (
-                  <strong className="deadline-closed">
-                    PORRA TANCADA
-                  </strong>
+                  <strong className="deadline-closed">PORRA TANCADA</strong>
                 ) : (
                   <div className="countdown-grid">
                     <div className="countdown-unit">
-                      <strong>
-                        {String(
-                          countdown.days,
-                        ).padStart(2, '0')}
-                      </strong>
+                      <strong>{String(countdown.days).padStart(2, "0")}</strong>
 
-                      <span>
-                        DIES
-                      </span>
+                      <span>DIES</span>
                     </div>
 
                     <div className="countdown-unit">
                       <strong>
-                        {String(
-                          countdown.hours,
-                        ).padStart(2, '0')}
+                        {String(countdown.hours).padStart(2, "0")}
                       </strong>
 
-                      <span>
-                        HORES
-                      </span>
+                      <span>HORES</span>
                     </div>
 
                     <div className="countdown-unit">
                       <strong>
-                        {String(
-                          countdown.minutes,
-                        ).padStart(2, '0')}
+                        {String(countdown.minutes).padStart(2, "0")}
                       </strong>
 
-                      <span>
-                        MIN
-                      </span>
+                      <span>MIN</span>
                     </div>
 
                     <div className="countdown-unit">
                       <strong>
-                        {String(
-                          countdown.seconds,
-                        ).padStart(2, '0')}
+                        {String(countdown.seconds).padStart(2, "0")}
                       </strong>
 
-                      <span>
-                        SEG
-                      </span>
+                      <span>SEG</span>
                     </div>
                   </div>
                 )}
 
-                <small>
-                  19 AGOST · 21:00
-                </small>
+                <small>19 AGOST · 21:00</small>
               </div>
             </header>
 
             <section className="prediction-card score-card">
               <div className="section-heading">
                 <div>
-                  <span className="step-number">
-                    01
-                  </span>
+                  <span className="step-number">01</span>
 
-                  <h2>
-                    Pronostica el resultat
-                  </h2>
+                  <h2>Pronostica el resultat</h2>
 
                   <button
                     type="button"
                     className="section-info-button"
-                    onClick={() =>
-                      toggleInfoSection('score')
-                    }
+                    onClick={() => toggleInfoSection("score")}
                     aria-label="Informació sobre el pronòstic del resultat"
-                    aria-expanded={
-                      openInfoSection === 'score'
-                    }
+                    aria-expanded={openInfoSection === "score"}
                     title="Com funciona aquesta secció?"
                   >
                     i
@@ -2288,73 +2305,49 @@ function App() {
 
                 <span
                   className={
-                    scoreTouched
-                      ? 'status-pill completed'
-                      : 'status-pill'
+                    scoreTouched ? "status-pill completed" : "status-pill"
                   }
                 >
-                  {scoreTouched
-                    ? 'FET'
-                    : 'PENDENT'}
+                  {scoreTouched ? "FET" : "PENDENT"}
                 </span>
               </div>
 
-              {openInfoSection === 'score' && (
-                <div
-                  className="section-info-panel"
-                  role="note"
-                >
+              {openInfoSection === "score" && (
+                <div className="section-info-panel" role="note">
                   <strong className="section-info-title">
                     PUNTS DEL RESULTAT
                   </strong>
 
                   <div className="section-info-points-list">
                     <div className="section-info-points-row featured">
-                      <span>
-                        Marcador exacte
-                      </span>
+                      <span>Marcador exacte</span>
 
-                      <strong>
-                        +50
-                      </strong>
+                      <strong>+50</strong>
                     </div>
 
                     <div className="section-info-points-row">
-                      <span>
-                        Encertar el signe del partit
-                      </span>
+                      <span>Encertar el signe del partit</span>
 
-                      <strong>
-                        +10
-                      </strong>
+                      <strong>+10</strong>
                     </div>
 
                     <div className="section-info-points-row">
-                      <span>
-                        Encertar els gols del Barça
-                      </span>
+                      <span>Encertar els gols del Barça</span>
 
-                      <strong>
-                        +15
-                      </strong>
+                      <strong>+15</strong>
                     </div>
 
                     <div className="section-info-points-row">
-                      <span>
-                        Encertar un número del marcador
-                      </span>
+                      <span>Encertar els gols del rival</span>
 
-                      <strong>
-                        +10
-                      </strong>
+                      <strong>+10</strong>
                     </div>
                   </div>
 
                   <small className="section-info-note">
-                    Si claves el marcador exacte, obtens +50.
-                    Si no, pots sumar els parcials. El número
-                    dels gols del Barça no es duplica si ja
-                    està cobert pel bonus de +15.
+                    Si claves el marcador exacte, obtens +50. Si no, pots sumar
+                    els parcials. El número dels gols del Barça no es duplica si
+                    ja està cobert pel bonus de +15.
                   </small>
                 </div>
               )}
@@ -2362,28 +2355,17 @@ function App() {
               <div className="scoreboard">
                 <div className="score-team">
                   <div className="score-team-label">
-                    <img
-                      src={matchData.homeCrest}
-                      alt=""
-                    />
+                    <img src={matchData.homeCrest} alt="" />
 
-                    <strong>
-                      {matchData.homeShortName}
-                    </strong>
+                    <strong>{matchData.homeShortName}</strong>
                   </div>
 
                   <div className="score-control">
                     <button
                       type="button"
                       onClick={() => {
-                        setScoreTouched(true)
-                        setBarcaScore(
-                          (score) =>
-                            Math.max(
-                              0,
-                              score - 1,
-                            ),
-                        )
+                        setScoreTouched(true);
+                        setBarcaScore((score) => Math.max(0, score - 1));
                       }}
                     >
                       −
@@ -2392,9 +2374,7 @@ function App() {
                     <button
                       type="button"
                       className="score-value"
-                      onClick={() =>
-                        setScoreTouched(true)
-                      }
+                      onClick={() => setScoreTouched(true)}
                       aria-label={`Confirmar ${barcaScore} gols del Barça`}
                     >
                       {barcaScore}
@@ -2403,11 +2383,8 @@ function App() {
                     <button
                       type="button"
                       onClick={() => {
-                        setScoreTouched(true)
-                        setBarcaScore(
-                          (score) =>
-                            score + 1,
-                        )
+                        setScoreTouched(true);
+                        setBarcaScore((score) => score + 1);
                       }}
                     >
                       +
@@ -2415,34 +2392,21 @@ function App() {
                   </div>
                 </div>
 
-                <span className="score-separator">
-                  :
-                </span>
+                <span className="score-separator">:</span>
 
                 <div className="score-team">
                   <div className="score-team-label">
-                    <img
-                      src={matchData.awayCrest}
-                      alt=""
-                    />
+                    <img src={matchData.awayCrest} alt="" />
 
-                    <strong>
-                      {matchData.awayShortName}
-                    </strong>
+                    <strong>{matchData.awayShortName}</strong>
                   </div>
 
                   <div className="score-control">
                     <button
                       type="button"
                       onClick={() => {
-                        setScoreTouched(true)
-                        setRivalScore(
-                          (score) =>
-                            Math.max(
-                              0,
-                              score - 1,
-                            ),
-                        )
+                        setScoreTouched(true);
+                        setRivalScore((score) => Math.max(0, score - 1));
                       }}
                     >
                       −
@@ -2451,9 +2415,7 @@ function App() {
                     <button
                       type="button"
                       className="score-value"
-                      onClick={() =>
-                        setScoreTouched(true)
-                      }
+                      onClick={() => setScoreTouched(true)}
                       aria-label={`Confirmar ${rivalScore} gols de l'Al-Ahly`}
                     >
                       {rivalScore}
@@ -2462,11 +2424,8 @@ function App() {
                     <button
                       type="button"
                       onClick={() => {
-                        setScoreTouched(true)
-                        setRivalScore(
-                          (score) =>
-                            score + 1,
-                        )
+                        setScoreTouched(true);
+                        setRivalScore((score) => score + 1);
                       }}
                     >
                       +
@@ -2486,25 +2445,17 @@ function App() {
                   />
 
                   <div className="lotto-title-copy">
-                    <h2>
-                      La Lotto Flick
-                    </h2>
+                    <h2>La Lotto Flick</h2>
 
-                    <span className="formation-label">
-                      4-3-3 FIX
-                    </span>
+                    <span className="formation-label">4-3-3 FIX</span>
                   </div>
 
                   <button
                     type="button"
                     className="section-info-button"
-                    onClick={() =>
-                      toggleInfoSection('lineup')
-                    }
+                    onClick={() => toggleInfoSection("lineup")}
                     aria-label="Informació sobre la Lotto Flick"
-                    aria-expanded={
-                      openInfoSection === 'lineup'
-                    }
+                    aria-expanded={openInfoSection === "lineup"}
                     title="Com funciona aquesta secció?"
                   >
                     i
@@ -2514,21 +2465,18 @@ function App() {
                 <span
                   className={
                     lineupIsComplete
-                      ? 'lineup-counter completed'
-                      : 'lineup-counter'
+                      ? "lineup-counter completed"
+                      : "lineup-counter"
                   }
                 >
                   {lineupIsComplete
-                    ? 'FET · 11 / 11'
+                    ? "FET · 11 / 11"
                     : `OPCIONAL · ${lineupCount} / 11`}
                 </span>
               </div>
 
-              {openInfoSection === 'lineup' && (
-                <div
-                  className="section-info-panel"
-                  role="note"
-                >
+              {openInfoSection === "lineup" && (
+                <div className="section-info-panel" role="note">
                   <strong className="section-info-title">
                     PUNTS DE LA LOTTO FLICK
                   </strong>
@@ -2596,19 +2544,17 @@ function App() {
                   </div>
 
                   <small className="section-info-note">
-                    Compten els jugadors encertats, no la
-                    posició on els col·loques al camp.
+                    Compten els jugadors encertats, no la posició on els
+                    col·loques al camp.
                   </small>
                 </div>
               )}
 
               <p className="section-help">
-                Selecciona una posició i una xapa en
-                l’ordre que vulguis. Per desfer, selecciona
-                el jugador del camp i després torna a clicar
-                la seva mateixa xapa de la safata, o fes-ho
-                a l’inrevés. També pots arrossegar-lo sobre
-                la seva xapa.
+                Selecciona una posició i una xapa en l’ordre que vulguis. Per
+                desfer, selecciona el jugador del camp i després torna a clicar
+                la seva mateixa xapa de la safata, o fes-ho a l’inrevés. També
+                pots arrossegar-lo sobre la seva xapa.
               </p>
 
               <div className="football-field">
@@ -2627,135 +2573,78 @@ function App() {
                       className={`formation-row formation-${line.id}`}
                       aria-label={line.label}
                     >
-                      {line.slots.map(
-                        (slotIndex) => {
-                          const playerId =
-                            lineup[slotIndex]
+                      {line.slots.map((slotIndex) => {
+                        const playerId = lineup[slotIndex];
 
-                          const player =
-                            playerId
-                              ? playersById[
-                                  playerId
-                                ]
-                              : null
+                        const player = playerId ? playersById[playerId] : null;
 
-                          const isTargetSelected =
-                            selectedSlotIndex ===
-                            slotIndex
+                        const isTargetSelected =
+                          selectedSlotIndex === slotIndex;
 
-                          const isProtagonist =
-                            Boolean(player) &&
-                            protagonistId ===
-                              player.id
+                        const isProtagonist =
+                          Boolean(player) && protagonistId === player.id;
 
-                          const isPlayerSelected =
-                            Boolean(player) &&
-                            selectedPlayerId ===
-                              player.id
+                        const isPlayerSelected =
+                          Boolean(player) && selectedPlayerId === player.id;
 
-                          const fieldSlotClassName =
-                            [
-                              'field-slot',
+                        const fieldSlotClassName = [
+                          "field-slot",
+                          player ? "occupied" : "",
+                          isTargetSelected ? "target-selected" : "",
+                          isPlayerSelected ? "player-selected" : "",
+                          isProtagonist ? "protagonist" : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ");
+
+                        return (
+                          <button
+                            key={slotIndex}
+                            type="button"
+                            className={fieldSlotClassName}
+                            draggable={Boolean(player)}
+                            onDragStart={(event) => {
+                              if (player) {
+                                handleDragStart(event, player.id);
+                              }
+                            }}
+                            onDragOver={(event) => event.preventDefault()}
+                            onDrop={(event) => handleDrop(event, slotIndex)}
+                            onClick={() => handleSlotClick(slotIndex)}
+                            aria-pressed={isTargetSelected || isPlayerSelected}
+                            aria-label={
                               player
-                                ? 'occupied'
-                                : '',
-                              isTargetSelected
-                                ? 'target-selected'
-                                : '',
-                              isPlayerSelected
-                                ? 'player-selected'
-                                : '',
-                              isProtagonist
-                                ? 'protagonist'
-                                : '',
-                            ]
-                              .filter(Boolean)
-                              .join(' ')
+                                ? `Posició de ${player.name}`
+                                : `Posició lliure ${slotIndex + 1}`
+                            }
+                          >
+                            {player ? (
+                              <>
+                                <img
+                                  src={player.image}
+                                  className="field-player-image"
+                                  alt=""
+                                />
 
-                          return (
-                            <button
-                              key={slotIndex}
-                              type="button"
-                              className={
-                                fieldSlotClassName
-                              }
-                              draggable={
-                                Boolean(player)
-                              }
-                              onDragStart={(
-                                event,
-                              ) => {
-                                if (
-                                  player
-                                ) {
-                                  handleDragStart(
-                                    event,
-                                    player.id,
-                                  )
-                                }
-                              }}
-                              onDragOver={(
-                                event,
-                              ) =>
-                                event.preventDefault()
-                              }
-                              onDrop={(
-                                event,
-                              ) =>
-                                handleDrop(
-                                  event,
-                                  slotIndex,
-                                )
-                              }
-                              onClick={() =>
-                                handleSlotClick(
-                                  slotIndex,
-                                )
-                              }
-                              aria-pressed={
-                                isTargetSelected ||
-                                isPlayerSelected
-                              }
-                              aria-label={
-                                player
-                                  ? `Posició de ${player.name}`
-                                  : `Posició lliure ${slotIndex + 1}`
-                              }
-                            >
-                              {player ? (
-                                <>
-                                  <img
-                                    src={
-                                      player.image
-                                    }
-                                    className="field-player-image"
-                                    alt=""
-                                  />
+                                {isProtagonist && (
+                                  <span
+                                    className="protagonist-crown"
+                                    aria-hidden="true"
+                                  >
+                                    ★
+                                  </span>
+                                )}
 
-                                  {isProtagonist && (
-                                    <span
-                                      className="protagonist-crown"
-                                      aria-hidden="true"
-                                    >
-                                      ★
-                                    </span>
-                                  )}
-
-                                  <small className="field-player-name">
-                                    {
-                                      player.shortName
-                                    }
-                                  </small>
-                                </>
-                              ) : (
-                                <span className="field-slot-plus">
-                                  +
-                                </span>
-                              )}
-                            </button>
-                          )
-                        },
-                      )}
+                                <small className="field-player-name">
+                                  {player.shortName}
+                                </small>
+                              </>
+                            ) : (
+                              <span className="field-slot-plus">+</span>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   ))}
                 </div>
@@ -2763,76 +2652,40 @@ function App() {
 
               <div className="player-tray">
                 <div className="player-tray-header">
-                  <strong>
-                    23 XAPES DEL BARÇA
-                  </strong>
+                  <strong>23 XAPES DEL BARÇA</strong>
 
-                  <span>
-                    {players.length} jugadors
-                  </span>
+                  <span>{players.length} jugadors</span>
                 </div>
 
                 <div className="player-badges">
                   {players.map((player) => {
-                    const isInLineup =
-                      lineup.includes(
-                        player.id,
-                      )
+                    const isInLineup = lineup.includes(player.id);
 
-                    const isPendingSelection =
-                      selectedPlayerId ===
-                      player.id
+                    const isPendingSelection = selectedPlayerId === player.id;
 
-                    const playerBadgeClassName =
-                      [
-                        'player-badge',
-                        isInLineup
-                          ? 'selected'
-                          : '',
-                        isPendingSelection
-                          ? 'pending-selection'
-                          : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')
+                    const playerBadgeClassName = [
+                      "player-badge",
+                      isInLineup ? "selected" : "",
+                      isPendingSelection ? "pending-selection" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ");
 
                     return (
                       <button
                         key={player.id}
                         type="button"
-                        className={
-                          playerBadgeClassName
-                        }
+                        className={playerBadgeClassName}
                         draggable
-                        onDragStart={(
-                          event,
-                        ) =>
-                          handleDragStart(
-                            event,
-                            player.id,
-                          )
+                        onDragStart={(event) =>
+                          handleDragStart(event, player.id)
                         }
-                        onDragOver={(
-                          event,
-                        ) =>
-                          event.preventDefault()
+                        onDragOver={(event) => event.preventDefault()}
+                        onDrop={(event) =>
+                          handlePlayerBadgeDrop(event, player.id)
                         }
-                        onDrop={(
-                          event,
-                        ) =>
-                          handlePlayerBadgeDrop(
-                            event,
-                            player.id,
-                          )
-                        }
-                        onClick={() =>
-                          handlePlayerClick(
-                            player.id,
-                          )
-                        }
-                        aria-pressed={
-                          isPendingSelection
-                        }
+                        onClick={() => handlePlayerClick(player.id)}
+                        aria-pressed={isPendingSelection}
                       >
                         <img
                           src={player.image}
@@ -2840,11 +2693,9 @@ function App() {
                           alt=""
                         />
 
-                        <span>
-                          {player.name}
-                        </span>
+                        <span>{player.name}</span>
                       </button>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -2853,25 +2704,16 @@ function App() {
             <section className="prediction-card protagonist-card">
               <div className="section-heading">
                 <div>
-                  <span className="step-number">
-                    03
-                  </span>
+                  <span className="step-number">03</span>
 
-                  <h2>
-                    Marca el protagonista
-                  </h2>
+                  <h2>Marca el protagonista</h2>
 
                   <button
                     type="button"
                     className="section-info-button"
-                    onClick={() =>
-                      toggleInfoSection('protagonist')
-                    }
+                    onClick={() => toggleInfoSection("protagonist")}
                     aria-label="Informació sobre el protagonista"
-                    aria-expanded={
-                      openInfoSection ===
-                      'protagonist'
-                    }
+                    aria-expanded={openInfoSection === "protagonist"}
                     title="Com funciona aquesta secció?"
                   >
                     i
@@ -2881,168 +2723,116 @@ function App() {
                 <span
                   className={
                     protagonistIsComplete
-                      ? 'status-pill completed'
-                      : 'status-pill'
+                      ? "status-pill completed"
+                      : "status-pill"
                   }
                 >
-                  {protagonistIsComplete
-                    ? 'FET'
-                    : 'OPCIONAL'}
+                  {protagonistIsComplete ? "FET" : "OPCIONAL"}
                 </span>
               </div>
 
-              {openInfoSection === 'protagonist' && (
-                <div
-                  className="section-info-panel"
-                  role="note"
-                >
+              {openInfoSection === "protagonist" && (
+                <div className="section-info-panel" role="note">
                   <strong className="section-info-title">
                     PUNTS DEL PROTAGONISTA
                   </strong>
 
                   <div className="section-info-protagonist-grid">
                     <div className="section-info-points-row special">
-                      <span>
-                        Lamine Yamal
-                      </span>
+                      <span>Lamine Yamal</span>
 
-                      <strong>
-                        +5 / −15
-                      </strong>
+                      <strong>+5 / −15</strong>
                     </div>
 
                     <div className="section-info-points-row">
                       <span>
-                        Fermín López · Raphinha · Ferran
-                        Torres · Anthony Gordon
+                        Fermín López · Raphinha · Ferran Torres · Anthony Gordon
                       </span>
 
-                      <strong>
-                        +10 / −10
-                      </strong>
+                      <strong>+10 / −10</strong>
+                    </div>
+
+                    <div className="section-info-points-row">
+                      <span>Dani Olmo · Karim Adeyemi · Pedri</span>
+
+                      <strong>+20 / −10</strong>
+                    </div>
+
+                    <div className="section-info-points-row">
+                      <span>Frenkie de Jong · Jules Koundé · Marc Bernal</span>
+
+                      <strong>+30 / −10</strong>
                     </div>
 
                     <div className="section-info-points-row">
                       <span>
-                        Dani Olmo · Karim Adeyemi · Pedri
+                        João Cancelo · Ronald Araújo · Eric Garcia · Alejandro
+                        Balde
                       </span>
 
-                      <strong>
-                        +20 / −10
-                      </strong>
+                      <strong>+40 / −5</strong>
                     </div>
 
                     <div className="section-info-points-row">
                       <span>
-                        Frenkie de Jong · Jules Koundé ·
-                        Marc Bernal
+                        Gavi · Gerard Martín · Marc Casadó · Pau Cubarsí ·
+                        Andreas Christensen · Jofre Torrents
                       </span>
 
-                      <strong>
-                        +30 / −10
-                      </strong>
-                    </div>
-
-                    <div className="section-info-points-row">
-                      <span>
-                        João Cancelo · Ronald Araújo · Eric
-                        Garcia · Alejandro Balde
-                      </span>
-
-                      <strong>
-                        +40 / −5
-                      </strong>
-                    </div>
-
-                    <div className="section-info-points-row">
-                      <span>
-                        Gavi · Gerard Martín · Marc Casadó ·
-                        Pau Cubarsí · Andreas Christensen ·
-                        Jofre Torrents
-                      </span>
-
-                      <strong>
-                        +50 / −5
-                      </strong>
+                      <strong>+50 / −5</strong>
                     </div>
                   </div>
 
                   <small className="section-info-note">
-                    El primer número són els punts si marca
-                    o assisteix. El segon és la penalització
-                    si no participa en cap gol. Gol i
+                    El primer número són els punts si marca o assisteix. El
+                    segon és la penalització si no participa en cap gol. Gol i
                     assistència no acumulen.
                   </small>
                 </div>
               )}
 
               <p className="section-help">
-                Tria qualsevol jugador de camp.
-                Encertes si marca o dona una assistència.
-                Cada jugador té un premi i un risc segons
-                el seu grup.
+                Tria qualsevol jugador de camp. Encertes si marca o dona una
+                assistència. Cada jugador té un premi i un risc segons el seu
+                grup.
               </p>
 
               <div className="protagonist-combined-rule">
                 <div className="protagonist-combined-icons">
-                  <span className="protagonist-combined-icon goal">
-                    ⚽
-                  </span>
+                  <span className="protagonist-combined-icon goal">⚽</span>
 
-                  <span className="protagonist-combined-or">
-                    O
-                  </span>
+                  <span className="protagonist-combined-or">O</span>
 
-                  <span className="protagonist-combined-icon assist">
-                    A
-                  </span>
+                  <span className="protagonist-combined-icon assist">A</span>
                 </div>
 
                 <div className="protagonist-combined-copy">
-                  <span>
-                    UNA ÚNICA APOSTA
-                  </span>
+                  <span>UNA ÚNICA APOSTA</span>
 
-                  <strong>
-                    MARCA O ASSISTEIX
-                  </strong>
+                  <strong>MARCA O ASSISTEIX</strong>
 
                   <small>
-                    Gol o assistència donen el mateix
-                    encert. Si fa totes dues coses,
-                    només puntua una vegada.
+                    Gol o assistència donen el mateix encert. Si fa totes dues
+                    coses, només puntua una vegada.
                   </small>
                 </div>
 
-                <span className="protagonist-binary-pill">
-                  RESULTAT BINARI
-                </span>
+                <span className="protagonist-binary-pill">RESULTAT BINARI</span>
               </div>
 
               <div className="protagonist-picker">
                 <div className="protagonist-picker-copy">
-                  <span>
-                    PROTAGONISTA
-                  </span>
+                  <span>PROTAGONISTA</span>
 
-                  <strong>
-                    Tria un dels 21 jugadors de camp
-                  </strong>
+                  <strong>Tria un dels 21 jugadors de camp</strong>
 
-                  <small>
-                    Cada opció mostra premi i penalització
-                  </small>
+                  <small>Cada opció mostra premi i penalització</small>
                 </div>
 
                 <select
-                  value={
-                    protagonistId ?? ''
-                  }
+                  value={protagonistId ?? ""}
                   onChange={(event) =>
-                    setProtagonistId(
-                      event.target.value ||
-                        null,
-                    )
+                    setProtagonistId(event.target.value || null)
                   }
                   aria-label="Selecciona el protagonista"
                 >
@@ -3050,31 +2840,23 @@ function App() {
                     Selecciona un dels 21 jugadors de camp
                   </option>
 
-                  {eligibleProtagonistPlayers.map(
-                    (player) => {
-                      const scoring =
-                        protagonistScoringByPlayerId[
-                          player.id
-                        ]
+                  {eligibleProtagonistPlayers.map((player) => {
+                    const scoring = protagonistScoringByPlayerId[player.id];
 
-                      return (
-                        <option
-                          key={player.id}
-                          value={player.id}
-                        >
-                          {`${player.name} · +${scoring.hitPoints} si encertes · ${scoring.missPoints} si falles`}
-                        </option>
-                      )
-                    },
-                  )}
+                    return (
+                      <option key={player.id} value={player.id}>
+                        {`${player.name} · +${scoring.hitPoints} si encertes · ${scoring.missPoints} si falles`}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
               <div
                 className={
                   protagonistIsComplete
-                    ? 'protagonist-showcase selected'
-                    : 'protagonist-showcase'
+                    ? "protagonist-showcase selected"
+                    : "protagonist-showcase"
                 }
               >
                 {protagonistIsComplete ? (
@@ -3099,64 +2881,43 @@ function App() {
                         PROTAGONISTA ESCOLLIT
                       </span>
 
-                      <strong>
-                        {protagonist.name}
-                      </strong>
+                      <strong>{protagonist.name}</strong>
 
                       <div className="protagonist-score-grid">
                         <div className="protagonist-score-box hit">
-                          <span>
-                            SI MARCA O ASSISTEIX
-                          </span>
+                          <span>SI MARCA O ASSISTEIX</span>
 
-                          <strong>
-                            +
-                            {
-                              protagonistScoring.hitPoints
-                            }
-                          </strong>
+                          <strong>+{protagonistScoring.hitPoints}</strong>
                         </div>
 
                         <div className="protagonist-score-box miss">
-                          <span>
-                            SI NO PARTICIPA EN GOL
-                          </span>
+                          <span>SI NO PARTICIPA EN GOL</span>
 
-                          <strong>
-                            {
-                              protagonistScoring.missPoints
-                            }
-                          </strong>
+                          <strong>{protagonistScoring.missPoints}</strong>
                         </div>
                       </div>
 
                       <small className="protagonist-single-score-note">
-                        L’aposta no es multiplica: encara que
-                        faci més d’un gol, més d’una assistència
-                        o totes dues coses, només genera un
-                        encert.
+                        L’aposta no es multiplica: encara que faci més d’un gol,
+                        més d’una assistència o totes dues coses, només genera
+                        un encert.
                       </small>
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="protagonist-empty-icon">
-                      ★
-                    </div>
+                    <div className="protagonist-empty-icon">★</div>
 
                     <div className="protagonist-showcase-copy">
                       <span className="protagonist-kicker">
                         FALTA UN ÚLTIM PAS
                       </span>
 
-                      <strong>
-                        Tria el teu protagonista
-                      </strong>
+                      <strong>Tria el teu protagonista</strong>
 
                       <small>
-                        Escull qualsevol dels 21 jugadors de
-                        camp. Veuràs el seu grup, els punts
-                        positius i la penalització abans de
+                        Escull qualsevol dels 21 jugadors de camp. Veuràs el seu
+                        grup, els punts positius i la penalització abans de
                         confirmar.
                       </small>
                     </div>
@@ -3170,95 +2931,70 @@ function App() {
                 <span>
                   {scoreTouched
                     ? `RESULTAT ${barcaScore}-${rivalScore}`
-                    : 'RESULTAT PENDENT'}
+                    : "RESULTAT PENDENT"}
                 </span>
 
                 <span>
                   {lineupIsComplete
-                    ? 'XI 11/11'
+                    ? "XI 11/11"
                     : `XI ${lineupCount}/11 · OPCIONAL`}
                 </span>
 
                 <span>
                   {protagonistIsComplete
                     ? `PROTAGONISTA ${protagonist.shortName.toUpperCase()} · +${protagonistScoring.hitPoints}/${protagonistScoring.missPoints}`
-                    : 'PROTAGONISTA OPCIONAL'}
+                    : "PROTAGONISTA OPCIONAL"}
                 </span>
 
                 <button
                   type="button"
                   className="section-info-button confirm-info-button"
-                  onClick={() =>
-                    toggleInfoSection('confirm')
-                  }
+                  onClick={() => toggleInfoSection("confirm")}
                   aria-label="Informació sobre les combinacions de la porra"
-                  aria-expanded={
-                    openInfoSection === 'confirm'
-                  }
+                  aria-expanded={openInfoSection === "confirm"}
                   title="Què és obligatori i què és opcional?"
                 >
                   i
                 </button>
               </div>
 
-              {openInfoSection === 'confirm' && (
-                <div
-                  className="confirm-info-panel"
-                  role="note"
-                >
+              {openInfoSection === "confirm" && (
+                <div className="confirm-info-panel" role="note">
                   <strong className="confirm-info-title">
                     ENVIA LA PORRA COM TU VULGUIS
                   </strong>
 
                   <p className="confirm-info-intro">
-                    <strong>
-                      Només el resultat és obligatori.
-                    </strong>{' '}
-                    La Lotto Flick i el protagonista són
-                    opcionals i els pots afegir per separat
-                    o combinar-los.
+                    <strong>Només el resultat és obligatori.</strong> La Lotto
+                    Flick i el protagonista són opcionals i els pots afegir per
+                    separat o combinar-los.
                   </p>
 
                   <div className="confirm-info-options">
                     <div className="confirm-info-option">
-                      <strong>
-                        RESULTAT
-                      </strong>
+                      <strong>RESULTAT</strong>
+
+                      <span>La porra mínima i vàlida.</span>
+                    </div>
+
+                    <div className="confirm-info-option">
+                      <strong>RESULTAT + LOTTO FLICK</strong>
 
                       <span>
-                        La porra mínima i vàlida.
+                        La Lotto s’inclou quan completes els 11 titulars.
                       </span>
                     </div>
 
                     <div className="confirm-info-option">
-                      <strong>
-                        RESULTAT + LOTTO FLICK
-                      </strong>
+                      <strong>RESULTAT + PROTAGONISTA</strong>
 
-                      <span>
-                        La Lotto s’inclou quan completes els
-                        11 titulars.
-                      </span>
-                    </div>
-
-                    <div className="confirm-info-option">
-                      <strong>
-                        RESULTAT + PROTAGONISTA
-                      </strong>
-
-                      <span>
-                        Afegeix qui marcarà o assistirà.
-                      </span>
+                      <span>Afegeix qui marcarà o assistirà.</span>
                     </div>
 
                     <div className="confirm-info-option featured">
-                      <strong>
-                        PORRA COMPLETA
-                      </strong>
+                      <strong>PORRA COMPLETA</strong>
 
-                      <span>
-                        Resultat + 11 titulars + protagonista.
-                      </span>
+                      <span>Resultat + 11 titulars + protagonista.</span>
                     </div>
                   </div>
                 </div>
@@ -3281,7 +3017,7 @@ function App() {
           </section>
         )}
 
-        {activePage === 'ranking' && (
+        {activePage === "ranking" && (
           <section className="ranking-page">
             <header className="ranking-hero">
               <div className="ranking-hero-top">
@@ -3290,22 +3026,17 @@ function App() {
                     LA CLASSIFICACIÓ DE LA CULERADA
                   </span>
 
-                  <h1>
-                    RÀNQUING
-                  </h1>
+                  <h1>RÀNQUING</h1>
 
                   <p>
-                    Identitat X, rivalitat culer i punts
-                    transparents partit rere partit.
+                    Identitat culer verificada, rivalitat i punts transparents
+                    partit rere partit.
                   </p>
                 </div>
 
                 <span className="ranking-x-origin">
-                  <strong>
-                    𝕏
-                  </strong>
-
-                  IDENTITAT X
+                  <strong>✓</strong>
+                  IDENTITAT CULER
                 </span>
               </div>
 
@@ -3313,59 +3044,41 @@ function App() {
                 <button
                   type="button"
                   className="ranking-current-user"
-                  onClick={() =>
-                    openRankingProfile(
-                      currentRankingUser.id,
-                    )
-                  }
+                  onClick={() => openRankingProfile(currentRankingUser.id)}
                 >
-                  <RankingAvatar
-                    user={currentRankingUser}
-                    size="large"
-                  />
+                  <RankingAvatar user={currentRankingUser} size="large" />
 
                   <span className="ranking-current-copy">
-                    <small>
-                      LA TEVA POSICIÓ
-                    </small>
+                    <small>LA TEVA POSICIÓ</small>
 
-                    <strong>
-                      {
-                        currentRankingUser.displayName
-                      }
-                    </strong>
+                    <strong>{currentRankingUser.displayName}</strong>
 
-                    <span>
-                      {
-                        currentRankingUser.handle
-                      }
+                    <span className="ranking-current-source">
+                      {currentRankingUser.hasXIdentity ? (
+                        <>
+                          <span aria-hidden="true">𝕏</span>
+                          {currentRankingUser.handle}
+                        </>
+                      ) : (
+                        <>
+                          <GoogleMark className="ranking-provider-mark google" />
+                          COMPTE GOOGLE
+                        </>
+                      )}
                     </span>
                   </span>
 
                   <span className="ranking-current-stat">
-                    <small>
-                      POSICIÓ
-                    </small>
+                    <small>POSICIÓ</small>
 
-                    <strong>
-                      #
-                      {
-                        currentRankingPosition
-                      }
-                    </strong>
+                    <strong>#{currentRankingPosition}</strong>
                   </span>
 
                   <span className="ranking-current-stat points">
-                    <small>
-                      PUNTS
-                    </small>
+                    <small>PUNTS</small>
 
                     <strong>
-                      {
-                        currentRankingUser[
-                          rankingTab
-                        ].totalPoints
-                      }
+                      {currentRankingUser[rankingTab].totalPoints}
                     </strong>
                   </span>
                 </button>
@@ -3380,19 +3093,13 @@ function App() {
               <button
                 type="button"
                 role="tab"
-                aria-selected={
-                  rankingTab === 'general'
-                }
+                aria-selected={rankingTab === "general"}
                 className={
-                  rankingTab === 'general'
-                    ? 'ranking-tab active'
-                    : 'ranking-tab'
+                  rankingTab === "general"
+                    ? "ranking-tab active"
+                    : "ranking-tab"
                 }
-                onClick={() =>
-                  changeRankingTab(
-                    'general',
-                  )
-                }
+                onClick={() => changeRankingTab("general")}
               >
                 GENERAL
               </button>
@@ -3400,19 +3107,13 @@ function App() {
               <button
                 type="button"
                 role="tab"
-                aria-selected={
-                  rankingTab === 'jornada'
-                }
+                aria-selected={rankingTab === "jornada"}
                 className={
-                  rankingTab === 'jornada'
-                    ? 'ranking-tab active'
-                    : 'ranking-tab'
+                  rankingTab === "jornada"
+                    ? "ranking-tab active"
+                    : "ranking-tab"
                 }
-                onClick={() =>
-                  changeRankingTab(
-                    'jornada',
-                  )
-                }
+                onClick={() => changeRankingTab("jornada")}
               >
                 JORNADA
               </button>
@@ -3422,338 +3123,350 @@ function App() {
               <header className="ranking-board-heading">
                 <div>
                   <span>
-                    {rankingTab === 'general'
-                      ? 'CLASSIFICACIÓ GENERAL'
-                      : 'ÚLTIMA JORNADA'}
+                    {rankingTab === "general"
+                      ? "CLASSIFICACIÓ GENERAL"
+                      : "ÚLTIMA JORNADA"}
                   </span>
 
-                  <strong>
-                    {
-                      visibleRankingRows.length
-                    }
-                    {' '}culers carregats
-                  </strong>
+                  <strong>{visibleRankingRows.length} culers carregats</strong>
                 </div>
 
-                <small>
-                  20 EN 20 · SENSE LÍMIT
-                </small>
+                <small>20 EN 20 · SENSE LÍMIT</small>
               </header>
 
-              <div
-                className="ranking-table-head"
-                aria-hidden="true"
-              >
-                <span>
-                  POS
-                </span>
+              <div className="ranking-table-head" aria-hidden="true">
+                <span>POS</span>
 
-                <span>
-                  CULER
-                </span>
+                <span>CULER</span>
 
-                <span>
-                  RESULTAT
-                </span>
+                <span>RESULTAT</span>
 
-                <span>
-                  XI
-                </span>
+                <span>XI</span>
 
-                <span>
-                  PROTAGONISTA
-                </span>
+                <span>PROTAGONISTA</span>
 
-                <span>
-                  PTS
-                </span>
+                <span>PTS</span>
               </div>
 
               <div className="ranking-list">
-                {visibleRankingRows.map(
-                  (user, index) => {
-                    const position =
-                      index + 1
+                {visibleRankingRows.map((user, index) => {
+                  const position = index + 1;
 
-                    const points =
-                      user[rankingTab]
+                  const points = user[rankingTab];
 
-                    const medal =
-                      position === 1
-                        ? '🥇'
-                        : position === 2
-                          ? '🥈'
-                          : position === 3
-                            ? '🥉'
-                            : null
+                  const medal =
+                    position === 1
+                      ? "🥇"
+                      : position === 2
+                        ? "🥈"
+                        : position === 3
+                          ? "🥉"
+                          : null;
 
-                    const rankingRowClassName =
-                      [
-                        'ranking-row',
-                        user.isCurrentUser
-                          ? 'current-user'
-                          : '',
-                        position <= 3
-                          ? 'podium'
-                          : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')
+                  const rankingRowClassName = [
+                    "ranking-row",
+                    user.isCurrentUser ? "current-user" : "",
+                    position <= 3 ? "podium" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ");
 
-                    return (
-                      <article
-                        key={`${rankingTab}-${user.id}`}
-                        className={
-                          rankingRowClassName
-                        }
+                  return (
+                    <article
+                      key={`${rankingTab}-${user.id}`}
+                      className={rankingRowClassName}
+                    >
+                      <span className="ranking-position">
+                        {medal ? (
+                          <span className="ranking-medal">{medal}</span>
+                        ) : (
+                          position
+                        )}
+                      </span>
+
+                      <button
+                        type="button"
+                        className="ranking-identity"
+                        onClick={() => openRankingProfile(user.id)}
                       >
-                        <span className="ranking-position">
-                          {medal ? (
-                            <span className="ranking-medal">
-                              {medal}
-                            </span>
-                          ) : (
-                            position
-                          )}
+                        <RankingAvatar user={user} />
+
+                        <span className="ranking-identity-copy">
+                          <strong>
+                            {user.displayName}
+
+                            {user.isCurrentUser && (
+                              <span className="ranking-you-badge">TU</span>
+                            )}
+                          </strong>
+
+                          <small>
+                            {user.hasXIdentity ? (
+                              <>
+                                <span aria-hidden="true">𝕏</span>
+                                {user.handle}
+                              </>
+                            ) : (
+                              <>
+                                <GoogleMark className="ranking-provider-mark google" />
+                                COMPTE GOOGLE
+                              </>
+                            )}
+                          </small>
                         </span>
+                      </button>
 
-                        <button
-                          type="button"
-                          className="ranking-identity"
-                          onClick={() =>
-                            openRankingProfile(
-                              user.id,
-                            )
-                          }
-                        >
-                          <RankingAvatar
-                            user={user}
-                          />
+                      <span
+                        className="ranking-breakdown result"
+                        data-label="RESULTAT"
+                      >
+                        {points.resultPoints}
+                      </span>
 
-                          <span className="ranking-identity-copy">
-                            <strong>
-                              {
-                                user.displayName
-                              }
+                      <span className="ranking-breakdown xi" data-label="XI">
+                        {points.xiPoints}
+                      </span>
 
-                              {user.isCurrentUser && (
-                                <span className="ranking-you-badge">
-                                  TU
-                                </span>
-                              )}
-                            </strong>
+                      <span
+                        className="ranking-breakdown protagonist"
+                        data-label="PROTAGONISTA"
+                      >
+                        {points.protagonistPoints}
+                      </span>
 
-                            <small>
-                              <span aria-hidden="true">
-                                𝕏
-                              </span>
-
-                              {user.handle}
-                            </small>
-                          </span>
-                        </button>
-
-                        <span
-                          className="ranking-breakdown result"
-                          data-label="RESULTAT"
-                        >
-                          {
-                            points.resultPoints
-                          }
-                        </span>
-
-                        <span
-                          className="ranking-breakdown xi"
-                          data-label="XI"
-                        >
-                          {points.xiPoints}
-                        </span>
-
-                        <span
-                          className="ranking-breakdown protagonist"
-                          data-label="PROTAGONISTA"
-                        >
-                          {
-                            points.protagonistPoints
-                          }
-                        </span>
-
-                        <strong
-                          className="ranking-total"
-                          data-label="PTS"
-                        >
-                          {
-                            points.totalPoints
-                          }
-                        </strong>
-                      </article>
-                    )
-                  },
-                )}
+                      <strong className="ranking-total" data-label="PTS">
+                        {points.totalPoints}
+                      </strong>
+                    </article>
+                  );
+                })}
               </div>
 
               <div className="ranking-load-more">
                 {rankingHasMore ? (
                   <>
-                    <button
-                      type="button"
-                      onClick={
-                        loadMoreRanking
-                      }
-                    >
+                    <button type="button" onClick={loadMoreRanking}>
                       CARREGAR 20 MÉS
                     </button>
 
                     <small>
-                      També es carreguen automàticament
-                      quan baixes.
+                      També es carreguen automàticament quan baixes.
                     </small>
                   </>
                 ) : (
-                  <span>
-                    HAS ARRIBAT AL FINAL DEL RÀNQUING
-                  </span>
+                  <span>HAS ARRIBAT AL FINAL DEL RÀNQUING</span>
                 )}
               </div>
             </section>
           </section>
         )}
 
-        {activePage === 'profile' &&
+        {activePage === "profile" &&
           selectedProfileUser &&
           selectedProfileData && (
             <section className="profile-page">
               <header
                 className={
                   selectedProfileUser.isCurrentUser
-                    ? 'profile-hero own-profile'
-                    : 'profile-hero public-profile'
+                    ? "profile-hero own-profile"
+                    : "profile-hero public-profile"
                 }
               >
                 <div className="profile-identity-block">
-                  <RankingAvatar
-                    user={selectedProfileUser}
-                    size="profile"
-                  />
+                  <RankingAvatar user={selectedProfileUser} size="profile" />
 
                   <div className="profile-identity-copy">
                     <span className="profile-kicker">
                       {selectedProfileUser.isCurrentUser
-                        ? 'EL TEU PERFIL'
-                        : 'PERFIL PÚBLIC'}
+                        ? "EL TEU PERFIL"
+                        : "PERFIL PÚBLIC"}
                     </span>
 
-                    <h1>
-                      {
-                        selectedProfileUser.displayName
-                      }
-                    </h1>
+                    <h1>{selectedProfileUser.displayName}</h1>
 
-                    <a
-                      href={
-                        selectedProfileUser.twitterUrl
-                      }
-                      target="_blank"
-                      rel="noreferrer"
-                      className="profile-x-handle"
-                    >
-                      <span aria-hidden="true">
-                        𝕏
+                    {selectedProfileUser.hasXIdentity &&
+                    selectedProfileUser.twitterUrl ? (
+                      <a
+                        href={selectedProfileUser.twitterUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="profile-x-handle"
+                      >
+                        <span aria-hidden="true">𝕏</span>
+
+                        {selectedProfileUser.handle}
+                      </a>
+                    ) : isOwnAuthenticatedProfile ? (
+                      <span className="profile-account-source">
+                        <GoogleMark className="profile-provider-mark google" />
+                        COMPTE GOOGLE
                       </span>
+                    ) : null}
 
-                      {
-                        selectedProfileUser.handle
-                      }
-                    </a>
+                    {isOwnAuthenticatedProfile ? (
+                      <div className="profile-inline-actions">
+                        <button
+                          type="button"
+                          className="profile-inline-action"
+                          disabled={profileLoading || profileActionLoading}
+                          onClick={() => {
+                            setProfileDraftName(profileDisplayName);
+                            setProfileNameEditorOpen(
+                              (currentValue) => !currentValue,
+                            );
+                            setProfileFeedback(null);
+                          }}
+                        >
+                          <span aria-hidden="true">✎</span>
+                          CANVIA NOM
+                        </button>
 
-                    <div className="profile-identity-badges">
-                      <span>
-                        IDENTITAT X
-                      </span>
+                        <button
+                          type="button"
+                          className="profile-inline-action"
+                          disabled={profileLoading || profileActionLoading}
+                          onClick={() => profileAvatarInputRef.current?.click()}
+                        >
+                          <span aria-hidden="true">◉</span>
+                          CANVIA AVATAR
+                        </button>
 
-                      <span>
-                        CULER DES DE 2026
-                      </span>
-                    </div>
+                        <input
+                          ref={profileAvatarInputRef}
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          className="profile-avatar-input"
+                          onChange={handleProfileAvatarChange}
+                        />
+                      </div>
+                    ) : (
+                      <div className="profile-identity-badges">
+                        {selectedProfileUser.hasXIdentity && (
+                          <span>IDENTITAT X</span>
+                        )}
+
+                        <span>
+                          CULER DES DE {selectedProfileUser.joinedYear || 2026}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="profile-hero-stats">
                   <div>
-                    <span>
-                      POSICIÓ GENERAL
-                    </span>
+                    <span>POSICIÓ GENERAL</span>
 
-                    <strong>
-                      #
-                      {
-                        selectedProfilePosition
-                      }
-                    </strong>
+                    <strong>#{selectedProfilePosition}</strong>
                   </div>
 
                   <div className="gold">
-                    <span>
-                      PUNTS
-                    </span>
+                    <span>PUNTS</span>
 
-                    <strong>
-                      {
-                        selectedProfileUser.general
-                          .totalPoints
-                      }
-                    </strong>
+                    <strong>{selectedProfileUser.general.totalPoints}</strong>
                   </div>
                 </div>
 
-                <div className="profile-hero-actions">
-                  <a
-                    href={
-                      selectedProfileUser.twitterUrl
-                    }
-                    target="_blank"
-                    rel="noreferrer"
-                    className="profile-action-button x"
-                  >
-                    <span aria-hidden="true">
-                      𝕏
-                    </span>
+                {(selectedProfileUser.twitterUrl ||
+                  !selectedProfileUser.isCurrentUser) && (
+                  <div className="profile-hero-actions">
+                    {selectedProfileUser.twitterUrl && (
+                      <a
+                        href={selectedProfileUser.twitterUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="profile-action-button x"
+                      >
+                        <span aria-hidden="true">𝕏</span>
+                        VEURE A X
+                      </a>
+                    )}
 
-                    VEURE A X
-                  </a>
-
-                  {!selectedProfileUser.isCurrentUser && (
-                    <button
-                      type="button"
-                      className="profile-action-button back"
-                      onClick={() =>
-                        setActivePage(
-                          'ranking',
-                        )
-                      }
-                    >
-                      ← RÀNQUING
-                    </button>
-                  )}
-                </div>
+                    {!selectedProfileUser.isCurrentUser && (
+                      <button
+                        type="button"
+                        className="profile-action-button back"
+                        onClick={() => setActivePage("ranking")}
+                      >
+                        ← RÀNQUING
+                      </button>
+                    )}
+                  </div>
+                )}
               </header>
 
-              <nav
-                className="profile-tabs"
-                aria-label="Seccions del perfil"
-              >
+              {isOwnAuthenticatedProfile && profileNameEditorOpen && (
+                <form
+                  className="profile-name-editor"
+                  onSubmit={handleSaveProfileName}
+                >
+                  <div>
+                    <span>EDITA EL TEU NOM PÚBLIC</span>
+                    <strong>Com vols aparèixer a Vesalaporra?</strong>
+                  </div>
+
+                  <input
+                    type="text"
+                    value={profileDraftName}
+                    minLength={PROFILE_NAME_MIN_LENGTH}
+                    maxLength={PROFILE_NAME_MAX_LENGTH}
+                    onChange={(event) =>
+                      setProfileDraftName(event.target.value)
+                    }
+                    autoFocus
+                    aria-label="Nom públic de Vesalaporra"
+                  />
+
+                  <div className="profile-name-editor-actions">
+                    <button
+                      type="button"
+                      className="secondary"
+                      disabled={profileActionLoading}
+                      onClick={() => {
+                        setProfileNameEditorOpen(false);
+                        setProfileDraftName(profileDisplayName);
+                      }}
+                    >
+                      CANCEL·LA
+                    </button>
+
+                    <button
+                      type="submit"
+                      className="primary"
+                      disabled={profileActionLoading}
+                    >
+                      {profileActionLoading ? "GUARDANT..." : "GUARDA NOM"}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {isOwnAuthenticatedProfile && profileFeedback?.message && (
+                <div
+                  className={`profile-feedback ${profileFeedback.type}`}
+                  role={profileFeedback.type === "error" ? "alert" : "status"}
+                >
+                  <span>{profileFeedback.message}</span>
+
+                  <button
+                    type="button"
+                    onClick={() => setProfileFeedback(null)}
+                    aria-label="Tanca el missatge del perfil"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+
+              <nav className="profile-tabs" aria-label="Seccions del perfil">
                 <button
                   type="button"
                   className={
-                    profileTab === 'overview'
-                      ? 'profile-tab active'
-                      : 'profile-tab'
+                    profileTab === "overview"
+                      ? "profile-tab active"
+                      : "profile-tab"
                   }
-                  onClick={() =>
-                    setProfileTab(
-                      'overview',
-                    )
-                  }
+                  onClick={() => setProfileTab("overview")}
                 >
                   RESUM
                 </button>
@@ -3761,15 +3474,11 @@ function App() {
                 <button
                   type="button"
                   className={
-                    profileTab === 'history'
-                      ? 'profile-tab active'
-                      : 'profile-tab'
+                    profileTab === "history"
+                      ? "profile-tab active"
+                      : "profile-tab"
                   }
-                  onClick={() =>
-                    setProfileTab(
-                      'history',
-                    )
-                  }
+                  onClick={() => setProfileTab("history")}
                 >
                   HISTORIAL
                 </button>
@@ -3777,166 +3486,101 @@ function App() {
                 <button
                   type="button"
                   className={
-                    profileTab === 'achievements'
-                      ? 'profile-tab active'
-                      : 'profile-tab'
+                    profileTab === "achievements"
+                      ? "profile-tab active"
+                      : "profile-tab"
                   }
-                  onClick={() =>
-                    setProfileTab(
-                      'achievements',
-                    )
-                  }
+                  onClick={() => setProfileTab("achievements")}
                 >
                   MEDALLES
                 </button>
               </nav>
 
-              {profileTab === 'overview' && (
+              {profileTab === "overview" && (
                 <div className="profile-overview">
                   <section className="profile-main-stats">
                     <article>
-                      <span>
-                        POSICIÓ
-                      </span>
+                      <span>POSICIÓ</span>
 
-                      <strong>
-                        #
-                        {
-                          selectedProfilePosition
-                        }
-                      </strong>
+                      <strong>#{selectedProfilePosition}</strong>
 
-                      <small>
-                        classificació general
-                      </small>
+                      <small>classificació general</small>
                     </article>
 
                     <article className="featured">
-                      <span>
-                        PUNTS TOTALS
-                      </span>
+                      <span>PUNTS TOTALS</span>
 
-                      <strong>
-                        {
-                          selectedProfileUser.general
-                            .totalPoints
-                        }
-                      </strong>
+                      <strong>{selectedProfileUser.general.totalPoints}</strong>
 
-                      <small>
-                        temporada actual
-                      </small>
+                      <small>temporada actual</small>
                     </article>
 
                     <article>
-                      <span>
-                        PORRES
-                      </span>
+                      <span>PORRES</span>
 
-                      <strong>
-                        {
-                          selectedProfileData.played
-                        }
-                      </strong>
+                      <strong>{selectedProfileData.played}</strong>
 
-                      <small>
-                        partits jugats
-                      </small>
+                      <small>partits jugats</small>
                     </article>
 
                     <article>
-                      <span>
-                        EXACTES
-                      </span>
+                      <span>EXACTES</span>
 
-                      <strong>
-                        {
-                          selectedProfileData.exactScores
-                        }
-                      </strong>
+                      <strong>{selectedProfileData.exactScores}</strong>
 
-                      <small>
-                        marcadors clavats
-                      </small>
+                      <small>marcadors clavats</small>
                     </article>
                   </section>
 
                   <section className="profile-breakdown-card">
                     <header>
                       <div>
-                        <span>
-                          PUNTS PER CATEGORIA
-                        </span>
+                        <span>PUNTS PER CATEGORIA</span>
 
-                        <strong>
-                          D’on surt la puntuació
-                        </strong>
+                        <strong>D’on surt la puntuació</strong>
                       </div>
 
                       <small>
-                        TOTAL{' '}
-                        {
-                          selectedProfileUser.general
-                            .totalPoints
-                        }
+                        TOTAL {selectedProfileUser.general.totalPoints}
                       </small>
                     </header>
 
                     {[
                       {
-                        key: 'result',
-                        label: 'RESULTAT',
-                        value:
-                          selectedProfileUser.general
-                            .resultPoints,
-                        className: 'result',
+                        key: "result",
+                        label: "RESULTAT",
+                        value: selectedProfileUser.general.resultPoints,
+                        className: "result",
                       },
                       {
-                        key: 'xi',
-                        label: 'LOTTO FLICK',
-                        value:
-                          selectedProfileUser.general
-                            .xiPoints,
-                        className: 'xi',
+                        key: "xi",
+                        label: "LOTTO FLICK",
+                        value: selectedProfileUser.general.xiPoints,
+                        className: "xi",
                       },
                       {
-                        key: 'protagonist',
-                        label: 'PROTAGONISTA',
-                        value:
-                          selectedProfileUser.general
-                            .protagonistPoints,
-                        className:
-                          'protagonist',
+                        key: "protagonist",
+                        label: "PROTAGONISTA",
+                        value: selectedProfileUser.general.protagonistPoints,
+                        className: "protagonist",
                       },
                     ].map((item) => {
-                      const totalPoints =
-                        Math.max(
-                          1,
-                          selectedProfileUser.general
-                            .totalPoints,
-                        )
+                      const totalPoints = Math.max(
+                        1,
+                        selectedProfileUser.general.totalPoints,
+                      );
 
-                      const percentage =
-                        Math.max(
-                          0,
-                          Math.min(
-                            100,
-                            Math.round(
-                              (item.value /
-                                totalPoints) *
-                                100,
-                            ),
-                          ),
-                        )
+                      const percentage = Math.max(
+                        0,
+                        Math.min(
+                          100,
+                          Math.round((item.value / totalPoints) * 100),
+                        ),
+                      );
 
                       return (
-                        <div
-                          key={item.key}
-                          className="profile-breakdown-row"
-                        >
-                          <span>
-                            {item.label}
-                          </span>
+                        <div key={item.key} className="profile-breakdown-row">
+                          <span>{item.label}</span>
 
                           <div className="profile-breakdown-track">
                             <span
@@ -3947,112 +3591,64 @@ function App() {
                             ></span>
                           </div>
 
-                          <strong>
-                            {item.value}
-                          </strong>
+                          <strong>{item.value}</strong>
                         </div>
-                      )
+                      );
                     })}
                   </section>
 
                   <section className="profile-performance-grid">
                     <article>
-                      <span className="profile-performance-icon">
-                        🎯
-                      </span>
+                      <span className="profile-performance-icon">🎯</span>
 
                       <div>
-                        <small>
-                          RESULTATS EXACTES
-                        </small>
+                        <small>RESULTATS EXACTES</small>
 
-                        <strong>
-                          {
-                            selectedProfileData.exactScores
-                          }
-                        </strong>
+                        <strong>{selectedProfileData.exactScores}</strong>
 
-                        <span>
-                          de{' '}
-                          {
-                            selectedProfileData.played
-                          }{' '}
-                          porres
-                        </span>
+                        <span>de {selectedProfileData.played} porres</span>
                       </div>
                     </article>
 
                     <article>
-                      <span className="profile-performance-icon">
-                        🧠
-                      </span>
+                      <span className="profile-performance-icon">🧠</span>
 
                       <div>
-                        <small>
-                          MITJANA LOTTO
-                        </small>
+                        <small>MITJANA LOTTO</small>
 
                         <strong>
-                          {
-                            selectedProfileData.averageXi.toFixed(
-                              1,
-                            )
-                          }
+                          {selectedProfileData.averageXi.toFixed(1)}
                           /11
                         </strong>
 
-                        <span>
-                          lectura de titulars
-                        </span>
+                        <span>lectura de titulars</span>
                       </div>
                     </article>
 
                     <article>
-                      <span className="profile-performance-icon">
-                        ⭐
-                      </span>
+                      <span className="profile-performance-icon">⭐</span>
 
                       <div>
-                        <small>
-                          PROTAGONISTES
-                        </small>
+                        <small>PROTAGONISTES</small>
 
                         <strong>
-                          {
-                            selectedProfileData.protagonistHits
-                          }
-                          /
-                          {
-                            selectedProfileData.history
-                              .length
-                          }
+                          {selectedProfileData.protagonistHits}/
+                          {selectedProfileData.history.length}
                         </strong>
 
-                        <span>
-                          encerts recents
-                        </span>
+                        <span>encerts recents</span>
                       </div>
                     </article>
 
                     <article>
-                      <span className="profile-performance-icon">
-                        🔥
-                      </span>
+                      <span className="profile-performance-icon">🔥</span>
 
                       <div>
-                        <small>
-                          MILLOR RATXA
-                        </small>
+                        <small>MILLOR RATXA</small>
 
-                        <strong>
-                          {
-                            selectedProfileData.longestStreak
-                          }
-                        </strong>
+                        <strong>{selectedProfileData.longestStreak}</strong>
 
-                        <span>
-                          jornades positives
-                        </span>
+                        <span>jornades positives</span>
                       </div>
                     </article>
                   </section>
@@ -4060,100 +3656,58 @@ function App() {
                   <section className="profile-records-section">
                     <header>
                       <div>
-                        <span>
-                          MILLORS ACTUACIONS
-                        </span>
+                        <span>MILLORS ACTUACIONS</span>
 
-                        <strong>
-                          Els tres records del perfil
-                        </strong>
+                        <strong>Els tres records del perfil</strong>
                       </div>
                     </header>
 
                     <div className="profile-records-grid">
                       <article className="profile-record-card gold">
-                        <span className="profile-record-ordinal">
-                          01
-                        </span>
+                        <span className="profile-record-ordinal">01</span>
 
-                        <span className="profile-record-icon">
-                          🏆
-                        </span>
+                        <span className="profile-record-icon">🏆</span>
 
                         <strong>
-                          {
-                            selectedProfileData.bestMatch
-                              .totalPoints
-                          }{' '}
-                          PTS
+                          {selectedProfileData.bestMatch.totalPoints} PTS
                         </strong>
 
-                        <small>
-                          Millor jornada
-                        </small>
+                        <small>Millor jornada</small>
 
                         <p>
-                          {
-                            selectedProfileData.bestMatch
-                              .label
-                          }{' '}
-                          · Barça vs{' '}
-                          {
-                            selectedProfileData.bestMatch
-                              .opponent
-                          }
+                          {selectedProfileData.bestMatch.label} · Barça vs{" "}
+                          {selectedProfileData.bestMatch.opponent}
                         </p>
                       </article>
 
                       <article className="profile-record-card silver">
-                        <span className="profile-record-ordinal">
-                          02
-                        </span>
+                        <span className="profile-record-ordinal">02</span>
 
-                        <span className="profile-record-icon">
-                          🧠
-                        </span>
+                        <span className="profile-record-icon">🧠</span>
 
                         <strong>
-                          {
-                            selectedProfileData.bestXi
-                          }
+                          {selectedProfileData.bestXi}
                           /11
                         </strong>
 
-                        <small>
-                          Millor Lotto Flick
-                        </small>
+                        <small>Millor Lotto Flick</small>
 
-                        <p>
-                          Titulars encertats en una
-                          sola jornada.
-                        </p>
+                        <p>Titulars encertats en una sola jornada.</p>
                       </article>
 
                       <article className="profile-record-card bronze">
-                        <span className="profile-record-ordinal">
-                          03
-                        </span>
+                        <span className="profile-record-ordinal">03</span>
 
-                        <span className="profile-record-icon">
-                          ⭐
-                        </span>
+                        <span className="profile-record-icon">⭐</span>
 
                         <strong>
-                          +
-                          {
-                            selectedProfileData.bestProtagonistPoints
-                          }
+                          +{selectedProfileData.bestProtagonistPoints}
                         </strong>
 
-                        <small>
-                          Millor protagonista
-                        </small>
+                        <small>Millor protagonista</small>
 
                         <p>
-                          Premi màxim aconseguit amb
-                          una marca o assistència.
+                          Premi màxim aconseguit amb una marca o assistència.
                         </p>
                       </article>
                     </div>
@@ -4161,225 +3715,136 @@ function App() {
                 </div>
               )}
 
-              {profileTab === 'history' && (
+              {profileTab === "history" && (
                 <section className="profile-history-card">
                   <header>
                     <div>
-                      <span>
-                        HISTORIAL DE PORRES
-                      </span>
+                      <span>HISTORIAL DE PORRES</span>
 
-                      <strong>
-                        Últims partits puntuats
-                      </strong>
+                      <strong>Últims partits puntuats</strong>
                     </div>
 
-                    <small>
-                      {
-                        selectedProfileData.history
-                          .length
-                      }{' '}
-                      JORNADES
-                    </small>
+                    <small>{selectedProfileData.history.length} JORNADES</small>
                   </header>
 
                   <div className="profile-history-list">
-                    {selectedProfileData.history.map(
-                      (match) => (
-                        <article
-                          key={match.id}
-                          className="profile-history-row"
-                        >
-                          <div className="profile-history-match">
-                            <span className="profile-opponent-badge">
-                              {
-                                match.opponentShort
-                              }
-                            </span>
+                    {selectedProfileData.history.map((match) => (
+                      <article key={match.id} className="profile-history-row">
+                        <div className="profile-history-match">
+                          <span className="profile-opponent-badge">
+                            {match.opponentShort}
+                          </span>
 
-                            <div>
-                              <small>
-                                {match.label} ·{' '}
-                                {match.dateLabel}
-                              </small>
-
-                              <strong>
-                                Barça vs{' '}
-                                {
-                                  match.opponent
-                                }
-                              </strong>
-                            </div>
-                          </div>
-
-                          <div className="profile-history-score">
-                            <span>
-                              PRONÒSTIC
-                            </span>
-
-                            <strong>
-                              {
-                                match.predictedHome
-                              }
-                              -
-                              {
-                                match.predictedAway
-                              }
-                            </strong>
-
+                          <div>
                             <small>
-                              REAL{' '}
-                              {
-                                match.actualHome
-                              }
-                              -
-                              {
-                                match.actualAway
-                              }
+                              {match.label} · {match.dateLabel}
                             </small>
+
+                            <strong>Barça vs {match.opponent}</strong>
                           </div>
+                        </div>
 
-                          <div className="profile-history-details">
-                            <span className="result">
-                              RESULTAT{' '}
-                              {match.resultPoints >=
-                              0
-                                ? '+'
-                                : ''}
-                              {
-                                match.resultPoints
-                              }
-                            </span>
+                        <div className="profile-history-score">
+                          <span>PRONÒSTIC</span>
 
-                            <span className="xi">
-                              XI {match.xiHits}/11 ·{' '}
-                              {match.xiPoints >= 0
-                                ? '+'
-                                : ''}
-                              {match.xiPoints}
-                            </span>
+                          <strong>
+                            {match.predictedHome}-{match.predictedAway}
+                          </strong>
 
-                            <span
-                              className={
-                                match.protagonistHit
-                                  ? 'protagonist hit'
-                                  : 'protagonist miss'
-                              }
-                            >
-                              {
-                                match.protagonist
-                              }{' '}
-                              ·{' '}
-                              {match.protagonistPoints >=
-                              0
-                                ? '+'
-                                : ''}
-                              {
-                                match.protagonistPoints
-                              }
-                            </span>
-                          </div>
+                          <small>
+                            REAL {match.actualHome}-{match.actualAway}
+                          </small>
+                        </div>
 
-                          <strong
+                        <div className="profile-history-details">
+                          <span className="result">
+                            RESULTAT {match.resultPoints >= 0 ? "+" : ""}
+                            {match.resultPoints}
+                          </span>
+
+                          <span className="xi">
+                            XI {match.xiHits}/11 ·{" "}
+                            {match.xiPoints >= 0 ? "+" : ""}
+                            {match.xiPoints}
+                          </span>
+
+                          <span
                             className={
-                              match.totalPoints >= 0
-                                ? 'profile-history-total positive'
-                                : 'profile-history-total negative'
+                              match.protagonistHit
+                                ? "protagonist hit"
+                                : "protagonist miss"
                             }
                           >
-                            {match.totalPoints >= 0
-                              ? '+'
-                              : ''}
-                            {
-                              match.totalPoints
-                            }
-                            <small>
-                              PTS
-                            </small>
-                          </strong>
-                        </article>
-                      ),
-                    )}
+                            {match.protagonist} ·{" "}
+                            {match.protagonistPoints >= 0 ? "+" : ""}
+                            {match.protagonistPoints}
+                          </span>
+                        </div>
+
+                        <strong
+                          className={
+                            match.totalPoints >= 0
+                              ? "profile-history-total positive"
+                              : "profile-history-total negative"
+                          }
+                        >
+                          {match.totalPoints >= 0 ? "+" : ""}
+                          {match.totalPoints}
+                          <small>PTS</small>
+                        </strong>
+                      </article>
+                    ))}
                   </div>
                 </section>
               )}
 
-              {profileTab === 'achievements' && (
+              {profileTab === "achievements" && (
                 <section className="profile-achievements-section">
                   <header className="profile-achievements-hero">
-                    <div className="profile-achievements-trophy">
-                      🏅
-                    </div>
+                    <div className="profile-achievements-trophy">🏅</div>
 
                     <div>
-                      <span>
-                        VITRINA DEL CULER
-                      </span>
+                      <span>VITRINA DEL CULER</span>
 
                       <strong>
-                        {
-                          selectedProfileData.unlockedAchievements
-                        }
-                        /
-                        {
-                          selectedProfileData.achievements
-                            .length
-                        }{' '}
-                        medalles
+                        {selectedProfileData.unlockedAchievements}/
+                        {selectedProfileData.achievements.length} medalles
                       </strong>
 
                       <p>
-                        Assoliments públics que expliquen
-                        com competeix aquest perfil.
+                        Assoliments públics que expliquen com competeix aquest
+                        perfil.
                       </p>
                     </div>
                   </header>
 
                   <div className="profile-achievements-grid">
-                    {selectedProfileData.achievements.map(
-                      (achievement) => (
-                        <article
-                          key={achievement.id}
-                          className={
-                            achievement.unlocked
-                              ? 'profile-achievement unlocked'
-                              : 'profile-achievement locked'
-                          }
-                        >
-                          <span className="profile-achievement-icon">
-                            {
-                              achievement.icon
-                            }
+                    {selectedProfileData.achievements.map((achievement) => (
+                      <article
+                        key={achievement.id}
+                        className={
+                          achievement.unlocked
+                            ? "profile-achievement unlocked"
+                            : "profile-achievement locked"
+                        }
+                      >
+                        <span className="profile-achievement-icon">
+                          {achievement.icon}
+                        </span>
+
+                        <div>
+                          <span>
+                            {achievement.unlocked ? "DESBLOQUEJADA" : "PENDENT"}
                           </span>
 
-                          <div>
-                            <span>
-                              {achievement.unlocked
-                                ? 'DESBLOQUEJADA'
-                                : 'PENDENT'}
-                            </span>
+                          <strong>{achievement.title}</strong>
 
-                            <strong>
-                              {
-                                achievement.title
-                              }
-                            </strong>
+                          <p>{achievement.description}</p>
+                        </div>
 
-                            <p>
-                              {
-                                achievement.description
-                              }
-                            </p>
-                          </div>
-
-                          <small>
-                            {
-                              achievement.progress
-                            }
-                          </small>
-                        </article>
-                      ),
-                    )}
+                        <small>{achievement.progress}</small>
+                      </article>
+                    ))}
                   </div>
                 </section>
               )}
@@ -4387,7 +3852,7 @@ function App() {
           )}
       </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

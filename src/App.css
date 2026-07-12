@@ -34,11 +34,7 @@ body {
       rgba(26, 48, 112, 0.24),
       transparent 34rem
     ),
-    linear-gradient(
-      180deg,
-      #090d1a 0%,
-      #070913 100%
-    );
+    linear-gradient(180deg, #090d1a 0%, #070913 100%);
   color: #f7f8ff;
 }
 
@@ -118,11 +114,7 @@ button:focus-visible {
       rgba(255, 221, 89, 0.55),
       transparent 24%
     ),
-    linear-gradient(
-      145deg,
-      #1d2f82 0 46%,
-      #a40f3c 46% 100%
-    );
+    linear-gradient(145deg, #1d2f82 0 46%, #a40f3c 46% 100%);
   color: #ffe477;
   font-size: 22px;
   font-weight: 950;
@@ -195,12 +187,7 @@ button:focus-visible {
   left: 16px;
   height: 2px;
   border-radius: 99px;
-  background:
-    linear-gradient(
-      90deg,
-      #f4c72f,
-      #f5744b
-    );
+  background: linear-gradient(90deg, #f4c72f, #f5744b);
 }
 
 /* =========================================================
@@ -210,10 +197,7 @@ button:focus-visible {
 .play-page {
   width: min(100% - 32px, 980px);
   margin: 0 auto;
-  padding:
-    clamp(28px, 5vw, 58px)
-    0
-    72px;
+  padding: clamp(28px, 5vw, 58px) 0 72px;
 }
 
 /* =========================================================
@@ -233,16 +217,10 @@ button:focus-visible {
 .match-main {
   min-width: 0;
   padding: 22px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.085);
+  border: 1px solid rgba(255, 255, 255, 0.085);
   border-radius: 24px;
   background:
-    radial-gradient(
-      circle at 8% 20%,
-      rgba(45, 78, 180, 0.18),
-      transparent 36%
-    ),
+    radial-gradient(circle at 8% 20%, rgba(45, 78, 180, 0.18), transparent 36%),
     radial-gradient(
       circle at 92% 10%,
       rgba(163, 15, 61, 0.16),
@@ -255,10 +233,8 @@ button:focus-visible {
     ),
     rgba(12, 16, 33, 0.92);
   box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.035),
-    0 18px 50px
-      rgba(0, 0, 0, 0.18);
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 18px 50px rgba(0, 0, 0, 0.18);
 }
 
 .eyebrow {
@@ -298,11 +274,7 @@ button:focus-visible {
   max-width: 78px;
   flex: 0 0 78px;
   object-fit: contain;
-  filter:
-    drop-shadow(
-      0 10px 18px
-      rgba(0, 0, 0, 0.34)
-    );
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.34));
 }
 
 .match-club-copy {
@@ -315,8 +287,7 @@ button:focus-visible {
 .match-club-copy strong {
   overflow: hidden;
   color: #ffffff;
-  font-size:
-    clamp(18px, 3vw, 30px);
+  font-size: clamp(18px, 3vw, 30px);
   font-weight: 950;
   line-height: 1;
   letter-spacing: -0.035em;
@@ -337,12 +308,9 @@ button:focus-visible {
   place-items: center;
   width: 46px;
   height: 46px;
-  border:
-    1px solid
-    rgba(255, 211, 54, 0.3);
+  border: 1px solid rgba(255, 211, 54, 0.3);
   border-radius: 50%;
-  background:
-    rgba(255, 211, 54, 0.075);
+  background: rgba(255, 211, 54, 0.075);
   color: #f6d34c;
   font-size: 11px;
   font-weight: 950;
@@ -355,9 +323,7 @@ button:focus-visible {
   gap: 9px;
   margin-top: 18px;
   padding-top: 15px;
-  border-top:
-    1px solid
-    rgba(255, 255, 255, 0.07);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .match-kickoff-icon {
@@ -365,9 +331,7 @@ button:focus-visible {
   place-items: center;
   width: 26px;
   height: 26px;
-  border:
-    1px solid
-    rgba(255, 211, 54, 0.24);
+  border: 1px solid rgba(255, 211, 54, 0.24);
   border-radius: 50%;
   color: #f5cf3f;
   font-size: 16px;
@@ -393,9 +357,7 @@ button:focus-visible {
   justify-content: center;
   min-width: 294px;
   padding: 22px;
-  border:
-    1px solid
-    rgba(255, 211, 54, 0.18);
+  border: 1px solid rgba(255, 211, 54, 0.18);
   border-radius: 24px;
   background:
     radial-gradient(
@@ -403,17 +365,11 @@ button:focus-visible {
       rgba(244, 208, 75, 0.11),
       transparent 44%
     ),
-    linear-gradient(
-      145deg,
-      rgba(41, 60, 132, 0.15),
-      rgba(125, 14, 55, 0.1)
-    ),
+    linear-gradient(145deg, rgba(41, 60, 132, 0.15), rgba(125, 14, 55, 0.1)),
     rgba(12, 16, 33, 0.95);
   box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.035),
-    0 18px 50px
-      rgba(0, 0, 0, 0.17);
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 18px 50px rgba(0, 0, 0, 0.17);
 }
 
 .deadline-title {
@@ -427,8 +383,7 @@ button:focus-visible {
 
 .countdown-grid {
   display: grid;
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 7px;
 }
 
@@ -439,12 +394,9 @@ button:focus-visible {
   gap: 3px;
   min-width: 0;
   padding: 10px 5px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(255, 255, 255, 0.075);
   border-radius: 12px;
-  background:
-    rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .countdown-unit strong {
@@ -452,8 +404,7 @@ button:focus-visible {
   font-size: 21px;
   font-weight: 950;
   line-height: 1;
-  font-variant-numeric:
-    tabular-nums;
+  font-variant-numeric: tabular-nums;
 }
 
 .countdown-unit span {
@@ -472,8 +423,7 @@ button:focus-visible {
 }
 
 .deadline.closed {
-  border-color:
-    rgba(235, 68, 101, 0.25);
+  border-color: rgba(235, 68, 101, 0.25);
 }
 
 .deadline-closed {
@@ -524,9 +474,7 @@ button:focus-visible {
   width: 34px;
   height: 34px;
   flex: 0 0 34px;
-  border:
-    1px solid
-    rgba(255, 211, 54, 0.32);
+  border: 1px solid rgba(255, 211, 54, 0.32);
   border-radius: 50%;
   background: rgba(255, 211, 54, 0.07);
   color: #f6cf3b;
@@ -546,12 +494,9 @@ button:focus-visible {
 .lineup-counter {
   min-width: max-content;
   padding: 7px 11px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
-  background:
-    rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.035);
   color: #98a3bf;
   font-size: 10px;
   font-weight: 900;
@@ -559,27 +504,21 @@ button:focus-visible {
 }
 
 .status-pill.completed {
-  border-color:
-    rgba(68, 213, 137, 0.32);
-  background:
-    rgba(68, 213, 137, 0.09);
+  border-color: rgba(68, 213, 137, 0.32);
+  background: rgba(68, 213, 137, 0.09);
   color: #76e3a9;
 }
 
 .lineup-counter {
-  border-color:
-    rgba(67, 136, 255, 0.28);
-  background:
-    rgba(52, 116, 239, 0.09);
+  border-color: rgba(67, 136, 255, 0.28);
+  background: rgba(52, 116, 239, 0.09);
   color: #81aaff;
   font-size: 12px;
 }
 
 .lineup-counter.completed {
-  border-color:
-    rgba(68, 213, 137, 0.32);
-  background:
-    rgba(68, 213, 137, 0.09);
+  border-color: rgba(68, 213, 137, 0.32);
+  background: rgba(68, 213, 137, 0.09);
   color: #76e3a9;
 }
 
@@ -625,8 +564,7 @@ button:focus-visible {
   gap: 8px;
 }
 
-.score-team:first-child
-  .score-team-label {
+.score-team:first-child .score-team-label {
   flex-direction: row-reverse;
 }
 
@@ -651,9 +589,7 @@ button:focus-visible {
     42px;
   align-items: center;
   overflow: hidden;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   background: #090d1c;
 }
@@ -661,8 +597,7 @@ button:focus-visible {
 .score-control button {
   height: 54px;
   border: 0;
-  background:
-    rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.035);
   color: #bec6d9;
   font-size: 24px;
   font-weight: 700;
@@ -690,8 +625,7 @@ button:focus-visible {
 }
 
 .score-control .score-value:hover {
-  background:
-    rgba(255, 211, 54, 0.055);
+  background: rgba(255, 211, 54, 0.055);
   color: #ffe477;
 }
 
@@ -722,9 +656,7 @@ button:focus-visible {
   height: 58px;
   max-width: 58px;
   flex: 0 0 58px;
-  border:
-    2px solid
-    rgba(255, 214, 63, 0.55);
+  border: 2px solid rgba(255, 214, 63, 0.55);
   border-radius: 50%;
   object-fit: cover;
   object-position: center 18%;
@@ -753,12 +685,9 @@ button:focus-visible {
   align-items: center;
   min-height: 22px;
   padding: 4px 8px;
-  border:
-    1px solid
-    rgba(255, 211, 54, 0.25);
+  border: 1px solid rgba(255, 211, 54, 0.25);
   border-radius: 999px;
-  background:
-    rgba(255, 211, 54, 0.07);
+  background: rgba(255, 211, 54, 0.07);
   color: #f5d34b;
   font-size: 9px;
   font-weight: 950;
@@ -773,8 +702,7 @@ button:focus-visible {
   0% {
     box-shadow:
       0 28px 80px rgba(15, 23, 42, 0.9),
-      inset 0 0 0 1px
-        rgba(226, 232, 240, 0.06);
+      inset 0 0 0 1px rgba(226, 232, 240, 0.06);
     transform: translateY(0);
   }
 
@@ -782,25 +710,21 @@ button:focus-visible {
     box-shadow:
       0 34px 96px rgba(15, 23, 42, 1),
       0 0 38px rgba(34, 197, 94, 0.2),
-      inset 0 0 0 1px
-        rgba(226, 232, 240, 0.12);
+      inset 0 0 0 1px rgba(226, 232, 240, 0.12);
     transform: translateY(-1px);
   }
 
   100% {
     box-shadow:
       0 28px 80px rgba(15, 23, 42, 0.9),
-      inset 0 0 0 1px
-        rgba(226, 232, 240, 0.06);
+      inset 0 0 0 1px rgba(226, 232, 240, 0.06);
     transform: translateY(0);
   }
 }
 
 @keyframes vesPitchSweep {
   0% {
-    transform:
-      translateX(-140%)
-      rotate(10deg);
+    transform: translateX(-140%) rotate(10deg);
     opacity: 0;
   }
 
@@ -809,9 +733,7 @@ button:focus-visible {
   }
 
   100% {
-    transform:
-      translateX(260%)
-      rotate(10deg);
+    transform: translateX(260%) rotate(10deg);
     opacity: 0;
   }
 }
@@ -850,13 +772,8 @@ button:focus-visible {
     );
   box-shadow:
     0 28px 80px rgba(15, 23, 42, 0.9),
-    inset 0 0 0 1px
-      rgba(226, 232, 240, 0.06);
-  animation:
-    vesPitchBreath
-    6.5s
-    ease-in-out
-    infinite;
+    inset 0 0 0 1px rgba(226, 232, 240, 0.06);
+  animation: vesPitchBreath 6.5s ease-in-out infinite;
 }
 
 .football-field::before {
@@ -864,15 +781,11 @@ button:focus-visible {
   position: absolute;
   inset: 24px;
   z-index: 1;
-  border:
-    2px solid
-    rgba(226, 232, 240, 0.6);
+  border: 2px solid rgba(226, 232, 240, 0.6);
   border-radius: 26px;
   box-shadow:
-    inset 0 0 0 1px
-      rgba(255, 255, 255, 0.06),
-    inset 0 0 44px
-      rgba(2, 6, 23, 0.34);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    inset 0 0 44px rgba(2, 6, 23, 0.34);
   pointer-events: none;
 }
 
@@ -884,27 +797,21 @@ button:focus-visible {
   left: 0;
   z-index: 2;
   width: 42%;
-  background:
-    linear-gradient(
-      100deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.08) 42%,
-      rgba(187, 247, 208, 0.14) 50%,
-      transparent 62%
-    );
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 42%,
+    rgba(187, 247, 208, 0.14) 50%,
+    transparent 62%
+  );
   pointer-events: none;
-  animation:
-    vesPitchSweep
-    7.8s
-    ease-in-out
-    infinite;
+  animation: vesPitchSweep 7.8s ease-in-out infinite;
 }
 
 .field-line {
   position: absolute;
   z-index: 3;
-  background:
-    rgba(226, 232, 240, 0.5);
+  background: rgba(226, 232, 240, 0.5);
   pointer-events: none;
 }
 
@@ -923,9 +830,7 @@ button:focus-visible {
   z-index: 3;
   width: 130px;
   height: 130px;
-  border:
-    2px solid
-    rgba(226, 232, 240, 0.5);
+  border: 2px solid rgba(226, 232, 240, 0.5);
   border-radius: 999px;
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -939,8 +844,7 @@ button:focus-visible {
   width: 7px;
   height: 7px;
   border-radius: 999px;
-  background:
-    rgba(226, 232, 240, 0.65);
+  background: rgba(226, 232, 240, 0.65);
   transform: translate(-50%, -50%);
 }
 
@@ -1003,14 +907,10 @@ button:focus-visible {
   height: clamp(62px, 8.5vw, 82px);
   padding: 0;
   overflow: visible;
-  border:
-    2px dashed
-    rgba(255, 255, 255, 0.45);
+  border: 2px dashed rgba(255, 255, 255, 0.45);
   border-radius: 50%;
-  background:
-    rgba(3, 22, 14, 0.26);
-  color:
-    rgba(255, 255, 255, 0.68);
+  background: rgba(3, 22, 14, 0.26);
+  color: rgba(255, 255, 255, 0.68);
   backdrop-filter: blur(3px);
   transition:
     transform 160ms ease,
@@ -1022,8 +922,7 @@ button:focus-visible {
 .field-slot:hover {
   z-index: 10;
   border-color: #ffe05c;
-  background:
-    rgba(255, 210, 53, 0.13);
+  background: rgba(255, 210, 53, 0.13);
   transform: scale(1.07);
 }
 
@@ -1057,26 +956,19 @@ button:focus-visible {
   object-position: center 22%;
   background: #f7ecd3;
   box-shadow:
-    0 0 0 3px
-      rgba(8, 11, 22, 0.7),
-    0 8px 20px
-      rgba(0, 0, 0, 0.38);
+    0 0 0 3px rgba(8, 11, 22, 0.7),
+    0 8px 20px rgba(0, 0, 0, 0.38);
   user-select: none;
   pointer-events: none;
 }
 
 .field-slot.occupied .field-player-image {
-  border:
-    3px solid
-    rgba(255, 216, 66, 0.84);
+  border: 3px solid rgba(255, 216, 66, 0.84);
   filter: none;
   box-shadow:
-    0 0 0 4px
-      rgba(128, 17, 60, 0.9),
-    0 0 24px
-      rgba(164, 15, 60, 0.2),
-    0 10px 26px
-      rgba(0, 0, 0, 0.34);
+    0 0 0 4px rgba(128, 17, 60, 0.9),
+    0 0 24px rgba(164, 15, 60, 0.2),
+    0 10px 26px rgba(0, 0, 0, 0.34);
   transform: none;
 }
 
@@ -1098,16 +990,10 @@ button:focus-visible {
       rgba(255, 244, 200, 0.24),
       transparent 29%
     ),
-    radial-gradient(
-      circle at 72% 82%,
-      rgba(113, 13, 51, 0.15),
-      transparent 45%
-    );
+    radial-gradient(circle at 72% 82%, rgba(113, 13, 51, 0.15), transparent 45%);
   box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.2),
-    inset -10px -14px 24px
-      rgba(63, 6, 26, 0.14);
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset -10px -14px 24px rgba(63, 6, 26, 0.14);
   opacity: 0.88;
   pointer-events: none;
 }
@@ -1120,12 +1006,9 @@ button:focus-visible {
   max-width: 105px;
   padding: 3px 7px;
   overflow: hidden;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 999px;
-  background:
-    rgba(5, 10, 22, 0.88);
+  background: rgba(5, 10, 22, 0.88);
   color: #ffffff;
   font-size: 9px;
   font-weight: 900;
@@ -1134,9 +1017,7 @@ button:focus-visible {
   white-space: nowrap;
   transform: translateX(-50%);
   pointer-events: none;
-  box-shadow:
-    0 4px 12px
-    rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* =========================================================
@@ -1148,17 +1029,12 @@ button:focus-visible {
 }
 
 .field-slot.protagonist .field-player-image {
-  border:
-    3px solid
-    rgba(255, 216, 66, 0.84);
+  border: 3px solid rgba(255, 216, 66, 0.84);
   filter: none;
   box-shadow:
-    0 0 0 4px
-      rgba(128, 17, 60, 0.9),
-    0 0 24px
-      rgba(164, 15, 60, 0.2),
-    0 10px 26px
-      rgba(0, 0, 0, 0.34);
+    0 0 0 4px rgba(128, 17, 60, 0.9),
+    0 0 24px rgba(164, 15, 60, 0.2),
+    0 10px 26px rgba(0, 0, 0, 0.34);
   transform: none;
 }
 
@@ -1173,21 +1049,18 @@ button:focus-visible {
   height: 34px;
   border: 3px solid #091020;
   border-radius: 50%;
-  background:
-    radial-gradient(
-      circle at 35% 25%,
-      #fff4a4 0%,
-      #f3cf40 45%,
-      #d99d16 100%
-    );
+  background: radial-gradient(
+    circle at 35% 25%,
+    #fff4a4 0%,
+    #f3cf40 45%,
+    #d99d16 100%
+  );
   color: #161004;
   font-size: 17px;
   font-weight: 950;
   box-shadow:
-    0 6px 18px
-      rgba(0, 0, 0, 0.45),
-    0 0 18px
-      rgba(244, 208, 75, 0.55);
+    0 6px 18px rgba(0, 0, 0, 0.45),
+    0 0 18px rgba(244, 208, 75, 0.55);
   pointer-events: none;
 }
 
@@ -1221,8 +1094,7 @@ button:focus-visible {
 
 .player-badges {
   display: grid;
-  grid-template-columns:
-    repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 18px 12px;
   width: 100%;
   padding: 8px 2px 12px;
@@ -1252,9 +1124,7 @@ button:focus-visible {
 
 .player-badge:hover {
   background: transparent;
-  transform:
-    translateY(-4px)
-    scale(1.03);
+  transform: translateY(-4px) scale(1.03);
 }
 
 .player-badge > img.player-badge-avatar {
@@ -1267,20 +1137,15 @@ button:focus-visible {
   max-height: 92px;
   flex: 0 0 auto;
   aspect-ratio: 1;
-  border:
-    3px solid
-    rgba(255, 216, 66, 0.84);
+  border: 3px solid rgba(255, 216, 66, 0.84);
   border-radius: 50%;
   object-fit: cover;
   object-position: center 22%;
   background: #f7ecd3;
   box-shadow:
-    0 0 0 4px
-      rgba(128, 17, 60, 0.9),
-    0 0 24px
-      rgba(164, 15, 60, 0.2),
-    0 10px 26px
-      rgba(0, 0, 0, 0.34);
+    0 0 0 4px rgba(128, 17, 60, 0.9),
+    0 0 24px rgba(164, 15, 60, 0.2),
+    0 10px 26px rgba(0, 0, 0, 0.34);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
@@ -1324,16 +1189,10 @@ button:focus-visible {
       rgba(255, 244, 200, 0.24),
       transparent 29%
     ),
-    radial-gradient(
-      circle at 72% 82%,
-      rgba(113, 13, 51, 0.15),
-      transparent 45%
-    );
+    radial-gradient(circle at 72% 82%, rgba(113, 13, 51, 0.15), transparent 45%);
   box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.2),
-    inset -10px -14px 24px
-      rgba(63, 6, 26, 0.14);
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset -10px -14px 24px rgba(63, 6, 26, 0.14);
   transform: translateX(-50%);
   opacity: 0.88;
   pointer-events: none;
@@ -1352,24 +1211,14 @@ button:focus-visible {
   filter: none;
 }
 
-.player-badge.selected
-  > img.player-badge-avatar {
-  border-color:
-    rgba(218, 171, 55, 0.96);
-  filter:
-    sepia(0.5)
-    saturate(0.88)
-    brightness(0.7)
-    contrast(1.12);
+.player-badge.selected > img.player-badge-avatar {
+  border-color: rgba(218, 171, 55, 0.96);
+  filter: sepia(0.5) saturate(0.88) brightness(0.7) contrast(1.12);
   box-shadow:
-    0 0 0 4px
-      rgba(112, 13, 48, 0.94),
-    0 0 0 7px
-      rgba(201, 151, 46, 0.22),
-    0 0 28px
-      rgba(201, 151, 46, 0.34),
-    0 10px 26px
-      rgba(0, 0, 0, 0.42);
+    0 0 0 4px rgba(112, 13, 48, 0.94),
+    0 0 0 7px rgba(201, 151, 46, 0.22),
+    0 0 28px rgba(201, 151, 46, 0.34),
+    0 10px 26px rgba(0, 0, 0, 0.42);
 }
 
 .player-badge.selected::before {
@@ -1385,18 +1234,11 @@ button:focus-visible {
       rgba(74, 43, 2, 0.38) 48%,
       rgba(20, 12, 2, 0.76) 100%
     ),
-    radial-gradient(
-      circle at 76% 82%,
-      rgba(207, 157, 43, 0.2),
-      transparent 42%
-    );
+    radial-gradient(circle at 76% 82%, rgba(207, 157, 43, 0.2), transparent 42%);
   box-shadow:
-    inset 0 1px 0
-      rgba(255, 241, 190, 0.24),
-    inset 0 -18px 30px
-      rgba(0, 0, 0, 0.5),
-    inset -12px -14px 26px
-      rgba(68, 35, 0, 0.36);
+    inset 0 1px 0 rgba(255, 241, 190, 0.24),
+    inset 0 -18px 30px rgba(0, 0, 0, 0.5),
+    inset -12px -14px 26px rgba(68, 35, 0, 0.36);
   opacity: 1;
 }
 
@@ -1430,16 +1272,10 @@ button:focus-visible {
   margin-top: 24px;
   padding: 22px 24px;
   overflow: hidden;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.085);
+  border: 1px solid rgba(255, 255, 255, 0.085);
   border-radius: 22px;
   background:
-    radial-gradient(
-      circle at 8% 50%,
-      rgba(56, 95, 200, 0.12),
-      transparent 34%
-    ),
+    radial-gradient(circle at 8% 50%, rgba(56, 95, 200, 0.12), transparent 34%),
     linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.045),
@@ -1447,10 +1283,8 @@ button:focus-visible {
     ),
     rgba(9, 13, 29, 0.72);
   box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.035),
-    0 14px 40px
-      rgba(0, 0, 0, 0.15);
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 14px 40px rgba(0, 0, 0, 0.15);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
@@ -1465,18 +1299,16 @@ button:focus-visible {
   width: 280px;
   height: 280px;
   border-radius: 50%;
-  background:
-    radial-gradient(
-      circle,
-      rgba(244, 208, 75, 0.11),
-      transparent 68%
-    );
+  background: radial-gradient(
+    circle,
+    rgba(244, 208, 75, 0.11),
+    transparent 68%
+  );
   pointer-events: none;
 }
 
 .protagonist-showcase.selected {
-  border-color:
-    rgba(244, 208, 75, 0.26);
+  border-color: rgba(244, 208, 75, 0.26);
   background:
     radial-gradient(
       circle at 8% 50%,
@@ -1488,19 +1320,12 @@ button:focus-visible {
       rgba(164, 15, 60, 0.12),
       transparent 34%
     ),
-    linear-gradient(
-      135deg,
-      rgba(29, 47, 130, 0.18),
-      rgba(128, 17, 60, 0.1)
-    ),
+    linear-gradient(135deg, rgba(29, 47, 130, 0.18), rgba(128, 17, 60, 0.1)),
     rgba(9, 13, 29, 0.84);
   box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.04),
-    0 18px 48px
-      rgba(0, 0, 0, 0.2),
-    0 0 34px
-      rgba(244, 208, 75, 0.055);
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 18px 48px rgba(0, 0, 0, 0.2),
+    0 0 34px rgba(244, 208, 75, 0.055);
 }
 
 .protagonist-image-wrap {
@@ -1523,10 +1348,8 @@ button:focus-visible {
   object-position: center 22%;
   background: #f7ecd3;
   box-shadow:
-    0 0 0 4px
-      rgba(25, 45, 120, 0.82),
-    0 12px 34px
-      rgba(0, 0, 0, 0.4);
+    0 0 0 4px rgba(25, 45, 120, 0.82),
+    0 12px 34px rgba(0, 0, 0, 0.4);
 }
 
 .protagonist-showcase-star {
@@ -1540,21 +1363,13 @@ button:focus-visible {
   height: 34px;
   border: 3px solid #091020;
   border-radius: 50%;
-  background:
-    linear-gradient(
-      135deg,
-      #fff19a,
-      #f3c927 65%,
-      #df9917
-    );
+  background: linear-gradient(135deg, #fff19a, #f3c927 65%, #df9917);
   color: #171104;
   font-size: 17px;
   font-weight: 950;
   box-shadow:
-    0 5px 16px
-      rgba(0, 0, 0, 0.4),
-    0 0 16px
-      rgba(244, 208, 75, 0.45);
+    0 5px 16px rgba(0, 0, 0, 0.4),
+    0 0 16px rgba(244, 208, 75, 0.45);
 }
 
 .protagonist-empty-icon {
@@ -1565,17 +1380,12 @@ button:focus-visible {
   width: 88px;
   height: 88px;
   flex: 0 0 88px;
-  border:
-    2px dashed
-    rgba(255, 255, 255, 0.19);
+  border: 2px dashed rgba(255, 255, 255, 0.19);
   border-radius: 50%;
-  background:
-    rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.025);
   color: #626d89;
   font-size: 32px;
-  box-shadow:
-    inset 0 0 24px
-      rgba(255, 255, 255, 0.018);
+  box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.018);
 }
 
 .protagonist-showcase-copy {
@@ -1617,12 +1427,9 @@ button:focus-visible {
   gap: 9px;
   margin-top: 2px;
   padding: 7px 11px;
-  border:
-    1px solid
-    rgba(244, 208, 75, 0.19);
+  border: 1px solid rgba(244, 208, 75, 0.19);
   border-radius: 999px;
-  background:
-    rgba(244, 208, 75, 0.055);
+  background: rgba(244, 208, 75, 0.055);
 }
 
 .protagonist-rule-option {
@@ -1646,16 +1453,10 @@ button:focus-visible {
 .confirm-section {
   margin-top: 22px;
   padding: 20px;
-  border:
-    1px solid
-    rgba(255, 211, 54, 0.15);
+  border: 1px solid rgba(255, 211, 54, 0.15);
   border-radius: 22px;
   background:
-    linear-gradient(
-      135deg,
-      rgba(42, 66, 143, 0.16),
-      rgba(143, 15, 62, 0.1)
-    ),
+    linear-gradient(135deg, rgba(42, 66, 143, 0.16), rgba(143, 15, 62, 0.1)),
     #0d1122;
 }
 
@@ -1686,20 +1487,12 @@ button:focus-visible {
 .confirm-info-panel {
   margin: -2px 0 15px;
   padding: 15px;
-  border:
-    1px solid
-    rgba(255, 211, 54, 0.18);
+  border: 1px solid rgba(255, 211, 54, 0.18);
   border-radius: 15px;
   background:
-    linear-gradient(
-      135deg,
-      rgba(40, 62, 139, 0.16),
-      rgba(132, 16, 61, 0.11)
-    ),
+    linear-gradient(135deg, rgba(40, 62, 139, 0.16), rgba(132, 16, 61, 0.11)),
     rgba(8, 12, 27, 0.84);
-  box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .confirm-info-title {
@@ -1726,8 +1519,7 @@ button:focus-visible {
 
 .confirm-info-options {
   display: grid;
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin-top: 12px;
 }
@@ -1735,19 +1527,14 @@ button:focus-visible {
 .confirm-info-option {
   min-width: 0;
   padding: 10px 11px;
-  border:
-    1px solid
-    rgba(95, 121, 194, 0.18);
+  border: 1px solid rgba(95, 121, 194, 0.18);
   border-radius: 12px;
-  background:
-    rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.025);
 }
 
 .confirm-info-option.featured {
-  border-color:
-    rgba(255, 211, 54, 0.28);
-  background:
-    rgba(255, 211, 54, 0.06);
+  border-color: rgba(255, 211, 54, 0.28);
+  background: rgba(255, 211, 54, 0.06);
 }
 
 .confirm-info-option strong {
@@ -1786,22 +1573,14 @@ button:focus-visible {
   min-height: 58px;
   border: 0;
   border-radius: 16px;
-  background:
-    linear-gradient(
-      110deg,
-      #efc52f 0%,
-      #ffde63 55%,
-      #f7aa38 100%
-    );
+  background: linear-gradient(110deg, #efc52f 0%, #ffde63 55%, #f7aa38 100%);
   color: #191406;
   font-size: 14px;
   font-weight: 950;
   letter-spacing: 0.075em;
   box-shadow:
-    0 12px 34px
-      rgba(255, 193, 35, 0.18),
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.5);
+    0 12px 34px rgba(255, 193, 35, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transition:
     transform 160ms ease,
     box-shadow 160ms ease;
@@ -1810,10 +1589,8 @@ button:focus-visible {
 .confirm-button:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 16px 42px
-      rgba(255, 193, 35, 0.26),
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.5);
+    0 16px 42px rgba(255, 193, 35, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .confirm-button:disabled {
@@ -1822,10 +1599,8 @@ button:focus-visible {
   filter: saturate(0.55);
   transform: none;
   box-shadow:
-    0 8px 22px
-      rgba(0, 0, 0, 0.18),
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.24);
+    0 8px 22px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 
 .confirm-button:disabled:hover {
@@ -1851,8 +1626,7 @@ button:focus-visible {
 .placeholder-page h1 {
   margin: 0;
   color: #ffffff;
-  font-size:
-    clamp(44px, 9vw, 88px);
+  font-size: clamp(44px, 9vw, 88px);
   font-weight: 950;
   letter-spacing: -0.055em;
 }
@@ -1921,8 +1695,7 @@ button:focus-visible {
   }
 
   .match-header h1 {
-    font-size:
-      clamp(29px, 9vw, 42px);
+    font-size: clamp(29px, 9vw, 42px);
   }
 
   .deadline strong {
@@ -2051,10 +1824,8 @@ button:focus-visible {
   }
 
   .field-slot {
-    width:
-      clamp(48px, 14vw, 62px);
-    height:
-      clamp(48px, 14vw, 62px);
+    width: clamp(48px, 14vw, 62px);
+    height: clamp(48px, 14vw, 62px);
   }
 
   .field-slot-plus {
@@ -2078,24 +1849,19 @@ button:focus-visible {
   }
 
   .player-badges {
-    grid-template-columns:
-      repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 15px 7px;
   }
 
-  .player-badge
-    > img.player-badge-avatar {
-    width:
-      clamp(58px, 17vw, 76px);
-    height:
-      clamp(58px, 17vw, 76px);
+  .player-badge > img.player-badge-avatar {
+    width: clamp(58px, 17vw, 76px);
+    height: clamp(58px, 17vw, 76px);
     max-width: 76px;
     max-height: 76px;
   }
 
   .player-badge::before {
-    width:
-      clamp(58px, 17vw, 76px);
+    width: clamp(58px, 17vw, 76px);
   }
 
   .player-badge > span {
@@ -2247,31 +2013,24 @@ button:focus-visible {
   }
 
   .field-slot {
-    width:
-      clamp(44px, 14vw, 56px);
-    height:
-      clamp(44px, 14vw, 56px);
+    width: clamp(44px, 14vw, 56px);
+    height: clamp(44px, 14vw, 56px);
   }
 
   .player-badges {
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px 8px;
   }
 
-  .player-badge
-    > img.player-badge-avatar {
-    width:
-      clamp(66px, 22vw, 82px);
-    height:
-      clamp(66px, 22vw, 82px);
+  .player-badge > img.player-badge-avatar {
+    width: clamp(66px, 22vw, 82px);
+    height: clamp(66px, 22vw, 82px);
     max-width: 82px;
     max-height: 82px;
   }
 
   .player-badge::before {
-    width:
-      clamp(66px, 22vw, 82px);
+    width: clamp(66px, 22vw, 82px);
   }
 
   .player-badge > span {
@@ -2422,13 +2181,12 @@ button:focus-visible {
 
   opacity: 0;
 
-  background:
-    linear-gradient(
-      110deg,
-      transparent 20%,
-      rgba(255, 255, 255, 0.07) 50%,
-      transparent 80%
-    );
+  background: linear-gradient(
+    110deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.07) 50%,
+    transparent 80%
+  );
 
   pointer-events: none;
 
@@ -2463,11 +2221,7 @@ button:focus-visible {
       rgba(45, 78, 180, 0.17),
       transparent 35%
     ),
-    linear-gradient(
-      135deg,
-      rgba(26, 48, 132, 0.28),
-      rgba(128, 17, 60, 0.12)
-    ),
+    linear-gradient(135deg, rgba(26, 48, 132, 0.28), rgba(128, 17, 60, 0.12)),
     #0c1122;
 
   box-shadow:
@@ -2480,21 +2234,13 @@ button:focus-visible {
   border-color: rgba(229, 38, 84, 0.62);
 
   background:
-    radial-gradient(
-      circle at 10% 50%,
-      rgba(229, 38, 84, 0.2),
-      transparent 38%
-    ),
+    radial-gradient(circle at 10% 50%, rgba(229, 38, 84, 0.2), transparent 38%),
     radial-gradient(
       circle at 90% 10%,
       rgba(45, 78, 180, 0.16),
       transparent 35%
     ),
-    linear-gradient(
-      135deg,
-      rgba(36, 52, 126, 0.22),
-      rgba(145, 13, 57, 0.22)
-    ),
+    linear-gradient(135deg, rgba(36, 52, 126, 0.22), rgba(145, 13, 57, 0.22)),
     #0c1122;
 
   box-shadow:
@@ -2524,19 +2270,13 @@ button:focus-visible {
 
   font-size: 24px;
 
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .protagonist-type-icon.assist-icon {
   border-color: rgba(255, 255, 255, 0.14);
 
-  background:
-    linear-gradient(
-      135deg,
-      #ed2856,
-      #b80c43
-    );
+  background: linear-gradient(135deg, #ed2856, #b80c43);
 
   color: #ffffff;
 
@@ -2572,7 +2312,6 @@ button:focus-visible {
   font-weight: 700;
 }
 
-
 /* =========================================================
    SELECTOR DEL JUGADOR
    ========================================================= */
@@ -2591,11 +2330,7 @@ button:focus-visible {
   border-radius: 18px;
 
   background:
-    radial-gradient(
-      circle at 0% 50%,
-      rgba(42, 70, 161, 0.16),
-      transparent 38%
-    ),
+    radial-gradient(circle at 0% 50%, rgba(42, 70, 161, 0.16), transparent 38%),
     linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.035),
@@ -2694,7 +2429,6 @@ button:focus-visible {
   color: #ffffff;
 }
 
-
 /* =========================================================
    MOBILE
    ========================================================= */
@@ -2783,9 +2517,7 @@ button:focus-visible {
   margin-top: 24px;
   padding: 18px 20px;
   overflow: hidden;
-  border:
-    1px solid
-    rgba(244, 208, 75, 0.3);
+  border: 1px solid rgba(244, 208, 75, 0.3);
   border-radius: 19px;
   background:
     radial-gradient(
@@ -2798,19 +2530,12 @@ button:focus-visible {
       rgba(177, 18, 65, 0.18),
       transparent 36%
     ),
-    linear-gradient(
-      135deg,
-      rgba(29, 48, 132, 0.28),
-      rgba(129, 16, 60, 0.16)
-    ),
+    linear-gradient(135deg, rgba(29, 48, 132, 0.28), rgba(129, 16, 60, 0.16)),
     #0c1122;
   box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.045),
-    0 14px 36px
-      rgba(0, 0, 0, 0.22),
-    0 0 28px
-      rgba(244, 208, 75, 0.055);
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 14px 36px rgba(0, 0, 0, 0.22),
+    0 0 28px rgba(244, 208, 75, 0.055);
 }
 
 .protagonist-combined-icons {
@@ -2829,35 +2554,21 @@ button:focus-visible {
 }
 
 .protagonist-combined-icon.goal {
-  border:
-    1px solid
-    rgba(244, 208, 75, 0.35);
-  background:
-    rgba(244, 208, 75, 0.1);
+  border: 1px solid rgba(244, 208, 75, 0.35);
+  background: rgba(244, 208, 75, 0.1);
   font-size: 23px;
-  box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .protagonist-combined-icon.assist {
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.16);
-  background:
-    linear-gradient(
-      135deg,
-      #ed2856,
-      #ad093d
-    );
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: linear-gradient(135deg, #ed2856, #ad093d);
   color: #ffffff;
   font-size: 20px;
   font-weight: 950;
   box-shadow:
-    0 8px 20px
-      rgba(180, 12, 63, 0.28),
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.18);
+    0 8px 20px rgba(180, 12, 63, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .protagonist-combined-or {
@@ -2887,8 +2598,7 @@ button:focus-visible {
 
 .protagonist-combined-copy > strong {
   color: #ffffff;
-  font-size:
-    clamp(17px, 3vw, 23px);
+  font-size: clamp(17px, 3vw, 23px);
   font-weight: 950;
   letter-spacing: -0.02em;
 }
@@ -2904,12 +2614,9 @@ button:focus-visible {
 .protagonist-binary-pill {
   min-width: max-content;
   padding: 8px 11px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
-  background:
-    rgba(255, 255, 255, 0.045);
+  background: rgba(255, 255, 255, 0.045);
   color: #bbc3d7;
   font-size: 9px;
   font-weight: 950;
@@ -2946,57 +2653,44 @@ button:focus-visible {
 }
 
 .protagonist-group-chip.group-special {
-  border-color:
-    rgba(255, 216, 73, 0.48);
-  background:
-    rgba(255, 207, 49, 0.1);
+  border-color: rgba(255, 216, 73, 0.48);
+  background: rgba(255, 207, 49, 0.1);
   color: #ffe271;
 }
 
 .protagonist-group-chip.group-a {
-  border-color:
-    rgba(72, 220, 145, 0.4);
-  background:
-    rgba(72, 220, 145, 0.09);
+  border-color: rgba(72, 220, 145, 0.4);
+  background: rgba(72, 220, 145, 0.09);
   color: #78e5ad;
 }
 
 .protagonist-group-chip.group-b {
-  border-color:
-    rgba(246, 196, 55, 0.4);
-  background:
-    rgba(246, 196, 55, 0.09);
+  border-color: rgba(246, 196, 55, 0.4);
+  background: rgba(246, 196, 55, 0.09);
   color: #f5ce59;
 }
 
 .protagonist-group-chip.group-c {
-  border-color:
-    rgba(82, 145, 255, 0.42);
-  background:
-    rgba(82, 145, 255, 0.09);
+  border-color: rgba(82, 145, 255, 0.42);
+  background: rgba(82, 145, 255, 0.09);
   color: #8bb4ff;
 }
 
 .protagonist-group-chip.group-d {
-  border-color:
-    rgba(238, 67, 102, 0.43);
-  background:
-    rgba(238, 67, 102, 0.09);
+  border-color: rgba(238, 67, 102, 0.43);
+  background: rgba(238, 67, 102, 0.09);
   color: #ff839b;
 }
 
 .protagonist-group-chip.group-e {
-  border-color:
-    rgba(218, 224, 237, 0.3);
-  background:
-    rgba(218, 224, 237, 0.065);
+  border-color: rgba(218, 224, 237, 0.3);
+  background: rgba(218, 224, 237, 0.065);
   color: #dce2ef;
 }
 
 .protagonist-score-grid {
   display: grid;
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 9px;
   width: min(100%, 440px);
   margin-top: 5px;
@@ -3028,18 +2722,14 @@ button:focus-visible {
 }
 
 .protagonist-score-box.hit {
-  border-color:
-    rgba(67, 218, 137, 0.3);
-  background:
-    rgba(67, 218, 137, 0.075);
+  border-color: rgba(67, 218, 137, 0.3);
+  background: rgba(67, 218, 137, 0.075);
   color: #72e3a8;
 }
 
 .protagonist-score-box.miss {
-  border-color:
-    rgba(238, 71, 101, 0.28);
-  background:
-    rgba(238, 71, 101, 0.07);
+  border-color: rgba(238, 71, 101, 0.28);
+  background: rgba(238, 71, 101, 0.07);
   color: #ff8097;
 }
 
@@ -3113,20 +2803,15 @@ button:focus-visible {
   height: 28px;
   flex: 0 0 28px;
   padding: 0;
-  border:
-    1px solid
-    rgba(255, 211, 54, 0.32);
+  border: 1px solid rgba(255, 211, 54, 0.32);
   border-radius: 50%;
-  background:
-    rgba(255, 211, 54, 0.07);
+  background: rgba(255, 211, 54, 0.07);
   color: #f6cf3b;
   font-family: Georgia, serif;
   font-size: 15px;
   font-weight: 900;
   line-height: 1;
-  box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   transition:
     transform 160ms ease,
     border-color 160ms ease,
@@ -3136,10 +2821,8 @@ button:focus-visible {
 
 .section-info-button:hover,
 .section-info-button[aria-expanded="true"] {
-  border-color:
-    rgba(255, 222, 99, 0.72);
-  background:
-    rgba(255, 211, 54, 0.15);
+  border-color: rgba(255, 222, 99, 0.72);
+  background: rgba(255, 211, 54, 0.15);
   color: #fff0a1;
   transform: translateY(-1px);
 }
@@ -3147,24 +2830,16 @@ button:focus-visible {
 .section-info-panel {
   margin: 15px 0 0 46px;
   padding: 13px 15px;
-  border:
-    1px solid
-    rgba(93, 139, 255, 0.2);
+  border: 1px solid rgba(93, 139, 255, 0.2);
   border-radius: 14px;
   background:
-    linear-gradient(
-      135deg,
-      rgba(42, 70, 161, 0.13),
-      rgba(255, 255, 255, 0.02)
-    ),
+    linear-gradient(135deg, rgba(42, 70, 161, 0.13), rgba(255, 255, 255, 0.02)),
     rgba(8, 13, 29, 0.72);
   color: #aeb8cf;
   font-size: 12px;
   font-weight: 650;
   line-height: 1.55;
-  box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.025);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
 @media (max-width: 760px) {
@@ -3214,8 +2889,7 @@ button:focus-visible {
 
 .section-info-xi-grid {
   display: grid;
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 7px;
 }
 
@@ -3226,12 +2900,9 @@ button:focus-visible {
   gap: 14px;
   min-height: 38px;
   padding: 8px 10px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 10px;
-  background:
-    rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.025);
 }
 
 .section-info-points-row > span {
@@ -3249,10 +2920,8 @@ button:focus-visible {
 }
 
 .section-info-points-row.featured {
-  border-color:
-    rgba(244, 208, 75, 0.25);
-  background:
-    rgba(244, 208, 75, 0.07);
+  border-color: rgba(244, 208, 75, 0.25);
+  background: rgba(244, 208, 75, 0.07);
 }
 
 .section-info-points-row.featured > span,
@@ -3269,10 +2938,8 @@ button:focus-visible {
 }
 
 .section-info-points-row.troll {
-  border-color:
-    rgba(184, 116, 255, 0.28);
-  background:
-    rgba(146, 74, 222, 0.08);
+  border-color: rgba(184, 116, 255, 0.28);
+  background: rgba(146, 74, 222, 0.08);
 }
 
 .section-info-points-row.troll > span,
@@ -3281,10 +2948,8 @@ button:focus-visible {
 }
 
 .section-info-points-row.special {
-  border-color:
-    rgba(244, 208, 75, 0.25);
-  background:
-    rgba(244, 208, 75, 0.07);
+  border-color: rgba(244, 208, 75, 0.25);
+  background: rgba(244, 208, 75, 0.07);
 }
 
 .section-info-points-row.special > span,
@@ -3311,13 +2976,11 @@ button:focus-visible {
    PARTIT I PROTAGONISTA — AJUSTOS RESPONSIVE
    ========================================================= */
 
-.section-info-protagonist-grid
-  .section-info-points-row {
+.section-info-protagonist-grid .section-info-points-row {
   align-items: flex-start;
 }
 
-.section-info-protagonist-grid
-  .section-info-points-row > span {
+.section-info-protagonist-grid .section-info-points-row > span {
   max-width: 78%;
   line-height: 1.45;
 }
@@ -3400,14 +3063,12 @@ button:focus-visible {
     font-size: 18px;
   }
 
-  .section-info-protagonist-grid
-    .section-info-points-row {
+  .section-info-protagonist-grid .section-info-points-row {
     flex-direction: column;
     gap: 5px;
   }
 
-  .section-info-protagonist-grid
-    .section-info-points-row > span {
+  .section-info-protagonist-grid .section-info-points-row > span {
     max-width: 100%;
   }
 }
@@ -3416,30 +3077,20 @@ button:focus-visible {
    SELECCIÓ INVERSA SENSE TAB DE BANQUETA
    ========================================================= */
 
-.field-slot.player-selected
-  .field-player-image {
+.field-slot.player-selected .field-player-image {
   box-shadow:
-    0 0 0 4px
-      rgba(128, 17, 60, 0.9),
-    0 0 0 7px
-      rgba(255, 216, 66, 0.34),
-    0 0 28px
-      rgba(244, 208, 75, 0.34),
-    0 10px 26px
-      rgba(0, 0, 0, 0.34);
+    0 0 0 4px rgba(128, 17, 60, 0.9),
+    0 0 0 7px rgba(255, 216, 66, 0.34),
+    0 0 28px rgba(244, 208, 75, 0.34),
+    0 10px 26px rgba(0, 0, 0, 0.34);
 }
 
-.player-badge.pending-selection
-  > img.player-badge-avatar {
+.player-badge.pending-selection > img.player-badge-avatar {
   box-shadow:
-    0 0 0 4px
-      rgba(128, 17, 60, 0.9),
-    0 0 0 7px
-      rgba(255, 216, 66, 0.34),
-    0 0 28px
-      rgba(244, 208, 75, 0.34),
-    0 10px 26px
-      rgba(0, 0, 0, 0.34);
+    0 0 0 4px rgba(128, 17, 60, 0.9),
+    0 0 0 7px rgba(255, 216, 66, 0.34),
+    0 0 28px rgba(244, 208, 75, 0.34),
+    0 10px 26px rgba(0, 0, 0, 0.34);
 }
 
 /* =========================================================
@@ -3449,27 +3100,17 @@ button:focus-visible {
 .ranking-page {
   width: min(100% - 32px, 1120px);
   margin: 0 auto;
-  padding:
-    clamp(28px, 5vw, 58px)
-    0
-    86px;
+  padding: clamp(28px, 5vw, 58px) 0 86px;
 }
 
 .ranking-hero {
   position: relative;
-  padding:
-    clamp(22px, 4vw, 34px);
+  padding: clamp(22px, 4vw, 34px);
   overflow: hidden;
-  border:
-    1px solid
-    rgba(255, 211, 54, 0.16);
+  border: 1px solid rgba(255, 211, 54, 0.16);
   border-radius: 28px;
   background:
-    radial-gradient(
-      circle at 8% 10%,
-      rgba(44, 77, 180, 0.25),
-      transparent 38%
-    ),
+    radial-gradient(circle at 8% 10%, rgba(44, 77, 180, 0.25), transparent 38%),
     radial-gradient(
       circle at 92% 10%,
       rgba(151, 15, 59, 0.24),
@@ -3482,10 +3123,8 @@ button:focus-visible {
     ),
     #0b1020;
   box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.045),
-    0 24px 70px
-      rgba(0, 0, 0, 0.28);
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 24px 70px rgba(0, 0, 0, 0.28);
 }
 
 .ranking-hero::after {
@@ -3496,12 +3135,11 @@ button:focus-visible {
   width: 340px;
   height: 340px;
   border-radius: 50%;
-  background:
-    radial-gradient(
-      circle,
-      rgba(244, 208, 75, 0.12),
-      transparent 68%
-    );
+  background: radial-gradient(
+    circle,
+    rgba(244, 208, 75, 0.12),
+    transparent 68%
+  );
   pointer-events: none;
 }
 
@@ -3526,8 +3164,7 @@ button:focus-visible {
 .ranking-hero h1 {
   margin: 0;
   color: #ffffff;
-  font-size:
-    clamp(38px, 7vw, 72px);
+  font-size: clamp(38px, 7vw, 72px);
   font-weight: 950;
   line-height: 0.92;
   letter-spacing: -0.055em;
@@ -3550,12 +3187,9 @@ button:focus-visible {
   gap: 8px;
   min-width: max-content;
   padding: 8px 12px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
-  background:
-    rgba(3, 7, 17, 0.5);
+  background: rgba(3, 7, 17, 0.5);
   color: #aeb7cb;
   font-size: 9px;
   font-weight: 950;
@@ -3581,24 +3215,16 @@ button:focus-visible {
   width: 100%;
   margin-top: 25px;
   padding: 14px 16px;
-  border:
-    1px solid
-    rgba(244, 208, 75, 0.3);
+  border: 1px solid rgba(244, 208, 75, 0.3);
   border-radius: 20px;
   background:
-    linear-gradient(
-      105deg,
-      rgba(244, 208, 75, 0.11),
-      rgba(42, 67, 155, 0.12)
-    ),
+    linear-gradient(105deg, rgba(244, 208, 75, 0.11), rgba(42, 67, 155, 0.12)),
     rgba(5, 10, 23, 0.76);
   color: #ffffff;
   text-align: left;
   box-shadow:
-    inset 4px 0 0
-      rgba(244, 208, 75, 0.86),
-    0 14px 34px
-      rgba(0, 0, 0, 0.2);
+    inset 4px 0 0 rgba(244, 208, 75, 0.86),
+    0 14px 34px rgba(0, 0, 0, 0.2);
   transition:
     transform 160ms ease,
     border-color 160ms ease,
@@ -3606,16 +3232,12 @@ button:focus-visible {
 }
 
 .ranking-current-user:hover {
-  border-color:
-    rgba(244, 208, 75, 0.58);
+  border-color: rgba(244, 208, 75, 0.58);
   transform: translateY(-2px);
   box-shadow:
-    inset 4px 0 0
-      rgba(244, 208, 75, 1),
-    0 18px 42px
-      rgba(0, 0, 0, 0.28),
-    0 0 24px
-      rgba(244, 208, 75, 0.08);
+    inset 4px 0 0 rgba(244, 208, 75, 1),
+    0 18px 42px rgba(0, 0, 0, 0.28),
+    0 0 24px rgba(244, 208, 75, 0.08);
 }
 
 .ranking-avatar {
@@ -3626,9 +3248,7 @@ button:focus-visible {
   height: 44px;
   flex: 0 0 44px;
   overflow: hidden;
-  border:
-    2px solid
-    rgba(244, 208, 75, 0.72);
+  border: 2px solid rgba(244, 208, 75, 0.72);
   border-radius: 50%;
   background:
     radial-gradient(
@@ -3636,19 +3256,13 @@ button:focus-visible {
       rgba(255, 227, 108, 0.38),
       transparent 35%
     ),
-    linear-gradient(
-      145deg,
-      #233d99,
-      #8d123f
-    );
+    linear-gradient(145deg, #233d99, #8d123f);
   color: #fff2a0;
   font-size: 12px;
   font-weight: 950;
   box-shadow:
-    0 0 0 3px
-      rgba(128, 17, 60, 0.75),
-    0 8px 20px
-      rgba(0, 0, 0, 0.32);
+    0 0 0 3px rgba(128, 17, 60, 0.75),
+    0 8px 20px rgba(0, 0, 0, 0.32);
 }
 
 .ranking-avatar-large {
@@ -3665,10 +3279,8 @@ button:focus-visible {
   border-width: 4px;
   font-size: 24px;
   box-shadow:
-    0 0 0 5px
-      rgba(128, 17, 60, 0.84),
-    0 18px 40px
-      rgba(0, 0, 0, 0.4);
+    0 0 0 5px rgba(128, 17, 60, 0.84),
+    0 18px 40px rgba(0, 0, 0, 0.4);
 }
 
 .ranking-avatar img {
@@ -3714,17 +3326,14 @@ button:focus-visible {
   gap: 3px;
   min-width: 72px;
   padding-left: 16px;
-  border-left:
-    1px solid
-    rgba(255, 255, 255, 0.08);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .ranking-current-stat strong {
   color: #ffffff;
   font-size: 20px;
   font-weight: 950;
-  font-variant-numeric:
-    tabular-nums;
+  font-variant-numeric: tabular-nums;
 }
 
 .ranking-current-stat.points strong {
@@ -3733,21 +3342,15 @@ button:focus-visible {
 
 .ranking-tabs {
   display: grid;
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
   width: min(100%, 520px);
   margin: 22px auto 18px;
   padding: 5px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
-  background:
-    rgba(9, 13, 28, 0.9);
-  box-shadow:
-    0 14px 34px
-      rgba(0, 0, 0, 0.25);
+  background: rgba(9, 13, 28, 0.9);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.25);
 }
 
 .ranking-tab {
@@ -3771,29 +3374,17 @@ button:focus-visible {
 }
 
 .ranking-tab.active {
-  background:
-    linear-gradient(
-      110deg,
-      #f0c735,
-      #f5df68
-    );
+  background: linear-gradient(110deg, #f0c735, #f5df68);
   color: #171205;
-  box-shadow:
-    0 10px 24px
-      rgba(244, 208, 75, 0.18);
+  box-shadow: 0 10px 24px rgba(244, 208, 75, 0.18);
 }
 
 .ranking-board {
   overflow: hidden;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 24px;
-  background:
-    rgba(8, 12, 25, 0.93);
-  box-shadow:
-    0 24px 70px
-      rgba(0, 0, 0, 0.27);
+  background: rgba(8, 12, 25, 0.93);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.27);
 }
 
 .ranking-board-heading {
@@ -3802,20 +3393,10 @@ button:focus-visible {
   justify-content: space-between;
   gap: 18px;
   padding: 18px 20px;
-  border-bottom:
-    1px solid
-    rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   background:
-    radial-gradient(
-      circle at 0% 0%,
-      rgba(42, 70, 161, 0.17),
-      transparent 42%
-    ),
-    radial-gradient(
-      circle at 100% 0%,
-      rgba(143, 15, 62, 0.14),
-      transparent 38%
-    );
+    radial-gradient(circle at 0% 0%, rgba(42, 70, 161, 0.17), transparent 42%),
+    radial-gradient(circle at 100% 0%, rgba(143, 15, 62, 0.14), transparent 38%);
 }
 
 .ranking-board-heading > div {
@@ -3861,11 +3442,8 @@ button:focus-visible {
 .ranking-table-head {
   min-height: 42px;
   padding: 0 18px;
-  border-bottom:
-    1px solid
-    rgba(255, 255, 255, 0.07);
-  background:
-    rgba(255, 255, 255, 0.025);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.025);
   color: #69758f;
   font-size: 9px;
   font-weight: 950;
@@ -3880,11 +3458,8 @@ button:focus-visible {
   position: relative;
   min-height: 70px;
   padding: 9px 18px;
-  border-bottom:
-    1px solid
-    rgba(255, 255, 255, 0.055);
-  background:
-    rgba(255, 255, 255, 0.012);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+  background: rgba(255, 255, 255, 0.012);
   transition:
     transform 150ms ease,
     background 150ms ease,
@@ -3892,41 +3467,33 @@ button:focus-visible {
 }
 
 .ranking-row:nth-child(even) {
-  background:
-    rgba(255, 255, 255, 0.024);
+  background: rgba(255, 255, 255, 0.024);
 }
 
 .ranking-row:hover {
   z-index: 2;
-  background:
-    rgba(255, 255, 255, 0.046);
-  box-shadow:
-    inset 3px 0 0
-      rgba(244, 208, 75, 0.55);
+  background: rgba(255, 255, 255, 0.046);
+  box-shadow: inset 3px 0 0 rgba(244, 208, 75, 0.55);
   transform: translateX(3px);
 }
 
 .ranking-row.podium {
-  background:
-    linear-gradient(
-      90deg,
-      rgba(244, 208, 75, 0.075),
-      rgba(255, 255, 255, 0.014)
-    );
+  background: linear-gradient(
+    90deg,
+    rgba(244, 208, 75, 0.075),
+    rgba(255, 255, 255, 0.014)
+  );
 }
 
 .ranking-row.current-user {
-  background:
-    linear-gradient(
-      90deg,
-      rgba(128, 17, 60, 0.28),
-      rgba(36, 62, 150, 0.2)
-    );
+  background: linear-gradient(
+    90deg,
+    rgba(128, 17, 60, 0.28),
+    rgba(36, 62, 150, 0.2)
+  );
   box-shadow:
-    inset 4px 0 0
-      rgba(244, 208, 75, 0.95),
-    inset 0 0 0 1px
-      rgba(244, 208, 75, 0.13);
+    inset 4px 0 0 rgba(244, 208, 75, 0.95),
+    inset 0 0 0 1px rgba(244, 208, 75, 0.13);
 }
 
 .ranking-position {
@@ -3935,8 +3502,7 @@ button:focus-visible {
   color: #9aa5bc;
   font-size: 13px;
   font-weight: 950;
-  font-variant-numeric:
-    tabular-nums;
+  font-variant-numeric: tabular-nums;
 }
 
 .ranking-medal {
@@ -3994,12 +3560,9 @@ button:focus-visible {
 
 .ranking-you-badge {
   padding: 3px 6px;
-  border:
-    1px solid
-    rgba(244, 208, 75, 0.35);
+  border: 1px solid rgba(244, 208, 75, 0.35);
   border-radius: 999px;
-  background:
-    rgba(244, 208, 75, 0.1);
+  background: rgba(244, 208, 75, 0.1);
   color: #f6d85e;
   font-size: 7px;
   font-weight: 950;
@@ -4010,32 +3573,26 @@ button:focus-visible {
   display: grid;
   place-items: center;
   min-height: 32px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.065);
+  border: 1px solid rgba(255, 255, 255, 0.065);
   border-radius: 10px;
   color: #bac3d5;
   font-size: 12px;
   font-weight: 850;
-  font-variant-numeric:
-    tabular-nums;
+  font-variant-numeric: tabular-nums;
 }
 
 .ranking-breakdown.result {
-  background:
-    rgba(68, 118, 238, 0.075);
+  background: rgba(68, 118, 238, 0.075);
   color: #99b6ff;
 }
 
 .ranking-breakdown.xi {
-  background:
-    rgba(66, 211, 139, 0.065);
+  background: rgba(66, 211, 139, 0.065);
   color: #82dfad;
 }
 
 .ranking-breakdown.protagonist {
-  background:
-    rgba(159, 30, 80, 0.095);
+  background: rgba(159, 30, 80, 0.095);
   color: #ff9bb0;
 }
 
@@ -4043,21 +3600,17 @@ button:focus-visible {
   display: grid;
   place-items: center;
   min-height: 38px;
-  border:
-    1px solid
-    rgba(244, 208, 75, 0.3);
+  border: 1px solid rgba(244, 208, 75, 0.3);
   border-radius: 12px;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(244, 208, 75, 0.15),
-      rgba(244, 208, 75, 0.04)
-    );
+  background: linear-gradient(
+    145deg,
+    rgba(244, 208, 75, 0.15),
+    rgba(244, 208, 75, 0.04)
+  );
   color: #f7d85a;
   font-size: 15px;
   font-weight: 950;
-  font-variant-numeric:
-    tabular-nums;
+  font-variant-numeric: tabular-nums;
 }
 
 .ranking-load-more {
@@ -4072,12 +3625,9 @@ button:focus-visible {
   min-width: 220px;
   min-height: 44px;
   padding: 0 18px;
-  border:
-    1px solid
-    rgba(244, 208, 75, 0.3);
+  border: 1px solid rgba(244, 208, 75, 0.3);
   border-radius: 999px;
-  background:
-    rgba(244, 208, 75, 0.075);
+  background: rgba(244, 208, 75, 0.075);
   color: #f5d65a;
   font-size: 10px;
   font-weight: 950;
@@ -4089,10 +3639,8 @@ button:focus-visible {
 }
 
 .ranking-load-more button:hover {
-  border-color:
-    rgba(244, 208, 75, 0.6);
-  background:
-    rgba(244, 208, 75, 0.13);
+  border-color: rgba(244, 208, 75, 0.6);
+  background: rgba(244, 208, 75, 0.13);
   transform: translateY(-2px);
 }
 
@@ -4104,8 +3652,6 @@ button:focus-visible {
   letter-spacing: 0.06em;
 }
 
-
-
 /* =========================================================
    PERFIL VESALAPORRA — IDENTITAT X, ESTADÍSTIQUES I MEDALLES
    ========================================================= */
@@ -4113,10 +3659,7 @@ button:focus-visible {
 .profile-page {
   width: min(100% - 32px, 1120px);
   margin: 0 auto;
-  padding:
-    clamp(28px, 5vw, 58px)
-    0
-    90px;
+  padding: clamp(28px, 5vw, 58px) 0 90px;
 }
 
 .profile-hero {
@@ -4128,24 +3671,13 @@ button:focus-visible {
     auto;
   align-items: center;
   gap: 24px;
-  padding:
-    clamp(22px, 4vw, 34px);
+  padding: clamp(22px, 4vw, 34px);
   overflow: hidden;
-  border:
-    1px solid
-    rgba(244, 208, 75, 0.2);
+  border: 1px solid rgba(244, 208, 75, 0.2);
   border-radius: 30px;
   background:
-    radial-gradient(
-      circle at 6% 10%,
-      rgba(38, 72, 174, 0.3),
-      transparent 38%
-    ),
-    radial-gradient(
-      circle at 92% 4%,
-      rgba(145, 15, 61, 0.3),
-      transparent 38%
-    ),
+    radial-gradient(circle at 6% 10%, rgba(38, 72, 174, 0.3), transparent 38%),
+    radial-gradient(circle at 92% 4%, rgba(145, 15, 61, 0.3), transparent 38%),
     linear-gradient(
       145deg,
       rgba(255, 255, 255, 0.05),
@@ -4153,10 +3685,8 @@ button:focus-visible {
     ),
     #0a0f20;
   box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.05),
-    0 26px 76px
-      rgba(0, 0, 0, 0.32);
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 26px 76px rgba(0, 0, 0, 0.32);
 }
 
 .profile-hero::after {
@@ -4167,18 +3697,16 @@ button:focus-visible {
   width: 360px;
   height: 360px;
   border-radius: 50%;
-  background:
-    radial-gradient(
-      circle,
-      rgba(244, 208, 75, 0.13),
-      transparent 68%
-    );
+  background: radial-gradient(
+    circle,
+    rgba(244, 208, 75, 0.13),
+    transparent 68%
+  );
   pointer-events: none;
 }
 
 .profile-hero.public-profile {
-  border-color:
-    rgba(112, 153, 255, 0.2);
+  border-color: rgba(112, 153, 255, 0.2);
 }
 
 .profile-identity-block {
@@ -4197,12 +3725,9 @@ button:focus-visible {
   border-width: 4px;
   font-size: 25px;
   box-shadow:
-    0 0 0 5px
-      rgba(128, 17, 60, 0.88),
-    0 18px 44px
-      rgba(0, 0, 0, 0.46),
-    0 0 34px
-      rgba(244, 208, 75, 0.1);
+    0 0 0 5px rgba(128, 17, 60, 0.88),
+    0 18px 44px rgba(0, 0, 0, 0.46),
+    0 0 34px rgba(244, 208, 75, 0.1);
 }
 
 .profile-identity-copy {
@@ -4224,8 +3749,7 @@ button:focus-visible {
   margin: 8px 0 0;
   overflow: hidden;
   color: #ffffff;
-  font-size:
-    clamp(30px, 5vw, 54px);
+  font-size: clamp(30px, 5vw, 54px);
   font-weight: 950;
   line-height: 0.96;
   letter-spacing: -0.05em;
@@ -4262,12 +3786,9 @@ button:focus-visible {
 
 .profile-identity-badges span {
   padding: 6px 9px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
-  background:
-    rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.035);
   color: #8d98b0;
   font-size: 8px;
   font-weight: 950;
@@ -4278,8 +3799,7 @@ button:focus-visible {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns:
-    repeat(2, minmax(94px, 1fr));
+  grid-template-columns: repeat(2, minmax(94px, 1fr));
   gap: 10px;
 }
 
@@ -4290,12 +3810,9 @@ button:focus-visible {
   justify-content: center;
   min-height: 88px;
   padding: 13px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 18px;
-  background:
-    rgba(3, 8, 20, 0.54);
+  background: rgba(3, 8, 20, 0.54);
 }
 
 .profile-hero-stats span {
@@ -4312,15 +3829,12 @@ button:focus-visible {
   font-size: 26px;
   font-weight: 950;
   line-height: 1;
-  font-variant-numeric:
-    tabular-nums;
+  font-variant-numeric: tabular-nums;
 }
 
 .profile-hero-stats .gold {
-  border-color:
-    rgba(244, 208, 75, 0.28);
-  background:
-    rgba(244, 208, 75, 0.07);
+  border-color: rgba(244, 208, 75, 0.28);
+  background: rgba(244, 208, 75, 0.07);
 }
 
 .profile-hero-stats .gold strong {
@@ -4343,12 +3857,9 @@ button:focus-visible {
   gap: 7px;
   min-height: 42px;
   padding: 0 14px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
-  background:
-    rgba(6, 10, 22, 0.72);
+  background: rgba(6, 10, 22, 0.72);
   color: #dce2ee;
   font-size: 9px;
   font-weight: 950;
@@ -4361,40 +3872,30 @@ button:focus-visible {
 }
 
 .profile-action-button:hover {
-  border-color:
-    rgba(244, 208, 75, 0.45);
-  background:
-    rgba(244, 208, 75, 0.07);
+  border-color: rgba(244, 208, 75, 0.45);
+  background: rgba(244, 208, 75, 0.07);
   transform: translateY(-1px);
 }
 
 .profile-action-button.x {
-  border-color:
-    rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
 .profile-action-button.back {
-  border-color:
-    rgba(128, 17, 60, 0.35);
+  border-color: rgba(128, 17, 60, 0.35);
 }
 
 .profile-tabs {
   display: grid;
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   width: min(100%, 660px);
   margin: 22px auto 18px;
   padding: 5px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
-  background:
-    rgba(9, 13, 28, 0.92);
-  box-shadow:
-    0 14px 34px
-      rgba(0, 0, 0, 0.25);
+  background: rgba(9, 13, 28, 0.92);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.25);
 }
 
 .profile-tab {
@@ -4409,16 +3910,9 @@ button:focus-visible {
 }
 
 .profile-tab.active {
-  background:
-    linear-gradient(
-      110deg,
-      #f0c735,
-      #f5df68
-    );
+  background: linear-gradient(110deg, #f0c735, #f5df68);
   color: #171205;
-  box-shadow:
-    0 10px 24px
-      rgba(244, 208, 75, 0.18);
+  box-shadow: 0 10px 24px rgba(244, 208, 75, 0.18);
 }
 
 .profile-overview {
@@ -4428,8 +3922,7 @@ button:focus-visible {
 
 .profile-main-stats {
   display: grid;
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -4439,9 +3932,7 @@ button:focus-visible {
   align-items: flex-start;
   min-height: 118px;
   padding: 17px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.085);
+  border: 1px solid rgba(255, 255, 255, 0.085);
   border-radius: 20px;
   background:
     linear-gradient(
@@ -4451,15 +3942,12 @@ button:focus-visible {
     ),
     rgba(10, 14, 29, 0.92);
   box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.035),
-    0 16px 44px
-      rgba(0, 0, 0, 0.18);
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 16px 44px rgba(0, 0, 0, 0.18);
 }
 
 .profile-main-stats article.featured {
-  border-color:
-    rgba(244, 208, 75, 0.28);
+  border-color: rgba(244, 208, 75, 0.28);
   background:
     radial-gradient(
       circle at 20% 0%,
@@ -4482,8 +3970,7 @@ button:focus-visible {
   font-size: 30px;
   font-weight: 950;
   line-height: 1;
-  font-variant-numeric:
-    tabular-nums;
+  font-variant-numeric: tabular-nums;
 }
 
 .profile-main-stats .featured strong {
@@ -4502,15 +3989,10 @@ button:focus-visible {
 .profile-achievements-section,
 .profile-records-section {
   overflow: hidden;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.085);
+  border: 1px solid rgba(255, 255, 255, 0.085);
   border-radius: 24px;
-  background:
-    rgba(8, 12, 25, 0.94);
-  box-shadow:
-    0 22px 64px
-      rgba(0, 0, 0, 0.24);
+  background: rgba(8, 12, 25, 0.94);
+  box-shadow: 0 22px 64px rgba(0, 0, 0, 0.24);
 }
 
 .profile-breakdown-card > header,
@@ -4521,20 +4003,10 @@ button:focus-visible {
   justify-content: space-between;
   gap: 18px;
   padding: 18px 20px;
-  border-bottom:
-    1px solid
-    rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   background:
-    radial-gradient(
-      circle at 0% 0%,
-      rgba(42, 70, 161, 0.16),
-      transparent 44%
-    ),
-    radial-gradient(
-      circle at 100% 0%,
-      rgba(143, 15, 62, 0.13),
-      transparent 40%
-    );
+    radial-gradient(circle at 0% 0%, rgba(42, 70, 161, 0.16), transparent 44%),
+    radial-gradient(circle at 100% 0%, rgba(143, 15, 62, 0.13), transparent 40%);
 }
 
 .profile-breakdown-card > header > div,
@@ -4579,9 +4051,7 @@ button:focus-visible {
   align-items: center;
   gap: 16px;
   padding: 15px 20px;
-  border-bottom:
-    1px solid
-    rgba(255, 255, 255, 0.055);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
 }
 
 .profile-breakdown-row > span {
@@ -4596,16 +4066,14 @@ button:focus-visible {
   font-size: 15px;
   font-weight: 950;
   text-align: right;
-  font-variant-numeric:
-    tabular-nums;
+  font-variant-numeric: tabular-nums;
 }
 
 .profile-breakdown-track {
   height: 9px;
   overflow: hidden;
   border-radius: 999px;
-  background:
-    rgba(255, 255, 255, 0.055);
+  background: rgba(255, 255, 255, 0.055);
 }
 
 .profile-breakdown-fill {
@@ -4616,36 +4084,20 @@ button:focus-visible {
 }
 
 .profile-breakdown-fill.result {
-  background:
-    linear-gradient(
-      90deg,
-      #3d70e4,
-      #8eafff
-    );
+  background: linear-gradient(90deg, #3d70e4, #8eafff);
 }
 
 .profile-breakdown-fill.xi {
-  background:
-    linear-gradient(
-      90deg,
-      #23975f,
-      #74e2a8
-    );
+  background: linear-gradient(90deg, #23975f, #74e2a8);
 }
 
 .profile-breakdown-fill.protagonist {
-  background:
-    linear-gradient(
-      90deg,
-      #8d123f,
-      #ff8ca5
-    );
+  background: linear-gradient(90deg, #8d123f, #ff8ca5);
 }
 
 .profile-performance-grid {
   display: grid;
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -4655,12 +4107,9 @@ button:focus-visible {
   gap: 13px;
   min-height: 104px;
   padding: 15px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
-  background:
-    rgba(12, 16, 31, 0.92);
+  background: rgba(12, 16, 31, 0.92);
 }
 
 .profile-performance-icon {
@@ -4669,12 +4118,9 @@ button:focus-visible {
   width: 48px;
   height: 48px;
   flex: 0 0 48px;
-  border:
-    1px solid
-    rgba(244, 208, 75, 0.22);
+  border: 1px solid rgba(244, 208, 75, 0.22);
   border-radius: 50%;
-  background:
-    rgba(244, 208, 75, 0.07);
+  background: rgba(244, 208, 75, 0.07);
   font-size: 21px;
 }
 
@@ -4708,8 +4154,7 @@ button:focus-visible {
 
 .profile-records-grid {
   display: grid;
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   padding: 16px;
 }
@@ -4722,62 +4167,39 @@ button:focus-visible {
   min-height: 250px;
   padding: 17px 14px;
   overflow: hidden;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 22px;
   text-align: center;
-  box-shadow:
-    0 18px 46px
-      rgba(0, 0, 0, 0.32);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.32);
 }
 
 .profile-record-card.gold {
-  border-color:
-    rgba(244, 208, 75, 0.42);
+  border-color: rgba(244, 208, 75, 0.42);
   background:
-    radial-gradient(
-      circle at 50% 0%,
-      rgba(244, 208, 75, 0.3),
-      transparent 48%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(98, 70, 10, 0.78),
-      rgba(6, 9, 20, 0.98)
-    );
+    radial-gradient(circle at 50% 0%, rgba(244, 208, 75, 0.3), transparent 48%),
+    linear-gradient(180deg, rgba(98, 70, 10, 0.78), rgba(6, 9, 20, 0.98));
 }
 
 .profile-record-card.silver {
-  border-color:
-    rgba(203, 213, 225, 0.36);
+  border-color: rgba(203, 213, 225, 0.36);
   background:
     radial-gradient(
       circle at 50% 0%,
       rgba(226, 232, 240, 0.24),
       transparent 48%
     ),
-    linear-gradient(
-      180deg,
-      rgba(65, 78, 101, 0.72),
-      rgba(6, 9, 20, 0.98)
-    );
+    linear-gradient(180deg, rgba(65, 78, 101, 0.72), rgba(6, 9, 20, 0.98));
 }
 
 .profile-record-card.bronze {
-  border-color:
-    rgba(251, 146, 60, 0.36);
+  border-color: rgba(251, 146, 60, 0.36);
   background:
     radial-gradient(
       circle at 50% 0%,
       rgba(251, 146, 60, 0.23),
       transparent 48%
     ),
-    linear-gradient(
-      180deg,
-      rgba(100, 45, 15, 0.72),
-      rgba(6, 9, 20, 0.98)
-    );
+    linear-gradient(180deg, rgba(100, 45, 15, 0.72), rgba(6, 9, 20, 0.98));
 }
 
 .profile-record-ordinal {
@@ -4794,16 +4216,11 @@ button:focus-visible {
   width: 82px;
   height: 82px;
   margin-top: 12px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 50%;
-  background:
-    rgba(2, 6, 18, 0.42);
+  background: rgba(2, 6, 18, 0.42);
   font-size: 35px;
-  box-shadow:
-    0 14px 34px
-      rgba(0, 0, 0, 0.34);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
 }
 
 .profile-record-card > strong {
@@ -4844,16 +4261,12 @@ button:focus-visible {
   gap: 14px;
   min-height: 88px;
   padding: 12px 18px;
-  border-bottom:
-    1px solid
-    rgba(255, 255, 255, 0.055);
-  background:
-    rgba(255, 255, 255, 0.012);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+  background: rgba(255, 255, 255, 0.012);
 }
 
 .profile-history-row:nth-child(even) {
-  background:
-    rgba(255, 255, 255, 0.024);
+  background: rgba(255, 255, 255, 0.024);
 }
 
 .profile-history-match {
@@ -4869,16 +4282,13 @@ button:focus-visible {
   width: 46px;
   height: 46px;
   flex: 0 0 46px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 50%;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(43, 72, 166, 0.3),
-      rgba(128, 17, 60, 0.26)
-    );
+  background: linear-gradient(
+    145deg,
+    rgba(43, 72, 166, 0.3),
+    rgba(128, 17, 60, 0.26)
+  );
   color: #f1d85d;
   font-size: 9px;
   font-weight: 950;
@@ -4943,9 +4353,7 @@ button:focus-visible {
 
 .profile-history-details > span {
   padding: 6px 8px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 999px;
   font-size: 8px;
   font-weight: 900;
@@ -4953,20 +4361,17 @@ button:focus-visible {
 }
 
 .profile-history-details .result {
-  background:
-    rgba(62, 112, 229, 0.08);
+  background: rgba(62, 112, 229, 0.08);
   color: #94b3ff;
 }
 
 .profile-history-details .xi {
-  background:
-    rgba(55, 188, 117, 0.07);
+  background: rgba(55, 188, 117, 0.07);
   color: #79dfa8;
 }
 
 .profile-history-details .protagonist {
-  background:
-    rgba(145, 21, 70, 0.1);
+  background: rgba(145, 21, 70, 0.1);
   color: #ff9bb0;
 }
 
@@ -4980,29 +4385,22 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
   min-height: 50px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   font-size: 17px;
   font-weight: 950;
-  font-variant-numeric:
-    tabular-nums;
+  font-variant-numeric: tabular-nums;
 }
 
 .profile-history-total.positive {
-  border-color:
-    rgba(67, 218, 137, 0.24);
-  background:
-    rgba(67, 218, 137, 0.07);
+  border-color: rgba(67, 218, 137, 0.24);
+  background: rgba(67, 218, 137, 0.07);
   color: #78e2ab;
 }
 
 .profile-history-total.negative {
-  border-color:
-    rgba(238, 71, 101, 0.24);
-  background:
-    rgba(238, 71, 101, 0.07);
+  border-color: rgba(238, 71, 101, 0.24);
+  background: rgba(238, 71, 101, 0.07);
   color: #ff8097;
 }
 
@@ -5021,20 +4419,10 @@ button:focus-visible {
   align-items: center;
   gap: 18px;
   padding: 22px;
-  border-bottom:
-    1px solid
-    rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   background:
-    radial-gradient(
-      circle at 0% 0%,
-      rgba(244, 208, 75, 0.16),
-      transparent 42%
-    ),
-    radial-gradient(
-      circle at 100% 0%,
-      rgba(143, 15, 62, 0.14),
-      transparent 40%
-    );
+    radial-gradient(circle at 0% 0%, rgba(244, 208, 75, 0.16), transparent 42%),
+    radial-gradient(circle at 100% 0%, rgba(143, 15, 62, 0.14), transparent 40%);
 }
 
 .profile-achievements-trophy {
@@ -5043,16 +4431,11 @@ button:focus-visible {
   width: 76px;
   height: 76px;
   flex: 0 0 76px;
-  border:
-    1px solid
-    rgba(244, 208, 75, 0.34);
+  border: 1px solid rgba(244, 208, 75, 0.34);
   border-radius: 50%;
-  background:
-    rgba(244, 208, 75, 0.09);
+  background: rgba(244, 208, 75, 0.09);
   font-size: 34px;
-  box-shadow:
-    0 14px 34px
-      rgba(0, 0, 0, 0.28);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
 }
 
 .profile-achievements-hero > div:last-child {
@@ -5083,8 +4466,7 @@ button:focus-visible {
 
 .profile-achievements-grid {
   display: grid;
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 11px;
   padding: 16px;
 }
@@ -5099,23 +4481,15 @@ button:focus-visible {
   gap: 13px;
   min-height: 104px;
   padding: 14px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
-  background:
-    rgba(255, 255, 255, 0.018);
+  background: rgba(255, 255, 255, 0.018);
 }
 
 .profile-achievement.unlocked {
-  border-color:
-    rgba(244, 208, 75, 0.24);
+  border-color: rgba(244, 208, 75, 0.24);
   background:
-    radial-gradient(
-      circle at 0% 0%,
-      rgba(244, 208, 75, 0.11),
-      transparent 46%
-    ),
+    radial-gradient(circle at 0% 0%, rgba(244, 208, 75, 0.11), transparent 46%),
     rgba(255, 255, 255, 0.018);
 }
 
@@ -5130,12 +4504,9 @@ button:focus-visible {
   width: 54px;
   height: 54px;
   flex: 0 0 54px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 50%;
-  background:
-    rgba(5, 9, 20, 0.58);
+  background: rgba(5, 9, 20, 0.58);
   font-size: 24px;
 }
 
@@ -5152,9 +4523,7 @@ button:focus-visible {
   letter-spacing: 0.1em;
 }
 
-.profile-achievement.unlocked
-  > div
-  > span {
+.profile-achievement.unlocked > div > span {
   color: #f1cd47;
 }
 
@@ -5175,9 +4544,7 @@ button:focus-visible {
 .profile-achievement > small {
   min-width: max-content;
   padding: 6px 8px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
   color: #99a3ba;
   font-size: 7px;
@@ -5206,8 +4573,7 @@ button:focus-visible {
   }
 
   .profile-performance-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .profile-history-row {
@@ -5262,13 +4628,11 @@ button:focus-visible {
   }
 
   .profile-main-stats {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .profile-performance-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .profile-records-grid {
@@ -5520,8 +4884,7 @@ button:focus-visible {
   }
 
   .ranking-breakdown::before {
-    content:
-      attr(data-label);
+    content: attr(data-label);
     margin-right: 7px;
     color: #69758f;
     font-size: 7px;
@@ -5593,8 +4956,7 @@ button:focus-visible {
   }
 
   .profile-preview-points {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -5723,16 +5085,12 @@ button:focus-visible {
   min-width: 44px;
   min-height: 44px;
   padding: 5px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.11);
+  border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 50%;
   color: #ffffff;
   box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.045),
-    0 8px 22px
-      rgba(0, 0, 0, 0.22);
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 8px 22px rgba(0, 0, 0, 0.22);
   transition:
     transform 160ms ease,
     border-color 160ms ease,
@@ -5743,16 +5101,12 @@ button:focus-visible {
 
 .auth-provider-button:hover,
 .auth-account-button:hover {
-  border-color:
-    rgba(244, 208, 75, 0.46);
+  border-color: rgba(244, 208, 75, 0.46);
   transform: translateY(-2px);
   box-shadow:
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.07),
-    0 12px 28px
-      rgba(0, 0, 0, 0.3),
-    0 0 20px
-      rgba(244, 208, 75, 0.07);
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 12px 28px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(244, 208, 75, 0.07);
 }
 
 .auth-provider-button:active,
@@ -5784,15 +5138,12 @@ button:focus-visible {
 }
 
 .auth-provider-button.google {
-  background:
-    rgba(255, 255, 255, 0.045);
+  background: rgba(255, 255, 255, 0.045);
 }
 
 .auth-account-button.signed-in {
-  border-color:
-    rgba(68, 213, 137, 0.3);
-  background:
-    rgba(68, 213, 137, 0.07);
+  border-color: rgba(68, 213, 137, 0.3);
+  background: rgba(68, 213, 137, 0.07);
 }
 
 .auth-google-mark,
@@ -5807,34 +5158,27 @@ button:focus-visible {
 }
 
 .auth-google-mark {
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   background: #ffffff;
   color: #4285f4;
   font-size: 17px;
   font-weight: 950;
-  box-shadow:
-    0 5px 15px
-      rgba(0, 0, 0, 0.25);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+}
+
+.auth-google-mark svg {
+  display: block;
+  width: 19px;
+  height: 19px;
 }
 
 .auth-avatar {
-  border:
-    2px solid
-    rgba(244, 208, 75, 0.68);
-  background:
-    linear-gradient(
-      145deg,
-      #243d99,
-      #8d123f
-    );
+  border: 2px solid rgba(244, 208, 75, 0.68);
+  background: linear-gradient(145deg, #243d99, #8d123f);
   color: #fff0a0;
   font-size: 10px;
   font-weight: 950;
-  box-shadow:
-    0 0 0 2px
-      rgba(128, 17, 60, 0.72);
+  box-shadow: 0 0 0 2px rgba(128, 17, 60, 0.72);
 }
 
 .auth-avatar img {
@@ -5850,9 +5194,7 @@ button:focus-visible {
   z-index: 80;
   width: min(310px, calc(100vw - 24px));
   padding: 12px;
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.11);
+  border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 18px;
   background:
     radial-gradient(
@@ -5862,10 +5204,8 @@ button:focus-visible {
     ),
     rgba(8, 12, 25, 0.98);
   box-shadow:
-    0 24px 60px
-      rgba(0, 0, 0, 0.48),
-    inset 0 1px 0
-      rgba(255, 255, 255, 0.04);
+    0 24px 60px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(18px);
 }
 
@@ -5875,9 +5215,7 @@ button:focus-visible {
   gap: 11px;
   min-width: 0;
   padding: 3px 3px 12px;
-  border-bottom:
-    1px solid
-    rgba(255, 255, 255, 0.075);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.075);
 }
 
 .auth-menu-identity > span {
@@ -5910,12 +5248,9 @@ button:focus-visible {
   width: 100%;
   min-height: 40px;
   margin-top: 10px;
-  border:
-    1px solid
-    rgba(238, 71, 101, 0.26);
+  border: 1px solid rgba(238, 71, 101, 0.26);
   border-radius: 12px;
-  background:
-    rgba(238, 71, 101, 0.07);
+  background: rgba(238, 71, 101, 0.07);
   color: #ff8ba1;
   font-size: 9px;
   font-weight: 950;
@@ -5923,10 +5258,8 @@ button:focus-visible {
 }
 
 .auth-menu > button:hover {
-  border-color:
-    rgba(238, 71, 101, 0.48);
-  background:
-    rgba(238, 71, 101, 0.12);
+  border-color: rgba(238, 71, 101, 0.48);
+  background: rgba(238, 71, 101, 0.12);
 }
 
 .auth-error-banner {
@@ -5943,16 +5276,11 @@ button:focus-visible {
   width: min(100% - 24px, 980px);
   margin: 10px auto 0;
   padding: 11px 13px;
-  border:
-    1px solid
-    rgba(238, 71, 101, 0.34);
+  border: 1px solid rgba(238, 71, 101, 0.34);
   border-radius: 14px;
-  background:
-    rgba(52, 9, 23, 0.94);
+  background: rgba(52, 9, 23, 0.94);
   color: #ffd5dd;
-  box-shadow:
-    0 14px 34px
-      rgba(0, 0, 0, 0.3);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(16px);
 }
 
@@ -5977,8 +5305,7 @@ button:focus-visible {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background:
-    rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.07);
   color: #ffffff;
   font-size: 18px;
 }
@@ -6076,5 +5403,289 @@ button:focus-visible {
 
   .auth-error-banner strong {
     display: none;
+  }
+}
+
+/* =========================================================
+   PERFIL AUTENTICAT — GOOGLE/X + EDICIÓ DE NOM I AVATAR
+   ========================================================= */
+
+.profile-account-source,
+.ranking-current-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  color: #9ba6bc;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.profile-account-source {
+  max-width: 100%;
+  margin-top: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-provider-mark,
+.ranking-provider-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.profile-provider-mark.google,
+.ranking-provider-mark.google {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: #ffffff;
+  color: #4285f4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.24);
+}
+
+.profile-provider-mark.google svg,
+.ranking-provider-mark.google svg {
+  display: block;
+  width: 13px;
+  height: 13px;
+}
+
+.ranking-current-source > span:first-child:not(.ranking-provider-mark) {
+  color: #ffffff;
+}
+
+.profile-inline-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.profile-inline-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid rgba(244, 208, 75, 0.24);
+  border-radius: 999px;
+  background: rgba(244, 208, 75, 0.065);
+  color: #f4d55a;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.profile-inline-action:hover {
+  border-color: rgba(244, 208, 75, 0.52);
+  background: rgba(244, 208, 75, 0.11);
+  transform: translateY(-1px);
+}
+
+.profile-inline-action:disabled {
+  cursor: wait;
+  opacity: 0.52;
+  transform: none;
+}
+
+.profile-inline-action > span {
+  color: #ffffff;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.profile-avatar-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.profile-name-editor {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(220px, 360px)
+    auto;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+  padding: 16px 18px;
+  border: 1px solid rgba(244, 208, 75, 0.22);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(42, 70, 161, 0.16), transparent 44%),
+    rgba(9, 13, 28, 0.94);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 16px 42px rgba(0, 0, 0, 0.22);
+}
+
+.profile-name-editor > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-name-editor > div:first-child span {
+  color: #f1cc45;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+}
+
+.profile-name-editor > div:first-child strong {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.profile-name-editor input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 13px;
+  outline: none;
+  background: #0d1427;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 850;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.profile-name-editor input:focus {
+  border-color: rgba(244, 208, 75, 0.68);
+  box-shadow: 0 0 0 3px rgba(244, 208, 75, 0.1);
+}
+
+.profile-name-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-name-editor-actions button {
+  min-height: 42px;
+  padding: 0 13px;
+  border-radius: 999px;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+.profile-name-editor-actions .secondary {
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  background: rgba(255, 255, 255, 0.04);
+  color: #aeb7ca;
+}
+
+.profile-name-editor-actions .primary {
+  border: 1px solid rgba(244, 208, 75, 0.42);
+  background: linear-gradient(110deg, #efc52f, #f5df68);
+  color: #171205;
+}
+
+.profile-name-editor-actions button:disabled {
+  cursor: wait;
+  opacity: 0.52;
+}
+
+.profile-feedback {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 11px 13px;
+  border: 1px solid;
+  border-radius: 14px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.profile-feedback.success {
+  border-color: rgba(68, 213, 137, 0.3);
+  background: rgba(68, 213, 137, 0.075);
+  color: #83e6b0;
+}
+
+.profile-feedback.error {
+  border-color: rgba(238, 71, 101, 0.34);
+  background: rgba(238, 71, 101, 0.075);
+  color: #ff93a7;
+}
+
+.profile-feedback button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  color: currentColor;
+  font-size: 16px;
+}
+
+@media (max-width: 900px) {
+  .profile-name-editor {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-name-editor-actions {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 500px) {
+  .profile-inline-actions {
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .profile-inline-action {
+    flex: 1 1 130px;
+    min-height: 36px;
+    padding: 0 9px;
+    font-size: 7px;
+  }
+
+  .profile-account-source {
+    font-size: 10px;
+  }
+
+  .profile-name-editor {
+    padding: 14px;
+    border-radius: 17px;
+  }
+
+  .profile-name-editor-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-name-editor-actions button {
+    width: 100%;
+    padding: 0 8px;
   }
 }
