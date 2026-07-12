@@ -6028,14 +6028,14 @@ button:focus-visible {
   height: 62px;
   flex: 0 0 62px;
   overflow: hidden;
-  border: 3px solid rgba(255, 216, 66, 0.86);
+  border: 3px solid rgba(47, 91, 210, 0.94);
   border-radius: 50%;
   background: #f7ecd3;
   box-shadow:
-    0 0 0 4px rgba(128, 17, 60, 0.9),
-    0 0 0 7px rgba(244, 208, 75, 0.1),
+    0 0 0 4px rgba(128, 17, 60, 0.94),
+    0 0 0 7px rgba(47, 91, 210, 0.13),
     0 12px 30px rgba(0, 0, 0, 0.34),
-    0 0 24px rgba(244, 208, 75, 0.12);
+    0 0 24px rgba(47, 91, 210, 0.18);
 }
 
 .flick-avatar-shell::before {
@@ -6082,6 +6082,7 @@ button:focus-visible {
   object-fit: cover;
   object-position: center 18%;
   background: #ffffff;
+  filter: saturate(1.24) contrast(1.1) brightness(1.035);
   box-shadow: none;
 }
 
