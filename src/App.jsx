@@ -262,17 +262,17 @@ const protagonistScoringByPlayerId = {
     missPoints: -5,
     order: 14,
   },
-   gavi: {
-    groupLabel: "GRUP E",
-    groupKey: "e",
+  gavi: {
+    groupLabel: "GRUP D",
+    groupKey: "d",
     goalContributions: 1,
     hitPoints: 40,
     missPoints: -5,
     order: 15,
   },
   "alejandro-balde": {
-    groupLabel: "GRUP D",
-    groupKey: "d",
+    groupLabel: "GRUP E",
+    groupKey: "e",
     goalContributions: 3,
     hitPoints: 50,
     missPoints: -5,
@@ -320,9 +320,58 @@ const protagonistScoringByPlayerId = {
   },
 };
 
+const teamBadgeVisualsById = {
+  barcelona: {
+    colors: ["#2147a5", "#a61c48", "#2147a5", "#a61c48"],
+  },
+  "al-ahly": {
+    colors: ["#d0183a", "#f5f6f8"],
+  },
+  "atletico-madrid": {
+    colors: ["#d71920", "#ffffff", "#1d3f72"],
+  },
+  "athletic-club": {
+    colors: ["#d71920", "#ffffff", "#111111"],
+  },
+  "real-madrid": {
+    colors: ["#ffffff"],
+  },
+  tottenham: {
+    colors: ["#ffffff", "#111111"],
+  },
+};
+
+const DEFAULT_TEAM_BADGE_COLORS = ["#6f7a95"];
+
+const getTeamBadgeBackground = (teamId) => {
+  const configuredColors = teamBadgeVisualsById[teamId]?.colors;
+
+  const colors =
+    Array.isArray(configuredColors) && configuredColors.length > 0
+      ? configuredColors.filter(Boolean).slice(0, 4)
+      : DEFAULT_TEAM_BADGE_COLORS;
+
+  if (colors.length === 1) {
+    return colors[0];
+  }
+
+  const stripeWidth = 100 / colors.length;
+
+  const gradientStops = colors.flatMap((color, index) => {
+    const start = (index * stripeWidth).toFixed(4);
+    const end = ((index + 1) * stripeWidth).toFixed(4);
+
+    return [`${color} ${start}%`, `${color} ${end}%`];
+  });
+
+  return `linear-gradient(90deg, ${gradientStops.join(", ")})`;
+};
+
 const matchData = {
+  homeTeamId: "barcelona",
   homeName: "Barça",
   homeLocation: "Barcelona",
+  awayTeamId: "al-ahly",
   awayName: "Al-Ahly",
   awayCountry: "Egipte",
   kickoffLabel: "DIMECRES · 19 AGOST 2026 · 21:00",
@@ -744,7 +793,7 @@ const profileDemoMatches = [
     xiBase: 11,
     protagonist: "Lamine",
     protagonistHitPoints: 5,
-    protagonistMissPoints: -15,
+    protagonistMissPoints: -5,
   },
   {
     id: "j4",
@@ -782,7 +831,7 @@ const profileDemoMatches = [
     actualAway: 0,
     xiBase: 8,
     protagonist: "Gavi",
-    protagonistHitPoints: 50,
+    protagonistHitPoints: 40,
     protagonistMissPoints: -5,
   },
   {
@@ -2317,7 +2366,12 @@ function App() {
                 <div className="score-team home">
                   <div className="score-team-label">
                     <span
-                      className="team-color-dot team-color-dot-barca"
+                      className="team-color-dot"
+                      style={{
+                        background: getTeamBadgeBackground(
+                          matchData.homeTeamId,
+                        ),
+                      }}
                       aria-hidden="true"
                     ></span>
 
@@ -2404,7 +2458,12 @@ function App() {
                 <div className="score-team away">
                   <div className="score-team-label">
                     <span
-                      className="team-color-dot team-color-dot-al-ahly"
+                      className="team-color-dot"
+                      style={{
+                        background: getTeamBadgeBackground(
+                          matchData.awayTeamId,
+                        ),
+                      }}
                       aria-hidden="true"
                     ></span>
 
@@ -2724,7 +2783,7 @@ function App() {
                     <div className="section-info-points-row special">
                       <span>Lamine Yamal</span>
 
-                      <strong>+5 / −15</strong>
+                      <strong>+5 / −5</strong>
                     </div>
 
                     <div className="section-info-points-row">
@@ -2749,8 +2808,7 @@ function App() {
 
                     <div className="section-info-points-row">
                       <span>
-                        João Cancelo · Ronald Araújo · Eric Garcia · Alejandro
-                        Balde
+                        João Cancelo · Ronald Araújo · Eric Garcia · Gavi
                       </span>
 
                       <strong>+40 / −5</strong>
@@ -2758,8 +2816,8 @@ function App() {
 
                     <div className="section-info-points-row">
                       <span>
-                        Gavi · Gerard Martín · Marc Casadó · Pau Cubarsí ·
-                        Andreas Christensen · Jofre Torrents
+                        Alejandro Balde · Gerard Martín · Marc Casadó · Pau
+                        Cubarsí · Andreas Christensen · Jofre Torrents
                       </span>
 
                       <strong>+50 / −5</strong>
