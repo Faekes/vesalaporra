@@ -1015,6 +1015,30 @@ function ProtagonistEventIcon({ type, count = null, className = "" }) {
   );
 }
 
+function ParticipationRoleIcon({ type, count = null, className = "" }) {
+  const isStarter = type === "starter";
+  const roleLetter = isStarter ? "T" : "S";
+  const roleLabel = isStarter ? "Titular" : "Suplent";
+
+  return (
+    <span
+      className={`participation-role-stat ${type} ${className}`.trim()}
+      aria-label={count === null ? roleLabel : `${roleLabel}: ${count}`}
+    >
+      <span
+        className={`participation-role-icon ${type}`}
+        aria-hidden="true"
+      >
+        {roleLetter}
+      </span>
+
+      {count !== null && (
+        <strong className="participation-role-count">{count}</strong>
+      )}
+    </span>
+  );
+}
+
 function PlayerNotesStats({ stats, mode }) {
   if (!stats) {
     return null;
@@ -1026,10 +1050,11 @@ function PlayerNotesStats({ stats, mode }) {
         className="notes-player-stats season"
         aria-label="Estadístiques de temporada"
       >
-        <span className="notes-stat-chip starter">T {stats.starts}</span>
-        <span className="notes-stat-chip substitute">
-          S {stats.substituteAppearances}
-        </span>
+        <ParticipationRoleIcon type="starter" count={stats.starts} />
+        <ParticipationRoleIcon
+          type="substitute"
+          count={stats.substituteAppearances}
+        />
         <ProtagonistEventIcon type="goal" count={stats.goals} />
         <ProtagonistEventIcon type="assist" count={stats.assists} />
       </div>
@@ -1042,13 +1067,9 @@ function PlayerNotesStats({ stats, mode }) {
       aria-label="Participació en el partit"
     >
       {stats.role && (
-        <span
-          className={`notes-stat-chip ${
-            stats.role === "T" ? "starter" : "substitute"
-          }`}
-        >
-          {stats.role}
-        </span>
+        <ParticipationRoleIcon
+          type={stats.role === "T" ? "starter" : "substitute"}
+        />
       )}
 
       {Array.from({ length: stats.goals }, (_, index) => (
@@ -4076,7 +4097,7 @@ function App() {
                     {tool.id === "goal" || tool.id === "assist" ? (
                       <ProtagonistEventIcon type={tool.id} />
                     ) : (
-                      <span>{tool.icon}</span>
+                      <ParticipationRoleIcon type={tool.id} />
                     )}
                     <strong>{tool.label}</strong>
                   </button>
@@ -4163,25 +4184,23 @@ function App() {
 
                       <div className="admin-player-current-stats">
                         <div className="admin-role-controls">
-                          <span
+                          <ParticipationRoleIcon
+                            type="starter"
                             className={
                               stats.role === "T"
-                                ? "admin-current-chip starter active"
-                                : "admin-current-chip starter"
+                                ? "admin-current-role active"
+                                : "admin-current-role"
                             }
-                          >
-                            T
-                          </span>
+                          />
 
-                          <span
+                          <ParticipationRoleIcon
+                            type="substitute"
                             className={
                               stats.role === "S"
-                                ? "admin-current-chip substitute active"
-                                : "admin-current-chip substitute"
+                                ? "admin-current-role active"
+                                : "admin-current-role"
                             }
-                          >
-                            S
-                          </span>
+                          />
 
                           {stats.role && (
                             <button

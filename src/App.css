@@ -2563,18 +2563,18 @@ button:focus-visible {
 }
 
 .protagonist-type-icon.assist-icon {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(238, 71, 101, 0.42);
 
-  background: linear-gradient(135deg, #ed2856, #b80c43);
+  background: rgba(5, 10, 23, 0.82);
 
-  color: #ffffff;
+  color: #ff607f;
 
   font-size: 21px;
   font-weight: 950;
 
   box-shadow:
-    0 8px 20px rgba(180, 12, 63, 0.26),
-    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 18px rgba(238, 71, 101, 0.08);
 }
 
 .protagonist-type-button > span:last-child {
@@ -2850,14 +2850,14 @@ button:focus-visible {
 }
 
 .protagonist-combined-icon.assist {
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: linear-gradient(135deg, #ed2856, #ad093d);
-  color: #ffffff;
+  border: 1px solid rgba(238, 71, 101, 0.42);
+  background: rgba(5, 10, 23, 0.82);
+  color: #ff607f;
   font-size: 20px;
   font-weight: 950;
   box-shadow:
-    0 8px 20px rgba(180, 12, 63, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 18px rgba(238, 71, 101, 0.08);
 }
 
 .protagonist-combined-or {
@@ -3040,7 +3040,8 @@ button:focus-visible {
     justify-self: flex-start;
   }
 
-  .protagonist-combined-icon {
+  .protagonist-combined-icon,
+  .participation-role-icon {
     width: 40px;
     height: 40px;
     flex-basis: 40px;
@@ -7018,6 +7019,54 @@ button:focus-visible {
   color: #d1adff;
 }
 
+.participation-role-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.participation-role-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  background: rgba(5, 10, 23, 0.82);
+  font-size: 18px;
+  font-weight: 950;
+  line-height: 1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.participation-role-icon.starter {
+  border-color: rgba(67, 218, 137, 0.42);
+  color: #72e3a8;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 18px rgba(67, 218, 137, 0.08);
+}
+
+.participation-role-icon.substitute {
+  border-color: rgba(244, 208, 75, 0.42);
+  color: #f7d85a;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 18px rgba(244, 208, 75, 0.08);
+}
+
+.participation-role-count {
+  min-width: 16px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 950;
+  line-height: 1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
 .protagonist-event-stat {
   display: inline-flex;
   align-items: center;
@@ -7037,7 +7086,10 @@ button:focus-visible {
 
 .notes-player-stats .protagonist-combined-icon,
 .admin-tool .protagonist-combined-icon,
-.admin-count-control .protagonist-combined-icon {
+.admin-count-control .protagonist-combined-icon,
+.notes-player-stats .participation-role-icon,
+.admin-tool .participation-role-icon,
+.admin-role-controls .participation-role-icon {
   width: 48px;
   height: 48px;
   flex-basis: 48px;
@@ -7167,7 +7219,7 @@ button.notes-star:hover {
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
 }
 
-.admin-tool > span:not(.protagonist-event-stat) {
+.admin-tool > span:not(.protagonist-event-stat):not(.participation-role-stat) {
   display: grid;
   place-items: center;
   width: 38px;
@@ -7187,16 +7239,18 @@ button.notes-star:hover {
   letter-spacing: 0.055em;
 }
 
-.admin-tool.starter > span:not(.protagonist-event-stat) {
-  color: #8eb3ff;
+.admin-tool.starter > span:not(.protagonist-event-stat):not(.participation-role-stat) {
+  color: #72e3a8;
 }
 
-.admin-tool.substitute > span:not(.protagonist-event-stat) {
-  color: #d1adff;
+.admin-tool.substitute > span:not(.protagonist-event-stat):not(.participation-role-stat) {
+  color: #f7d85a;
 }
 
 .admin-tool.goal > .protagonist-event-stat,
-.admin-tool.assist > .protagonist-event-stat {
+.admin-tool.assist > .protagonist-event-stat,
+.admin-tool.starter > .participation-role-stat,
+.admin-tool.substitute > .participation-role-stat {
   flex: 0 0 auto;
 }
 
@@ -7359,6 +7413,32 @@ button.notes-star:hover {
   color: #d1adff;
 }
 
+.admin-current-role {
+  opacity: 0.34;
+  filter: saturate(0.62);
+}
+
+.admin-current-role.active {
+  opacity: 1;
+  filter: none;
+}
+
+.admin-current-role.active .participation-role-icon.starter {
+  background: rgba(67, 218, 137, 0.11);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 3px rgba(67, 218, 137, 0.07),
+    0 0 20px rgba(67, 218, 137, 0.13);
+}
+
+.admin-current-role.active .participation-role-icon.substitute {
+  background: rgba(244, 208, 75, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 3px rgba(244, 208, 75, 0.07),
+    0 0 20px rgba(244, 208, 75, 0.13);
+}
+
 .admin-clear-role,
 .admin-count-control button {
   display: grid;
@@ -7512,7 +7592,12 @@ button.notes-star:hover {
   }
 
   .notes-player-stats.season {
-    gap: 4px;
+    gap: 4px 6px;
+  }
+
+  .notes-player-stats .participation-role-count,
+  .notes-player-stats .protagonist-event-count {
+    font-size: 11px;
   }
 
   .notes-rating-area {
@@ -7573,5 +7658,18 @@ button.notes-star:hover {
   .admin-count-control {
     justify-content: space-between;
   }
+}
+/* =========================================================
+   ICONES DE PARTICIPACIÓ I EVENTS — COLOR ÚNIC DEL GOL
+   ========================================================= */
+
+.protagonist-combined-icon.assist,
+.participation-role-icon.starter,
+.participation-role-icon.substitute,
+.admin-current-role.active .participation-role-icon.starter,
+.admin-current-role.active .participation-role-icon.substitute {
+  border-color: rgba(244, 208, 75, 0.35);
+  background: rgba(244, 208, 75, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
