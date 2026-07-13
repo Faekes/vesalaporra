@@ -8157,3 +8157,70 @@ button.notes-star:hover {
     font-size: 9px;
   }
 }
+/* =========================================================
+   CORRECCIÓ ESPECÍFICA — RESULTAT EDITABLE DE PUNTUACIONS
+   ========================================================= */
+
+@media (min-width: 761px) {
+  .admin-scoring-hero
+    > .official-match-card.editable
+    .official-match-line {
+    grid-template-columns: 54px minmax(0, 1fr) 54px;
+    gap: 6px;
+  }
+
+  .admin-scoring-hero
+    > .official-match-card.editable
+    .official-match-team {
+    gap: 5px;
+  }
+
+  .admin-scoring-hero
+    > .official-match-card.editable
+    .team-color-dot.official-match-badge {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+
+  .admin-scoring-hero
+    > .official-match-card.editable
+    .official-match-team strong {
+    max-width: 54px;
+    font-size: 9px;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .admin-scoring-hero
+    > .official-match-card.editable
+    .official-score-editor {
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .admin-scoring-hero
+    > .official-match-card.editable
+    .official-score-side {
+    grid-template-columns: 21px 30px 21px;
+  }
+
+  .admin-scoring-hero
+    > .official-match-card.editable
+    .official-score-side button {
+    width: 21px;
+  }
+
+  .admin-scoring-hero
+    > .official-match-card.editable
+    .official-score-side strong {
+    font-size: 20px;
+  }
+
+  .admin-scoring-hero
+    > .official-match-card.editable
+    .official-score-editor
+    > span {
+    font-size: 17px;
+  }
+}
