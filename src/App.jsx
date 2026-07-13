@@ -1839,6 +1839,164 @@ const buildProfileDemoData = (
   };
 };
 
+const VESALAPORRA_CURRENT_MATCH_ID =
+  import.meta.env.VITE_VESALAPORRA_CURRENT_MATCH_ID ||
+  "6e6e5216-0d3f-4a65-9171-31b72026b001";
+
+const PLAYER_SOURCE_MAX_BYTES = 5 * 1024 * 1024;
+
+const PLAYER_SOURCE_ALLOWED_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+]);
+
+const EMPTY_ADMIN_PLAYER_FORM = {
+  displayName: "",
+  shortName: "",
+  shirtNumber: "",
+  playerKey: "",
+};
+
+const createAdminAuditId = (action) => {
+  const safeAction = String(action || "ACTION")
+    .toUpperCase()
+    .replace(/[^A-Z0-9_]/g, "_")
+    .slice(0, 48);
+
+  return `VLP_UI_${safeAction}_20260713_016_${crypto.randomUUID()}`;
+};
+
+const getPayloadValue = (payload, candidateKeys) => {
+  const keys = new Set(candidateKeys);
+  const visited = new Set();
+
+  const visit = (value, depth) => {
+    if (depth > 5 || value === null || value === undefined) {
+      return undefined;
+    }
+
+    if (typeof value !== "object") {
+      return undefined;
+    }
+
+    if (visited.has(value)) {
+      return undefined;
+    }
+
+    visited.add(value);
+
+    for (const [key, nestedValue] of Object.entries(value)) {
+      if (keys.has(key) && nestedValue !== null && nestedValue !== undefined) {
+        return nestedValue;
+      }
+    }
+
+    for (const nestedValue of Object.values(value)) {
+      const result = visit(nestedValue, depth + 1);
+
+      if (result !== undefined) {
+        return result;
+      }
+    }
+
+    return undefined;
+  };
+
+  return visit(payload, 0);
+};
+
+const getPublicStorageImageUrl = (bucket, path, version = null) => {
+  if (!bucket || !path) {
+    return null;
+  }
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  const publicUrl = data?.publicUrl || null;
+
+  if (!publicUrl) {
+    return null;
+  }
+
+  const cacheVersion = version || "current";
+
+  return `${publicUrl}?v=${encodeURIComponent(cacheVersion)}`;
+};
+
+const normalizeAdminPlayer = (row) => ({
+  playerId: row.player_id,
+  playerKey: row.player_key,
+  displayName: row.display_name,
+  shortName: row.short_name || row.display_name,
+  shirtNumber: row.shirt_number,
+  catalogStatus: row.catalog_status,
+  sourceImageBucket: row.source_image_bucket,
+  sourceImagePath: row.source_image_path,
+  sourceImageVersion: row.source_image_version,
+  sourceImageMimeType: row.source_image_mime_type,
+  sourceImageOriginalFilename: row.source_image_original_filename,
+  portraitBucket: row.portrait_bucket,
+  portraitPath: row.portrait_path,
+  portraitVersion: row.portrait_version,
+  portraitMimeType: row.portrait_mime_type,
+  portraitOriginalFilename: row.portrait_original_filename,
+  portraitUrl: getPublicStorageImageUrl(
+    row.portrait_bucket,
+    row.portrait_path,
+    row.portrait_version,
+  ),
+  badgeProcessingStatus: row.badge_processing_status,
+  badgeProcessingError: row.badge_processing_error,
+  currentBadgeJobId: row.current_badge_job_id,
+  currentJobStatus: row.current_job_status,
+  currentJobReviewStatus: row.current_job_review_status,
+  currentJobPreviewBucket: row.current_job_preview_bucket,
+  currentJobPreviewPath: row.current_job_preview_path,
+  assignedToMatch: Boolean(row.assigned_to_match),
+  assignedMatchId: row.assigned_match_id,
+  rosterOrder: row.roster_order,
+  availabilityStatus: row.availability_status || "available",
+  isPublicVisible: Boolean(row.is_public_visible),
+  eligibleForLineup: Boolean(row.eligible_for_lineup),
+  eligibleForProtagonist: Boolean(row.eligible_for_protagonist),
+  eligibleForRatings: Boolean(row.eligible_for_ratings),
+  adminNote: row.admin_note || "",
+});
+
+const normalizePublicMatchPlayer = (row) => ({
+  id: String(row.player_id),
+  name: row.display_name,
+  shortName: row.short_name || row.display_name,
+  shirtNumber: row.shirt_number,
+  image:
+    getPublicStorageImageUrl(
+      row.avatar_bucket,
+      row.avatar_path,
+      row.avatar_version,
+    ) || "/fcb/PLAYER_PLACEHOLDER.png",
+  availabilityStatus: row.availability_status || "available",
+  eligibleForLineup: Boolean(row.eligible_for_lineup),
+  eligibleForProtagonist: Boolean(row.eligible_for_protagonist),
+  eligibleForRatings: Boolean(row.eligible_for_ratings),
+  rosterOrder: Number(row.roster_order || 9999),
+  isDynamicPlayer: true,
+});
+
+const getDefaultDynamicProtagonistScoring = (player) => {
+  if (!player?.eligibleForProtagonist) {
+    return null;
+  }
+
+  return {
+    groupLabel: "GRUP E",
+    groupKey: "e",
+    goalContributions: 0,
+    hitPoints: 50,
+    missPoints: -5,
+    order: 1000 + Number(player.rosterOrder || 0),
+  };
+};
+
 const formation433 = [
   {
     id: "forwards",
@@ -1941,6 +2099,37 @@ function App() {
 
   const [selectedAdminTool, setSelectedAdminTool] = useState(null);
 
+
+  const [backendIsAdmin, setBackendIsAdmin] = useState(false);
+
+  const [adminScoringTab, setAdminScoringTab] = useState("match");
+
+  const [publicMatchPlayers, setPublicMatchPlayers] = useState([]);
+
+  const [adminPlayerCatalog, setAdminPlayerCatalog] = useState([]);
+
+  const [adminPlayerCatalogLoading, setAdminPlayerCatalogLoading] =
+    useState(false);
+
+  const [adminPlayerForm, setAdminPlayerForm] = useState(
+    EMPTY_ADMIN_PLAYER_FORM,
+  );
+
+  const [adminPlayerCreating, setAdminPlayerCreating] = useState(false);
+
+  const [adminPlayerBusyId, setAdminPlayerBusyId] = useState(null);
+
+  const [adminSelectedUploadPlayerId, setAdminSelectedUploadPlayerId] =
+    useState(null);
+
+  const [adminBadgeReviewQueue, setAdminBadgeReviewQueue] = useState([]);
+
+  const [adminPreviewUrlsByJobId, setAdminPreviewUrlsByJobId] = useState({});
+
+  const [adminPlayerFeedback, setAdminPlayerFeedback] = useState(null);
+
+  const adminPlayerFileInputRef = useRef(null);
+
   const officialMatchStatsByPlayerId = officialMatchState.statsByPlayerId;
   const officialHomeScore = officialMatchState.homeScore;
   const officialAwayScore = officialMatchState.awayScore;
@@ -1949,9 +2138,46 @@ function App() {
 
   const isAdmin =
     import.meta.env.DEV ||
+    backendIsAdmin ||
     Boolean(
       authUser && VESALAPORRA_ADMIN_USER_IDS.includes(String(authUser.id)),
     );
+
+  const mergedPublicMatchPlayers = [
+    ...publicMatchPlayers,
+    ...players.filter(
+      (player) =>
+        !publicMatchPlayers.some(
+          (dynamicPlayer) =>
+            dynamicPlayer.name.trim().toLocaleLowerCase("ca") ===
+            player.name.trim().toLocaleLowerCase("ca"),
+        ),
+    ),
+  ];
+
+  const gamePlayers =
+    publicMatchPlayers.length >= 11
+      ? [...publicMatchPlayers].sort(
+          (firstPlayer, secondPlayer) =>
+            firstPlayer.rosterOrder - secondPlayer.rosterOrder,
+        )
+      : mergedPublicMatchPlayers.filter(
+          (player, index, allPlayers) =>
+            allPlayers.findIndex((candidate) => candidate.id === player.id) ===
+            index,
+        );
+
+  const lineupPlayers = gamePlayers.filter(
+    (player) => player.eligibleForLineup !== false,
+  );
+
+  const gamePlayersById = Object.fromEntries(
+    gamePlayers.map((player) => [player.id, player]),
+  );
+
+  const getPlayerProtagonistScoring = (player) =>
+    protagonistScoringByPlayerId[player?.id] ||
+    getDefaultDynamicProtagonistScoring(player);
 
   const authMetadata = authUser?.user_metadata ?? {};
 
@@ -2009,21 +2235,21 @@ function App() {
   const lineupCount = lineup.filter(Boolean).length;
   const lineupIsComplete = lineupCount === 11;
 
-  const eligibleProtagonistPlayers = players
+  const eligibleProtagonistPlayers = gamePlayers
     .filter(
       (player) =>
-        !player.isGoalkeeper && protagonistScoringByPlayerId[player.id],
+        !player.isGoalkeeper && Boolean(getPlayerProtagonistScoring(player)),
     )
     .sort(
       (firstPlayer, secondPlayer) =>
-        protagonistScoringByPlayerId[firstPlayer.id].order -
-        protagonistScoringByPlayerId[secondPlayer.id].order,
+        getPlayerProtagonistScoring(firstPlayer).order -
+        getPlayerProtagonistScoring(secondPlayer).order,
     );
 
-  const protagonist = protagonistId ? playersById[protagonistId] : null;
+  const protagonist = protagonistId ? gamePlayersById[protagonistId] : null;
 
-  const protagonistScoring = protagonistId
-    ? protagonistScoringByPlayerId[protagonistId]
+  const protagonistScoring = protagonist
+    ? getPlayerProtagonistScoring(protagonist)
     : null;
 
   const protagonistIsComplete = Boolean(protagonist && protagonistScoring);
@@ -2304,7 +2530,7 @@ function App() {
       return `Els gols assignats als jugadors (${barcaGoals}) han de coincidir amb els gols del Barça (${officialMatchState.homeScore}).`;
     }
 
-    const invalidEventPlayer = players.find((player) => {
+    const invalidEventPlayer = gamePlayers.find((player) => {
       const stats = officialMatchState.statsByPlayerId[player.id];
 
       return (
@@ -2392,7 +2618,7 @@ function App() {
   };
 
   const applyAdminToolToPlayer = (playerId, toolId) => {
-    if (!isAdmin || !playersById[playerId]) {
+    if (!isAdmin || !gamePlayersById[playerId]) {
       return;
     }
 
@@ -2471,6 +2697,605 @@ function App() {
 
     if (ADMIN_SCORING_TOOLS.some((tool) => tool.id === toolId)) {
       applyAdminToolToPlayer(playerId, toolId);
+    }
+  };
+
+  const loadPublicMatchPlayers = async () => {
+    const { data, error } = await supabase.rpc(
+      "vesalaporra_public_match_players",
+      {
+        p_match_id: VESALAPORRA_CURRENT_MATCH_ID,
+      },
+    );
+
+    if (error) {
+      console.warn("No s’ha pogut carregar la plantilla pública:", error);
+      return;
+    }
+
+    const normalizedRows = (Array.isArray(data) ? data : [])
+      .map(normalizePublicMatchPlayer)
+      .filter((player) => player.id && player.name && player.image)
+      .sort(
+        (firstPlayer, secondPlayer) =>
+          firstPlayer.rosterOrder - secondPlayer.rosterOrder,
+      );
+
+    setPublicMatchPlayers(normalizedRows);
+  };
+
+  const loadAdminPlayerWorkspace = async ({ quiet = false } = {}) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    if (!quiet) {
+      setAdminPlayerCatalogLoading(true);
+    }
+
+    try {
+      const [catalogResponse, reviewResponse] = await Promise.all([
+        supabase.rpc("vesalaporra_admin_list_player_catalog", {
+          p_match_id: VESALAPORRA_CURRENT_MATCH_ID,
+        }),
+        supabase.rpc("vesalaporra_admin_list_badge_review_queue", {
+          p_limit: 50,
+        }),
+      ]);
+
+      if (catalogResponse.error) {
+        throw catalogResponse.error;
+      }
+
+      if (reviewResponse.error) {
+        throw reviewResponse.error;
+      }
+
+      const normalizedCatalog = (
+        Array.isArray(catalogResponse.data) ? catalogResponse.data : []
+      )
+        .map(normalizeAdminPlayer)
+        .sort((firstPlayer, secondPlayer) => {
+          if (firstPlayer.catalogStatus !== secondPlayer.catalogStatus) {
+            return firstPlayer.catalogStatus === "active" ? -1 : 1;
+          }
+
+          return firstPlayer.displayName.localeCompare(
+            secondPlayer.displayName,
+            "ca",
+          );
+        });
+
+      const reviewRows = Array.isArray(reviewResponse.data)
+        ? reviewResponse.data
+        : [];
+
+      const signedPreviewEntries = await Promise.all(
+        reviewRows.map(async (job) => {
+          if (!job.preview_bucket || !job.preview_path) {
+            return [job.job_id, null];
+          }
+
+          const { data: signedData, error: signedError } = await supabase.storage
+            .from(job.preview_bucket)
+            .createSignedUrl(job.preview_path, 60 * 15);
+
+          if (signedError) {
+            console.warn(
+              `No s’ha pogut signar la preview ${job.job_id}:`,
+              signedError,
+            );
+          }
+
+          return [job.job_id, signedData?.signedUrl || null];
+        }),
+      );
+
+      setAdminPlayerCatalog(normalizedCatalog);
+      setAdminBadgeReviewQueue(reviewRows);
+      setAdminPreviewUrlsByJobId(Object.fromEntries(signedPreviewEntries));
+    } catch (error) {
+      setAdminPlayerFeedback({
+        type: "error",
+        message:
+          error?.message || "No s’ha pogut carregar el catàleg de jugadors.",
+      });
+    } finally {
+      if (!quiet) {
+        setAdminPlayerCatalogLoading(false);
+      }
+    }
+  };
+
+  const handleCreateAdminPlayer = async (event) => {
+    event.preventDefault();
+
+    if (!isAdmin || adminPlayerCreating) {
+      return;
+    }
+
+    const displayName = adminPlayerForm.displayName.trim();
+    const shortName = adminPlayerForm.shortName.trim();
+    const playerKey = adminPlayerForm.playerKey.trim();
+    const shirtNumber = adminPlayerForm.shirtNumber.trim();
+
+    if (displayName.length < 2) {
+      setAdminPlayerFeedback({
+        type: "error",
+        message: "Escriu el nom complet del jugador.",
+      });
+      return;
+    }
+
+    setAdminPlayerCreating(true);
+    setAdminPlayerFeedback(null);
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "vesalaporra_admin_create_player",
+        {
+          p_audit_id: createAdminAuditId("CREATE_PLAYER"),
+          p_display_name: displayName,
+          p_short_name: shortName || null,
+          p_shirt_number: shirtNumber === "" ? null : Number(shirtNumber),
+          p_player_key: playerKey || null,
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const createdPlayerId = getPayloadValue(data, [
+        "player_id",
+        "created_player_id",
+        "id",
+      ]);
+
+      setAdminPlayerForm(EMPTY_ADMIN_PLAYER_FORM);
+      setAdminPlayerFeedback({
+        type: "success",
+        message: createdPlayerId
+          ? `Jugador creat correctament · ${createdPlayerId}`
+          : "Jugador creat correctament.",
+      });
+
+      await loadAdminPlayerWorkspace({ quiet: true });
+    } catch (error) {
+      setAdminPlayerFeedback({
+        type: "error",
+        message: error?.message || "No s’ha pogut crear el jugador.",
+      });
+    } finally {
+      setAdminPlayerCreating(false);
+    }
+  };
+
+  const openAdminPlayerUpload = (playerId) => {
+    if (!isAdmin || adminPlayerBusyId) {
+      return;
+    }
+
+    setAdminSelectedUploadPlayerId(playerId);
+    adminPlayerFileInputRef.current?.click();
+  };
+
+  const handleAdminPlayerSourceFile = async (event) => {
+    const file = event.target.files?.[0] || null;
+    event.target.value = "";
+
+    const playerId = adminSelectedUploadPlayerId;
+    setAdminSelectedUploadPlayerId(null);
+
+    if (!file || !playerId || !isAdmin || adminPlayerBusyId) {
+      return;
+    }
+
+    if (!PLAYER_SOURCE_ALLOWED_TYPES.has(file.type)) {
+      setAdminPlayerFeedback({
+        type: "error",
+        message: "La xapa ha de ser PNG, JPG o WEBP.",
+      });
+      return;
+    }
+
+    if (file.size > PLAYER_SOURCE_MAX_BYTES) {
+      setAdminPlayerFeedback({
+        type: "error",
+        message: "La xapa no pot superar els 5 MB.",
+      });
+      return;
+    }
+
+    setAdminPlayerBusyId(playerId);
+    setAdminPlayerFeedback({
+      type: "working",
+      message: "Pujant la imatge i preparant la previsualització...",
+    });
+
+    let uploadId = null;
+
+    try {
+      const prepareResponse = await supabase.rpc(
+        "vesalaporra_admin_prepare_player_source_upload",
+        {
+          p_player_id: playerId,
+          p_mime_type: file.type,
+          p_original_filename: file.name,
+          p_audit_id: createAdminAuditId("PREPARE_PLAYER_UPLOAD"),
+        },
+      );
+
+      if (prepareResponse.error) {
+        throw prepareResponse.error;
+      }
+
+      uploadId = getPayloadValue(prepareResponse.data, [
+        "upload_id",
+        "source_upload_id",
+        "id",
+      ]);
+
+      const sourceBucket = getPayloadValue(prepareResponse.data, [
+        "source_bucket",
+        "upload_bucket",
+        "bucket",
+        "bucket_id",
+      ]);
+
+      const sourcePath = getPayloadValue(prepareResponse.data, [
+        "source_path",
+        "upload_path",
+        "object_path",
+        "path",
+      ]);
+
+      if (!uploadId || !sourceBucket || !sourcePath) {
+        throw new Error(
+          "La preparació de la pujada no ha retornat upload_id, bucket i path.",
+        );
+      }
+
+      const { error: storageError } = await supabase.storage
+        .from(String(sourceBucket))
+        .upload(String(sourcePath), file, {
+          contentType: file.type,
+          cacheControl: "0",
+          upsert: false,
+        });
+
+      if (storageError) {
+        throw storageError;
+      }
+
+      const finalizeResponse = await supabase.rpc(
+        "vesalaporra_admin_finalize_source_upload",
+        {
+          p_upload_id: uploadId,
+          p_processing_mode: "ready_portrait_import",
+          p_audit_id: createAdminAuditId("FINALIZE_PLAYER_UPLOAD"),
+        },
+      );
+
+      if (finalizeResponse.error) {
+        throw finalizeResponse.error;
+      }
+
+      const jobId = getPayloadValue(finalizeResponse.data, [
+        "job_id",
+        "badge_job_id",
+        "current_badge_job_id",
+      ]);
+
+      if (!jobId) {
+        throw new Error("La pujada s’ha completat, però no ha retornat job_id.");
+      }
+
+      const workerResponse = await supabase.functions.invoke(
+        "vesalaporra-badge-worker",
+        {
+          body: {
+            action: "process",
+            job_id: jobId,
+          },
+        },
+      );
+
+      if (workerResponse.error) {
+        throw workerResponse.error;
+      }
+
+      if (workerResponse.data?.status !== "BADGE_PREVIEW_READY") {
+        throw new Error(
+          workerResponse.data?.error ||
+            `Resposta inesperada del worker: ${
+              workerResponse.data?.status || "sense estat"
+            }`,
+        );
+      }
+
+      setAdminPlayerFeedback({
+        type: "success",
+        message:
+          "Previsualització preparada. Revisa-la i aprova-la abans de publicar.",
+      });
+
+      await loadAdminPlayerWorkspace({ quiet: true });
+    } catch (error) {
+      if (uploadId) {
+        const cancelResponse = await supabase.rpc(
+          "vesalaporra_admin_cancel_source_upload",
+          {
+            p_upload_id: uploadId,
+            p_audit_id: createAdminAuditId("CANCEL_PLAYER_UPLOAD"),
+          },
+        );
+
+        if (cancelResponse.error) {
+          console.warn(
+            "No s’ha pogut cancel·lar la pujada fallida:",
+            cancelResponse.error,
+          );
+        }
+      }
+
+      setAdminPlayerFeedback({
+        type: "error",
+        message:
+          error?.message || "No s’ha pogut processar la imatge del jugador.",
+      });
+    } finally {
+      setAdminPlayerBusyId(null);
+    }
+  };
+
+  const handleAdminBadgeDecision = async (job, decision) => {
+    if (!isAdmin || adminPlayerBusyId) {
+      return;
+    }
+
+    const isApproval = decision === "approve";
+    setAdminPlayerBusyId(job.player_id);
+    setAdminPlayerFeedback({
+      type: "working",
+      message: isApproval
+        ? "Aprovant i publicant la xapa..."
+        : "Rebutjant la previsualització...",
+    });
+
+    try {
+      const reviewResponse = await supabase.rpc(
+        "vesalaporra_admin_review_badge_job",
+        {
+          p_job_id: job.job_id,
+          p_decision: decision,
+          p_review_note: isApproval
+            ? "Aprovada des de PUNTUACIONS."
+            : "Rebutjada des de PUNTUACIONS.",
+          p_audit_id: createAdminAuditId(
+            isApproval ? "APPROVE_BADGE_JOB" : "REJECT_BADGE_JOB",
+          ),
+        },
+      );
+
+      if (reviewResponse.error) {
+        throw reviewResponse.error;
+      }
+
+      if (isApproval) {
+        const publishResponse = await supabase.functions.invoke(
+          "vesalaporra-badge-worker",
+          {
+            body: {
+              action: "publish",
+              job_id: job.job_id,
+            },
+          },
+        );
+
+        if (publishResponse.error) {
+          throw publishResponse.error;
+        }
+
+        if (publishResponse.data?.status !== "BADGE_PUBLISHED") {
+          throw new Error(
+            publishResponse.data?.error ||
+              `Resposta inesperada publicant: ${
+                publishResponse.data?.status || "sense estat"
+              }`,
+          );
+        }
+      }
+
+      setAdminPlayerFeedback({
+        type: "success",
+        message: isApproval
+          ? "Xapa aprovada i publicada correctament."
+          : "Previsualització rebutjada. Pots pujar una imatge nova.",
+      });
+
+      await Promise.all([
+        loadAdminPlayerWorkspace({ quiet: true }),
+        loadPublicMatchPlayers(),
+      ]);
+    } catch (error) {
+      setAdminPlayerFeedback({
+        type: "error",
+        message:
+          error?.message || "No s’ha pogut completar la revisió de la xapa.",
+      });
+    } finally {
+      setAdminPlayerBusyId(null);
+    }
+  };
+
+  const saveAdminMatchPlayer = async (player, patch) => {
+    if (!isAdmin || adminPlayerBusyId) {
+      return;
+    }
+
+    setAdminPlayerBusyId(player.playerId);
+    setAdminPlayerFeedback(null);
+
+    const nextRosterOrder =
+      Number(player.rosterOrder) ||
+      Math.max(
+        0,
+        ...adminPlayerCatalog.map((catalogPlayer) =>
+          Number(catalogPlayer.rosterOrder || 0),
+        ),
+      ) + 1;
+
+    const nextValues = {
+      availabilityStatus:
+        patch.availabilityStatus ?? player.availabilityStatus ?? "available",
+      isPublicVisible:
+        patch.isPublicVisible ?? Boolean(player.isPublicVisible),
+      eligibleForLineup:
+        patch.eligibleForLineup ?? Boolean(player.eligibleForLineup),
+      eligibleForProtagonist:
+        patch.eligibleForProtagonist ??
+        Boolean(player.eligibleForProtagonist),
+      eligibleForRatings:
+        patch.eligibleForRatings ?? Boolean(player.eligibleForRatings),
+      adminNote: patch.adminNote ?? player.adminNote ?? "",
+    };
+
+    if (nextValues.isPublicVisible && !player.portraitPath) {
+      setAdminPlayerFeedback({
+        type: "error",
+        message:
+          "Abans de fer-lo visible has de pujar i aprovar la seva xapa.",
+      });
+      setAdminPlayerBusyId(null);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.rpc(
+        "vesalaporra_admin_upsert_match_player",
+        {
+          p_match_id: VESALAPORRA_CURRENT_MATCH_ID,
+          p_player_id: player.playerId,
+          p_roster_order: nextRosterOrder,
+          p_availability_status: nextValues.availabilityStatus,
+          p_is_public_visible: nextValues.isPublicVisible,
+          p_eligible_for_lineup: nextValues.eligibleForLineup,
+          p_eligible_for_protagonist: nextValues.eligibleForProtagonist,
+          p_eligible_for_ratings: nextValues.eligibleForRatings,
+          p_admin_note: nextValues.adminNote || null,
+          p_audit_id: createAdminAuditId("UPSERT_MATCH_PLAYER"),
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      setAdminPlayerFeedback({
+        type: "success",
+        message: "Configuració del jugador guardada.",
+      });
+
+      await Promise.all([
+        loadAdminPlayerWorkspace({ quiet: true }),
+        loadPublicMatchPlayers(),
+      ]);
+    } catch (error) {
+      setAdminPlayerFeedback({
+        type: "error",
+        message:
+          error?.message || "No s’ha pogut guardar el jugador del partit.",
+      });
+    } finally {
+      setAdminPlayerBusyId(null);
+    }
+  };
+
+  const removeAdminMatchPlayer = async (player) => {
+    if (!isAdmin || adminPlayerBusyId || !player.assignedToMatch) {
+      return;
+    }
+
+    setAdminPlayerBusyId(player.playerId);
+    setAdminPlayerFeedback(null);
+
+    try {
+      const { error } = await supabase.rpc(
+        "vesalaporra_admin_remove_match_player",
+        {
+          p_match_id: VESALAPORRA_CURRENT_MATCH_ID,
+          p_player_id: player.playerId,
+          p_audit_id: createAdminAuditId("REMOVE_MATCH_PLAYER"),
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      setAdminPlayerFeedback({
+        type: "success",
+        message: "Jugador retirat d’aquest partit. El seu historial es conserva.",
+      });
+
+      await Promise.all([
+        loadAdminPlayerWorkspace({ quiet: true }),
+        loadPublicMatchPlayers(),
+      ]);
+    } catch (error) {
+      setAdminPlayerFeedback({
+        type: "error",
+        message: error?.message || "No s’ha pogut retirar el jugador.",
+      });
+    } finally {
+      setAdminPlayerBusyId(null);
+    }
+  };
+
+  const toggleAdminPlayerArchive = async (player) => {
+    if (!isAdmin || adminPlayerBusyId) {
+      return;
+    }
+
+    const nextStatus =
+      player.catalogStatus === "archived" ? "active" : "archived";
+
+    setAdminPlayerBusyId(player.playerId);
+    setAdminPlayerFeedback(null);
+
+    try {
+      const { error } = await supabase.rpc(
+        "vesalaporra_admin_update_player",
+        {
+          p_player_id: player.playerId,
+          p_patch: {
+            catalog_status: nextStatus,
+          },
+          p_audit_id: createAdminAuditId("UPDATE_PLAYER_STATUS"),
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      setAdminPlayerFeedback({
+        type: "success",
+        message:
+          nextStatus === "archived"
+            ? "Jugador arxivat. No s’ha esborrat cap historial."
+            : "Jugador reactivat al catàleg.",
+      });
+
+      await loadAdminPlayerWorkspace({ quiet: true });
+    } catch (error) {
+      setAdminPlayerFeedback({
+        type: "error",
+        message: error?.message || "No s’ha pogut actualitzar el jugador.",
+      });
+    } finally {
+      setAdminPlayerBusyId(null);
     }
   };
 
@@ -2866,6 +3691,43 @@ function App() {
   };
 
   useEffect(() => {
+    let isCurrent = true;
+
+    const resolveBackendAdmin = async () => {
+      if (!authUser) {
+        if (isCurrent) {
+          setBackendIsAdmin(false);
+        }
+        return;
+      }
+
+      const { data, error } = await supabase.rpc(
+        "vesalaporra_current_user_is_admin",
+      );
+
+      if (isCurrent) {
+        setBackendIsAdmin(!error && data === true);
+      }
+    };
+
+    resolveBackendAdmin();
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [authUser?.id]);
+
+  useEffect(() => {
+    loadPublicMatchPlayers();
+  }, []);
+
+  useEffect(() => {
+    if (activePage === "scoring" && isAdmin && adminScoringTab === "players") {
+      loadAdminPlayerWorkspace();
+    }
+  }, [activePage, adminScoringTab, isAdmin]);
+
+  useEffect(() => {
     let isMounted = true;
 
     const cleanAuthUrl = () => {
@@ -3212,17 +4074,17 @@ function App() {
       return;
     }
 
-    const protagonistPlayer = playersById[protagonistId];
+    const protagonistPlayer = gamePlayersById[protagonistId];
 
     const isStillEligible =
       protagonistPlayer &&
       !protagonistPlayer.isGoalkeeper &&
-      Boolean(protagonistScoringByPlayerId[protagonistId]);
+      Boolean(getPlayerProtagonistScoring(protagonistPlayer));
 
     if (!isStillEligible) {
       setProtagonistId(null);
     }
-  }, [protagonistId]);
+  }, [protagonistId, publicMatchPlayers]);
 
   useEffect(() => {
     let isCurrent = true;
@@ -3321,7 +4183,7 @@ function App() {
   }, [activePage, isAdmin]);
 
   const placePlayerInSlot = (playerId, targetSlotIndex) => {
-    if (predictionConfirmed || !playersById[playerId]) {
+    if (predictionConfirmed || !gamePlayersById[playerId]) {
       return;
     }
 
@@ -3350,7 +4212,7 @@ function App() {
   };
 
   const removePlayerFromLineup = (playerId) => {
-    if (predictionConfirmed || !playersById[playerId]) {
+    if (predictionConfirmed || !gamePlayersById[playerId]) {
       return;
     }
 
@@ -3456,7 +4318,7 @@ function App() {
 
     const playerId = event.dataTransfer.getData("text/plain");
 
-    if (!playersById[playerId]) {
+    if (!gamePlayersById[playerId]) {
       return;
     }
 
@@ -4049,7 +4911,7 @@ function App() {
                       {line.slots.map((slotIndex) => {
                         const playerId = lineup[slotIndex];
 
-                        const player = playerId ? playersById[playerId] : null;
+                        const player = playerId ? gamePlayersById[playerId] : null;
 
                         const isTargetSelected =
                           selectedSlotIndex === slotIndex;
@@ -4128,11 +4990,11 @@ function App() {
                 <div className="player-tray-header">
                   <strong>23 XAPES DEL BARÇA</strong>
 
-                  <span>{players.length} jugadors</span>
+                  <span>{lineupPlayers.length} jugadors</span>
                 </div>
 
                 <div className="player-badges">
-                  {players.map((player) => {
+                  {lineupPlayers.map((player) => {
                     const isInLineup = lineup.includes(player.id);
 
                     const isPendingSelection = selectedPlayerId === player.id;
@@ -4314,7 +5176,7 @@ function App() {
                   </option>
 
                   {eligibleProtagonistPlayers.map((player) => {
-                    const scoring = protagonistScoringByPlayerId[player.id];
+                    const scoring = getPlayerProtagonistScoring(player);
 
                     return (
                       <option key={player.id} value={player.id}>
@@ -4667,255 +5529,735 @@ function App() {
                 <span className="admin-scoring-kicker">ÀREA PRIVADA</span>
                 <h1>PUNTUACIONS</h1>
                 <p>
-                  Introdueix el resultat, la participació, els gols i les
-                  assistències. Aquesta és la font única que recalcula tot el
-                  joc.
+                  Gestiona el partit oficial i la plantilla pública des d’un
+                  únic espai segur. El backend valida tots els canvis.
                 </p>
               </div>
 
-              <OfficialMatchCard
-                homeScore={officialHomeScore}
-                awayScore={officialAwayScore}
-                editable
-                onHomeScoreChange={(nextScore) =>
-                  updateOfficialMatchScore("home", nextScore)
-                }
-                onAwayScoreChange={(nextScore) =>
-                  updateOfficialMatchScore("away", nextScore)
-                }
-              />
+              {adminScoringTab === "match" ? (
+                <OfficialMatchCard
+                  homeScore={officialHomeScore}
+                  awayScore={officialAwayScore}
+                  editable
+                  onHomeScoreChange={(nextScore) =>
+                    updateOfficialMatchScore("home", nextScore)
+                  }
+                  onAwayScoreChange={(nextScore) =>
+                    updateOfficialMatchScore("away", nextScore)
+                  }
+                />
+              ) : (
+                <div className="admin-player-hero-summary">
+                  <span>CATÀLEG DINÀMIC</span>
+                  <strong>{adminPlayerCatalog.length} jugadors</strong>
+                  <small>
+                    Match ID · {VESALAPORRA_CURRENT_MATCH_ID.slice(0, 8)}…
+                  </small>
+                </div>
+              )}
             </header>
 
-            <section className="admin-tools-card">
-              <header>
-                <div>
-                  <span>EINES OFICIALS</span>
-                  <strong>Arrossega una icona sobre cada jugador</strong>
-                </div>
-
-                <small>
-                  També pots seleccionar una eina i aplicar-la des de la
-                  targeta del jugador.
-                </small>
-              </header>
-
-              <div className="admin-tool-tray">
-                {ADMIN_SCORING_TOOLS.map((tool) => (
-                  <button
-                    key={tool.id}
-                    type="button"
-                    draggable
-                    className={
-                      selectedAdminTool === tool.id
-                        ? `admin-tool ${tool.id} selected`
-                        : `admin-tool ${tool.id}`
-                    }
-                    onDragStart={(event) =>
-                      handleAdminToolDragStart(event, tool.id)
-                    }
-                    onClick={() =>
-                      setSelectedAdminTool((currentTool) =>
-                        currentTool === tool.id ? null : tool.id,
-                      )
-                    }
-                    aria-pressed={selectedAdminTool === tool.id}
-                  >
-                    {tool.id === "goal" || tool.id === "assist" ? (
-                      <ProtagonistEventIcon type={tool.id} />
-                    ) : (
-                      <ParticipationRoleIcon type={tool.id} />
-                    )}
-                    <strong>{tool.label}</strong>
-                  </button>
-                ))}
-              </div>
-
-              <div className="admin-live-summary">
-                <span>TITULARS <strong>{adminStarterCount}</strong></span>
-                <span>SUPLENTS <strong>{adminSubstituteCount}</strong></span>
-                <span>GOLS <strong>{adminGoalCount}</strong></span>
-                <span>ASSISTÈNCIES <strong>{adminAssistCount}</strong></span>
-              </div>
-            </section>
-
-            <section className="admin-player-board">
-              <header>
-                <div>
-                  <span>PLANTILLA DEL BARÇA</span>
-                  <strong>Font oficial del partit</strong>
-                </div>
-
-                <small>T i S són excloents</small>
-              </header>
-
-              <div className="admin-player-grid">
-                {players.map((player) => {
-                  const stats = officialMatchStatsByPlayerId[player.id] || {
-                    role: null,
-                    goals: 0,
-                    assists: 0,
-                  };
-
-                  const selectedToolLabel = ADMIN_SCORING_TOOLS.find(
-                    (tool) => tool.id === selectedAdminTool,
-                  )?.label;
-
-                  return (
-                    <article key={player.id} className="admin-player-card">
-                      <div className="admin-player-identity">
-                        <PlayerNotesAvatar
-                          player={player}
-                          className="admin"
-                        />
-
-                        <div>
-                          <strong>{player.name}</strong>
-                          <small>
-                            {stats.role === "T"
-                              ? "TITULAR"
-                              : stats.role === "S"
-                                ? "SUPLENT AMB MINUTS"
-                                : "SENSE PARTICIPACIÓ MARCADA"}
-                          </small>
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        className={
-                          selectedAdminTool
-                            ? "admin-player-drop-target armed"
-                            : "admin-player-drop-target"
-                        }
-                        onDragOver={(event) => event.preventDefault()}
-                        onDrop={(event) =>
-                          handleAdminPlayerDrop(event, player.id)
-                        }
-                        onClick={() => {
-                          if (selectedAdminTool) {
-                            applyAdminToolToPlayer(
-                              player.id,
-                              selectedAdminTool,
-                            );
-                          }
-                        }}
-                      >
-                        <span aria-hidden="true">＋</span>
-                        <small>
-                          {selectedToolLabel
-                            ? `APLICA ${selectedToolLabel.toUpperCase()}`
-                            : "ARROSSEGA AQUÍ"}
-                        </small>
-                      </button>
-
-                      <div className="admin-player-current-stats">
-                        <div className="admin-role-controls">
-                          <ParticipationRoleIcon
-                            type="starter"
-                            className={
-                              stats.role === "T"
-                                ? "admin-current-role active"
-                                : "admin-current-role"
-                            }
-                          />
-
-                          <ParticipationRoleIcon
-                            type="substitute"
-                            className={
-                              stats.role === "S"
-                                ? "admin-current-role active"
-                                : "admin-current-role"
-                            }
-                          />
-
-                          {stats.role && (
-                            <button
-                              type="button"
-                              className="admin-clear-role"
-                              onClick={() => clearAdminPlayerRole(player.id)}
-                              aria-label={`Elimina la participació de ${player.name}`}
-                            >
-                              ×
-                            </button>
-                          )}
-                        </div>
-
-                        <div className="admin-count-control">
-                          <ProtagonistEventIcon
-                            type="goal"
-                            count={stats.goals}
-                            className="admin-event-stat"
-                          />
-                          <button
-                            type="button"
-                            disabled={stats.goals === 0}
-                            onClick={() =>
-                              decrementAdminPlayerStat(player.id, "goals")
-                            }
-                            aria-label={`Resta un gol a ${player.name}`}
-                          >
-                            −
-                          </button>
-                        </div>
-
-                        <div className="admin-count-control">
-                          <ProtagonistEventIcon
-                            type="assist"
-                            count={stats.assists}
-                            className="admin-event-stat"
-                          />
-                          <button
-                            type="button"
-                            disabled={stats.assists === 0}
-                            onClick={() =>
-                              decrementAdminPlayerStat(player.id, "assists")
-                            }
-                            aria-label={`Resta una assistència a ${player.name}`}
-                          >
-                            −
-                          </button>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="admin-publish-card">
-              <div className="admin-publish-copy">
-                <span>FONT OFICIAL ÚNICA</span>
-                <strong>
-                  Guarda el partit i recalcula totes les puntuacions
-                </strong>
-                <small>
-                  Les Notes, el Rànquing i el Perfil llegeixen aquest mateix
-                  resultat, els mateixos titulars i els mateixos esdeveniments.
-                </small>
-              </div>
+            <div className="admin-area-tabs" role="tablist">
+              <button
+                type="button"
+                className={
+                  adminScoringTab === "match"
+                    ? "admin-area-tab active"
+                    : "admin-area-tab"
+                }
+                onClick={() => setAdminScoringTab("match")}
+                role="tab"
+                aria-selected={adminScoringTab === "match"}
+              >
+                PARTIT I PUNTS
+              </button>
 
               <button
                 type="button"
-                className="admin-publish-button"
-                disabled={officialMatchSaving}
-                onClick={handleSaveOfficialMatch}
+                className={
+                  adminScoringTab === "players"
+                    ? "admin-area-tab active"
+                    : "admin-area-tab"
+                }
+                onClick={() => setAdminScoringTab("players")}
+                role="tab"
+                aria-selected={adminScoringTab === "players"}
               >
-                {officialMatchSaving
-                  ? "GUARDANT I CALCULANT..."
-                  : "GUARDA I CALCULA TOTES LES PUNTUACIONS"}
+                JUGADORS I XAPES
+                {adminBadgeReviewQueue.length > 0 && (
+                  <span>{adminBadgeReviewQueue.length}</span>
+                )}
               </button>
+            </div>
 
-              {officialMatchFeedback?.message && (
-                <div
-                  className={`admin-publish-feedback ${officialMatchFeedback.type}`}
-                  role={
-                    officialMatchFeedback.type === "error" ? "alert" : "status"
-                  }
-                >
-                  {officialMatchFeedback.message}
-                </div>
-              )}
-            </section>
+            {adminScoringTab === "match" ? (
+              <>
+                <section className="admin-tools-card">
+                  <header>
+                    <div>
+                      <span>EINES OFICIALS</span>
+                      <strong>Arrossega una icona sobre cada jugador</strong>
+                    </div>
+
+                    <small>
+                      També pots seleccionar una eina i aplicar-la des de la
+                      targeta del jugador.
+                    </small>
+                  </header>
+
+                  <div className="admin-tool-tray">
+                    {ADMIN_SCORING_TOOLS.map((tool) => (
+                      <button
+                        key={tool.id}
+                        type="button"
+                        draggable
+                        className={
+                          selectedAdminTool === tool.id
+                            ? `admin-tool ${tool.id} selected`
+                            : `admin-tool ${tool.id}`
+                        }
+                        onDragStart={(event) =>
+                          handleAdminToolDragStart(event, tool.id)
+                        }
+                        onClick={() =>
+                          setSelectedAdminTool((currentTool) =>
+                            currentTool === tool.id ? null : tool.id,
+                          )
+                        }
+                        aria-pressed={selectedAdminTool === tool.id}
+                      >
+                        {tool.id === "goal" || tool.id === "assist" ? (
+                          <ProtagonistEventIcon type={tool.id} />
+                        ) : (
+                          <ParticipationRoleIcon type={tool.id} />
+                        )}
+                        <strong>{tool.label}</strong>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="admin-live-summary">
+                    <span>
+                      TITULARS <strong>{adminStarterCount}</strong>
+                    </span>
+                    <span>
+                      SUPLENTS <strong>{adminSubstituteCount}</strong>
+                    </span>
+                    <span>
+                      GOLS <strong>{adminGoalCount}</strong>
+                    </span>
+                    <span>
+                      ASSISTÈNCIES <strong>{adminAssistCount}</strong>
+                    </span>
+                  </div>
+                </section>
+
+                <section className="admin-player-board">
+                  <header>
+                    <div>
+                      <span>PLANTILLA DEL BARÇA</span>
+                      <strong>Font oficial del partit</strong>
+                    </div>
+
+                    <small>T i S són excloents</small>
+                  </header>
+
+                  <div className="admin-player-grid">
+                    {gamePlayers.map((player) => {
+                      const stats = officialMatchStatsByPlayerId[player.id] || {
+                        role: null,
+                        goals: 0,
+                        assists: 0,
+                      };
+
+                      const selectedToolLabel = ADMIN_SCORING_TOOLS.find(
+                        (tool) => tool.id === selectedAdminTool,
+                      )?.label;
+
+                      return (
+                        <article key={player.id} className="admin-player-card">
+                          <div className="admin-player-identity">
+                            <PlayerNotesAvatar
+                              player={player}
+                              className="admin"
+                            />
+
+                            <div>
+                              <strong>{player.name}</strong>
+                              <small>
+                                {stats.role === "T"
+                                  ? "TITULAR"
+                                  : stats.role === "S"
+                                    ? "SUPLENT AMB MINUTS"
+                                    : "SENSE PARTICIPACIÓ MARCADA"}
+                              </small>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            className={
+                              selectedAdminTool
+                                ? "admin-player-drop-target armed"
+                                : "admin-player-drop-target"
+                            }
+                            onDragOver={(event) => event.preventDefault()}
+                            onDrop={(event) =>
+                              handleAdminPlayerDrop(event, player.id)
+                            }
+                            onClick={() => {
+                              if (selectedAdminTool) {
+                                applyAdminToolToPlayer(
+                                  player.id,
+                                  selectedAdminTool,
+                                );
+                              }
+                            }}
+                          >
+                            <span aria-hidden="true">＋</span>
+                            <small>
+                              {selectedToolLabel
+                                ? `APLICA ${selectedToolLabel.toUpperCase()}`
+                                : "ARROSSEGA AQUÍ"}
+                            </small>
+                          </button>
+
+                          <div className="admin-player-current-stats">
+                            <div className="admin-role-controls">
+                              <ParticipationRoleIcon
+                                type="starter"
+                                className={
+                                  stats.role === "T"
+                                    ? "admin-current-role active"
+                                    : "admin-current-role"
+                                }
+                              />
+
+                              <ParticipationRoleIcon
+                                type="substitute"
+                                className={
+                                  stats.role === "S"
+                                    ? "admin-current-role active"
+                                    : "admin-current-role"
+                                }
+                              />
+
+                              {stats.role && (
+                                <button
+                                  type="button"
+                                  className="admin-clear-role"
+                                  onClick={() =>
+                                    clearAdminPlayerRole(player.id)
+                                  }
+                                  aria-label={`Elimina la participació de ${player.name}`}
+                                >
+                                  ×
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="admin-count-control">
+                              <ProtagonistEventIcon
+                                type="goal"
+                                count={stats.goals}
+                                className="admin-event-stat"
+                              />
+                              <button
+                                type="button"
+                                disabled={stats.goals === 0}
+                                onClick={() =>
+                                  decrementAdminPlayerStat(player.id, "goals")
+                                }
+                                aria-label={`Resta un gol a ${player.name}`}
+                              >
+                                −
+                              </button>
+                            </div>
+
+                            <div className="admin-count-control">
+                              <ProtagonistEventIcon
+                                type="assist"
+                                count={stats.assists}
+                                className="admin-event-stat"
+                              />
+                              <button
+                                type="button"
+                                disabled={stats.assists === 0}
+                                onClick={() =>
+                                  decrementAdminPlayerStat(
+                                    player.id,
+                                    "assists",
+                                  )
+                                }
+                                aria-label={`Resta una assistència a ${player.name}`}
+                              >
+                                −
+                              </button>
+                            </div>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                <section className="admin-publish-card">
+                  <div className="admin-publish-copy">
+                    <span>FONT OFICIAL ÚNICA</span>
+                    <strong>
+                      Guarda el partit i recalcula totes les puntuacions
+                    </strong>
+                    <small>
+                      Les Notes, el Rànquing i el Perfil llegeixen aquest mateix
+                      resultat, els mateixos titulars i els mateixos
+                      esdeveniments.
+                    </small>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="admin-publish-button"
+                    disabled={officialMatchSaving}
+                    onClick={handleSaveOfficialMatch}
+                  >
+                    {officialMatchSaving
+                      ? "GUARDANT I CALCULANT..."
+                      : "GUARDA I CALCULA TOTES LES PUNTUACIONS"}
+                  </button>
+
+                  {officialMatchFeedback?.message && (
+                    <div
+                      className={`admin-publish-feedback ${officialMatchFeedback.type}`}
+                      role={
+                        officialMatchFeedback.type === "error"
+                          ? "alert"
+                          : "status"
+                      }
+                    >
+                      {officialMatchFeedback.message}
+                    </div>
+                  )}
+                </section>
+              </>
+            ) : (
+              <section className="admin-player-workspace">
+                <input
+                  ref={adminPlayerFileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="admin-hidden-file-input"
+                  onChange={handleAdminPlayerSourceFile}
+                />
+
+                {adminPlayerFeedback?.message && (
+                  <div
+                    className={`admin-player-feedback ${adminPlayerFeedback.type}`}
+                    role={
+                      adminPlayerFeedback.type === "error" ? "alert" : "status"
+                    }
+                  >
+                    {adminPlayerFeedback.message}
+                  </div>
+                )}
+
+                <section className="admin-create-player-card">
+                  <header>
+                    <div>
+                      <span>NOU FITXATGE</span>
+                      <strong>Afegeix un jugador al catàleg</strong>
+                    </div>
+                    <small>
+                      Primer crea’l. Després puja la xapa i decideix si apareix
+                      al partit.
+                    </small>
+                  </header>
+
+                  <form
+                    className="admin-create-player-form"
+                    onSubmit={handleCreateAdminPlayer}
+                  >
+                    <label>
+                      <span>NOM COMPLET *</span>
+                      <input
+                        type="text"
+                        value={adminPlayerForm.displayName}
+                        onChange={(event) =>
+                          setAdminPlayerForm((currentForm) => ({
+                            ...currentForm,
+                            displayName: event.target.value,
+                          }))
+                        }
+                        placeholder="Hèctor Fort"
+                        maxLength={80}
+                        required
+                      />
+                    </label>
+
+                    <label>
+                      <span>NOM CURT</span>
+                      <input
+                        type="text"
+                        value={adminPlayerForm.shortName}
+                        onChange={(event) =>
+                          setAdminPlayerForm((currentForm) => ({
+                            ...currentForm,
+                            shortName: event.target.value,
+                          }))
+                        }
+                        placeholder="Hèctor"
+                        maxLength={40}
+                      />
+                    </label>
+
+                    <label>
+                      <span>DORSAL</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max="99"
+                        value={adminPlayerForm.shirtNumber}
+                        onChange={(event) =>
+                          setAdminPlayerForm((currentForm) => ({
+                            ...currentForm,
+                            shirtNumber: event.target.value,
+                          }))
+                        }
+                        placeholder="32"
+                      />
+                    </label>
+
+                    <label>
+                      <span>CLAU OPCIONAL</span>
+                      <input
+                        type="text"
+                        value={adminPlayerForm.playerKey}
+                        onChange={(event) =>
+                          setAdminPlayerForm((currentForm) => ({
+                            ...currentForm,
+                            playerKey: event.target.value,
+                          }))
+                        }
+                        placeholder="hector-fort"
+                        maxLength={80}
+                      />
+                    </label>
+
+                    <button
+                      type="submit"
+                      disabled={adminPlayerCreating}
+                    >
+                      {adminPlayerCreating
+                        ? "CREANT JUGADOR..."
+                        : "+ AFEGEIX JUGADOR"}
+                    </button>
+                  </form>
+                </section>
+
+                {adminBadgeReviewQueue.length > 0 && (
+                  <section className="admin-review-board">
+                    <header>
+                      <div>
+                        <span>REVISIÓ OBLIGATÒRIA</span>
+                        <strong>
+                          {adminBadgeReviewQueue.length} xapa
+                          {adminBadgeReviewQueue.length === 1 ? "" : "es"}
+                          pendent
+                          {adminBadgeReviewQueue.length === 1 ? "" : "s"}
+                        </strong>
+                      </div>
+                      <small>
+                        Res no es publica fins que tu prems APROVA I PUBLICA.
+                      </small>
+                    </header>
+
+                    <div className="admin-review-grid">
+                      {adminBadgeReviewQueue.map((job) => (
+                        <article
+                          key={job.job_id}
+                          className="admin-review-card"
+                        >
+                          <div className="admin-review-preview">
+                            {adminPreviewUrlsByJobId[job.job_id] ? (
+                              <img
+                                src={adminPreviewUrlsByJobId[job.job_id]}
+                                alt={`Previsualització de ${job.display_name}`}
+                              />
+                            ) : (
+                              <span>PREVIEW</span>
+                            )}
+                          </div>
+
+                          <div className="admin-review-copy">
+                            <span>{job.processing_mode}</span>
+                            <strong>{job.display_name}</strong>
+                            <small>
+                              Estat · {job.review_status || "pending"}
+                            </small>
+                          </div>
+
+                          <div className="admin-review-actions">
+                            <button
+                              type="button"
+                              className="approve"
+                              disabled={adminPlayerBusyId === job.player_id}
+                              onClick={() =>
+                                handleAdminBadgeDecision(job, "approve")
+                              }
+                            >
+                              APROVA I PUBLICA
+                            </button>
+
+                            <button
+                              type="button"
+                              className="reject"
+                              disabled={adminPlayerBusyId === job.player_id}
+                              onClick={() =>
+                                handleAdminBadgeDecision(job, "reject")
+                              }
+                            >
+                              REBUTJA
+                            </button>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                <section className="admin-catalog-board">
+                  <header>
+                    <div>
+                      <span>CATÀLEG GENERAL</span>
+                      <strong>Jugadors, xapes i visibilitat del partit</strong>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="admin-refresh-catalog"
+                      disabled={adminPlayerCatalogLoading}
+                      onClick={() => loadAdminPlayerWorkspace()}
+                    >
+                      {adminPlayerCatalogLoading
+                        ? "CARREGANT..."
+                        : "↻ ACTUALITZA"}
+                    </button>
+                  </header>
+
+                  {adminPlayerCatalogLoading ? (
+                    <div className="admin-catalog-empty">
+                      Carregant el catàleg segur…
+                    </div>
+                  ) : adminPlayerCatalog.length === 0 ? (
+                    <div className="admin-catalog-empty">
+                      Encara no hi ha jugadors al catàleg. Crea el primer a
+                      sobre.
+                    </div>
+                  ) : (
+                    <div className="admin-catalog-grid">
+                      {adminPlayerCatalog.map((player) => {
+                        const isBusy = adminPlayerBusyId === player.playerId;
+                        const hasPortrait = Boolean(player.portraitPath);
+
+                        return (
+                          <article
+                            key={player.playerId}
+                            className={
+                              player.catalogStatus === "archived"
+                                ? "admin-catalog-player archived"
+                                : "admin-catalog-player"
+                            }
+                          >
+                            <div className="admin-catalog-player-top">
+                              <div className="admin-catalog-portrait">
+                                {player.portraitUrl ? (
+                                  <img
+                                    src={player.portraitUrl}
+                                    alt=""
+                                    loading="lazy"
+                                  />
+                                ) : (
+                                  <span>
+                                    {getRankingInitials(player.displayName)}
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="admin-catalog-player-copy">
+                                <span>
+                                  {player.shirtNumber
+                                    ? `DORSAL ${player.shirtNumber}`
+                                    : "SENSE DORSAL"}
+                                </span>
+                                <strong>{player.displayName}</strong>
+                                <small>{player.playerKey}</small>
+                              </div>
+
+                              <span
+                                className={`admin-catalog-status ${
+                                  player.catalogStatus || "active"
+                                }`}
+                              >
+                                {player.catalogStatus || "active"}
+                              </span>
+                            </div>
+
+                            <div className="admin-catalog-flags">
+                              <span className={hasPortrait ? "ok" : "pending"}>
+                                {hasPortrait ? "XAPA PUBLICADA" : "SENSE XAPA"}
+                              </span>
+                              <span
+                                className={
+                                  player.assignedToMatch ? "ok" : "pending"
+                                }
+                              >
+                                {player.assignedToMatch
+                                  ? "AL PARTIT"
+                                  : "FORA DEL PARTIT"}
+                              </span>
+                              <span
+                                className={
+                                  player.isPublicVisible ? "ok" : "pending"
+                                }
+                              >
+                                {player.isPublicVisible
+                                  ? "VISIBLE"
+                                  : "OCULT"}
+                              </span>
+                            </div>
+
+                            {player.badgeProcessingError && (
+                              <div className="admin-catalog-error">
+                                {player.badgeProcessingError}
+                              </div>
+                            )}
+
+                            <div className="admin-catalog-actions primary">
+                              <button
+                                type="button"
+                                className="upload"
+                                disabled={isBusy}
+                                onClick={() =>
+                                  openAdminPlayerUpload(player.playerId)
+                                }
+                              >
+                                {isBusy
+                                  ? "PROCESSANT..."
+                                  : hasPortrait
+                                    ? "CANVIA LA XAPA"
+                                    : "PUJA LA XAPA"}
+                              </button>
+
+                              {player.assignedToMatch ? (
+                                <button
+                                  type="button"
+                                  className="remove"
+                                  disabled={isBusy}
+                                  onClick={() =>
+                                    removeAdminMatchPlayer(player)
+                                  }
+                                >
+                                  TREU DEL PARTIT
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="assign"
+                                  disabled={isBusy}
+                                  onClick={() =>
+                                    saveAdminMatchPlayer(player, {
+                                      isPublicVisible: false,
+                                      eligibleForLineup: true,
+                                      eligibleForProtagonist: true,
+                                      eligibleForRatings: true,
+                                    })
+                                  }
+                                >
+                                  AFEGEIX AL PARTIT
+                                </button>
+                              )}
+                            </div>
+
+                            {player.assignedToMatch && (
+                              <div className="admin-catalog-toggles">
+                                <label>
+                                  <input
+                                    type="checkbox"
+                                    checked={player.isPublicVisible}
+                                    disabled={isBusy || !hasPortrait}
+                                    onChange={(event) =>
+                                      saveAdminMatchPlayer(player, {
+                                        isPublicVisible: event.target.checked,
+                                      })
+                                    }
+                                  />
+                                  <span>VISIBLE A LA PORRA</span>
+                                </label>
+
+                                <label>
+                                  <input
+                                    type="checkbox"
+                                    checked={player.eligibleForLineup}
+                                    disabled={isBusy}
+                                    onChange={(event) =>
+                                      saveAdminMatchPlayer(player, {
+                                        eligibleForLineup:
+                                          event.target.checked,
+                                      })
+                                    }
+                                  />
+                                  <span>XI TITULAR</span>
+                                </label>
+
+                                <label>
+                                  <input
+                                    type="checkbox"
+                                    checked={player.eligibleForProtagonist}
+                                    disabled={isBusy}
+                                    onChange={(event) =>
+                                      saveAdminMatchPlayer(player, {
+                                        eligibleForProtagonist:
+                                          event.target.checked,
+                                      })
+                                    }
+                                  />
+                                  <span>PROTAGONISTA</span>
+                                </label>
+
+                                <label>
+                                  <input
+                                    type="checkbox"
+                                    checked={player.eligibleForRatings}
+                                    disabled={isBusy}
+                                    onChange={(event) =>
+                                      saveAdminMatchPlayer(player, {
+                                        eligibleForRatings:
+                                          event.target.checked,
+                                      })
+                                    }
+                                  />
+                                  <span>LES NOTES</span>
+                                </label>
+                              </div>
+                            )}
+
+                            <button
+                              type="button"
+                              className="admin-archive-player"
+                              disabled={isBusy}
+                              onClick={() => toggleAdminPlayerArchive(player)}
+                            >
+                              {player.catalogStatus === "archived"
+                                ? "REACTIVA JUGADOR"
+                                : "ARXIVA JUGADOR"}
+                            </button>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
+              </section>
+            )}
           </section>
         )}
 
@@ -5820,8 +7162,8 @@ function App() {
 
               <span>
                 {confirmedPrediction.protagonistId &&
-                playersById[confirmedPrediction.protagonistId]
-                  ? `PROTAGONISTA ${playersById[
+                gamePlayersById[confirmedPrediction.protagonistId]
+                  ? `PROTAGONISTA ${gamePlayersById[
                       confirmedPrediction.protagonistId
                     ].shortName.toUpperCase()}`
                   : "SENSE PROTAGONISTA"}
