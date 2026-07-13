@@ -6677,6 +6677,12 @@ button:focus-visible {
   letter-spacing: -0.055em;
 }
 
+.admin-scoring-hero h1 {
+  font-size: clamp(34px, 5.3vw, 56px);
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+}
+
 .notes-hero p,
 .admin-scoring-hero p {
   max-width: 620px;
@@ -7673,3 +7679,481 @@ button.notes-star:hover {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
+
+
+/* =========================================================
+   FONT OFICIAL DEL PARTIT — NOTES, PUNTUACIONS I REALTIME
+   ========================================================= */
+
+.official-match-card {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 360px);
+  min-width: 330px;
+  min-height: 148px;
+  padding: 18px 20px;
+  overflow: hidden;
+  border: 1px solid rgba(244, 208, 75, 0.28);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(41, 75, 181, 0.22), transparent 44%),
+    radial-gradient(circle at 90% 12%, rgba(151, 15, 59, 0.22), transparent 42%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012)),
+    rgba(6, 10, 24, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 18px 46px rgba(0, 0, 0, 0.28),
+    0 0 26px rgba(244, 208, 75, 0.045);
+}
+
+.official-match-card::after {
+  content: "";
+  position: absolute;
+  top: -70%;
+  left: -20%;
+  width: 44%;
+  height: 240%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.07), transparent);
+  transform: rotate(12deg);
+  pointer-events: none;
+}
+
+.official-match-card.editable {
+  min-height: 170px;
+  border-color: rgba(244, 208, 75, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 20px 54px rgba(0, 0, 0, 0.32),
+    0 0 32px rgba(244, 208, 75, 0.08);
+}
+
+.official-match-eyebrow {
+  position: relative;
+  z-index: 2;
+  color: #f4d04b;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+}
+
+.official-match-line {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(78px, 1fr) auto minmax(78px, 1fr);
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.official-match-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.official-match-team strong {
+  max-width: 100%;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.team-color-dot.official-match-badge {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-width: 2px;
+  box-shadow:
+    0 0 0 3px rgba(244, 208, 75, 0.11),
+    0 9px 22px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.official-match-score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 72px;
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 18px rgba(244, 208, 75, 0.16);
+}
+
+.official-match-score span {
+  color: #f4d04b;
+  font-size: 18px;
+}
+
+.official-match-date {
+  position: relative;
+  z-index: 2;
+  margin-top: 11px;
+  color: #8ca0ce;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+}
+
+.official-score-editor {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.official-score-editor > span {
+  color: #f4d04b;
+  font-size: 20px;
+  font-weight: 950;
+}
+
+.official-score-side {
+  display: grid;
+  grid-template-columns: 26px 34px 26px;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(244, 208, 75, 0.2);
+  border-radius: 12px;
+  background: rgba(4, 8, 20, 0.72);
+}
+
+.official-score-side button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  background: rgba(255, 255, 255, 0.035);
+  color: #cbd3e5;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.official-score-side button:hover {
+  background: rgba(244, 208, 75, 0.12);
+  color: #ffe270;
+}
+
+.official-score-side strong {
+  display: grid;
+  place-items: center;
+  height: 38px;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+}
+
+.notes-hero,
+.admin-scoring-hero {
+  align-items: stretch;
+}
+
+.notes-hero > .official-match-card,
+.admin-scoring-hero > .official-match-card {
+  align-self: center;
+}
+
+/* =========================================================
+   PUBLICACIÓ OFICIAL I CÀLCUL GLOBAL
+   ========================================================= */
+
+.admin-publish-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  align-items: center;
+  gap: 18px 24px;
+  margin-top: 18px;
+  padding: 22px;
+  border: 1px solid rgba(244, 208, 75, 0.3);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(244, 208, 75, 0.14), transparent 38%),
+    radial-gradient(circle at 96% 100%, rgba(142, 16, 61, 0.18), transparent 42%),
+    linear-gradient(135deg, rgba(31, 50, 137, 0.2), rgba(128, 17, 60, 0.11)),
+    rgba(9, 13, 28, 0.96);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 22px 60px rgba(0, 0, 0, 0.26);
+}
+
+.admin-publish-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.admin-publish-copy span {
+  color: #f4d04b;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+}
+
+.admin-publish-copy strong {
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.admin-publish-copy small {
+  max-width: 620px;
+  color: #8793ae;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.admin-publish-button {
+  min-height: 54px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 15px;
+  background: linear-gradient(110deg, #efc52f, #ffe16f 56%, #f7aa38);
+  color: #181305;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.075em;
+  box-shadow:
+    0 14px 36px rgba(244, 190, 34, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.admin-publish-button:hover {
+  transform: translateY(-2px);
+}
+
+.admin-publish-button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+  transform: none;
+}
+
+.admin-publish-feedback {
+  grid-column: 1 / -1;
+  padding: 11px 13px;
+  border: 1px solid;
+  border-radius: 13px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.admin-publish-feedback.success {
+  border-color: rgba(68, 213, 137, 0.32);
+  background: rgba(68, 213, 137, 0.08);
+  color: #7ce5ad;
+}
+
+.admin-publish-feedback.warning {
+  border-color: rgba(244, 208, 75, 0.34);
+  background: rgba(244, 208, 75, 0.08);
+  color: #f5d96b;
+}
+
+.admin-publish-feedback.error {
+  border-color: rgba(238, 71, 101, 0.34);
+  background: rgba(238, 71, 101, 0.08);
+  color: #ff8ca2;
+}
+
+/* =========================================================
+   MEDALLES CANÒNIQUES I ICONES ACUMULABLES AL RÀNQUING
+   ========================================================= */
+
+.profile-achievements-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.profile-achievement {
+  min-height: 150px;
+}
+
+.profile-achievement.unlocked {
+  border-color: rgba(244, 208, 75, 0.55);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 232, 123, 0.2), transparent 38%),
+    radial-gradient(circle at 92% 100%, rgba(150, 16, 61, 0.2), transparent 44%),
+    linear-gradient(135deg, rgba(44, 68, 156, 0.24), rgba(128, 17, 60, 0.14)),
+    rgba(11, 15, 30, 0.97);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 3px rgba(244, 208, 75, 0.06),
+    0 0 32px rgba(244, 208, 75, 0.12),
+    0 18px 46px rgba(0, 0, 0, 0.28);
+}
+
+.profile-achievement.unlocked .profile-achievement-icon {
+  border-color: rgba(255, 226, 111, 0.7);
+  background:
+    radial-gradient(circle at 35% 22%, rgba(255, 250, 199, 0.62), transparent 34%),
+    linear-gradient(145deg, rgba(244, 208, 75, 0.34), rgba(141, 17, 63, 0.2));
+  filter: none;
+  box-shadow:
+    0 0 0 4px rgba(244, 208, 75, 0.08),
+    0 0 24px rgba(244, 208, 75, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.ranking-current-copy > strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ranking-current-copy > strong > span:first-child,
+.ranking-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ranking-achievement-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  max-width: 148px;
+  overflow: hidden;
+}
+
+.ranking-achievement-icon {
+  display: grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  flex: 0 0 21px;
+  border: 1px solid rgba(244, 208, 75, 0.42);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 22%, rgba(255, 247, 190, 0.36), transparent 38%),
+    rgba(244, 208, 75, 0.1);
+  font-size: 11px;
+  line-height: 1;
+  box-shadow:
+    0 0 0 2px rgba(128, 17, 60, 0.24),
+    0 0 12px rgba(244, 208, 75, 0.12);
+}
+
+.ranking-achievement-icons.current-user-icons .ranking-achievement-icon {
+  width: 23px;
+  height: 23px;
+  flex-basis: 23px;
+  font-size: 12px;
+}
+
+/* El gol continua sent la referència visual per als quatre tipus. */
+.protagonist-combined-icon.assist,
+.participation-role-icon.starter,
+.participation-role-icon.substitute,
+.admin-current-role.active .participation-role-icon.starter,
+.admin-current-role.active .participation-role-icon.substitute {
+  border-color: rgba(244, 208, 75, 0.35);
+  background: rgba(244, 208, 75, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 900px) {
+  .official-match-card {
+    min-width: 300px;
+  }
+
+  .admin-publish-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .official-match-card {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .notes-hero > .official-match-card,
+  .admin-scoring-hero > .official-match-card {
+    align-self: stretch;
+  }
+
+  .admin-publish-card {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .ranking-achievement-icons {
+    max-width: 116px;
+  }
+}
+
+@media (max-width: 520px) {
+  .official-match-card {
+    min-height: 136px;
+    padding: 15px 12px;
+  }
+
+  .official-match-line {
+    gap: 7px;
+  }
+
+  .team-color-dot.official-match-badge {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+
+  .official-match-score {
+    min-width: 58px;
+    font-size: 24px;
+  }
+
+  .official-score-side {
+    grid-template-columns: 22px 30px 22px;
+  }
+
+  .official-score-side button {
+    width: 22px;
+  }
+
+  .official-match-team strong {
+    font-size: 9px;
+  }
+
+  .profile-achievements-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-achievement {
+    min-height: 0;
+  }
+
+  .ranking-achievement-icons {
+    gap: 2px;
+    max-width: 92px;
+  }
+
+  .ranking-achievement-icon {
+    width: 18px;
+    height: 18px;
+    flex-basis: 18px;
+    font-size: 9px;
+  }
+}

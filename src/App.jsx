@@ -346,25 +346,35 @@ const DEFAULT_TEAM_BADGE_COLORS = ["#6f7a95"];
 const getTeamBadgeBackground = (teamId) => {
   const configuredColors = teamBadgeVisualsById[teamId]?.colors;
 
+  const uniqueColors = [
+    ...new Set(
+      Array.isArray(configuredColors) && configuredColors.length > 0
+        ? configuredColors.filter(Boolean)
+        : DEFAULT_TEAM_BADGE_COLORS,
+    ),
+  ];
+
   const colors =
-    Array.isArray(configuredColors) && configuredColors.length > 0
-      ? configuredColors.filter(Boolean).slice(0, 4)
+    uniqueColors.length > 0
+      ? uniqueColors.slice(0, 2)
       : DEFAULT_TEAM_BADGE_COLORS;
 
   if (colors.length === 1) {
     return colors[0];
   }
 
-  const stripeWidth = 100 / colors.length;
+  const [primaryColor, secondaryColor] = colors;
 
-  const gradientStops = colors.flatMap((color, index) => {
-    const start = (index * stripeWidth).toFixed(4);
-    const end = ((index + 1) * stripeWidth).toFixed(4);
-
-    return [`${color} ${start}%`, `${color} ${end}%`];
-  });
-
-  return `linear-gradient(90deg, ${gradientStops.join(", ")})`;
+  return `linear-gradient(90deg,
+    ${primaryColor} 0%,
+    ${primaryColor} 25%,
+    ${secondaryColor} 25%,
+    ${secondaryColor} 50%,
+    ${primaryColor} 50%,
+    ${primaryColor} 75%,
+    ${secondaryColor} 75%,
+    ${secondaryColor} 100%
+  )`;
 };
 
 const matchData = {
@@ -749,12 +759,25 @@ function GoogleMark({ className = "" }) {
 }
 
 
+const OFFICIAL_MATCH_TABLE =
+  import.meta.env.VITE_VESALAPORRA_OFFICIAL_MATCH_TABLE ||
+  "vesalaporra_official_matches";
+
+const OFFICIAL_MATCH_STORAGE_KEY =
+  "vesalaporra_official_match_j8-atletico-2026";
+
 const NOTES_MATCH_DATA = {
   id: "j8-atletico-2026",
   eyebrow: "ÚLTIM PARTIT PUNTUAT",
-  title: "Barça 2–1 Atlético",
+  homeTeamId: "barcelona",
+  homeName: "Barça",
+  awayTeamId: "atletico-madrid",
+  awayName: "Atlético",
   dateLabel: "18 OCTUBRE 2026",
 };
+
+const formatOfficialMatchTitle = (homeScore, awayScore) =>
+  `${NOTES_MATCH_DATA.homeName} ${homeScore}–${awayScore} ${NOTES_MATCH_DATA.awayName}`;
 
 const RATING_SCALE = [
   { stars: 1, value: 0, label: "Pèssim" },
@@ -818,6 +841,78 @@ const createInitialOfficialMatchStats = () =>
       },
     ]),
   );
+
+const createInitialOfficialMatchState = () => ({
+  id: NOTES_MATCH_DATA.id,
+  homeScore: 2,
+  awayScore: 1,
+  statsByPlayerId: createInitialOfficialMatchStats(),
+  version: 1,
+  publishedAt: null,
+  updatedAt: null,
+});
+
+const normalizeOfficialMatchState = (rawState) => {
+  const fallbackState = createInitialOfficialMatchState();
+
+  const homeScore = Number(
+    rawState?.homeScore ?? rawState?.home_score ?? fallbackState.homeScore,
+  );
+
+  const awayScore = Number(
+    rawState?.awayScore ?? rawState?.away_score ?? fallbackState.awayScore,
+  );
+
+  const rawStats =
+    rawState?.statsByPlayerId ??
+    rawState?.player_stats ??
+    rawState?.stats_by_player_id ??
+    fallbackState.statsByPlayerId;
+
+  const statsByPlayerId = Object.fromEntries(
+    players.map((player) => {
+      const playerStats = rawStats?.[player.id] || {};
+
+      return [
+        player.id,
+        {
+          role:
+            playerStats.role === "T" || playerStats.role === "S"
+              ? playerStats.role
+              : null,
+          goals: Math.max(0, Number(playerStats.goals || 0)),
+          assists: Math.max(0, Number(playerStats.assists || 0)),
+        },
+      ];
+    }),
+  );
+
+  return {
+    id: NOTES_MATCH_DATA.id,
+    homeScore: Number.isFinite(homeScore) ? Math.max(0, homeScore) : 0,
+    awayScore: Number.isFinite(awayScore) ? Math.max(0, awayScore) : 0,
+    statsByPlayerId,
+    version: Math.max(
+      1,
+      Number(rawState?.version ?? fallbackState.version) || 1,
+    ),
+    publishedAt:
+      rawState?.publishedAt ?? rawState?.published_at ?? null,
+    updatedAt: rawState?.updatedAt ?? rawState?.updated_at ?? null,
+  };
+};
+
+const officialMatchStateToSupabaseRow = (officialMatchState, updatedBy) => ({
+  id: NOTES_MATCH_DATA.id,
+  home_team_id: NOTES_MATCH_DATA.homeTeamId,
+  away_team_id: NOTES_MATCH_DATA.awayTeamId,
+  home_score: officialMatchState.homeScore,
+  away_score: officialMatchState.awayScore,
+  player_stats: officialMatchState.statsByPlayerId,
+  version: officialMatchState.version,
+  published_at: officialMatchState.publishedAt,
+  updated_by: updatedBy || null,
+});
 
 const SEASON_RATING_AVERAGE_BY_PLAYER_ID = {
   "lamine-yamal": 8.9,
@@ -983,6 +1078,155 @@ const formatRatingAverage = (average) =>
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
   });
+
+function TeamColorBadge({ teamId, className = "" }) {
+  return (
+    <span
+      className={`team-color-dot ${className}`.trim()}
+      style={{
+        background: getTeamBadgeBackground(teamId),
+      }}
+      aria-hidden="true"
+    ></span>
+  );
+}
+
+function OfficialMatchCard({
+  homeScore,
+  awayScore,
+  editable = false,
+  onHomeScoreChange,
+  onAwayScoreChange,
+}) {
+  const changeScore = (team, delta) => {
+    const currentScore = team === "home" ? homeScore : awayScore;
+    const nextScore = Math.max(0, Number(currentScore || 0) + delta);
+
+    if (team === "home") {
+      onHomeScoreChange?.(nextScore);
+      return;
+    }
+
+    onAwayScoreChange?.(nextScore);
+  };
+
+  return (
+    <section
+      className={
+        editable ? "official-match-card editable" : "official-match-card"
+      }
+      aria-label={formatOfficialMatchTitle(homeScore, awayScore)}
+    >
+      <span className="official-match-eyebrow">
+        {NOTES_MATCH_DATA.eyebrow}
+      </span>
+
+      <div className="official-match-line">
+        <div className="official-match-team home">
+          <TeamColorBadge
+            teamId={NOTES_MATCH_DATA.homeTeamId}
+            className="official-match-badge"
+          />
+
+          <strong>{NOTES_MATCH_DATA.homeName}</strong>
+        </div>
+
+        {editable ? (
+          <div className="official-score-editor" aria-label="Resultat oficial">
+            <div className="official-score-side">
+              <button
+                type="button"
+                onClick={() => changeScore("home", -1)}
+                aria-label={`Resta un gol a ${NOTES_MATCH_DATA.homeName}`}
+              >
+                −
+              </button>
+
+              <strong>{homeScore}</strong>
+
+              <button
+                type="button"
+                onClick={() => changeScore("home", 1)}
+                aria-label={`Suma un gol a ${NOTES_MATCH_DATA.homeName}`}
+              >
+                +
+              </button>
+            </div>
+
+            <span aria-hidden="true">–</span>
+
+            <div className="official-score-side">
+              <button
+                type="button"
+                onClick={() => changeScore("away", -1)}
+                aria-label={`Resta un gol a ${NOTES_MATCH_DATA.awayName}`}
+              >
+                −
+              </button>
+
+              <strong>{awayScore}</strong>
+
+              <button
+                type="button"
+                onClick={() => changeScore("away", 1)}
+                aria-label={`Suma un gol a ${NOTES_MATCH_DATA.awayName}`}
+              >
+                +
+              </button>
+            </div>
+          </div>
+        ) : (
+          <strong className="official-match-score">
+            {homeScore}
+            <span aria-hidden="true">–</span>
+            {awayScore}
+          </strong>
+        )}
+
+        <div className="official-match-team away">
+          <TeamColorBadge
+            teamId={NOTES_MATCH_DATA.awayTeamId}
+            className="official-match-badge"
+          />
+
+          <strong>{NOTES_MATCH_DATA.awayName}</strong>
+        </div>
+      </div>
+
+      <small className="official-match-date">
+        {NOTES_MATCH_DATA.dateLabel}
+      </small>
+    </section>
+  );
+}
+
+function RankingAchievementIcons({ achievements, className = "" }) {
+  const unlockedAchievements = (achievements || []).filter(
+    (achievement) => achievement.unlocked,
+  );
+
+  if (unlockedAchievements.length === 0) {
+    return null;
+  }
+
+  return (
+    <span
+      className={`ranking-achievement-icons ${className}`.trim()}
+      aria-label={`${unlockedAchievements.length} medalles desbloquejades`}
+    >
+      {unlockedAchievements.map((achievement) => (
+        <span
+          key={achievement.id}
+          className="ranking-achievement-icon"
+          title={achievement.title}
+          aria-label={achievement.title}
+        >
+          {achievement.icon}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 function PlayerNotesAvatar({ player, className = "" }) {
   return (
@@ -1291,22 +1535,171 @@ const getDemoResultPoints = (
   return points;
 };
 
-const buildProfileDemoData = (user, generalPosition, jornadaPosition) => {
+const getDemoOfficialPrediction = (user) => {
   const seed = getProfileSeed(user);
+  const lineupOffset = seed % players.length;
+
+  const lineupIds = Array.from({ length: 11 }, (_, index) =>
+    players[(lineupOffset + index) % players.length].id,
+  );
+
+  const eligibleProtagonistIds = players
+    .filter(
+      (player) =>
+        !player.isGoalkeeper && protagonistScoringByPlayerId[player.id],
+    )
+    .sort(
+      (firstPlayer, secondPlayer) =>
+        protagonistScoringByPlayerId[firstPlayer.id].order -
+        protagonistScoringByPlayerId[secondPlayer.id].order,
+    )
+    .map((player) => player.id);
+
+  return {
+    predictedHome: seed % 5,
+    predictedAway: Math.floor(seed / 7) % 4,
+    lineupIds,
+    protagonistId:
+      eligibleProtagonistIds[seed % eligibleProtagonistIds.length],
+  };
+};
+
+const getOfficialMatchPointsForUser = (user, officialMatchState) => {
+  const prediction = getDemoOfficialPrediction(user);
+
+  const officialStarterIds = new Set(
+    Object.entries(officialMatchState.statsByPlayerId)
+      .filter(([, stats]) => stats.role === "T")
+      .map(([playerId]) => playerId),
+  );
+
+  const xiHits = prediction.lineupIds.filter((playerId) =>
+    officialStarterIds.has(playerId),
+  ).length;
+
+  const protagonistStats =
+    officialMatchState.statsByPlayerId[prediction.protagonistId] || {};
+
+  const protagonistHit =
+    Number(protagonistStats.goals || 0) > 0 ||
+    Number(protagonistStats.assists || 0) > 0;
+
+  const protagonistScoring =
+    protagonistScoringByPlayerId[prediction.protagonistId];
+
+  const resultPoints = getDemoResultPoints(
+    prediction.predictedHome,
+    prediction.predictedAway,
+    officialMatchState.homeScore,
+    officialMatchState.awayScore,
+  );
+
+  const xiPoints = profileXiPointsByHits[xiHits] ?? -30;
+
+  const protagonistPoints = protagonistHit
+    ? protagonistScoring.hitPoints
+    : protagonistScoring.missPoints;
+
+  return {
+    ...prediction,
+    actualHome: officialMatchState.homeScore,
+    actualAway: officialMatchState.awayScore,
+    xiHits,
+    protagonistHit,
+    protagonistPoints,
+    resultPoints,
+    xiPoints,
+    totalPoints: resultPoints + xiPoints + protagonistPoints,
+    isExact:
+      prediction.predictedHome === officialMatchState.homeScore &&
+      prediction.predictedAway === officialMatchState.awayScore,
+  };
+};
+
+const applyOfficialMatchPointsToRankingUser = (user, officialMatchState) => {
+  const jornada = getOfficialMatchPointsForUser(user, officialMatchState);
+
+  const previousGeneral = {
+    resultPoints: Math.max(
+      0,
+      user.general.resultPoints - user.jornada.resultPoints,
+    ),
+    xiPoints: Math.max(0, user.general.xiPoints - user.jornada.xiPoints),
+    protagonistPoints:
+      user.general.protagonistPoints - user.jornada.protagonistPoints,
+  };
+
+  const officialJornada = {
+    resultPoints: jornada.resultPoints,
+    xiPoints: jornada.xiPoints,
+    protagonistPoints: jornada.protagonistPoints,
+    totalPoints: jornada.totalPoints,
+  };
+
+  const general = {
+    resultPoints: previousGeneral.resultPoints + officialJornada.resultPoints,
+    xiPoints: previousGeneral.xiPoints + officialJornada.xiPoints,
+    protagonistPoints:
+      previousGeneral.protagonistPoints + officialJornada.protagonistPoints,
+    totalPoints: 0,
+  };
+
+  general.totalPoints =
+    general.resultPoints + general.xiPoints + general.protagonistPoints;
+
+  return {
+    ...user,
+    general,
+    jornada: officialJornada,
+  };
+};
+
+const buildProfileDemoData = (
+  user,
+  generalPosition,
+  jornadaPosition,
+  officialMatchState,
+) => {
+  const seed = getProfileSeed(user);
+  const officialJourney = getOfficialMatchPointsForUser(
+    user,
+    officialMatchState,
+  );
 
   const history = profileDemoMatches.map((match, index) => {
+    if (match.id === "j8") {
+      const protagonistPlayer = playersById[officialJourney.protagonistId];
+
+      return {
+        ...match,
+        actualHome: officialJourney.actualHome,
+        actualAway: officialJourney.actualAway,
+        predictedHome: officialJourney.predictedHome,
+        predictedAway: officialJourney.predictedAway,
+        xiHits: officialJourney.xiHits,
+        protagonist:
+          protagonistPlayer?.shortName || protagonistPlayer?.name || "Jugador",
+        protagonistHit: officialJourney.protagonistHit,
+        resultPoints: officialJourney.resultPoints,
+        xiPoints: officialJourney.xiPoints,
+        protagonistPoints: officialJourney.protagonistPoints,
+        totalPoints: officialJourney.totalPoints,
+        isExact: officialJourney.isExact,
+      };
+    }
+
     const homeVariation = ((seed + index * 5) % 3) - 1;
-
     const awayVariation = ((seed + index * 7) % 3) - 1;
-
     const predictedHome = Math.max(0, match.actualHome + homeVariation);
-
     const predictedAway = Math.max(0, match.actualAway + awayVariation);
+    const totalXiMiss = (seed + index * 13) % 41 === 0;
 
-    const xiHits = Math.max(
-      0,
-      Math.min(11, match.xiBase + (((seed + index * 3) % 3) - 1)),
-    );
+    const xiHits = totalXiMiss
+      ? 0
+      : Math.max(
+          0,
+          Math.min(11, match.xiBase + (((seed + index * 3) % 3) - 1)),
+        );
 
     const protagonistHit = (seed + index * 11) % 5 < 3;
 
@@ -1340,13 +1733,22 @@ const buildProfileDemoData = (user, generalPosition, jornadaPosition) => {
   });
 
   const played = 18 + (seed % 11);
-
+  const exactXiCount =
+    history.filter((match) => match.xiHits === 11).length + (seed % 3);
   const exactScores =
-    history.filter((match) => match.isExact).length + (seed % 3);
-
+    history.filter((match) => match.isExact).length + (seed % 2);
   const protagonistHits = history.filter(
     (match) => match.protagonistHit,
   ).length;
+  const jornadaWins = Math.min(
+    5,
+    (seed % 3) + (jornadaPosition === 1 ? 1 : 0),
+  );
+  const topTenConsecutive =
+    generalPosition > 0 && generalPosition <= 10 ? 3 + (seed % 2) : seed % 3;
+  const allXiMisses =
+    history.filter((match) => match.xiHits === 0).length +
+    (seed % 17 === 0 ? 1 : 0);
 
   const averageXi =
     history.reduce((total, match) => total + match.xiHits, 0) / history.length;
@@ -1364,92 +1766,62 @@ const buildProfileDemoData = (user, generalPosition, jornadaPosition) => {
 
   const longestStreak = 2 + (seed % 5);
 
-  const jornadaWins = jornadaPosition === 1 ? 1 : 0;
-
-  const identityAchievement = user?.hasXIdentity
-    ? {
-        id: "x-identity",
-        icon: "𝕏",
-        title: "Culer d’X",
-        description: "Identitat competitiva connectada a X.",
-        unlocked: true,
-        progress: "DESBLOQUEJAT",
-      }
-    : {
-        id: "verified-identity",
-        icon: "✓",
-        title: "Perfil verificat",
-        description: "Compte connectat i identificat a Vesalaporra.",
-        unlocked: true,
-        progress: "DESBLOQUEJAT",
-      };
-
   const achievements = [
-    identityAchievement,
-    {
-      id: "exact-score",
-      icon: "🎯",
-      title: "Marcador clavat",
-      description: "Encerta un resultat exacte.",
-      unlocked: exactScores >= 1,
-      progress: `${Math.min(exactScores, 1)}/1`,
-    },
     {
       id: "flick-reader",
       icon: "🧠",
       title: "Llegeix Flick",
-      description: "Encerta 10 titulars en una jornada.",
-      unlocked: bestXi >= 10,
-      progress: `${bestXi}/10`,
+      description: "Encerta 3 vegades l’11 titular exacte.",
+      unlocked: exactXiCount >= 3,
+      progress: `${Math.min(exactXiCount, 3)}/3`,
     },
     {
-      id: "perfect-xi",
-      icon: "👑",
-      title: "Onze perfecte",
-      description: "Clava els 11 titulars del Barça.",
-      unlocked: bestXi === 11,
-      progress: `${bestXi}/11`,
+      id: "nostradamus",
+      icon: "🔮",
+      title: "Nostradamus",
+      description: "Encerta el resultat exacte 3 cops.",
+      unlocked: exactScores >= 3,
+      progress: `${Math.min(exactScores, 3)}/3`,
     },
     {
-      id: "protagonist",
-      icon: "⭐",
-      title: "Protagonista",
-      description: "Encerta tres marques o assistències.",
+      id: "yoyalodije",
+      icon: "🎯",
+      title: "Yoyalodije",
+      description: "Encerta el protagonista —marca o assisteix— 3 cops.",
       unlocked: protagonistHits >= 3,
       progress: `${Math.min(protagonistHits, 3)}/3`,
     },
     {
-      id: "risk-master",
-      icon: "💎",
-      title: "Risc premiat",
-      description: "Guanya +50 amb un protagonista improbable.",
-      unlocked: bestProtagonistPoints >= 50,
-      progress:
-        bestProtagonistPoints >= 50
-          ? "DESBLOQUEJAT"
-          : `${bestProtagonistPoints}/50`,
-    },
-     {
-      id: "jornada-winner",
-      icon: "🥇",
-      title: "Guanyador de jornada",
-      description: "Acaba primer a la classificació d’una jornada.",
-      unlocked: jornadaPosition === 1,
-      progress: jornadaPosition > 0 ? `#${jornadaPosition}` : "—",
+      id: "winner",
+      icon: "👑",
+      title: "Winner",
+      description: "Guanya 3 cops una jornada.",
+      unlocked: jornadaWins >= 3,
+      progress: `${Math.min(jornadaWins, 3)}/3`,
     },
     {
-      id: "top-ten",
-      icon: "🏆",
-      title: "Top 10",
-      description: "Entra entre els deu millors del rànquing.",
-      unlocked: generalPosition > 0 && generalPosition <= 10,
-      progress: generalPosition > 0 ? `#${generalPosition}` : "—",
+      id: "candidat",
+      icon: "🚴",
+      title: "Candidat",
+      description: "Estigues al Top 10 tres jornades seguides.",
+      unlocked: topTenConsecutive >= 3,
+      progress: `${Math.min(topTenConsecutive, 3)}/3`,
+    },
+    {
+      id: "xop-xop-salinas",
+      icon: "🐙",
+      title: "Xop xop Salinas",
+      description:
+        "Falla tots els jugadors una vegada intentant encertar l’11 titular.",
+      unlocked: allXiMisses >= 1,
+      progress: `${Math.min(allXiMisses, 1)}/1`,
     },
   ];
 
   return {
     history,
     played,
+    exactXiCount,
     exactScores,
     protagonistHits,
     averageXi,
@@ -1458,6 +1830,8 @@ const buildProfileDemoData = (user, generalPosition, jornadaPosition) => {
     bestProtagonistPoints,
     longestStreak,
     jornadaWins,
+    topTenConsecutive,
+    allXiMisses,
     achievements,
     unlockedAchievements: achievements.filter(
       (achievement) => achievement.unlocked,
@@ -1557,10 +1931,19 @@ function App() {
 
   const [notesRatingsByPlayerId, setNotesRatingsByPlayerId] = useState({});
 
-  const [officialMatchStatsByPlayerId, setOfficialMatchStatsByPlayerId] =
-    useState(createInitialOfficialMatchStats);
+  const [officialMatchState, setOfficialMatchState] = useState(
+    createInitialOfficialMatchState,
+  );
+
+  const [officialMatchSaving, setOfficialMatchSaving] = useState(false);
+
+  const [officialMatchFeedback, setOfficialMatchFeedback] = useState(null);
 
   const [selectedAdminTool, setSelectedAdminTool] = useState(null);
+
+  const officialMatchStatsByPlayerId = officialMatchState.statsByPlayerId;
+  const officialHomeScore = officialMatchState.homeScore;
+  const officialAwayScore = officialMatchState.awayScore;
 
   const authUser = authSession?.user ?? null;
 
@@ -1653,29 +2036,34 @@ function App() {
         ? "ENTRA PER CONFIRMAR"
         : "CONFIRMA EL TEU PRONÒSTIC";
 
-  const rankingUsers = rankingDemoUsers.map((user) => {
-    if (!user.isCurrentUser || !authUser) {
-      return user;
-    }
+  const rankingUsers = rankingDemoUsers.map((baseUser) => {
+    const identityUser =
+      baseUser.isCurrentUser && authUser
+        ? {
+            ...baseUser,
+            authUserId: authUser.id,
+            twitterId: authUser.id,
+            displayName: profileDisplayName,
+            handle:
+              authIsX && providerHandleSlug ? `@${providerHandleSlug}` : "",
+            handleSlug: authIsX ? providerHandleSlug : "",
+            twitterAvatarUrl: profileAvatarUrl,
+            twitterUrl: providerTwitterUrl,
+            hasXIdentity: authIsX && Boolean(providerHandleSlug),
+            identityProvider: authProvider || "vesalaporra",
+            identityLabel: authIsX
+              ? "X"
+              : authProvider === "google"
+                ? "GOOGLE"
+                : "VESALAPORRA",
+            joinedYear: profileJoinedYear,
+          }
+        : baseUser;
 
-    return {
-      ...user,
-      authUserId: authUser.id,
-      twitterId: authUser.id,
-      displayName: profileDisplayName,
-      handle: authIsX && providerHandleSlug ? `@${providerHandleSlug}` : "",
-      handleSlug: authIsX ? providerHandleSlug : "",
-      twitterAvatarUrl: profileAvatarUrl,
-      twitterUrl: providerTwitterUrl,
-      hasXIdentity: authIsX && Boolean(providerHandleSlug),
-      identityProvider: authProvider || "vesalaporra",
-      identityLabel: authIsX
-        ? "X"
-        : authProvider === "google"
-          ? "GOOGLE"
-          : "VESALAPORRA",
-      joinedYear: profileJoinedYear,
-    };
+    return applyOfficialMatchPointsToRankingUser(
+      identityUser,
+      officialMatchState,
+    );
   });
 
   const rankingRows = [...rankingUsers].sort((firstUser, secondUser) => {
@@ -1743,12 +2131,23 @@ function App() {
       (user) => user.id === selectedProfileUser?.id,
     ) + 1;
 
+  const getProfileDataForUser = (user) => {
+    const generalPosition =
+      generalRankingRows.findIndex((row) => row.id === user.id) + 1;
+
+    const jornadaPosition =
+      jornadaRankingRows.findIndex((row) => row.id === user.id) + 1;
+
+    return buildProfileDemoData(
+      user,
+      generalPosition,
+      jornadaPosition,
+      officialMatchState,
+    );
+  };
+
   const selectedProfileData = selectedProfileUser
-    ? buildProfileDemoData(
-        selectedProfileUser,
-        selectedProfilePosition,
-        selectedProfileJornadaPosition,
-      )
+    ? getProfileDataForUser(selectedProfileUser)
     : null;
 
   const isOwnAuthenticatedProfile = Boolean(
@@ -1859,6 +2258,137 @@ function App() {
       ...currentRatings,
       [playerId]: stars,
     }));
+  };
+
+  const setOfficialMatchStatsByPlayerId = (statsUpdater) => {
+    setOfficialMatchState((currentState) => {
+      const nextStatsByPlayerId =
+        typeof statsUpdater === "function"
+          ? statsUpdater(currentState.statsByPlayerId)
+          : statsUpdater;
+
+      return {
+        ...currentState,
+        statsByPlayerId: nextStatsByPlayerId,
+        publishedAt: null,
+        updatedAt: new Date().toISOString(),
+      };
+    });
+  };
+
+  const updateOfficialMatchScore = (team, nextScore) => {
+    const safeScore = Math.max(0, Number(nextScore || 0));
+
+    setOfficialMatchState((currentState) => ({
+      ...currentState,
+      [team === "home" ? "homeScore" : "awayScore"]: safeScore,
+      publishedAt: null,
+      updatedAt: new Date().toISOString(),
+    }));
+  };
+
+  const validateOfficialMatch = () => {
+    const starterCount = Object.values(
+      officialMatchState.statsByPlayerId,
+    ).filter((stats) => stats.role === "T").length;
+
+    if (starterCount !== 11) {
+      return `Cal marcar exactament 11 titulars. Ara n’hi ha ${starterCount}.`;
+    }
+
+    const barcaGoals = Object.values(
+      officialMatchState.statsByPlayerId,
+    ).reduce((total, stats) => total + Number(stats.goals || 0), 0);
+
+    if (barcaGoals !== officialMatchState.homeScore) {
+      return `Els gols assignats als jugadors (${barcaGoals}) han de coincidir amb els gols del Barça (${officialMatchState.homeScore}).`;
+    }
+
+    const invalidEventPlayer = players.find((player) => {
+      const stats = officialMatchState.statsByPlayerId[player.id];
+
+      return (
+        !stats.role &&
+        (Number(stats.goals || 0) > 0 || Number(stats.assists || 0) > 0)
+      );
+    });
+
+    if (invalidEventPlayer) {
+      return `${invalidEventPlayer.name} té gol o assistència però no té participació marcada.`;
+    }
+
+    return null;
+  };
+
+  const handleSaveOfficialMatch = async () => {
+    if (officialMatchSaving) {
+      return;
+    }
+
+    const validationError = validateOfficialMatch();
+
+    if (validationError) {
+      setOfficialMatchFeedback({
+        type: "error",
+        message: validationError,
+      });
+      return;
+    }
+
+    const publishedState = {
+      ...officialMatchState,
+      version: officialMatchState.version + 1,
+      publishedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    setOfficialMatchSaving(true);
+    setOfficialMatchFeedback(null);
+    setOfficialMatchState(publishedState);
+
+    try {
+      window.localStorage.setItem(
+        OFFICIAL_MATCH_STORAGE_KEY,
+        JSON.stringify(publishedState),
+      );
+
+      const { data, error } = await supabase
+        .from(OFFICIAL_MATCH_TABLE)
+        .upsert(
+          officialMatchStateToSupabaseRow(publishedState, authUser?.id),
+          {
+            onConflict: "id",
+          },
+        )
+        .select(
+          "id, home_score, away_score, player_stats, version, published_at, updated_at",
+        )
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      setOfficialMatchState(normalizeOfficialMatchState(data));
+      setOfficialMatchFeedback({
+        type: "success",
+        message:
+          "Partit guardat. Les Notes, el Rànquing, el Perfil i totes les puntuacions ja llegeixen aquesta versió oficial.",
+      });
+    } catch (error) {
+      console.warn(
+        "No s’ha pogut sincronitzar la font oficial amb Supabase:",
+        error,
+      );
+
+      setOfficialMatchFeedback({
+        type: "warning",
+        message:
+          "El càlcul s’ha aplicat instantàniament en aquest navegador, però Supabase no ha confirmat el guardat. Revisa la taula oficial abans de publicar.",
+      });
+    } finally {
+      setOfficialMatchSaving(false);
+    }
   };
 
   const applyAdminToolToPlayer = (playerId, toolId) => {
@@ -2693,6 +3223,96 @@ function App() {
       setProtagonistId(null);
     }
   }, [protagonistId]);
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    try {
+      const storedOfficialMatch = window.localStorage.getItem(
+        OFFICIAL_MATCH_STORAGE_KEY,
+      );
+
+      if (storedOfficialMatch) {
+        setOfficialMatchState(
+          normalizeOfficialMatchState(JSON.parse(storedOfficialMatch)),
+        );
+      }
+    } catch (error) {
+      console.warn("No s’ha pogut restaurar el partit oficial local:", error);
+    }
+
+    const loadOfficialMatch = async () => {
+      const { data, error } = await supabase
+        .from(OFFICIAL_MATCH_TABLE)
+        .select(
+          "id, home_score, away_score, player_stats, version, published_at, updated_at",
+        )
+        .eq("id", NOTES_MATCH_DATA.id)
+        .maybeSingle();
+
+      if (!isCurrent || error || !data) {
+        if (error) {
+          console.warn(
+            "La font oficial de Supabase encara no està disponible:",
+            error,
+          );
+        }
+        return;
+      }
+
+      const normalizedState = normalizeOfficialMatchState(data);
+      setOfficialMatchState(normalizedState);
+      window.localStorage.setItem(
+        OFFICIAL_MATCH_STORAGE_KEY,
+        JSON.stringify(normalizedState),
+      );
+    };
+
+    loadOfficialMatch();
+
+    const officialMatchChannel = supabase
+      .channel(`vesalaporra-official-match-${NOTES_MATCH_DATA.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: OFFICIAL_MATCH_TABLE,
+          filter: `id=eq.${NOTES_MATCH_DATA.id}`,
+        },
+        (payload) => {
+          const nextRow = payload.new;
+
+          if (!nextRow?.id) {
+            return;
+          }
+
+          const normalizedState = normalizeOfficialMatchState(nextRow);
+          setOfficialMatchState(normalizedState);
+          window.localStorage.setItem(
+            OFFICIAL_MATCH_STORAGE_KEY,
+            JSON.stringify(normalizedState),
+          );
+        },
+      )
+      .subscribe();
+
+    return () => {
+      isCurrent = false;
+      supabase.removeChannel(officialMatchChannel);
+    };
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        OFFICIAL_MATCH_STORAGE_KEY,
+        JSON.stringify(officialMatchState),
+      );
+    } catch (error) {
+      console.warn("No s’ha pogut conservar el partit oficial:", error);
+    }
+  }, [officialMatchState]);
 
   useEffect(() => {
     if (activePage === "scoring" && !isAdmin) {
@@ -3904,11 +4524,10 @@ function App() {
                 </p>
               </div>
 
-              <div className="notes-match-chip">
-                <span>{NOTES_MATCH_DATA.eyebrow}</span>
-                <strong>{NOTES_MATCH_DATA.title}</strong>
-                <small>{NOTES_MATCH_DATA.dateLabel}</small>
-              </div>
+              <OfficialMatchCard
+                homeScore={officialHomeScore}
+                awayScore={officialAwayScore}
+              />
             </header>
 
             <div
@@ -4048,16 +4667,23 @@ function App() {
                 <span className="admin-scoring-kicker">ÀREA PRIVADA</span>
                 <h1>PUNTUACIONS</h1>
                 <p>
-                  Assigna la participació, els gols i les assistències. Aquesta
-                  realitat oficial alimenta Les Notes del partit.
+                  Introdueix el resultat, la participació, els gols i les
+                  assistències. Aquesta és la font única que recalcula tot el
+                  joc.
                 </p>
               </div>
 
-              <div className="admin-match-summary">
-                <span>{NOTES_MATCH_DATA.eyebrow}</span>
-                <strong>{NOTES_MATCH_DATA.title}</strong>
-                <small>{NOTES_MATCH_DATA.dateLabel}</small>
-              </div>
+              <OfficialMatchCard
+                homeScore={officialHomeScore}
+                awayScore={officialAwayScore}
+                editable
+                onHomeScoreChange={(nextScore) =>
+                  updateOfficialMatchScore("home", nextScore)
+                }
+                onAwayScoreChange={(nextScore) =>
+                  updateOfficialMatchScore("away", nextScore)
+                }
+              />
             </header>
 
             <section className="admin-tools-card">
@@ -4255,6 +4881,41 @@ function App() {
                 })}
               </div>
             </section>
+
+            <section className="admin-publish-card">
+              <div className="admin-publish-copy">
+                <span>FONT OFICIAL ÚNICA</span>
+                <strong>
+                  Guarda el partit i recalcula totes les puntuacions
+                </strong>
+                <small>
+                  Les Notes, el Rànquing i el Perfil llegeixen aquest mateix
+                  resultat, els mateixos titulars i els mateixos esdeveniments.
+                </small>
+              </div>
+
+              <button
+                type="button"
+                className="admin-publish-button"
+                disabled={officialMatchSaving}
+                onClick={handleSaveOfficialMatch}
+              >
+                {officialMatchSaving
+                  ? "GUARDANT I CALCULANT..."
+                  : "GUARDA I CALCULA TOTES LES PUNTUACIONS"}
+              </button>
+
+              {officialMatchFeedback?.message && (
+                <div
+                  className={`admin-publish-feedback ${officialMatchFeedback.type}`}
+                  role={
+                    officialMatchFeedback.type === "error" ? "alert" : "status"
+                  }
+                >
+                  {officialMatchFeedback.message}
+                </div>
+              )}
+            </section>
           </section>
         )}
 
@@ -4292,7 +4953,16 @@ function App() {
                                 <span className="ranking-current-copy">
                     <small>LA TEVA POSICIÓ</small>
 
-                    <strong>{currentRankingUser.displayName}</strong>
+                    <strong>
+                      <span>{currentRankingUser.displayName}</span>
+
+                      <RankingAchievementIcons
+                        achievements={
+                          getProfileDataForUser(currentRankingUser).achievements
+                        }
+                        className="current-user-icons"
+                      />
+                    </strong>
                   </span>
 
                   <span className="ranking-current-stat">
@@ -4420,7 +5090,15 @@ function App() {
 
                                               <span className="ranking-identity-copy">
                           <strong>
-                            {user.displayName}
+                            <span className="ranking-name-text">
+                              {user.displayName}
+                            </span>
+
+                            <RankingAchievementIcons
+                              achievements={
+                                getProfileDataForUser(user).achievements
+                              }
+                            />
 
                             {user.isCurrentUser && (
                               <span className="ranking-you-badge">TU</span>
@@ -4692,18 +5370,6 @@ function App() {
                 <button
                   type="button"
                   className={
-                    profileTab === "history"
-                      ? "profile-tab active"
-                      : "profile-tab"
-                  }
-                  onClick={() => setProfileTab("history")}
-                >
-                  HISTORIAL
-                </button>
-
-                <button
-                  type="button"
-                  className={
                     profileTab === "achievements"
                       ? "profile-tab active"
                       : "profile-tab"
@@ -4711,6 +5377,18 @@ function App() {
                   onClick={() => setProfileTab("achievements")}
                 >
                   MEDALLES
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    profileTab === "history"
+                      ? "profile-tab active"
+                      : "profile-tab"
+                  }
+                  onClick={() => setProfileTab("history")}
+                >
+                  HISTORIAL
                 </button>
               </nav>
 
@@ -5030,8 +5708,8 @@ function App() {
                       </strong>
 
                       <p>
-                        Assoliments públics que expliquen com competeix aquest
-                        perfil.
+                        Cada medalla desbloquejada queda il·luminada i acompanya
+                        el nom del culer als rànquings general i de jornada.
                       </p>
                     </div>
                   </header>
