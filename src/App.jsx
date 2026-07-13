@@ -1236,14 +1236,46 @@ function PlayerNotesAvatar({ player, className = "" }) {
   );
 }
 
-function ProtagonistEventIcon({ type, count = null, className = "" }) {
+function ProtagonistEventIcon({
+  type,
+  count = null,
+  className = "",
+  onClick = null,
+  disabled = false,
+  ariaLabel = null,
+}) {
   const isGoal = type === "goal";
   const eventLabel = isGoal ? "Gol" : "Assistència";
+  const Component = onClick ? "button" : "span";
+
+  const interactiveProps = onClick
+    ? {
+        type: "button",
+        onClick,
+        disabled,
+        style: {
+          display: "inline-flex",
+          width: "auto",
+          height: "auto",
+          padding: 0,
+          border: 0,
+          borderRadius: 0,
+          background: "transparent",
+          color: "inherit",
+          font: "inherit",
+          cursor: disabled ? "default" : "pointer",
+        },
+      }
+    : {};
 
   return (
-    <span
+    <Component
       className={`protagonist-event-stat ${type} ${className}`.trim()}
-      aria-label={count === null ? eventLabel : `${eventLabel}: ${count}`}
+      aria-label={
+        ariaLabel ||
+        (count === null ? eventLabel : `${eventLabel}: ${count}`)
+      }
+      {...interactiveProps}
     >
       <span
         className={`protagonist-combined-icon ${isGoal ? "goal" : "assist"}`}
@@ -1255,19 +1287,53 @@ function ProtagonistEventIcon({ type, count = null, className = "" }) {
       {count !== null && (
         <strong className="protagonist-event-count">{count}</strong>
       )}
-    </span>
+    </Component>
   );
 }
 
-function ParticipationRoleIcon({ type, count = null, className = "" }) {
+function ParticipationRoleIcon({
+  type,
+  count = null,
+  className = "",
+  onClick = null,
+  disabled = false,
+  pressed = undefined,
+  ariaLabel = null,
+}) {
   const isStarter = type === "starter";
   const roleLetter = isStarter ? "T" : "S";
   const roleLabel = isStarter ? "Titular" : "Suplent";
+  const Component = onClick ? "button" : "span";
+
+  const interactiveProps = onClick
+    ? {
+        type: "button",
+        onClick,
+        disabled,
+        "aria-pressed": pressed,
+        style: {
+          display: "inline-flex",
+          width: "auto",
+          height: "auto",
+          padding: 0,
+          border: 0,
+          borderRadius: 0,
+          background: "transparent",
+          color: "inherit",
+          font: "inherit",
+          cursor: disabled ? "default" : "pointer",
+        },
+      }
+    : {};
 
   return (
-    <span
+    <Component
       className={`participation-role-stat ${type} ${className}`.trim()}
-      aria-label={count === null ? roleLabel : `${roleLabel}: ${count}`}
+      aria-label={
+        ariaLabel ||
+        (count === null ? roleLabel : `${roleLabel}: ${count}`)
+      }
+      {...interactiveProps}
     >
       <span
         className={`participation-role-icon ${type}`}
@@ -1279,7 +1345,7 @@ function ParticipationRoleIcon({ type, count = null, className = "" }) {
       {count !== null && (
         <strong className="participation-role-count">{count}</strong>
       )}
-    </span>
+    </Component>
   );
 }
 
@@ -2097,8 +2163,6 @@ function App() {
 
   const [officialMatchFeedback, setOfficialMatchFeedback] = useState(null);
 
-  const [selectedAdminTool, setSelectedAdminTool] = useState(null);
-
 
   const [backendIsAdmin, setBackendIsAdmin] = useState(false);
 
@@ -2632,11 +2696,11 @@ function App() {
       const nextStats = { ...currentStats };
 
       if (toolId === "starter") {
-        nextStats.role = "T";
+        nextStats.role = currentStats.role === "T" ? null : "T";
       }
 
       if (toolId === "substitute") {
-        nextStats.role = "S";
+        nextStats.role = currentStats.role === "S" ? null : "S";
       }
 
       if (toolId === "goal") {
@@ -2654,20 +2718,6 @@ function App() {
     });
   };
 
-  const clearAdminPlayerRole = (playerId) => {
-    if (!isAdmin) {
-      return;
-    }
-
-    setOfficialMatchStatsByPlayerId((currentStatsByPlayerId) => ({
-      ...currentStatsByPlayerId,
-      [playerId]: {
-        ...currentStatsByPlayerId[playerId],
-        role: null,
-      },
-    }));
-  };
-
   const decrementAdminPlayerStat = (playerId, statKey) => {
     if (!isAdmin || !["goals", "assists"].includes(statKey)) {
       return;
@@ -2683,21 +2733,6 @@ function App() {
         ),
       },
     }));
-  };
-
-  const handleAdminToolDragStart = (event, toolId) => {
-    event.dataTransfer.setData("text/plain", toolId);
-    event.dataTransfer.effectAllowed = "copy";
-  };
-
-  const handleAdminPlayerDrop = (event, playerId) => {
-    event.preventDefault();
-
-    const toolId = event.dataTransfer.getData("text/plain");
-
-    if (ADMIN_SCORING_TOOLS.some((tool) => tool.id === toolId)) {
-      applyAdminToolToPlayer(playerId, toolId);
-    }
   };
 
   const loadPublicMatchPlayers = async () => {
@@ -5596,35 +5631,20 @@ function App() {
                   <header>
                     <div>
                       <span>EINES OFICIALS</span>
-                      <strong>Arrossega una icona sobre cada jugador</strong>
+                      <strong>Clica directament a cada jugador</strong>
                     </div>
 
                     <small>
-                      També pots seleccionar una eina i aplicar-la des de la
-                      targeta del jugador.
+                      T i S alternen la participació. Gol i assistència sumen
+                      amb cada clic; el botó − en resta una.
                     </small>
                   </header>
 
-                  <div className="admin-tool-tray">
+                  <div className="admin-tool-tray" aria-label="Llegenda d’eines">
                     {ADMIN_SCORING_TOOLS.map((tool) => (
-                      <button
+                      <div
                         key={tool.id}
-                        type="button"
-                        draggable
-                        className={
-                          selectedAdminTool === tool.id
-                            ? `admin-tool ${tool.id} selected`
-                            : `admin-tool ${tool.id}`
-                        }
-                        onDragStart={(event) =>
-                          handleAdminToolDragStart(event, tool.id)
-                        }
-                        onClick={() =>
-                          setSelectedAdminTool((currentTool) =>
-                            currentTool === tool.id ? null : tool.id,
-                          )
-                        }
-                        aria-pressed={selectedAdminTool === tool.id}
+                        className={`admin-tool ${tool.id}`}
                       >
                         {tool.id === "goal" || tool.id === "assist" ? (
                           <ProtagonistEventIcon type={tool.id} />
@@ -5632,7 +5652,7 @@ function App() {
                           <ParticipationRoleIcon type={tool.id} />
                         )}
                         <strong>{tool.label}</strong>
-                      </button>
+                      </div>
                     ))}
                   </div>
 
@@ -5659,7 +5679,9 @@ function App() {
                       <strong>Font oficial del partit</strong>
                     </div>
 
-                    <small>T i S són excloents</small>
+                    <small>
+                      Torna a clicar T o S per desmarcar. T i S són excloents.
+                    </small>
                   </header>
 
                   <div className="admin-player-grid">
@@ -5670,13 +5692,12 @@ function App() {
                         assists: 0,
                       };
 
-                      const selectedToolLabel = ADMIN_SCORING_TOOLS.find(
-                        (tool) => tool.id === selectedAdminTool,
-                      )?.label;
-
                       return (
                         <article key={player.id} className="admin-player-card">
-                          <div className="admin-player-identity">
+                          <div
+                            className="admin-player-identity"
+                            style={{ gridColumn: "1 / -1" }}
+                          >
                             <PlayerNotesAvatar
                               player={player}
                               className="admin"
@@ -5694,34 +5715,6 @@ function App() {
                             </div>
                           </div>
 
-                          <button
-                            type="button"
-                            className={
-                              selectedAdminTool
-                                ? "admin-player-drop-target armed"
-                                : "admin-player-drop-target"
-                            }
-                            onDragOver={(event) => event.preventDefault()}
-                            onDrop={(event) =>
-                              handleAdminPlayerDrop(event, player.id)
-                            }
-                            onClick={() => {
-                              if (selectedAdminTool) {
-                                applyAdminToolToPlayer(
-                                  player.id,
-                                  selectedAdminTool,
-                                );
-                              }
-                            }}
-                          >
-                            <span aria-hidden="true">＋</span>
-                            <small>
-                              {selectedToolLabel
-                                ? `APLICA ${selectedToolLabel.toUpperCase()}`
-                                : "ARROSSEGA AQUÍ"}
-                            </small>
-                          </button>
-
                           <div className="admin-player-current-stats">
                             <div className="admin-role-controls">
                               <ParticipationRoleIcon
@@ -5730,6 +5723,15 @@ function App() {
                                   stats.role === "T"
                                     ? "admin-current-role active"
                                     : "admin-current-role"
+                                }
+                                pressed={stats.role === "T"}
+                                onClick={() =>
+                                  applyAdminToolToPlayer(player.id, "starter")
+                                }
+                                ariaLabel={
+                                  stats.role === "T"
+                                    ? `Desmarca ${player.name} com a titular`
+                                    : `Marca ${player.name} com a titular`
                                 }
                               />
 
@@ -5740,20 +5742,19 @@ function App() {
                                     ? "admin-current-role active"
                                     : "admin-current-role"
                                 }
+                                pressed={stats.role === "S"}
+                                onClick={() =>
+                                  applyAdminToolToPlayer(
+                                    player.id,
+                                    "substitute",
+                                  )
+                                }
+                                ariaLabel={
+                                  stats.role === "S"
+                                    ? `Desmarca ${player.name} com a suplent`
+                                    : `Marca ${player.name} com a suplent`
+                                }
                               />
-
-                              {stats.role && (
-                                <button
-                                  type="button"
-                                  className="admin-clear-role"
-                                  onClick={() =>
-                                    clearAdminPlayerRole(player.id)
-                                  }
-                                  aria-label={`Elimina la participació de ${player.name}`}
-                                >
-                                  ×
-                                </button>
-                              )}
                             </div>
 
                             <div className="admin-count-control">
@@ -5761,6 +5762,10 @@ function App() {
                                 type="goal"
                                 count={stats.goals}
                                 className="admin-event-stat"
+                                onClick={() =>
+                                  applyAdminToolToPlayer(player.id, "goal")
+                                }
+                                ariaLabel={`Suma un gol a ${player.name}`}
                               />
                               <button
                                 type="button"
@@ -5779,6 +5784,10 @@ function App() {
                                 type="assist"
                                 count={stats.assists}
                                 className="admin-event-stat"
+                                onClick={() =>
+                                  applyAdminToolToPlayer(player.id, "assist")
+                                }
+                                ariaLabel={`Suma una assistència a ${player.name}`}
                               />
                               <button
                                 type="button"
