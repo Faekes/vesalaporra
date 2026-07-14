@@ -2980,7 +2980,8 @@ function App() {
         "bucket_id",
       ]);
 
-      const sourcePath = getPayloadValue(prepareResponse.data, [
+         const sourcePath = getPayloadValue(prepareResponse.data, [
+        "storage_path",
         "source_path",
         "upload_path",
         "object_path",
@@ -2989,7 +2990,7 @@ function App() {
 
       if (!uploadId || !sourceBucket || !sourcePath) {
         throw new Error(
-          "La preparació de la pujada no ha retornat upload_id, bucket i path.",
+          "La preparació de la pujada no ha retornat upload_id, bucket i storage_path.",
         );
       }
 
