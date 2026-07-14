@@ -813,20 +813,8 @@ export default {
             .from(
               "vesalaporra_badge_jobs",
             )
-            .select(
-              [
-                "id",
-                "player_id",
-                "status",
-                "review_status",
-                "publication_status",
-                "preview_bucket",
-                "preview_path",
-                "target_bucket",
-                "target_path",
-                "target_version",
-                "target_mime_type",
-              ].join(", "),
+                    .select(
+              "id, player_id, status, review_status, publication_status, preview_bucket, preview_path, target_bucket, target_path, target_version, target_mime_type",
             )
             .eq(
               "id",
