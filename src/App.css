@@ -8158,70 +8158,183 @@ button.notes-star:hover {
   }
 }
 /* =========================================================
-   CORRECCIÓ ESPECÍFICA — RESULTAT EDITABLE DE PUNTUACIONS
+   PUNTUACIONS — RESULTAT CENTRAL, NET I MÉS GRAN
    ========================================================= */
 
-@media (min-width: 761px) {
-  .admin-scoring-hero
+.admin-scoring-hero.admin-scoring-hero-compact {
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 24px;
+}
+
+.admin-scoring-hero.admin-scoring-hero-compact
+  > .official-match-card.editable {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 620px);
+  min-height: 190px;
+  padding: 24px 28px;
+}
+
+.admin-scoring-hero.admin-scoring-hero-compact
+  > .official-match-card.editable
+  .official-match-line {
+  grid-template-columns:
+    minmax(120px, 1fr)
+    auto
+    minmax(120px, 1fr);
+  gap: 18px;
+}
+
+.admin-scoring-hero.admin-scoring-hero-compact
+  > .official-match-card.editable
+  .official-match-team {
+  gap: 8px;
+}
+
+.admin-scoring-hero.admin-scoring-hero-compact
+  > .official-match-card.editable
+  .team-color-dot.official-match-badge {
+  width: 58px;
+  height: 58px;
+  flex-basis: 58px;
+}
+
+.admin-scoring-hero.admin-scoring-hero-compact
+  > .official-match-card.editable
+  .official-match-team strong {
+  max-width: none;
+  overflow: visible;
+  color: #ffffff;
+  font-size: 12px;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.admin-scoring-hero.admin-scoring-hero-compact
+  > .official-match-card.editable
+  .official-score-editor {
+  min-width: 0;
+  gap: 11px;
+}
+
+.admin-scoring-hero.admin-scoring-hero-compact
+  > .official-match-card.editable
+  .official-score-side {
+  grid-template-columns: 30px 46px 30px;
+  border-radius: 14px;
+}
+
+.admin-scoring-hero.admin-scoring-hero-compact
+  > .official-match-card.editable
+  .official-score-side button {
+  width: 30px;
+  height: 46px;
+  font-size: 19px;
+}
+
+.admin-scoring-hero.admin-scoring-hero-compact
+  > .official-match-card.editable
+  .official-score-side strong {
+  height: 46px;
+  font-size: 28px;
+}
+
+.admin-scoring-hero.admin-scoring-hero-compact
+  > .official-match-card.editable
+  .official-score-versus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  color: #f4d04b;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+}
+
+.admin-scoring-hero.admin-scoring-hero-compact
+  > .official-match-card.editable
+  .official-match-date {
+  margin-top: 14px;
+  font-size: 9px;
+}
+
+.admin-scoring-hero.admin-scoring-hero-compact
+  > .admin-player-hero-summary {
+  position: relative;
+  z-index: 2;
+  align-items: center;
+  min-width: min(100%, 360px);
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .admin-scoring-hero.admin-scoring-hero-compact {
+    padding: 16px 12px;
+  }
+
+  .admin-scoring-hero.admin-scoring-hero-compact
+    > .official-match-card.editable {
+    width: 100%;
+    min-height: 170px;
+    padding: 18px 12px;
+  }
+
+  .admin-scoring-hero.admin-scoring-hero-compact
     > .official-match-card.editable
     .official-match-line {
-    grid-template-columns: 54px minmax(0, 1fr) 54px;
+    grid-template-columns: 72px minmax(0, 1fr) 72px;
     gap: 6px;
   }
 
-  .admin-scoring-hero
+  .admin-scoring-hero.admin-scoring-hero-compact
     > .official-match-card.editable
-    .official-match-team {
+    .team-color-dot.official-match-badge {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+  }
+
+  .admin-scoring-hero.admin-scoring-hero-compact
+    > .official-match-card.editable
+    .official-match-team strong {
+    font-size: 9px;
+  }
+
+  .admin-scoring-hero.admin-scoring-hero-compact
+    > .official-match-card.editable
+    .official-score-editor {
     gap: 5px;
   }
 
-  .admin-scoring-hero
-    > .official-match-card.editable
-    .team-color-dot.official-match-badge {
-    width: 42px;
-    height: 42px;
-    flex-basis: 42px;
-  }
-
-  .admin-scoring-hero
-    > .official-match-card.editable
-    .official-match-team strong {
-    max-width: 54px;
-    font-size: 9px;
-    overflow: visible;
-    text-overflow: clip;
-  }
-
-  .admin-scoring-hero
-    > .official-match-card.editable
-    .official-score-editor {
-    min-width: 0;
-    gap: 4px;
-  }
-
-  .admin-scoring-hero
+  .admin-scoring-hero.admin-scoring-hero-compact
     > .official-match-card.editable
     .official-score-side {
-    grid-template-columns: 21px 30px 21px;
+    grid-template-columns: 22px 32px 22px;
   }
 
-  .admin-scoring-hero
+  .admin-scoring-hero.admin-scoring-hero-compact
     > .official-match-card.editable
     .official-score-side button {
-    width: 21px;
+    width: 22px;
+    height: 40px;
+    font-size: 16px;
   }
 
-  .admin-scoring-hero
+  .admin-scoring-hero.admin-scoring-hero-compact
     > .official-match-card.editable
     .official-score-side strong {
-    font-size: 20px;
+    height: 40px;
+    font-size: 21px;
   }
 
-  .admin-scoring-hero
+  .admin-scoring-hero.admin-scoring-hero-compact
     > .official-match-card.editable
-    .official-score-editor
-    > span {
-    font-size: 17px;
+    .official-score-versus {
+    min-width: 18px;
+    font-size: 8px;
   }
 }
 /* =========================================================

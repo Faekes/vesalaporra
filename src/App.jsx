@@ -1132,7 +1132,7 @@ function OfficialMatchCard({
         </div>
 
         {editable ? (
-          <div className="official-score-editor" aria-label="Resultat oficial">
+                   <div className="official-score-editor" aria-label="Resultat oficial">
             <div className="official-score-side">
               <button
                 type="button"
@@ -1153,7 +1153,9 @@ function OfficialMatchCard({
               </button>
             </div>
 
-            <span aria-hidden="true">–</span>
+            <span className="official-score-versus" aria-hidden="true">
+              VS
+            </span>
 
             <div className="official-score-side">
               <button
@@ -5559,16 +5561,7 @@ function App() {
 
         {activePage === "scoring" && isAdmin && (
           <section className="admin-scoring-page">
-            <header className="admin-scoring-hero">
-              <div>
-                <span className="admin-scoring-kicker">ÀREA PRIVADA</span>
-                <h1>PUNTUACIONS</h1>
-                <p>
-                  Gestiona el partit oficial i la plantilla pública des d’un
-                  únic espai segur. El backend valida tots els canvis.
-                </p>
-              </div>
-
+                       <header className="admin-scoring-hero admin-scoring-hero-compact">
               {adminScoringTab === "match" ? (
                 <OfficialMatchCard
                   homeScore={officialHomeScore}
@@ -5585,9 +5578,6 @@ function App() {
                 <div className="admin-player-hero-summary">
                   <span>CATÀLEG DINÀMIC</span>
                   <strong>{adminPlayerCatalog.length} jugadors</strong>
-                  <small>
-                    Match ID · {VESALAPORRA_CURRENT_MATCH_ID.slice(0, 8)}…
-                  </small>
                 </div>
               )}
             </header>
