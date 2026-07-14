@@ -156,6 +156,7 @@ const PROTAGONIST_GROUP_OPTIONS = [
     hitPoints: 5,
     missPoints: -15,
     sortOrder: 0,
+    excludesProtagonist: false,
   },
   {
     key: "a",
@@ -163,6 +164,7 @@ const PROTAGONIST_GROUP_OPTIONS = [
     hitPoints: 10,
     missPoints: -5,
     sortOrder: 100,
+    excludesProtagonist: false,
   },
   {
     key: "b",
@@ -170,6 +172,7 @@ const PROTAGONIST_GROUP_OPTIONS = [
     hitPoints: 20,
     missPoints: -10,
     sortOrder: 200,
+    excludesProtagonist: false,
   },
   {
     key: "c",
@@ -177,6 +180,7 @@ const PROTAGONIST_GROUP_OPTIONS = [
     hitPoints: 30,
     missPoints: -10,
     sortOrder: 300,
+    excludesProtagonist: false,
   },
   {
     key: "d",
@@ -184,6 +188,7 @@ const PROTAGONIST_GROUP_OPTIONS = [
     hitPoints: 40,
     missPoints: -5,
     sortOrder: 400,
+    excludesProtagonist: false,
   },
   {
     key: "e",
@@ -191,6 +196,15 @@ const PROTAGONIST_GROUP_OPTIONS = [
     hitPoints: 50,
     missPoints: -5,
     sortOrder: 500,
+    excludesProtagonist: false,
+  },
+  {
+    key: "f",
+    label: "GRUP F · PORTER",
+    hitPoints: null,
+    missPoints: null,
+    sortOrder: 600,
+    excludesProtagonist: true,
   },
 ];
 
@@ -199,7 +213,7 @@ const PROTAGONIST_GROUP_BY_KEY = Object.fromEntries(
 );
 
 const PROTAGONIST_GROUP_NOTE_PATTERN =
-  /\[VLP_PROTAGONIST_GROUP:(special|a|b|c|d|e)\]/i;
+  /\[VLP_PROTAGONIST_GROUP:(special|a|b|c|d|e|f)\]/i;
 
 const normalizeProtagonistGroupKey = (value) => {
   const normalizedValue = String(value || "")
@@ -2259,14 +2273,18 @@ const normalizePublicMatchPlayer = (row) => ({
 });
 
 const getDefaultDynamicProtagonistScoring = (player) => {
-  if (!player?.eligibleForProtagonist) {
+  const groupKey = normalizeProtagonistGroupKey(
+    player?.protagonistGroupKey || "e",
+  );
+
+  const group = PROTAGONIST_GROUP_BY_KEY[groupKey];
+
+  if (
+    !player?.eligibleForProtagonist ||
+    group?.excludesProtagonist === true
+  ) {
     return null;
   }
-
-  const groupKey = normalizeProtagonistGroupKey(
-    player.protagonistGroupKey || "e",
-  );
-  const group = PROTAGONIST_GROUP_BY_KEY[groupKey];
 
   return {
     groupLabel: group.label,
@@ -3422,106 +3440,132 @@ function App() {
     }
   };
 
-  const saveAdminMatchPlayer = async (player, patch) => {
-    if (!isAdmin || adminPlayerBusyId) {
-      return;
-    }
+const saveAdminMatchPlayer = async (player, patch) => {
+  if (!isAdmin || adminPlayerBusyId) {
+    return;
+  }
 
-    setAdminPlayerBusyId(player.playerId);
-    setAdminPlayerFeedback(null);
+  setAdminPlayerBusyId(player.playerId);
+  setAdminPlayerFeedback(null);
 
-    const nextRosterOrder =
-      Number(player.rosterOrder) ||
-      Math.max(
-        0,
-        ...adminPlayerCatalog.map((catalogPlayer) =>
-          Number(catalogPlayer.rosterOrder || 0),
-        ),
-      ) + 1;
-
-    const visibilityWasChanged = Object.prototype.hasOwnProperty.call(
-      patch,
-      "isPublicVisible",
-    );
-    const nextVisibility = visibilityWasChanged
-      ? Boolean(patch.isPublicVisible)
-      : Boolean(player.isPublicVisible);
-    const nextProtagonistGroupKey = normalizeProtagonistGroupKey(
-      patch.protagonistGroupKey || player.protagonistGroupKey || "e",
-    );
-    const baseAdminNote = patch.adminNote ?? player.adminNote ?? "";
-
-    const nextValues = {
-      availabilityStatus:
-        patch.availabilityStatus ?? player.availabilityStatus ?? "available",
-      isPublicVisible: nextVisibility,
-      eligibleForLineup: visibilityWasChanged
-        ? nextVisibility
-        : patch.eligibleForLineup ?? Boolean(player.eligibleForLineup),
-      eligibleForProtagonist: visibilityWasChanged
-        ? nextVisibility
-        : patch.eligibleForProtagonist ??
-          Boolean(player.eligibleForProtagonist),
-      eligibleForRatings: visibilityWasChanged
-        ? nextVisibility
-        : patch.eligibleForRatings ?? Boolean(player.eligibleForRatings),
-      protagonistGroupKey: nextProtagonistGroupKey,
-      adminNote: setProtagonistGroupInAdminNote(
-        baseAdminNote,
-        nextProtagonistGroupKey,
+  const nextRosterOrder =
+    Number(player.rosterOrder) ||
+    Math.max(
+      0,
+      ...adminPlayerCatalog.map((catalogPlayer) =>
+        Number(catalogPlayer.rosterOrder || 0),
       ),
-    };
+    ) + 1;
 
-    if (nextValues.isPublicVisible && !player.portraitPath) {
-      setAdminPlayerFeedback({
-        type: "error",
-        message:
-          "Abans de fer-lo visible has de pujar i aprovar la seva xapa.",
-      });
-      setAdminPlayerBusyId(null);
-      return;
-    }
+  const visibilityWasChanged = Object.prototype.hasOwnProperty.call(
+    patch,
+    "isPublicVisible",
+  );
 
-    try {
-      const { error } = await supabase.rpc(
-        "vesalaporra_admin_upsert_match_player",
-        {
-          p_match_id: VESALAPORRA_CURRENT_MATCH_ID,
-          p_player_id: player.playerId,
-          p_roster_order: nextRosterOrder,
-          p_availability_status: nextValues.availabilityStatus,
-          p_is_public_visible: nextValues.isPublicVisible,
-          p_eligible_for_lineup: nextValues.eligibleForLineup,
-          p_eligible_for_protagonist: nextValues.eligibleForProtagonist,
-          p_eligible_for_ratings: nextValues.eligibleForRatings,
-          p_admin_note: nextValues.adminNote || null,
-          p_audit_id: createAdminAuditId("UPSERT_MATCH_PLAYER"),
-        },
-      );
+  const protagonistGroupWasChanged = Object.prototype.hasOwnProperty.call(
+    patch,
+    "protagonistGroupKey",
+  );
 
-      if (error) {
-        throw error;
-      }
+  const nextVisibility = visibilityWasChanged
+    ? Boolean(patch.isPublicVisible)
+    : Boolean(player.isPublicVisible);
 
-      setAdminPlayerFeedback({
-        type: "success",
-        message: "Configuració del jugador guardada.",
-      });
+  const nextProtagonistGroupKey = normalizeProtagonistGroupKey(
+    patch.protagonistGroupKey || player.protagonistGroupKey || "e",
+  );
 
-      await Promise.all([
-        loadAdminPlayerWorkspace({ quiet: true }),
-        loadPublicMatchPlayers(),
-      ]);
-    } catch (error) {
-      setAdminPlayerFeedback({
-        type: "error",
-        message:
-          error?.message || "No s’ha pogut guardar el jugador del partit.",
-      });
-    } finally {
-      setAdminPlayerBusyId(null);
-    }
+  const nextProtagonistGroup =
+    PROTAGONIST_GROUP_BY_KEY[nextProtagonistGroupKey];
+
+  const isGoalkeeperGroup =
+    nextProtagonistGroup?.excludesProtagonist === true;
+
+  const nextEligibleForProtagonist = isGoalkeeperGroup
+    ? false
+    : visibilityWasChanged || protagonistGroupWasChanged
+      ? nextVisibility
+      : patch.eligibleForProtagonist ??
+        Boolean(player.eligibleForProtagonist);
+
+  const baseAdminNote = patch.adminNote ?? player.adminNote ?? "";
+
+  const nextValues = {
+    availabilityStatus:
+      patch.availabilityStatus ?? player.availabilityStatus ?? "available",
+
+    isPublicVisible: nextVisibility,
+
+    eligibleForLineup: visibilityWasChanged
+      ? nextVisibility
+      : patch.eligibleForLineup ?? Boolean(player.eligibleForLineup),
+
+    eligibleForProtagonist: nextEligibleForProtagonist,
+
+    eligibleForRatings: visibilityWasChanged
+      ? nextVisibility
+      : patch.eligibleForRatings ?? Boolean(player.eligibleForRatings),
+
+    protagonistGroupKey: nextProtagonistGroupKey,
+
+    adminNote: setProtagonistGroupInAdminNote(
+      baseAdminNote,
+      nextProtagonistGroupKey,
+    ),
   };
+
+  if (nextValues.isPublicVisible && !player.portraitPath) {
+    setAdminPlayerFeedback({
+      type: "error",
+      message:
+        "Abans de fer-lo visible has de pujar i aprovar la seva xapa.",
+    });
+    setAdminPlayerBusyId(null);
+    return;
+  }
+
+  try {
+    const { error } = await supabase.rpc(
+      "vesalaporra_admin_upsert_match_player",
+      {
+        p_match_id: VESALAPORRA_CURRENT_MATCH_ID,
+        p_player_id: player.playerId,
+        p_roster_order: nextRosterOrder,
+        p_availability_status: nextValues.availabilityStatus,
+        p_is_public_visible: nextValues.isPublicVisible,
+        p_eligible_for_lineup: nextValues.eligibleForLineup,
+        p_eligible_for_protagonist: nextValues.eligibleForProtagonist,
+        p_eligible_for_ratings: nextValues.eligibleForRatings,
+        p_admin_note: nextValues.adminNote || null,
+        p_audit_id: createAdminAuditId("UPSERT_MATCH_PLAYER"),
+      },
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    setAdminPlayerFeedback({
+      type: "success",
+      message: isGoalkeeperGroup
+        ? "Porter guardat. Serà visible a l’XI i Les Notes, però no com a protagonista."
+        : "Configuració del jugador guardada.",
+    });
+
+    await Promise.all([
+      loadAdminPlayerWorkspace({ quiet: true }),
+      loadPublicMatchPlayers(),
+    ]);
+  } catch (error) {
+    setAdminPlayerFeedback({
+      type: "error",
+      message:
+        error?.message || "No s’ha pogut guardar el jugador del partit.",
+    });
+  } finally {
+    setAdminPlayerBusyId(null);
+  }
+};
 
   const removeAdminMatchPlayer = async (player) => {
     if (!isAdmin || adminPlayerBusyId || !player.assignedToMatch) {
