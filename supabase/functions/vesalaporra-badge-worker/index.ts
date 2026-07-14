@@ -1,6 +1,6 @@
 // =========================================================
 // VESALAPORRA · BADGE WORKER
-// worker_id: VLP_EDGE_BADGE_WORKER_V1_20260713_014B
+// worker_id: VLP_EDGE_BADGE_WORKER_V1_1_20260714_040
 //
 // Implementat:
 //   ready_portrait_import
@@ -9,6 +9,10 @@
 //     - normalitza a WebP 1024 × 1024;
 //     - crea una preview privada;
 //     - deixa el job awaiting_review.
+//   publish
+//     - descarrega la preview privada aprovada;
+//     - la copia al bucket públic versionat;
+//     - finalitza la publicació amb la RPC canònica.
 //
 // Encara no implementat:
 //   ai_portrait_then_css
@@ -18,6 +22,7 @@
 //   - comprova que sigui administrador Vesalaporra;
 //   - usa service role només dins l’Edge Function;
 //   - mai publica automàticament;
+//   - només publica després de revisió admin aprovada;
 //   - mai exposa la foto original privada.
 // =========================================================
 
@@ -51,10 +56,53 @@ type Json =
 
 type Database = {
   public: {
-    Tables: Record<
-      string,
-      never
-    >;
+    Tables: {
+      vesalaporra_badge_jobs: {
+        Row: {
+          id: string;
+          player_id: string;
+          status: string;
+          review_status: string;
+          publication_status: string;
+          preview_bucket: string | null;
+          preview_path: string | null;
+          target_bucket: string | null;
+          target_path: string | null;
+          target_version: number | null;
+          target_mime_type: string | null;
+        };
+
+        Insert: {
+          id?: string;
+          player_id: string;
+          status?: string;
+          review_status?: string;
+          publication_status?: string;
+          preview_bucket?: string | null;
+          preview_path?: string | null;
+          target_bucket?: string | null;
+          target_path?: string | null;
+          target_version?: number | null;
+          target_mime_type?: string | null;
+        };
+
+        Update: {
+          id?: string;
+          player_id?: string;
+          status?: string;
+          review_status?: string;
+          publication_status?: string;
+          preview_bucket?: string | null;
+          preview_path?: string | null;
+          target_bucket?: string | null;
+          target_path?: string | null;
+          target_version?: number | null;
+          target_mime_type?: string | null;
+        };
+
+        Relationships: [];
+      };
+    };
 
     Views: Record<
       string,
@@ -140,6 +188,22 @@ type Database = {
         Returns:
           Json;
       };
+
+      vesalaporra_worker_publish_approved_badge_job: {
+        Args: {
+          p_job_id:
+            string;
+
+          p_worker_id:
+            string;
+
+          p_audit_id:
+            string;
+        };
+
+        Returns:
+          Json;
+      };
     };
 
     Enums: Record<
@@ -183,7 +247,7 @@ const FUNCTION_NAME =
   "vesalaporra-badge-worker";
 
 const WORKER_VERSION =
-  "VLP_EDGE_BADGE_WORKER_V1_20260713_014B";
+  "VLP_EDGE_BADGE_WORKER_V1_1_20260714_040";
 
 const TARGET_SIZE =
   1024;
@@ -221,7 +285,7 @@ const CORS_HEADERS: Record<string, string> = {
 // ---------------------------------------------------------
 
 type WorkerRequest = {
-  action?: "health" | "process";
+  action?: "health" | "process" | "publish";
   job_id?: string;
 };
 
@@ -255,6 +319,31 @@ type ClaimedJob = {
 type CompletePreviewResult = {
   status?: string;
   review_status?: string;
+  publication_status?: string;
+  badge_processing_status?: string;
+};
+
+type PublishableJob = {
+  id: string;
+  player_id: string;
+  status: string;
+  review_status: string;
+  publication_status: string;
+  preview_bucket: string | null;
+  preview_path: string | null;
+  target_bucket: string | null;
+  target_path: string | null;
+  target_version: number | null;
+  target_mime_type: string | null;
+};
+
+type PublishResult = {
+  status?: string;
+  job_id?: string;
+  player_id?: string;
+  target_bucket?: string;
+  target_path?: string;
+  target_version?: number;
   publication_status?: string;
   badge_processing_status?: string;
 };
@@ -315,7 +404,7 @@ const createAuditId = (
   return [
     "VLP_EDGE",
     cleanAction,
-    "20260713_014B",
+    "20260714_040",
     crypto.randomUUID(),
   ].join("_");
 };
@@ -643,6 +732,12 @@ export default {
             execution_id:
               executionId,
 
+            supported_actions: [
+              "health",
+              "process",
+              "publish",
+            ],
+
             supported_processing_modes: [
               "ready_portrait_import",
             ],
@@ -667,14 +762,400 @@ export default {
       }
 
       // ---------------------------------------------------
-      // F. VALIDAR JOB_ID
+      // F. VALIDAR ACCIÓ I JOB_ID
       // ---------------------------------------------------
+
+      const requestedAction =
+        requestBody.action
+        ?? "process";
+
+      if (
+        requestedAction !== "process"
+        && requestedAction !== "publish"
+      ) {
+        return jsonResponse(
+          {
+            status:
+              "UNSUPPORTED_ACTION",
+
+            error:
+              `Acció no suportada: ${requestedAction}`,
+
+            supported_actions: [
+              "health",
+              "process",
+              "publish",
+            ],
+          },
+
+          400,
+        );
+      }
 
       const requestedJobId =
         requireUuid(
           requestBody.job_id,
           "job_id",
         );
+
+      // ---------------------------------------------------
+      // G. PUBLICAR PREVIEW APROVADA
+      // ---------------------------------------------------
+
+      if (
+        requestedAction === "publish"
+      ) {
+        try {
+          const {
+            data: publishJobData,
+            error: publishJobError,
+          } = await ctx.supabaseAdmin
+            .from(
+              "vesalaporra_badge_jobs",
+            )
+            .select(
+              [
+                "id",
+                "player_id",
+                "status",
+                "review_status",
+                "publication_status",
+                "preview_bucket",
+                "preview_path",
+                "target_bucket",
+                "target_path",
+                "target_version",
+                "target_mime_type",
+              ].join(", "),
+            )
+            .eq(
+              "id",
+              requestedJobId,
+            )
+            .maybeSingle();
+
+          if (
+            publishJobError
+          ) {
+            throw new WorkerError(
+              500,
+              "PUBLISH_JOB_READ_FAILED",
+              publishJobError.message,
+            );
+          }
+
+          if (
+            !publishJobData
+          ) {
+            throw new WorkerError(
+              404,
+              "PUBLISH_JOB_NOT_FOUND",
+              "No s'ha trobat el job que s'ha de publicar.",
+            );
+          }
+
+          const publishJob =
+            publishJobData as PublishableJob;
+
+          if (
+            publishJob.publication_status ===
+              "published"
+          ) {
+            return jsonResponse(
+              {
+                status:
+                  "BADGE_PUBLISHED",
+
+                already_published:
+                  true,
+
+                worker_version:
+                  WORKER_VERSION,
+
+                worker_id:
+                  WORKER_ID,
+
+                execution_id:
+                  executionId,
+
+                job_id:
+                  publishJob.id,
+
+                player_id:
+                  publishJob.player_id,
+
+                target_bucket:
+                  publishJob.target_bucket,
+
+                target_path:
+                  publishJob.target_path,
+
+                target_version:
+                  publishJob.target_version,
+
+                publication_status:
+                  "published",
+              },
+            );
+          }
+
+          if (
+            publishJob.status !== "completed"
+            || publishJob.review_status !== "approved"
+            || publishJob.publication_status !== "pending"
+          ) {
+            throw new WorkerError(
+              409,
+              "BADGE_JOB_NOT_READY_TO_PUBLISH",
+              [
+                "El job no està preparat per publicar.",
+                `status=${publishJob.status}`,
+                `review_status=${publishJob.review_status}`,
+                `publication_status=${publishJob.publication_status}`,
+              ].join(" "),
+            );
+          }
+
+          if (
+            !publishJob.preview_bucket
+            || !publishJob.preview_path
+            || !publishJob.target_bucket
+            || !publishJob.target_path
+          ) {
+            throw new WorkerError(
+              500,
+              "INCOMPLETE_PUBLISH_PAYLOAD",
+              "El job aprovat no conté totes les rutes de publicació.",
+            );
+          }
+
+          const {
+            data: previewBlob,
+            error: previewDownloadError,
+          } = await ctx.supabaseAdmin
+            .storage
+            .from(
+              publishJob.preview_bucket,
+            )
+            .download(
+              publishJob.preview_path,
+            );
+
+          if (
+            previewDownloadError
+            || !previewBlob
+          ) {
+            throw new WorkerError(
+              404,
+              "APPROVED_PREVIEW_DOWNLOAD_FAILED",
+              previewDownloadError?.message
+                ?? "No s'ha pogut descarregar la preview aprovada.",
+            );
+          }
+
+          const previewBytes =
+            new Uint8Array(
+              await previewBlob.arrayBuffer(),
+            );
+
+          if (
+            previewBytes.byteLength === 0
+          ) {
+            throw new WorkerError(
+              422,
+              "APPROVED_PREVIEW_EMPTY",
+              "La preview aprovada està buida.",
+            );
+          }
+
+          const {
+            error: targetUploadError,
+          } = await ctx.supabaseAdmin
+            .storage
+            .from(
+              publishJob.target_bucket,
+            )
+            .upload(
+              publishJob.target_path,
+              previewBytes,
+
+              {
+                contentType:
+                  publishJob.target_mime_type
+                  ?? "image/webp",
+
+                cacheControl:
+                  "31536000",
+
+                upsert:
+                  true,
+              },
+            );
+
+          if (
+            targetUploadError
+          ) {
+            throw new WorkerError(
+              500,
+              "PUBLIC_PORTRAIT_UPLOAD_FAILED",
+              targetUploadError.message,
+            );
+          }
+
+          const publishAuditId =
+            createAuditId(
+              "BADGE_PORTRAIT_PUBLISH",
+            );
+
+          const {
+            data: publishData,
+            error: publishError,
+          } = await ctx.supabaseAdmin.rpc(
+            "vesalaporra_worker_publish_approved_badge_job",
+
+            {
+              p_job_id:
+                requestedJobId,
+
+              p_worker_id:
+                WORKER_ID,
+
+              p_audit_id:
+                publishAuditId,
+            },
+          );
+
+          if (
+            publishError
+          ) {
+            throw new WorkerError(
+              500,
+              "BADGE_PUBLISH_RPC_FAILED",
+              publishError.message,
+            );
+          }
+
+          const published =
+            publishData as PublishResult | null;
+
+          if (
+            published?.status !==
+              "BADGE_PORTRAIT_PUBLISHED"
+            && published?.status !==
+              "BADGE_JOB_ALREADY_PUBLISHED"
+          ) {
+            throw new WorkerError(
+              500,
+              "UNEXPECTED_PUBLISH_STATUS",
+              `Estat inesperat publicant: ${published?.status ?? "sense estat"}`,
+            );
+          }
+
+          return jsonResponse(
+            {
+              status:
+                "BADGE_PUBLISHED",
+
+              worker_version:
+                WORKER_VERSION,
+
+              worker_id:
+                WORKER_ID,
+
+              execution_id:
+                executionId,
+
+              job_id:
+                published?.job_id
+                ?? publishJob.id,
+
+              player_id:
+                published?.player_id
+                ?? publishJob.player_id,
+
+              target_bucket:
+                published?.target_bucket
+                ?? publishJob.target_bucket,
+
+              target_path:
+                published?.target_path
+                ?? publishJob.target_path,
+
+              target_version:
+                published?.target_version
+                ?? publishJob.target_version,
+
+              publication_status:
+                published?.publication_status
+                ?? "published",
+
+              badge_processing_status:
+                published?.badge_processing_status
+                ?? "ready",
+
+              copied_bytes:
+                previewBytes.byteLength,
+            },
+          );
+        } catch (
+          error: unknown
+        ) {
+          const message =
+            getErrorMessage(
+              error,
+            );
+
+          const errorCode =
+            getErrorCode(
+              error,
+            );
+
+          const statusCode =
+            getHttpStatus(
+              error,
+            );
+
+          console.error(
+            "Badge publish failure:",
+            {
+              errorCode,
+              message,
+              requestedJobId,
+            },
+          );
+
+          return jsonResponse(
+            {
+              status:
+                "BADGE_PUBLISH_FAILED",
+
+              error_code:
+                errorCode,
+
+              error:
+                message,
+
+              worker_version:
+                WORKER_VERSION,
+
+              worker_id:
+                WORKER_ID,
+
+              execution_id:
+                executionId,
+
+              job_id:
+                requestedJobId,
+            },
+
+            statusCode,
+          );
+        }
+      }
+
+      // ---------------------------------------------------
+      // H. PROCESSAR UNA XAPA NOVA
+      // ---------------------------------------------------
 
       const claimAuditId =
         createAuditId(
@@ -686,7 +1167,7 @@ export default {
 
       try {
         // -------------------------------------------------
-        // G. RECLAMAR JOB AMB SERVICE ROLE
+        // I. RECLAMAR JOB AMB SERVICE ROLE
         // -------------------------------------------------
 
         const {
@@ -743,7 +1224,7 @@ export default {
         }
 
         // -------------------------------------------------
-        // H. AQUESTA V1 NOMÉS PROCESSA XAPES PREPARADES
+        // J. AQUESTA V1 NOMÉS PROCESSA XAPES PREPARADES
         // -------------------------------------------------
 
         if (
@@ -794,7 +1275,7 @@ export default {
           claimedJob.expected_preview_path;
 
         // -------------------------------------------------
-        // I. DESCARREGAR ORIGINAL PRIVAT
+        // K. DESCARREGAR ORIGINAL PRIVAT
         // -------------------------------------------------
 
         const {
@@ -827,7 +1308,7 @@ export default {
           );
 
         // -------------------------------------------------
-        // J. NORMALITZAR A WEBP 1024 × 1024
+        // L. NORMALITZAR A WEBP 1024 × 1024
         // -------------------------------------------------
 
         const previewBytes =
@@ -836,7 +1317,7 @@ export default {
           );
 
         // -------------------------------------------------
-        // K. PUJAR PREVIEW PRIVADA
+        // M. PUJAR PREVIEW PRIVADA
         // -------------------------------------------------
 
         const {
@@ -873,7 +1354,7 @@ export default {
         }
 
         // -------------------------------------------------
-        // L. REGISTRAR PREVIEW COMPLETADA
+        // N. REGISTRAR PREVIEW COMPLETADA
         // -------------------------------------------------
 
         const completeAuditId =
