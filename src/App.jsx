@@ -416,8 +416,11 @@ const teamBadgeVisualsById = {
   barcelona: {
     colors: ["#2147a5", "#a61c48", "#2147a5", "#a61c48"],
   },
-  "al-ahly": {
+    "al-ahly": {
     colors: ["#d0183a", "#f5f6f8"],
+  },
+  birmingham: {
+    colors: ["#163f8f", "#ffffff"],
   },
   "atletico-madrid": {
     colors: ["#d71920", "#ffffff", "#1d3f72"],
@@ -435,8 +438,42 @@ const teamBadgeVisualsById = {
 
 const DEFAULT_TEAM_BADGE_COLORS = ["#6f7a95"];
 
-const getTeamBadgeBackground = (teamId) => {
-  const configuredColors = teamBadgeVisualsById[teamId]?.colors;
+const normalizeHexColor = (value) => {
+  const normalizedValue = String(value || "").trim();
+
+  return /^#[0-9a-f]{6}$/i.test(normalizedValue)
+    ? normalizedValue.toLowerCase()
+    : null;
+};
+
+const normalizeTeamBadgeColors = (...colorSources) => {
+  const flattenedColors = colorSources.flatMap((colorSource) => {
+    if (Array.isArray(colorSource)) {
+      return colorSource;
+    }
+
+    if (typeof colorSource === "string" && colorSource.includes(",")) {
+      return colorSource.split(",");
+    }
+
+    return colorSource ? [colorSource] : [];
+  });
+
+  return [
+    ...new Set(
+      flattenedColors
+        .map(normalizeHexColor)
+        .filter(Boolean),
+    ),
+  ];
+};
+
+const getTeamBadgeBackground = (teamId, overrideColors = null) => {
+  const normalizedOverrideColors = normalizeTeamBadgeColors(overrideColors);
+  const configuredColors =
+    normalizedOverrideColors.length > 0
+      ? normalizedOverrideColors
+      : teamBadgeVisualsById[teamId]?.colors;
 
   const uniqueColors = [
     ...new Set(
@@ -469,27 +506,98 @@ const getTeamBadgeBackground = (teamId) => {
   )`;
 };
 
-const matchData = {
-  id: "barcelona-al-ahly-2026-08-19",
+const EMPTY_MATCH_DATA = {
+  id: null,
   homeTeamId: "barcelona",
   homeName: "Barça",
-  homeLocation: "Barcelona",
-  awayTeamId: "al-ahly",
-  awayName: "Al-Ahly",
-  awayCountry: "Egipte",
-  kickoffLabel: "DIMECRES · 19 AGOST 2026 · 21:00",
-  kickoffAt: "2026-08-19T21:00:00+02:00",
+  homeLocation: "",
+  homeBadgeColors: teamBadgeVisualsById.barcelona.colors,
+  awayTeamId: "",
+  awayName: "CARREGANT...",
+  awayCountry: "",
+  awayBadgeColors: DEFAULT_TEAM_BADGE_COLORS,
+  kickoffLabel: "CARREGANT PARTIT...",
+  kickoffAt: null,
+  predictionsCloseAt: null,
+  predictionsAreOpen: false,
 };
 
 const PREDICTION_CELEBRATION_MS = 5600;
 
-const getPredictionStorageKey = (userId) =>
-  `vesalaporra_prediction_${String(userId)}_${matchData.id}`;
+const formatCurrentMatchKickoffLabel = (kickoffAt) => {
+  if (!kickoffAt) {
+    return "PARTIT PENDENT DE DATA";
+  }
 
-const getCountdown = () => {
+  const kickoffDate = new Date(kickoffAt);
+
+  const dateLabel = new Intl.DateTimeFormat("ca-ES", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    timeZone: "Europe/Madrid",
+  }).format(kickoffDate);
+
+  const timeLabel = new Intl.DateTimeFormat("ca-ES", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Europe/Madrid",
+  }).format(kickoffDate);
+
+  return `${dateLabel} · ${timeLabel}`.toLocaleUpperCase("ca-ES");
+};
+
+const getMatchTeamBadgeColors = (row, side) =>
+  normalizeTeamBadgeColors(
+    row?.[`${side}_team_colors`],
+    row?.[`${side}_colors`],
+    [
+      row?.[`${side}_primary_color`],
+      row?.[`${side}_secondary_color`],
+    ],
+    [
+      row?.[`${side}_team_primary_color`],
+      row?.[`${side}_team_secondary_color`],
+    ],
+  );
+
+const normalizeCurrentMatch = (row) => ({
+  id: row?.match_id ? String(row.match_id) : null,
+  homeTeamId: row?.home_team_key || "barcelona",
+  homeName: row?.home_display_name || "Barça",
+  homeLocation: row?.venue_name || row?.competition_name || "",
+  homeBadgeColors: getMatchTeamBadgeColors(row, "home"),
+  awayTeamId: row?.away_team_key || "",
+  awayName: row?.away_display_name || "",
+  awayCountry: row?.opponent_country || "",
+  awayBadgeColors: getMatchTeamBadgeColors(row, "away"),
+  kickoffLabel: formatCurrentMatchKickoffLabel(
+    row?.scheduled_kickoff_at,
+  ),
+  kickoffAt: row?.scheduled_kickoff_at || null,
+  predictionsCloseAt:
+    row?.predictions_close_at ||
+    row?.scheduled_kickoff_at ||
+    null,
+  predictionsAreOpen: Boolean(row?.predictions_are_open),
+});
+
+const getCountdown = (predictionsCloseAt) => {
+  if (!predictionsCloseAt) {
+    return {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      isClosed: true,
+    };
+  }
+
   const remainingMilliseconds = Math.max(
     0,
-    new Date(matchData.kickoffAt).getTime() - Date.now(),
+    new Date(predictionsCloseAt).getTime() - Date.now(),
   );
 
   const totalSeconds = Math.floor(remainingMilliseconds / 1000);
@@ -1172,12 +1280,12 @@ const formatRatingAverage = (average) =>
     maximumFractionDigits: 1,
   });
 
-function TeamColorBadge({ teamId, className = "" }) {
+function TeamColorBadge({ teamId, colors = null, className = "" }) {
   return (
     <span
       className={`team-color-dot ${className}`.trim()}
       style={{
-        background: getTeamBadgeBackground(teamId),
+        background: getTeamBadgeBackground(teamId, colors),
       }}
       aria-hidden="true"
     ></span>
@@ -1185,12 +1293,23 @@ function TeamColorBadge({ teamId, className = "" }) {
 }
 
 function OfficialMatchCard({
+  match = null,
   homeScore,
   awayScore,
   editable = false,
   onHomeScoreChange,
   onAwayScoreChange,
 }) {
+  const homeName = match?.homeName || NOTES_MATCH_DATA.homeName;
+  const awayName = match?.awayName || NOTES_MATCH_DATA.awayName;
+  const homeTeamId = match?.homeTeamId || NOTES_MATCH_DATA.homeTeamId;
+  const awayTeamId = match?.awayTeamId || NOTES_MATCH_DATA.awayTeamId;
+  const homeColors = match?.homeBadgeColors || null;
+  const awayColors = match?.awayBadgeColors || null;
+  const dateLabel = match?.kickoffAt
+    ? formatCurrentMatchKickoffLabel(match.kickoffAt)
+    : NOTES_MATCH_DATA.dateLabel;
+
   const changeScore = (team, delta) => {
     const currentScore = team === "home" ? homeScore : awayScore;
     const nextScore = Math.max(0, Number(currentScore || 0) + delta);
@@ -1208,29 +1327,30 @@ function OfficialMatchCard({
       className={
         editable ? "official-match-card editable" : "official-match-card"
       }
-      aria-label={formatOfficialMatchTitle(homeScore, awayScore)}
+      aria-label={`${homeName} ${homeScore}–${awayScore} ${awayName}`}
     >
       <span className="official-match-eyebrow">
-        {NOTES_MATCH_DATA.eyebrow}
+        {editable ? "PARTIT ACTIU A SUPABASE" : "ÚLTIM PARTIT PUNTUAT"}
       </span>
 
       <div className="official-match-line">
         <div className="official-match-team home">
           <TeamColorBadge
-            teamId={NOTES_MATCH_DATA.homeTeamId}
+            teamId={homeTeamId}
+            colors={homeColors}
             className="official-match-badge"
           />
 
-          <strong>{NOTES_MATCH_DATA.homeName}</strong>
+          <strong>{homeName}</strong>
         </div>
 
         {editable ? (
-                   <div className="official-score-editor" aria-label="Resultat oficial">
+          <div className="official-score-editor" aria-label="Resultat oficial">
             <div className="official-score-side">
               <button
                 type="button"
                 onClick={() => changeScore("home", -1)}
-                aria-label={`Resta un gol a ${NOTES_MATCH_DATA.homeName}`}
+                aria-label={`Resta un gol a ${homeName}`}
               >
                 −
               </button>
@@ -1240,7 +1360,7 @@ function OfficialMatchCard({
               <button
                 type="button"
                 onClick={() => changeScore("home", 1)}
-                aria-label={`Suma un gol a ${NOTES_MATCH_DATA.homeName}`}
+                aria-label={`Suma un gol a ${homeName}`}
               >
                 +
               </button>
@@ -1254,7 +1374,7 @@ function OfficialMatchCard({
               <button
                 type="button"
                 onClick={() => changeScore("away", -1)}
-                aria-label={`Resta un gol a ${NOTES_MATCH_DATA.awayName}`}
+                aria-label={`Resta un gol a ${awayName}`}
               >
                 −
               </button>
@@ -1264,7 +1384,7 @@ function OfficialMatchCard({
               <button
                 type="button"
                 onClick={() => changeScore("away", 1)}
-                aria-label={`Suma un gol a ${NOTES_MATCH_DATA.awayName}`}
+                aria-label={`Suma un gol a ${awayName}`}
               >
                 +
               </button>
@@ -1280,17 +1400,16 @@ function OfficialMatchCard({
 
         <div className="official-match-team away">
           <TeamColorBadge
-            teamId={NOTES_MATCH_DATA.awayTeamId}
+            teamId={awayTeamId}
+            colors={awayColors}
             className="official-match-badge"
           />
 
-          <strong>{NOTES_MATCH_DATA.awayName}</strong>
+          <strong>{awayName}</strong>
         </div>
       </div>
 
-      <small className="official-match-date">
-        {NOTES_MATCH_DATA.dateLabel}
-      </small>
+      <small className="official-match-date">{dateLabel}</small>
     </section>
   );
 }
@@ -2126,6 +2245,264 @@ const VESALAPORRA_CURRENT_MATCH_ID =
   import.meta.env.VITE_VESALAPORRA_CURRENT_MATCH_ID ||
   "6e6e5216-0d3f-4a65-9171-31b72026b001";
 
+const VESALAPORRA_ADMIN_MATCH_LIST_RPC =
+  import.meta.env.VITE_VESALAPORRA_ADMIN_MATCH_LIST_RPC ||
+  "vesalaporra_admin_list_matches";
+
+const VESALAPORRA_ADMIN_MATCH_UPSERT_RPC =
+  import.meta.env.VITE_VESALAPORRA_ADMIN_MATCH_UPSERT_RPC ||
+  "vesalaporra_admin_upsert_match";
+
+const VESALAPORRA_PRESENTATION_TIME_ZONE = "Europe/Madrid";
+
+const ADMIN_MATCH_COLOR_OPTIONS = [
+  { value: "#ffffff", label: "Blanc" },
+  { value: "#111111", label: "Negre" },
+  { value: "#d71920", label: "Vermell" },
+  { value: "#8f123f", label: "Grana" },
+  { value: "#163f8f", label: "Blau" },
+  { value: "#53a7e8", label: "Blau cel" },
+  { value: "#f4cf36", label: "Groc" },
+  { value: "#f58232", label: "Taronja" },
+  { value: "#1f8f4e", label: "Verd" },
+  { value: "#7b3fb4", label: "Lila" },
+  { value: "#ef6aa7", label: "Rosa" },
+  { value: "#8a5a35", label: "Marró" },
+  { value: "#8b95aa", label: "Gris" },
+];
+
+const EMPTY_ADMIN_MATCH_FORM = {
+  matchId: null,
+  rivalName: "",
+  rivalKey: "",
+  rivalCountry: "",
+  competitionName: "",
+  venueName: "",
+  kickoffText: "",
+  barcaSide: "home",
+  rivalColors: [],
+  makeCurrent: true,
+};
+
+const slugifyTeamKey = (value) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+
+const getTimeZoneOffsetMilliseconds = (
+  date,
+  timeZone = VESALAPORRA_PRESENTATION_TIME_ZONE,
+) => {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+
+  const values = Object.fromEntries(
+    parts
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, Number(part.value)]),
+  );
+
+  const representedAsUtc = Date.UTC(
+    values.year,
+    values.month - 1,
+    values.day,
+    values.hour,
+    values.minute,
+    values.second,
+  );
+
+  return representedAsUtc - date.getTime();
+};
+
+const madridDatePartsToIso = ({ year, month, day, hour, minute }) => {
+  const utcGuess = Date.UTC(year, month - 1, day, hour, minute, 0);
+  let resolvedUtc =
+    utcGuess -
+    getTimeZoneOffsetMilliseconds(
+      new Date(utcGuess),
+      VESALAPORRA_PRESENTATION_TIME_ZONE,
+    );
+
+  resolvedUtc =
+    utcGuess -
+    getTimeZoneOffsetMilliseconds(
+      new Date(resolvedUtc),
+      VESALAPORRA_PRESENTATION_TIME_ZONE,
+    );
+
+  return new Date(resolvedUtc).toISOString();
+};
+
+const parseAdminMatchDateText = (value) => {
+  const match = String(value || "")
+    .trim()
+    .match(
+      /^(\d{1,2})\s*\/\s*(\d{1,2})\s*\/\s*(\d{2}|\d{4})\s*(?:i|,|a\s+les)?\s*(\d{1,2})\s*:\s*(\d{2})$/i,
+    );
+
+  if (!match) {
+    return null;
+  }
+
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const rawYear = Number(match[3]);
+  const year = rawYear < 100 ? 2000 + rawYear : rawYear;
+  const hour = Number(match[4]);
+  const minute = Number(match[5]);
+
+  if (
+    year < 2020 ||
+    year > 2100 ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > 31 ||
+    hour < 0 ||
+    hour > 23 ||
+    minute < 0 ||
+    minute > 59
+  ) {
+    return null;
+  }
+
+  const calendarCheck = new Date(Date.UTC(year, month - 1, day));
+
+  if (
+    calendarCheck.getUTCFullYear() !== year ||
+    calendarCheck.getUTCMonth() !== month - 1 ||
+    calendarCheck.getUTCDate() !== day
+  ) {
+    return null;
+  }
+
+  return {
+    day,
+    month,
+    year,
+    hour,
+    minute,
+    iso: madridDatePartsToIso({ year, month, day, hour, minute }),
+  };
+};
+
+const isoToAdminMatchDateText = (isoValue) => {
+  if (!isoValue) {
+    return "";
+  }
+
+  const date = new Date(isoValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: VESALAPORRA_PRESENTATION_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+
+  const values = Object.fromEntries(
+    parts
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value]),
+  );
+
+  return `${Number(values.day)}/${Number(values.month)}/${String(values.year).slice(-2)} i ${values.hour}:${values.minute}`;
+};
+
+const isBarcelonaTeam = (teamKey, displayName) => {
+  const normalizedKey = slugifyTeamKey(teamKey);
+  const normalizedName = slugifyTeamKey(displayName);
+
+  return (
+    normalizedKey === "barcelona" ||
+    normalizedKey === "fc-barcelona" ||
+    normalizedName === "barca" ||
+    normalizedName === "fc-barcelona" ||
+    normalizedName === "barcelona"
+  );
+};
+
+const normalizeAdminMatch = (row) => {
+  const homeTeamKey = row?.home_team_key || row?.homeTeamKey || "";
+  const awayTeamKey = row?.away_team_key || row?.awayTeamKey || "";
+  const homeDisplayName =
+    row?.home_display_name || row?.homeDisplayName || "";
+  const awayDisplayName =
+    row?.away_display_name || row?.awayDisplayName || "";
+  const barcaIsHome = isBarcelonaTeam(homeTeamKey, homeDisplayName);
+  const rivalSide = barcaIsHome ? "away" : "home";
+  const rivalTeamKey = barcaIsHome ? awayTeamKey : homeTeamKey;
+  const rivalDisplayName = barcaIsHome
+    ? awayDisplayName
+    : homeDisplayName;
+
+  return {
+    matchId: String(row?.match_id || row?.id || ""),
+    barcaSide: barcaIsHome ? "home" : "away",
+    homeTeamKey,
+    homeDisplayName,
+    awayTeamKey,
+    awayDisplayName,
+    rivalTeamKey,
+    rivalDisplayName,
+    rivalCountry:
+      row?.opponent_country ||
+      row?.rival_country ||
+      row?.[`${rivalSide}_country`] ||
+      "",
+    competitionName:
+      row?.competition_name || row?.competitionName || "",
+    venueName: row?.venue_name || row?.venueName || "",
+    kickoffAt:
+      row?.scheduled_kickoff_at || row?.kickoff_at || row?.kickoffAt || null,
+    predictionsCloseAt:
+      row?.predictions_close_at || row?.predictionsCloseAt || null,
+    rivalColors: getMatchTeamBadgeColors(row, rivalSide),
+    status: row?.match_status || row?.status || "scheduled",
+    predictionsAreOpen: Boolean(
+      row?.predictions_are_open ?? row?.predictionsAreOpen,
+    ),
+    isCurrent: Boolean(row?.is_current ?? row?.isCurrent),
+  };
+};
+
+const adminMatchToForm = (match) => {
+  const rivalColors = normalizeTeamBadgeColors(match.rivalColors).slice(0, 2);
+
+  return {
+    matchId: match.matchId || null,
+    rivalName: match.rivalDisplayName || "",
+    rivalKey: match.rivalTeamKey || "",
+    rivalCountry: match.rivalCountry || "",
+    competitionName: match.competitionName || "",
+    venueName: match.venueName || "",
+    kickoffText: isoToAdminMatchDateText(match.kickoffAt),
+    barcaSide: match.barcaSide || "home",
+    rivalColors: rivalColors.length > 0 ? rivalColors : ["#6f7a95"],
+    makeCurrent: match.isCurrent,
+  };
+};
+
 const PLAYER_SOURCE_MAX_BYTES = 5 * 1024 * 1024;
 
 const PLAYER_SOURCE_ALLOWED_TYPES = new Set([
@@ -2371,7 +2748,17 @@ function App() {
 
   const [openInfoSection, setOpenInfoSection] = useState(null);
 
-  const [countdown, setCountdown] = useState(getCountdown);
+  const [matchData, setMatchData] = useState(EMPTY_MATCH_DATA);
+
+  const [matchLoading, setMatchLoading] = useState(true);
+
+  const [countdown, setCountdown] = useState(() =>
+    getCountdown(null),
+  );
+
+  const [predictionLoading, setPredictionLoading] = useState(false);
+
+  const [predictionSubmitting, setPredictionSubmitting] = useState(false);
 
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
@@ -2425,6 +2812,18 @@ function App() {
 
   const [adminPlayerFeedback, setAdminPlayerFeedback] = useState(null);
 
+  const [adminUpcomingMatches, setAdminUpcomingMatches] = useState([]);
+
+  const [adminMatchesLoading, setAdminMatchesLoading] = useState(false);
+
+  const [adminMatchSaving, setAdminMatchSaving] = useState(false);
+
+  const [adminMatchForm, setAdminMatchForm] = useState(
+    EMPTY_ADMIN_MATCH_FORM,
+  );
+
+  const [adminMatchFeedback, setAdminMatchFeedback] = useState(null);
+
   const adminPlayerFileInputRef = useRef(null);
 
   const officialMatchStatsByPlayerId = officialMatchState.statsByPlayerId;
@@ -2439,6 +2838,9 @@ function App() {
     Boolean(
       authUser && VESALAPORRA_ADMIN_USER_IDS.includes(String(authUser.id)),
     );
+
+  const activeAdminMatchId =
+    matchData.id || VESALAPORRA_CURRENT_MATCH_ID;
 
   const publicMatchPlayersWithAdminConfig = publicMatchPlayers.map(
     (publicPlayer) => {
@@ -2570,13 +2972,17 @@ function App() {
 
   const protagonistIsComplete = Boolean(protagonist && protagonistScoring);
 
-  const confirmButtonLabel = predictionConfirmed
+   const confirmButtonLabel = predictionConfirmed
     ? "PRONÒSTIC CONFIRMAT"
-    : countdown.isClosed
-      ? "PORRA TANCADA"
-      : !authLoading && !authUser
-        ? "ENTRA PER CONFIRMAR"
-        : "CONFIRMA EL TEU PRONÒSTIC";
+    : matchLoading || predictionLoading
+      ? "CARREGANT PORRA..."
+      : predictionSubmitting
+        ? "CONFIRMANT..."
+        : countdown.isClosed
+          ? "PORRA TANCADA"
+          : !authLoading && !authUser
+            ? "ENTRA PER CONFIRMAR"
+            : "CONFIRMA EL TEU PRONÒSTIC";
 
   const rankingUsers = rankingDemoUsers.map((baseUser) => {
     const identityUser =
@@ -3013,16 +3419,24 @@ function App() {
     }));
   };
 
-  const loadPublicMatchPlayers = async () => {
+   const loadPublicMatchPlayers = async (
+    matchId = matchData.id,
+  ) => {
+    if (!matchId) {
+      setPublicMatchPlayers([]);
+      return;
+    }
+
     const { data, error } = await supabase.rpc(
       "vesalaporra_public_match_players",
       {
-        p_match_id: VESALAPORRA_CURRENT_MATCH_ID,
+        p_match_id: matchId,
       },
     );
 
     if (error) {
       console.warn("No s’ha pogut carregar la plantilla pública:", error);
+      setPublicMatchPlayers([]);
       return;
     }
 
@@ -3037,6 +3451,261 @@ function App() {
     setPublicMatchPlayers(normalizedRows);
   };
 
+  const refreshPublicCurrentMatch = async ({ quiet = false } = {}) => {
+    if (!quiet) {
+      setMatchLoading(true);
+    }
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "vesalaporra_public_current_match",
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const currentMatchRow = Array.isArray(data) ? data[0] : data;
+
+      if (!currentMatchRow?.match_id) {
+        throw new Error("No hi ha cap partit públic programat a Supabase.");
+      }
+
+      const normalizedMatch = normalizeCurrentMatch(currentMatchRow);
+
+      setMatchData(normalizedMatch);
+      setCountdown(getCountdown(normalizedMatch.predictionsCloseAt));
+
+      return normalizedMatch;
+    } finally {
+      if (!quiet) {
+        setMatchLoading(false);
+      }
+    }
+  };
+
+  const loadAdminUpcomingMatches = async ({ quiet = false } = {}) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    if (!quiet) {
+      setAdminMatchesLoading(true);
+    }
+
+    try {
+      const { data, error } = await supabase.rpc(
+        VESALAPORRA_ADMIN_MATCH_LIST_RPC,
+        {
+          p_limit: 100,
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const rows = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.matches)
+          ? data.matches
+          : [];
+
+      const normalizedMatches = rows
+        .map(normalizeAdminMatch)
+        .filter((match) => match.matchId && match.kickoffAt)
+        .sort(
+          (firstMatch, secondMatch) =>
+            new Date(firstMatch.kickoffAt).getTime() -
+            new Date(secondMatch.kickoffAt).getTime(),
+        );
+
+      setAdminUpcomingMatches(normalizedMatches);
+    } catch (error) {
+      setAdminMatchFeedback({
+        type: "error",
+        message:
+          error?.message || "No s’han pogut carregar els propers partits.",
+      });
+    } finally {
+      if (!quiet) {
+        setAdminMatchesLoading(false);
+      }
+    }
+  };
+
+  const resetAdminMatchForm = () => {
+    setAdminMatchForm(EMPTY_ADMIN_MATCH_FORM);
+    setAdminMatchFeedback(null);
+  };
+
+  const editAdminMatch = (match) => {
+    setAdminMatchForm(adminMatchToForm(match));
+    setAdminMatchFeedback(null);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  const updateAdminMatchForm = (field, value) => {
+    setAdminMatchForm((currentForm) => ({
+      ...currentForm,
+      [field]: value,
+    }));
+  };
+
+  const toggleAdminMatchColor = (colorValue) => {
+    const normalizedColor = normalizeHexColor(colorValue);
+
+    if (!normalizedColor) {
+      return;
+    }
+
+    setAdminMatchForm((currentForm) => {
+      const currentColors = normalizeTeamBadgeColors(
+        currentForm.rivalColors,
+      ).slice(0, 2);
+      const selectedIndex = currentColors.indexOf(normalizedColor);
+
+      if (selectedIndex >= 0) {
+        if (currentColors.length === 1) {
+          return currentForm;
+        }
+
+        return {
+          ...currentForm,
+          rivalColors: currentColors.filter(
+            (selectedColor) => selectedColor !== normalizedColor,
+          ),
+        };
+      }
+
+      return {
+        ...currentForm,
+        rivalColors:
+          currentColors.length < 2
+            ? [...currentColors, normalizedColor]
+            : [currentColors[0], normalizedColor],
+      };
+    });
+  };
+
+  const validateAdminMatchForm = () => {
+    if (adminMatchForm.rivalName.trim().length < 2) {
+      return "Escriu el nom complet del rival.";
+    }
+
+    if (!parseAdminMatchDateText(adminMatchForm.kickoffText)) {
+      return "Escriu la data així: 31/7/26 i 20:45.";
+    }
+
+    if (adminMatchForm.rivalColors.length < 1) {
+      return "Tria almenys un color del rival.";
+    }
+
+    if (adminMatchForm.rivalColors.length > 2) {
+      return "Només pots triar un o dos colors.";
+    }
+
+    return null;
+  };
+
+  const handleSaveAdminMatch = async (event) => {
+    event.preventDefault();
+
+    if (!isAdmin || adminMatchSaving) {
+      return;
+    }
+
+    const validationError = validateAdminMatchForm();
+
+    if (validationError) {
+      setAdminMatchFeedback({
+        type: "error",
+        message: validationError,
+      });
+      return;
+    }
+
+    const parsedKickoff = parseAdminMatchDateText(
+      adminMatchForm.kickoffText,
+    );
+    const kickoffAt = parsedKickoff?.iso || null;
+    const rivalColors = normalizeTeamBadgeColors(
+      adminMatchForm.rivalColors,
+    ).slice(0, 2);
+    const rivalKey =
+      slugifyTeamKey(adminMatchForm.rivalKey) ||
+      slugifyTeamKey(adminMatchForm.rivalName);
+
+    setAdminMatchSaving(true);
+    setAdminMatchFeedback({
+      type: "working",
+      message: adminMatchForm.matchId
+        ? "Guardant els canvis del partit..."
+        : "Creant el proper partit...",
+    });
+
+    try {
+      const { data, error } = await supabase.rpc(
+        VESALAPORRA_ADMIN_MATCH_UPSERT_RPC,
+        {
+          p_match_id: adminMatchForm.matchId || null,
+          p_scheduled_kickoff_at: kickoffAt,
+          p_barca_side: adminMatchForm.barcaSide,
+          p_rival_team_key: rivalKey,
+          p_rival_display_name: adminMatchForm.rivalName.trim(),
+          p_rival_country: adminMatchForm.rivalCountry.trim() || null,
+          p_competition_name:
+            adminMatchForm.competitionName.trim() || null,
+          p_venue_name: adminMatchForm.venueName.trim() || null,
+          p_rival_primary_color: rivalColors[0] || null,
+          p_rival_secondary_color: rivalColors[1] || null,
+          p_make_current: Boolean(adminMatchForm.makeCurrent),
+          p_audit_id: createAdminAuditId(
+            adminMatchForm.matchId ? "UPDATE_MATCH" : "CREATE_MATCH",
+          ),
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const savedMatchId = getPayloadValue(data, [
+        "match_id",
+        "saved_match_id",
+        "id",
+      ]);
+
+      await loadAdminUpcomingMatches({ quiet: true });
+
+      const refreshedMatch = await refreshPublicCurrentMatch({ quiet: true });
+
+      if (refreshedMatch?.id) {
+        await loadPublicMatchPlayers(refreshedMatch.id);
+      }
+
+      setAdminMatchForm(EMPTY_ADMIN_MATCH_FORM);
+      setAdminMatchFeedback({
+        type: "success",
+        message: savedMatchId
+          ? "Partit guardat i portada actualitzada amb la nova font real."
+          : "Partit guardat. La portada ja ha rellegit el partit públic real.",
+      });
+    } catch (error) {
+      setAdminMatchFeedback({
+        type: "error",
+        message:
+          error?.message || "No s’ha pogut guardar el proper partit.",
+      });
+    } finally {
+      setAdminMatchSaving(false);
+    }
+  };
+
   const loadAdminPlayerWorkspace = async ({ quiet = false } = {}) => {
     if (!isAdmin) {
       return;
@@ -3049,7 +3718,7 @@ function App() {
     try {
       const [catalogResponse, reviewResponse] = await Promise.all([
         supabase.rpc("vesalaporra_admin_list_player_catalog", {
-          p_match_id: VESALAPORRA_CURRENT_MATCH_ID,
+          p_match_id: activeAdminMatchId,
         }),
         supabase.rpc("vesalaporra_admin_list_badge_review_queue", {
           p_limit: 50,
@@ -3528,7 +4197,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     const { error } = await supabase.rpc(
       "vesalaporra_admin_upsert_match_player",
       {
-        p_match_id: VESALAPORRA_CURRENT_MATCH_ID,
+        p_match_id: activeAdminMatchId,
         p_player_id: player.playerId,
         p_roster_order: nextRosterOrder,
         p_availability_status: nextValues.availabilityStatus,
@@ -3579,7 +4248,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
       const { error } = await supabase.rpc(
         "vesalaporra_admin_remove_match_player",
         {
-          p_match_id: VESALAPORRA_CURRENT_MATCH_ID,
+          p_match_id: activeAdminMatchId,
           p_player_id: player.playerId,
           p_audit_id: createAdminAuditId("REMOVE_MATCH_PLAYER"),
         },
@@ -3970,9 +4639,13 @@ const saveAdminMatchPlayer = async (player, patch) => {
     }
   };
 
-  const handleConfirmPrediction = () => {
+    const handleConfirmPrediction = () => {
     if (
       predictionConfirmed ||
+      predictionLoading ||
+      predictionSubmitting ||
+      matchLoading ||
+      !matchData.id ||
       countdown.isClosed ||
       !scoreTouched ||
       authLoading ||
@@ -3990,59 +4663,146 @@ const saveAdminMatchPlayer = async (player, patch) => {
   };
 
   const handleCancelPredictionConfirmation = () => {
+    if (predictionSubmitting) {
+      return;
+    }
+
     setConfirmationDialogOpen(false);
   };
 
-  const handleFinalizePrediction = () => {
+  const handleFinalizePrediction = async () => {
     if (
       !authUser ||
+      !matchData.id ||
       predictionConfirmed ||
+      predictionSubmitting ||
       countdown.isClosed ||
       !scoreTouched
     ) {
       return;
     }
 
-    const predictionSnapshot = {
-      matchId: matchData.id,
-      confirmedAt: new Date().toISOString(),
-      barcaScore,
-      rivalScore,
-      lineup: [...lineup],
-      protagonistId,
-    };
+    setPredictionSubmitting(true);
+    setAuthError("");
 
     try {
-      window.localStorage.setItem(
-        getPredictionStorageKey(authUser.id),
-        JSON.stringify(predictionSnapshot),
+      const submittedLineup = lineupIsComplete
+        ? lineup.filter(Boolean)
+        : [];
+
+      const { data: submitPayload, error: submitError } =
+        await supabase.rpc(
+          "vesalaporra_submit_prediction",
+          {
+            p_match_id: matchData.id,
+            p_barcelona_goals: barcaScore,
+            p_opponent_goals: rivalScore,
+            p_lineup_player_ids: submittedLineup,
+            p_protagonist_player_id: protagonistId || null,
+            p_audit_id:
+              `VLP_UI_SUBMIT_PREDICTION_20260714_060_${crypto.randomUUID()}`,
+          },
+        );
+
+      if (submitError) {
+        throw submitError;
+      }
+
+      const submitStatus = submitPayload?.status;
+
+      if (
+        submitStatus !== "PREDICTION_CONFIRMED" &&
+        submitStatus !== "PREDICTION_ALREADY_CONFIRMED"
+      ) {
+        throw new Error(
+          `Resposta inesperada confirmant la porra: ${
+            submitStatus || "sense estat"
+          }.`,
+        );
+      }
+
+      const { data: predictionRows, error: readError } =
+        await supabase.rpc(
+          "vesalaporra_my_prediction",
+          {
+            p_match_id: matchData.id,
+          },
+        );
+
+      if (readError) {
+        throw readError;
+      }
+
+      const savedPrediction = Array.isArray(predictionRows)
+        ? predictionRows[0]
+        : predictionRows;
+
+      if (!savedPrediction?.prediction_id) {
+        throw new Error(
+          "La porra s’ha enviat però no s’ha pogut recuperar.",
+        );
+      }
+
+      const restoredLineup = Array.from(
+        { length: 11 },
+        (_, index) =>
+          savedPrediction.lineup_player_ids?.[index] || null,
       );
+
+      const predictionSnapshot = {
+        matchId: String(savedPrediction.match_id),
+        confirmedAt: savedPrediction.confirmed_at,
+        barcaScore: Number(
+          savedPrediction.predicted_barcelona_goals,
+        ),
+        rivalScore: Number(
+          savedPrediction.predicted_opponent_goals,
+        ),
+        lineup: restoredLineup,
+        protagonistId:
+          savedPrediction.protagonist_player_id || null,
+      };
+
+      setBarcaScore(predictionSnapshot.barcaScore);
+      setRivalScore(predictionSnapshot.rivalScore);
+      setScoreTouched(true);
+      setLineup(restoredLineup);
+      setProtagonistId(predictionSnapshot.protagonistId);
+      setConfirmedPrediction(predictionSnapshot);
+      setPredictionConfirmed(true);
+      setConfirmationDialogOpen(false);
+      setSelectedSlotIndex(null);
+      setSelectedPlayerId(null);
+      setConfirmationAnimationActive(false);
+
+      window.requestAnimationFrame(() => {
+        setConfirmationAnimationActive(true);
+      });
+
+      if (confirmationAnimationTimerRef.current) {
+        window.clearTimeout(
+          confirmationAnimationTimerRef.current,
+        );
+      }
+
+      confirmationAnimationTimerRef.current =
+        window.setTimeout(() => {
+          setConfirmationAnimationActive(false);
+          confirmationAnimationTimerRef.current = null;
+        }, PREDICTION_CELEBRATION_MS);
     } catch (error) {
       console.warn(
-        "No s’ha pogut conservar el pronòstic al navegador:",
+        "No s’ha pogut confirmar el pronòstic real:",
         error,
       );
+
+      setAuthError(
+        error?.message ||
+          "No s’ha pogut confirmar la porra. Torna-ho a provar.",
+      );
+    } finally {
+      setPredictionSubmitting(false);
     }
-
-    setConfirmedPrediction(predictionSnapshot);
-    setPredictionConfirmed(true);
-    setConfirmationDialogOpen(false);
-    setSelectedSlotIndex(null);
-    setSelectedPlayerId(null);
-    setConfirmationAnimationActive(false);
-
-    window.requestAnimationFrame(() => {
-      setConfirmationAnimationActive(true);
-    });
-
-    if (confirmationAnimationTimerRef.current) {
-      window.clearTimeout(confirmationAnimationTimerRef.current);
-    }
-
-    confirmationAnimationTimerRef.current = window.setTimeout(() => {
-      setConfirmationAnimationActive(false);
-      confirmationAnimationTimerRef.current = null;
-    }, PREDICTION_CELEBRATION_MS);
   };
 
   useEffect(() => {
@@ -4072,13 +4832,91 @@ const saveAdminMatchPlayer = async (player, patch) => {
     };
   }, [authUser?.id]);
 
-  useEffect(() => {
-    loadPublicMatchPlayers();
+    useEffect(() => {
+    let isCurrent = true;
+
+    const loadCurrentMatch = async () => {
+      setMatchLoading(true);
+
+      try {
+        const { data, error } = await supabase.rpc(
+          "vesalaporra_public_current_match",
+        );
+
+        if (error) {
+          throw error;
+        }
+
+        const currentMatchRow = Array.isArray(data)
+          ? data[0]
+          : data;
+
+        if (!currentMatchRow?.match_id) {
+          throw new Error(
+            "No hi ha cap partit públic programat a Supabase.",
+          );
+        }
+
+        if (!isCurrent) {
+          return;
+        }
+
+        const normalizedMatch =
+          normalizeCurrentMatch(currentMatchRow);
+
+        setMatchData(normalizedMatch);
+
+        setCountdown(
+          getCountdown(normalizedMatch.predictionsCloseAt),
+        );
+      } catch (error) {
+        console.warn(
+          "No s’ha pogut carregar el partit públic actual:",
+          error,
+        );
+
+        if (isCurrent) {
+          setMatchData(EMPTY_MATCH_DATA);
+          setAuthError(
+            error?.message ||
+              "No s’ha pogut carregar el pròxim partit.",
+          );
+        }
+      } finally {
+        if (isCurrent) {
+          setMatchLoading(false);
+        }
+      }
+    };
+
+    loadCurrentMatch();
+
+    return () => {
+      isCurrent = false;
+    };
   }, []);
 
   useEffect(() => {
+    if (!matchData.id) {
+      setPublicMatchPlayers([]);
+      return;
+    }
+
+    loadPublicMatchPlayers(matchData.id);
+  }, [matchData.id]);
+  useEffect(() => {
     if (activePage === "scoring" && isAdmin && adminScoringTab === "players") {
       loadAdminPlayerWorkspace();
+    }
+  }, [activePage, adminScoringTab, isAdmin, activeAdminMatchId]);
+
+  useEffect(() => {
+    if (
+      activePage === "scoring" &&
+      isAdmin &&
+      adminScoringTab === "upcoming"
+    ) {
+      loadAdminUpcomingMatches();
     }
   }, [activePage, adminScoringTab, isAdmin]);
 
@@ -4318,7 +5156,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
     };
   }, [authUser?.id]);
 
-  useEffect(() => {
+   useEffect(() => {
+    let isCurrent = true;
+
     const resetPredictionDraft = () => {
       setBarcaScore(0);
       setRivalScore(0);
@@ -4333,55 +5173,98 @@ const saveAdminMatchPlayer = async (player, patch) => {
       setConfirmationAnimationActive(false);
     };
 
-    if (!authUser) {
+    if (!authUser || !matchData.id) {
       resetPredictionDraft();
-      return;
+      setPredictionLoading(false);
+
+      return () => {
+        isCurrent = false;
+      };
     }
 
-    const storageKey = getPredictionStorageKey(authUser.id);
+    const loadRealPrediction = async () => {
+      setPredictionLoading(true);
 
-    try {
-      const storedPrediction = window.localStorage.getItem(storageKey);
+      try {
+        const { data, error } = await supabase.rpc(
+          "vesalaporra_my_prediction",
+          {
+            p_match_id: matchData.id,
+          },
+        );
 
-      if (!storedPrediction) {
-        resetPredictionDraft();
-        return;
+        if (error) {
+          throw error;
+        }
+
+        if (!isCurrent) {
+          return;
+        }
+
+        const storedPrediction = Array.isArray(data)
+          ? data[0]
+          : data;
+
+        if (!storedPrediction?.prediction_id) {
+          resetPredictionDraft();
+          return;
+        }
+
+        const restoredLineup = Array.from(
+          { length: 11 },
+          (_, index) =>
+            storedPrediction.lineup_player_ids?.[index] ||
+            null,
+        );
+
+        const predictionSnapshot = {
+          matchId: String(storedPrediction.match_id),
+          confirmedAt: storedPrediction.confirmed_at,
+          barcaScore: Number(
+            storedPrediction.predicted_barcelona_goals,
+          ),
+          rivalScore: Number(
+            storedPrediction.predicted_opponent_goals,
+          ),
+          lineup: restoredLineup,
+          protagonistId:
+            storedPrediction.protagonist_player_id || null,
+        };
+
+        setBarcaScore(predictionSnapshot.barcaScore);
+        setRivalScore(predictionSnapshot.rivalScore);
+        setScoreTouched(true);
+        setLineup(restoredLineup);
+        setProtagonistId(predictionSnapshot.protagonistId);
+        setConfirmedPrediction(predictionSnapshot);
+        setPredictionConfirmed(true);
+      } catch (error) {
+        console.warn(
+          "No s’ha pogut recuperar el pronòstic real:",
+          error,
+        );
+
+        if (isCurrent) {
+          resetPredictionDraft();
+
+          setAuthError(
+            error?.message ||
+              "No s’ha pogut carregar la teva porra.",
+          );
+        }
+      } finally {
+        if (isCurrent) {
+          setPredictionLoading(false);
+        }
       }
+    };
 
-      const parsedPrediction = JSON.parse(storedPrediction);
+    loadRealPrediction();
 
-      if (
-        parsedPrediction?.matchId !== matchData.id ||
-        !Number.isFinite(parsedPrediction?.barcaScore) ||
-        !Number.isFinite(parsedPrediction?.rivalScore) ||
-        !Array.isArray(parsedPrediction?.lineup)
-      ) {
-        window.localStorage.removeItem(storageKey);
-        resetPredictionDraft();
-        return;
-      }
-
-      const restoredLineup = Array.from(
-        { length: 11 },
-        (_, index) => parsedPrediction.lineup[index] || null,
-      );
-
-      setBarcaScore(parsedPrediction.barcaScore);
-      setRivalScore(parsedPrediction.rivalScore);
-      setScoreTouched(true);
-      setLineup(restoredLineup);
-      setProtagonistId(parsedPrediction.protagonistId || null);
-      setConfirmedPrediction({
-        ...parsedPrediction,
-        lineup: restoredLineup,
-      });
-      setPredictionConfirmed(true);
-    } catch (error) {
-      console.warn("No s’ha pogut restaurar el pronòstic confirmat:", error);
-      window.localStorage.removeItem(storageKey);
-      resetPredictionDraft();
-    }
-  }, [authUser?.id]);
+    return () => {
+      isCurrent = false;
+    };
+  }, [authUser?.id, matchData.id]);
 
   useEffect(
     () => () => {
@@ -4392,13 +5275,24 @@ const saveAdminMatchPlayer = async (player, patch) => {
     [],
   );
 
-  useEffect(() => {
+    useEffect(() => {
+    setCountdown(
+      getCountdown(matchData.predictionsCloseAt),
+    );
+
+    if (!matchData.predictionsCloseAt) {
+      return undefined;
+    }
+
     const countdownInterval = window.setInterval(() => {
-      setCountdown(getCountdown());
+      setCountdown(
+        getCountdown(matchData.predictionsCloseAt),
+      );
     }, 1000);
 
-    return () => window.clearInterval(countdownInterval);
-  }, []);
+    return () =>
+      window.clearInterval(countdownInterval);
+  }, [matchData.predictionsCloseAt]);
 
   useEffect(() => {
     if (activePage !== "ranking" || !rankingHasMore) {
@@ -4986,6 +5880,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                       style={{
                         background: getTeamBadgeBackground(
                           matchData.homeTeamId,
+                          matchData.homeBadgeColors,
                         ),
                       }}
                       aria-hidden="true"
@@ -5108,6 +6003,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                       style={{
                         background: getTeamBadgeBackground(
                           matchData.awayTeamId,
+                          matchData.awayBadgeColors,
                         ),
                       }}
                       aria-hidden="true"
@@ -5696,11 +6592,14 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 </div>
               )}
 
-              <button
+                         <button
                 type="button"
                 className="confirm-button"
                 disabled={
                   !scoreTouched ||
+                  matchLoading ||
+                  predictionLoading ||
+                  predictionSubmitting ||
                   countdown.isClosed ||
                   authLoading ||
                   authActionLoading ||
@@ -5882,6 +6781,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                        <header className="admin-scoring-hero admin-scoring-hero-compact">
               {adminScoringTab === "match" ? (
                 <OfficialMatchCard
+                  match={matchData}
                   homeScore={officialHomeScore}
                   awayScore={officialAwayScore}
                   editable
@@ -5892,15 +6792,26 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     updateOfficialMatchScore("away", nextScore)
                   }
                 />
-              ) : (
+              ) : adminScoringTab === "players" ? (
                 <div className="admin-player-hero-summary">
                   <span>CATÀLEG DINÀMIC</span>
                   <strong>{adminPlayerCatalog.length} jugadors</strong>
                 </div>
+              ) : (
+                <div className="admin-player-hero-summary">
+                  <span>CALENDARI REAL</span>
+                  <strong>{adminUpcomingMatches.length} partits</strong>
+                  <small>
+                    Crear, editar i publicar el proper rival de la portada.
+                  </small>
+                </div>
               )}
             </header>
 
-            <div className="admin-area-tabs" role="tablist">
+            <div
+              className="admin-area-tabs"
+              role="tablist"
+            >
               <button
                 type="button"
                 className={
@@ -5930,6 +6841,20 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 {adminBadgeReviewQueue.length > 0 && (
                   <span>{adminBadgeReviewQueue.length}</span>
                 )}
+              </button>
+
+              <button
+                type="button"
+                className={
+                  adminScoringTab === "upcoming"
+                    ? "admin-area-tab active"
+                    : "admin-area-tab"
+                }
+                onClick={() => setAdminScoringTab("upcoming")}
+                role="tab"
+                aria-selected={adminScoringTab === "upcoming"}
+              >
+                PROPERS PARTITS
               </button>
             </div>
 
@@ -6156,7 +7081,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   )}
                 </section>
               </>
-            ) : (
+            ) : adminScoringTab === "players" ? (
               <section className="admin-player-workspace">
                 <input
                   ref={adminPlayerFileInputRef}
@@ -6520,6 +7445,377 @@ const saveAdminMatchPlayer = async (player, patch) => {
                                 ? "REACTIVA JUGADOR"
                                 : "ARXIVA JUGADOR"}
                             </button>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
+              </section>
+            ) : (
+              <section className="admin-player-workspace" role="tabpanel">
+                {adminMatchFeedback?.message && (
+                  <div
+                    className={`admin-player-feedback ${adminMatchFeedback.type}`}
+                    role={
+                      adminMatchFeedback.type === "error" ? "alert" : "status"
+                    }
+                  >
+                    {adminMatchFeedback.message}
+                  </div>
+                )}
+
+                <section className="admin-create-player-card admin-upcoming-match-card">
+                  <header>
+                    <div>
+                      <span>
+                        {adminMatchForm.matchId
+                          ? "EDITA PARTIT"
+                          : "NOU PROPER PARTIT"}
+                      </span>
+                      <strong>Nom, colors, local o visitant i data</strong>
+                    </div>
+
+                    <small>
+                      Quatre dades i prou. L’hora escrita s’interpreta sempre
+                      com a Europe/Madrid.
+                    </small>
+                  </header>
+
+                  <form
+                    className="admin-upcoming-match-form"
+                    onSubmit={handleSaveAdminMatch}
+                  >
+                    <label className="admin-upcoming-field admin-upcoming-rival-name">
+                      <span>NOM DEL RIVAL</span>
+                      <input
+                        type="text"
+                        value={adminMatchForm.rivalName}
+                        onChange={(event) =>
+                          updateAdminMatchForm("rivalName", event.target.value)
+                        }
+                        placeholder="Birmingham City"
+                        maxLength={100}
+                        required
+                      />
+                    </label>
+
+                    <div className="admin-upcoming-field">
+                      <span className="admin-upcoming-field-label">COLORS</span>
+
+                      <details className="admin-color-picker">
+                        <summary>
+                          <span className="admin-color-picker-preview">
+                            {adminMatchForm.rivalColors.length > 0 ? (
+                              adminMatchForm.rivalColors.map((color, index) => (
+                                <i
+                                  key={`${color}-${index}`}
+                                  style={{ background: color }}
+                                  aria-hidden="true"
+                                ></i>
+                              ))
+                            ) : (
+                              <i className="empty" aria-hidden="true"></i>
+                            )}
+                          </span>
+
+                          <strong>
+                            {adminMatchForm.rivalColors.length > 0
+                              ? `${adminMatchForm.rivalColors.length} COLOR${
+                                  adminMatchForm.rivalColors.length === 1
+                                    ? ""
+                                    : "S"
+                                } TRIAT${
+                                  adminMatchForm.rivalColors.length === 1
+                                    ? ""
+                                    : "S"
+                                }`
+                              : "TRIA 1 O 2 COLORS"}
+                          </strong>
+
+                          <span aria-hidden="true">⌄</span>
+                        </summary>
+
+                        <div className="admin-color-palette">
+                          {ADMIN_MATCH_COLOR_OPTIONS.map((colorOption) => {
+                            const selectedIndex =
+                              adminMatchForm.rivalColors.indexOf(
+                                colorOption.value,
+                              );
+
+                            return (
+                              <button
+                                key={colorOption.value}
+                                type="button"
+                                className={
+                                  selectedIndex >= 0
+                                    ? "admin-color-swatch selected"
+                                    : "admin-color-swatch"
+                                }
+                                onClick={() =>
+                                  toggleAdminMatchColor(colorOption.value)
+                                }
+                                title={colorOption.label}
+                                aria-label={`Tria ${colorOption.label}`}
+                                aria-pressed={selectedIndex >= 0}
+                                style={{ "--swatch-color": colorOption.value }}
+                              >
+                                {selectedIndex >= 0 && (
+                                  <span>{selectedIndex + 1}</span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <small>
+                          Amb un color, el rival surt llis. Amb dos, es creen
+                          automàticament quatre franges alternades.
+                        </small>
+                      </details>
+                    </div>
+
+                    <div className="admin-upcoming-field">
+                      <span className="admin-upcoming-field-label">
+                        LOCAL O VISITANT
+                      </span>
+
+                      <div
+                        className="admin-home-away-toggle"
+                        role="group"
+                        aria-label="Posició del Barça al partit"
+                      >
+                        <button
+                          type="button"
+                          className={
+                            adminMatchForm.barcaSide === "home" ? "active" : ""
+                          }
+                          onClick={() =>
+                            updateAdminMatchForm("barcaSide", "home")
+                          }
+                        >
+                          BARÇA LOCAL
+                        </button>
+
+                        <button
+                          type="button"
+                          className={
+                            adminMatchForm.barcaSide === "away" ? "active" : ""
+                          }
+                          onClick={() =>
+                            updateAdminMatchForm("barcaSide", "away")
+                          }
+                        >
+                          BARÇA VISITANT
+                        </button>
+                      </div>
+                    </div>
+
+                    <label className="admin-upcoming-field">
+                      <span>DATA</span>
+                      <input
+                        type="text"
+                        inputMode="text"
+                        value={adminMatchForm.kickoffText}
+                        onChange={(event) =>
+                          updateAdminMatchForm(
+                            "kickoffText",
+                            event.target.value,
+                          )
+                        }
+                        placeholder="31/7/26 i 20:45"
+                        maxLength={24}
+                        required
+                      />
+                    </label>
+
+                    <div className="admin-upcoming-preview-card">
+                      <span>PREVISUALITZACIÓ</span>
+
+                      <div className="admin-upcoming-preview-match">
+                        {adminMatchForm.barcaSide === "home" ? (
+                          <>
+                            <div>
+                              <TeamColorBadge
+                                teamId="barcelona"
+                                colors={teamBadgeVisualsById.barcelona.colors}
+                              />
+                              <strong>Barça</strong>
+                            </div>
+
+                            <b>VS</b>
+
+                            <div>
+                              <TeamColorBadge
+                                teamId={
+                                  slugifyTeamKey(adminMatchForm.rivalName) ||
+                                  "rival"
+                                }
+                                colors={adminMatchForm.rivalColors}
+                              />
+                              <strong>
+                                {adminMatchForm.rivalName.trim() || "Rival"}
+                              </strong>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div>
+                              <TeamColorBadge
+                                teamId={
+                                  slugifyTeamKey(adminMatchForm.rivalName) ||
+                                  "rival"
+                                }
+                                colors={adminMatchForm.rivalColors}
+                              />
+                              <strong>
+                                {adminMatchForm.rivalName.trim() || "Rival"}
+                              </strong>
+                            </div>
+
+                            <b>VS</b>
+
+                            <div>
+                              <TeamColorBadge
+                                teamId="barcelona"
+                                colors={teamBadgeVisualsById.barcelona.colors}
+                              />
+                              <strong>Barça</strong>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      <small>
+                        {adminMatchForm.kickoffText.trim() ||
+                          "31/7/26 i 20:45"}
+                      </small>
+                    </div>
+
+                    <div className="admin-upcoming-form-actions">
+                      <button type="submit" disabled={adminMatchSaving}>
+                        {adminMatchSaving
+                          ? "GUARDANT PARTIT..."
+                          : adminMatchForm.matchId
+                            ? "GUARDA ELS CANVIS"
+                            : "+ CREA EL PARTIT"}
+                      </button>
+
+                      {adminMatchForm.matchId && (
+                        <button
+                          type="button"
+                          className="secondary"
+                          disabled={adminMatchSaving}
+                          onClick={resetAdminMatchForm}
+                        >
+                          CANCEL·LA EDICIÓ
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                </section>
+
+                <section className="admin-catalog-board">
+                  <header>
+                    <div>
+                      <span>CALENDARI DE SUPABASE</span>
+                      <strong>Propers partits reals</strong>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="admin-refresh-catalog"
+                      disabled={adminMatchesLoading}
+                      onClick={() => loadAdminUpcomingMatches()}
+                    >
+                      {adminMatchesLoading ? "CARREGANT..." : "↻ ACTUALITZA"}
+                    </button>
+                  </header>
+
+                  {adminMatchesLoading ? (
+                    <div className="admin-catalog-empty">
+                      Carregant el calendari segur…
+                    </div>
+                  ) : adminUpcomingMatches.length === 0 ? (
+                    <div className="admin-catalog-empty">
+                      Encara no hi ha propers partits retornats pel backend.
+                    </div>
+                  ) : (
+                    <div className="admin-catalog-grid">
+                      {adminUpcomingMatches.map((match) => {
+                        const isPublicCurrent =
+                          match.isCurrent || match.matchId === matchData.id;
+
+                        return (
+                          <article
+                            key={match.matchId}
+                            className="admin-catalog-player"
+                          >
+                            <div className="admin-catalog-player-top">
+                              <div
+                                className="admin-catalog-portrait"
+                                style={{
+                                  background: getTeamBadgeBackground(
+                                    match.rivalTeamKey,
+                                    match.rivalColors,
+                                  ),
+                                }}
+                                aria-hidden="true"
+                              ></div>
+
+                              <div className="admin-catalog-player-copy">
+                                <span>
+                                  {match.barcaSide === "home"
+                                    ? "BARÇA LOCAL"
+                                    : "BARÇA VISITANT"}
+                                </span>
+                                <strong>{match.rivalDisplayName}</strong>
+                                <small>
+                                  {formatCurrentMatchKickoffLabel(
+                                    match.kickoffAt,
+                                  )}
+                                </small>
+                              </div>
+
+                              <span
+                                className={`admin-catalog-status ${
+                                  isPublicCurrent ? "active" : "scheduled"
+                                }`}
+                              >
+                                {isPublicCurrent
+                                  ? "PORTADA ACTUAL"
+                                  : match.status}
+                              </span>
+                            </div>
+
+                            <div className="admin-catalog-flags">
+                              <span className="ok">
+                                {match.competitionName || "SENSE COMPETICIÓ"}
+                              </span>
+                              <span className="ok">
+                                {match.venueName || "SEU PENDENT"}
+                              </span>
+                              <span
+                                className={
+                                  match.predictionsAreOpen ? "ok" : "pending"
+                                }
+                              >
+                                {match.predictionsAreOpen
+                                  ? "PORRA OBERTA"
+                                  : "PORRA NO OBERTA"}
+                              </span>
+                            </div>
+
+                            <div className="admin-catalog-actions primary">
+                              <button
+                                type="button"
+                                className="upload"
+                                disabled={adminMatchSaving}
+                                onClick={() => editAdminMatch(match)}
+                              >
+                                EDITA PARTIT
+                              </button>
+                            </div>
                           </article>
                         );
                       })}
