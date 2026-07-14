@@ -8541,12 +8541,7 @@ button.notes-star:hover {
 
 .admin-create-player-form {
   display: grid;
-  grid-template-columns:
-    minmax(180px, 1.5fr)
-    minmax(140px, 1fr)
-    minmax(90px, 0.45fr)
-    minmax(150px, 1fr)
-    auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
   gap: 12px;
   padding: 18px 20px 20px;
@@ -8931,44 +8926,131 @@ button.notes-star:hover {
   opacity: 0.48;
 }
 
-.admin-catalog-toggles {
+.admin-jornada-controls {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px;
+  gap: 9px;
 }
 
-.admin-catalog-toggles label {
+.admin-jornada-visibility {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: 37px;
-  padding: 0 9px;
+  gap: 11px;
+  min-height: 58px;
+  padding: 10px 12px;
   border: 1px solid rgba(255, 255, 255, 0.075);
-  border-radius: 10px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.025);
   cursor: pointer;
 }
 
-.admin-catalog-toggles input {
-  width: 16px;
-  height: 16px;
+.admin-jornada-visibility:has(input:checked) {
+  border-color: rgba(244, 208, 75, 0.3);
+  background: rgba(244, 208, 75, 0.065);
+}
+
+.admin-jornada-visibility input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
   accent-color: #f2cd43;
 }
 
-.admin-catalog-toggles span {
-  color: #9ca7bf;
-  font-size: 7px;
-  font-weight: 950;
-  letter-spacing: 0.06em;
+.admin-jornada-visibility > span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
 }
 
-.admin-catalog-toggles label:has(input:checked) {
-  border-color: rgba(244, 208, 75, 0.23);
-  background: rgba(244, 208, 75, 0.055);
-}
-
-.admin-catalog-toggles label:has(input:checked) span {
+.admin-jornada-visibility strong {
   color: #f4d65c;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.075em;
+}
+
+.admin-jornada-visibility small {
+  color: #7f8ba7;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.admin-protagonist-group-control {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.admin-protagonist-group-control > label {
+  color: #7e8aa5;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+}
+
+.admin-protagonist-group-control > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-protagonist-group-control select {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(244, 208, 75, 0.24);
+  border-radius: 10px;
+  outline: none;
+  background: #10172a;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-protagonist-group-control select:focus {
+  border-color: rgba(244, 208, 75, 0.68);
+  box-shadow: 0 0 0 3px rgba(244, 208, 75, 0.09);
+}
+
+.admin-protagonist-group-control select:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
+.admin-protagonist-group-points {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  gap: 2px 5px;
+  min-width: 106px;
+  padding: 6px 8px;
+  border: 1px solid rgba(244, 208, 75, 0.18);
+  border-radius: 10px;
+  background: rgba(244, 208, 75, 0.05);
+}
+
+.admin-protagonist-group-points strong {
+  color: #f6d85f;
+  font-size: 12px;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-protagonist-group-points strong:nth-of-type(2) {
+  color: #ff8fa4;
+}
+
+.admin-protagonist-group-points small {
+  color: #7f8ba7;
+  font-size: 7px;
+  font-weight: 800;
 }
 
 .admin-archive-player {
@@ -9053,7 +9135,7 @@ button.notes-star:hover {
 
   .admin-review-actions,
   .admin-catalog-actions.primary,
-  .admin-catalog-toggles {
+  .admin-jornada-controls {
     grid-template-columns: 1fr;
   }
 
@@ -9069,5 +9151,48 @@ button.notes-star:hover {
   .admin-catalog-status {
     grid-column: 1 / -1;
     justify-self: flex-start;
+  }
+}
+
+
+/* =========================================================
+   MEDALLES ESPECIALS · KAMIKAZE I CAMPIÓ 26/27
+   ========================================================= */
+
+.achievement-custom-icon {
+  display: block;
+  width: 38px;
+  height: 38px;
+  overflow: visible;
+}
+
+.kamikaze-plane-icon {
+  filter: drop-shadow(0 5px 8px rgba(112, 8, 28, 0.42));
+}
+
+.vesalaporra-champion-icon {
+  filter: drop-shadow(0 5px 10px rgba(244, 208, 75, 0.28));
+}
+
+.ranking-achievement-icon .achievement-custom-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.ranking-achievement-icons.current-user-icons
+  .ranking-achievement-icon
+  .achievement-custom-icon {
+  width: 17px;
+  height: 17px;
+}
+
+@media (max-width: 760px) {
+  .admin-protagonist-group-control > div {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-protagonist-group-points {
+    width: 100%;
+    grid-template-columns: auto 1fr auto 1fr;
   }
 }

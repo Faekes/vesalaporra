@@ -149,13 +149,91 @@ const playersById = Object.fromEntries(
   players.map((player) => [player.id, player]),
 );
 
+const PROTAGONIST_GROUP_OPTIONS = [
+  {
+    key: "special",
+    label: "YAMAL SPECIAL",
+    hitPoints: 5,
+    missPoints: -15,
+    sortOrder: 0,
+  },
+  {
+    key: "a",
+    label: "GRUP A",
+    hitPoints: 10,
+    missPoints: -5,
+    sortOrder: 100,
+  },
+  {
+    key: "b",
+    label: "GRUP B",
+    hitPoints: 20,
+    missPoints: -10,
+    sortOrder: 200,
+  },
+  {
+    key: "c",
+    label: "GRUP C",
+    hitPoints: 30,
+    missPoints: -10,
+    sortOrder: 300,
+  },
+  {
+    key: "d",
+    label: "GRUP D",
+    hitPoints: 40,
+    missPoints: -5,
+    sortOrder: 400,
+  },
+  {
+    key: "e",
+    label: "GRUP E",
+    hitPoints: 50,
+    missPoints: -5,
+    sortOrder: 500,
+  },
+];
+
+const PROTAGONIST_GROUP_BY_KEY = Object.fromEntries(
+  PROTAGONIST_GROUP_OPTIONS.map((group) => [group.key, group]),
+);
+
+const PROTAGONIST_GROUP_NOTE_PATTERN =
+  /\[VLP_PROTAGONIST_GROUP:(special|a|b|c|d|e)\]/i;
+
+const normalizeProtagonistGroupKey = (value) => {
+  const normalizedValue = String(value || "")
+    .trim()
+    .toLowerCase();
+
+  return PROTAGONIST_GROUP_BY_KEY[normalizedValue]
+    ? normalizedValue
+    : "e";
+};
+
+const getProtagonistGroupKeyFromAdminNote = (adminNote) => {
+  const match = String(adminNote || "").match(PROTAGONIST_GROUP_NOTE_PATTERN);
+
+  return normalizeProtagonistGroupKey(match?.[1] || "e");
+};
+
+const setProtagonistGroupInAdminNote = (adminNote, groupKey) => {
+  const normalizedGroupKey = normalizeProtagonistGroupKey(groupKey);
+  const cleanNote = String(adminNote || "")
+    .replace(PROTAGONIST_GROUP_NOTE_PATTERN, "")
+    .trim();
+  const groupToken = `[VLP_PROTAGONIST_GROUP:${normalizedGroupKey}]`;
+
+  return cleanNote ? `${cleanNote} ${groupToken}` : groupToken;
+};
+
 const protagonistScoringByPlayerId = {
   "lamine-yamal": {
     groupLabel: "YAMAL SPECIAL",
     groupKey: "special",
     goalContributions: 41,
     hitPoints: 5,
-    missPoints: -5,
+    missPoints: -15,
     order: 1,
   },
   "fermin-lopez": {
@@ -869,23 +947,24 @@ const normalizeOfficialMatchState = (rawState) => {
     rawState?.stats_by_player_id ??
     fallbackState.statsByPlayerId;
 
-  const statsByPlayerId = Object.fromEntries(
-    players.map((player) => {
-      const playerStats = rawStats?.[player.id] || {};
-
-      return [
-        player.id,
-        {
-          role:
-            playerStats.role === "T" || playerStats.role === "S"
-              ? playerStats.role
-              : null,
-          goals: Math.max(0, Number(playerStats.goals || 0)),
-          assists: Math.max(0, Number(playerStats.assists || 0)),
-        },
-      ];
-    }),
+  const normalizedRawStats = Object.fromEntries(
+    Object.entries(rawStats || {}).map(([playerId, playerStats]) => [
+      playerId,
+      {
+        role:
+          playerStats?.role === "T" || playerStats?.role === "S"
+            ? playerStats.role
+            : null,
+        goals: Math.max(0, Number(playerStats?.goals || 0)),
+        assists: Math.max(0, Number(playerStats?.assists || 0)),
+      },
+    ]),
   );
+
+  const statsByPlayerId = {
+    ...fallbackState.statsByPlayerId,
+    ...normalizedRawStats,
+  };
 
   return {
     id: NOTES_MATCH_DATA.id,
@@ -1202,6 +1281,88 @@ function OfficialMatchCard({
   );
 }
 
+function KamikazePlaneIcon({ className = "" }) {
+  return (
+    <svg
+      className={`achievement-custom-icon kamikaze-plane-icon ${className}`.trim()}
+      viewBox="0 0 64 64"
+      role="img"
+      aria-label="Avioneta antiga vermella amb el morro cap a terra"
+    >
+      <g transform="rotate(90 32 32)">
+        <path
+          d="M10 31.5 24 27l8-15 5 1-3 15 15-4.5c3-.9 5.5.7 5.5 3.5S52 31.4 49 30.5L34 27l3 15-5 1-8-15-14-4.5Z"
+          fill="#d9203f"
+          stroke="#6f0d21"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M8 27.5v8M5 31.5h6"
+          stroke="#f37a88"
+          strokeWidth="2.6"
+          strokeLinecap="round"
+        />
+        <circle cx="16" cy="31.5" r="3.2" fill="#7d1024" />
+        <path
+          d="M24 27.3h10v8.4H24z"
+          fill="#b51631"
+          stroke="#6f0d21"
+          strokeWidth="1.4"
+        />
+      </g>
+    </svg>
+  );
+}
+
+function VesalaporraChampionIcon({ className = "" }) {
+  return (
+    <svg
+      className={`achievement-custom-icon vesalaporra-champion-icon ${className}`.trim()}
+      viewBox="0 0 64 64"
+      role="img"
+      aria-label="V de Vesalaporra"
+    >
+      <defs>
+        <linearGradient id="vlpChampionGradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#2444a8" />
+          <stop offset="48%" stopColor="#2444a8" />
+          <stop offset="52%" stopColor="#a41645" />
+          <stop offset="100%" stopColor="#a41645" />
+        </linearGradient>
+      </defs>
+      <circle cx="32" cy="32" r="27" fill="url(#vlpChampionGradient)" />
+      <circle
+        cx="32"
+        cy="32"
+        r="27"
+        fill="none"
+        stroke="#f4d04b"
+        strokeWidth="4"
+      />
+      <path
+        d="M18 18h9l5 24 5-24h9L37 49H27Z"
+        fill="#ffe56f"
+        stroke="#7f1838"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function AchievementIconGraphic({ achievement }) {
+  if (achievement?.icon === "kamikaze-plane") {
+    return <KamikazePlaneIcon />;
+  }
+
+  if (achievement?.icon === "vesalaporra-v") {
+    return <VesalaporraChampionIcon />;
+  }
+
+  return achievement?.icon || "🏅";
+}
+
 function RankingAchievementIcons({ achievements, className = "" }) {
   const unlockedAchievements = (achievements || []).filter(
     (achievement) => achievement.unlocked,
@@ -1223,7 +1384,7 @@ function RankingAchievementIcons({ achievements, className = "" }) {
           title={achievement.title}
           aria-label={achievement.title}
         >
-          {achievement.icon}
+          <AchievementIconGraphic achievement={achievement} />
         </span>
       ))}
     </span>
@@ -1485,7 +1646,7 @@ const profileDemoMatches = [
     xiBase: 11,
     protagonist: "Lamine",
     protagonistHitPoints: 5,
-    protagonistMissPoints: -5,
+    protagonistMissPoints: -15,
   },
   {
     id: "j4",
@@ -1834,6 +1995,26 @@ const buildProfileDemoData = (
 
   const longestStreak = 2 + (seed % 5);
 
+  const kamikazeUnlocked = history.some(
+    (match) =>
+      (match.protagonistHit && match.protagonistPoints === 50) ||
+      (match.isExact && match.actualHome === 0 && match.actualAway === 0) ||
+      (match.isExact && match.actualHome + match.actualAway > 5),
+  );
+
+  const permanentAchievementIds = new Set([
+    ...(Array.isArray(user?.permanentAchievementIds)
+      ? user.permanentAchievementIds
+      : []),
+    ...(Array.isArray(user?.permanent_achievement_ids)
+      ? user.permanent_achievement_ids
+      : []),
+  ]);
+
+  const seasonChampion2627Unlocked = permanentAchievementIds.has(
+    "season-champion-2026-27",
+  );
+
   const achievements = [
     {
       id: "flick-reader",
@@ -1855,17 +2036,17 @@ const buildProfileDemoData = (
       id: "yoyalodije",
       icon: "🎯",
       title: "Yoyalodije",
-      description: "Encerta el protagonista —marca o assisteix— 3 cops.",
-      unlocked: protagonistHits >= 3,
-      progress: `${Math.min(protagonistHits, 3)}/3`,
+      description: "Encerta el protagonista —marca o assisteix— 4 cops.",
+      unlocked: protagonistHits >= 4,
+      progress: `${Math.min(protagonistHits, 4)}/4`,
     },
     {
       id: "winner",
       icon: "👑",
       title: "Winner",
-      description: "Guanya 3 cops una jornada.",
-      unlocked: jornadaWins >= 3,
-      progress: `${Math.min(jornadaWins, 3)}/3`,
+      description: "Guanya 2 cops una jornada.",
+      unlocked: jornadaWins >= 2,
+      progress: `${Math.min(jornadaWins, 2)}/2`,
     },
     {
       id: "candidat",
@@ -1884,6 +2065,24 @@ const buildProfileDemoData = (
       unlocked: allXiMisses >= 1,
       progress: `${Math.min(allXiMisses, 1)}/1`,
     },
+    {
+      id: "kamikaze",
+      icon: "kamikaze-plane",
+      title: "Kamikaze",
+      description:
+        "Encerta un protagonista de 50 punts, un 0–0 o un partit de més de 5 gols.",
+      unlocked: kamikazeUnlocked,
+      progress: kamikazeUnlocked ? "1/1" : "0/1",
+    },
+    {
+      id: "season-champion-2026-27",
+      icon: "vesalaporra-v",
+      title: "Campió de la temporada 26/27",
+      description:
+        "Medalla permanent vinculada al compte que guanya la temporada 2026/27.",
+      unlocked: seasonChampion2627Unlocked,
+      progress: seasonChampion2627Unlocked ? "1/1" : "0/1",
+    },
   ];
 
   return {
@@ -1900,6 +2099,8 @@ const buildProfileDemoData = (
     jornadaWins,
     topTenConsecutive,
     allXiMisses,
+    kamikazeUnlocked,
+    seasonChampion2627Unlocked,
     achievements,
     unlockedAchievements: achievements.filter(
       (achievement) => achievement.unlocked,
@@ -1921,9 +2122,6 @@ const PLAYER_SOURCE_ALLOWED_TYPES = new Set([
 
 const EMPTY_ADMIN_PLAYER_FORM = {
   displayName: "",
-  shortName: "",
-  shirtNumber: "",
-  playerKey: "",
 };
 
 const createAdminAuditId = (action) => {
@@ -2029,6 +2227,11 @@ const normalizeAdminPlayer = (row) => ({
   eligibleForProtagonist: Boolean(row.eligible_for_protagonist),
   eligibleForRatings: Boolean(row.eligible_for_ratings),
   adminNote: row.admin_note || "",
+  protagonistGroupKey: normalizeProtagonistGroupKey(
+    row.protagonist_group_key ||
+      row.protagonist_group ||
+      getProtagonistGroupKeyFromAdminNote(row.admin_note),
+  ),
 });
 
 const normalizePublicMatchPlayer = (row) => ({
@@ -2046,6 +2249,11 @@ const normalizePublicMatchPlayer = (row) => ({
   eligibleForLineup: Boolean(row.eligible_for_lineup),
   eligibleForProtagonist: Boolean(row.eligible_for_protagonist),
   eligibleForRatings: Boolean(row.eligible_for_ratings),
+  protagonistGroupKey: normalizeProtagonistGroupKey(
+    row.protagonist_group_key ||
+      row.protagonist_group ||
+      getProtagonistGroupKeyFromAdminNote(row.admin_note),
+  ),
   rosterOrder: Number(row.roster_order || 9999),
   isDynamicPlayer: true,
 });
@@ -2055,13 +2263,18 @@ const getDefaultDynamicProtagonistScoring = (player) => {
     return null;
   }
 
+  const groupKey = normalizeProtagonistGroupKey(
+    player.protagonistGroupKey || "e",
+  );
+  const group = PROTAGONIST_GROUP_BY_KEY[groupKey];
+
   return {
-    groupLabel: "GRUP E",
-    groupKey: "e",
+    groupLabel: group.label,
+    groupKey,
     goalContributions: 0,
-    hitPoints: 50,
-    missPoints: -5,
-    order: 1000 + Number(player.rosterOrder || 0),
+    hitPoints: group.hitPoints,
+    missPoints: group.missPoints,
+    order: group.sortOrder + Number(player.rosterOrder || 0),
   };
 };
 
@@ -2209,11 +2422,28 @@ function App() {
       authUser && VESALAPORRA_ADMIN_USER_IDS.includes(String(authUser.id)),
     );
 
+  const publicMatchPlayersWithAdminConfig = publicMatchPlayers.map(
+    (publicPlayer) => {
+      const adminPlayer = adminPlayerCatalog.find(
+        (catalogPlayer) => catalogPlayer.playerId === publicPlayer.id,
+      );
+
+      return {
+        ...publicPlayer,
+        protagonistGroupKey: normalizeProtagonistGroupKey(
+          publicPlayer.protagonistGroupKey ||
+            adminPlayer?.protagonistGroupKey ||
+            "e",
+        ),
+      };
+    },
+  );
+
   const mergedPublicMatchPlayers = [
-    ...publicMatchPlayers,
+    ...publicMatchPlayersWithAdminConfig,
     ...players.filter(
       (player) =>
-        !publicMatchPlayers.some(
+        !publicMatchPlayersWithAdminConfig.some(
           (dynamicPlayer) =>
             dynamicPlayer.name.trim().toLocaleLowerCase("ca") ===
             player.name.trim().toLocaleLowerCase("ca"),
@@ -2222,8 +2452,8 @@ function App() {
   ];
 
   const gamePlayers =
-    publicMatchPlayers.length >= 11
-      ? [...publicMatchPlayers].sort(
+    publicMatchPlayersWithAdminConfig.length >= 11
+      ? [...publicMatchPlayersWithAdminConfig].sort(
           (firstPlayer, secondPlayer) =>
             firstPlayer.rosterOrder - secondPlayer.rosterOrder,
         )
@@ -2304,7 +2534,9 @@ function App() {
   const eligibleProtagonistPlayers = gamePlayers
     .filter(
       (player) =>
-        !player.isGoalkeeper && Boolean(getPlayerProtagonistScoring(player)),
+        !player.isGoalkeeper &&
+        player.eligibleForProtagonist !== false &&
+        Boolean(getPlayerProtagonistScoring(player)),
     )
     .sort(
       (firstPlayer, secondPlayer) =>
@@ -2349,6 +2581,11 @@ function App() {
                 ? "GOOGLE"
                 : "VESALAPORRA",
             joinedYear: profileJoinedYear,
+            permanentAchievementIds: Array.isArray(
+              authMetadata.permanent_achievement_ids,
+            )
+              ? authMetadata.permanent_achievement_ids
+              : [],
           }
         : baseUser;
 
@@ -2446,11 +2683,14 @@ function App() {
     authUser && selectedProfileUser?.isCurrentUser,
   );
 
-  const notesMatchRows = players
+  const notesMatchRows = gamePlayers
     .filter((player) => {
       const stats = officialMatchStatsByPlayerId[player.id];
 
-      return stats?.role === "T" || stats?.role === "S";
+      return (
+        player.eligibleForRatings !== false &&
+        (stats?.role === "T" || stats?.role === "S")
+      );
     })
     .map((player) => {
       const ownStars = notesRatingsByPlayerId[player.id] || 0;
@@ -2469,7 +2709,25 @@ function App() {
       };
     });
 
-  const notesSeasonRows = players
+  const knownDynamicSeasonPlayers = adminPlayerCatalog
+    .filter((player) => player.portraitUrl)
+    .map((player) => ({
+      id: player.playerId,
+      name: player.displayName,
+      shortName: player.shortName || player.displayName,
+      image: player.portraitUrl,
+      isDynamicPlayer: true,
+    }));
+
+  const notesSeasonPlayers = [
+    ...players,
+    ...knownDynamicSeasonPlayers.filter(
+      (dynamicPlayer) =>
+        !players.some((staticPlayer) => staticPlayer.id === dynamicPlayer.id),
+    ),
+  ];
+
+  const notesSeasonRows = notesSeasonPlayers
     .map((player) => {
       const ratingSummary =
         SEASON_COMMUNITY_RATING_BY_PLAYER_ID[player.id] || null;
@@ -2852,9 +3110,6 @@ function App() {
     }
 
     const displayName = adminPlayerForm.displayName.trim();
-    const shortName = adminPlayerForm.shortName.trim();
-    const playerKey = adminPlayerForm.playerKey.trim();
-    const shirtNumber = adminPlayerForm.shirtNumber.trim();
 
     if (displayName.length < 2) {
       setAdminPlayerFeedback({
@@ -2873,9 +3128,9 @@ function App() {
         {
           p_audit_id: createAdminAuditId("CREATE_PLAYER"),
           p_display_name: displayName,
-          p_short_name: shortName || null,
-          p_shirt_number: shirtNumber === "" ? null : Number(shirtNumber),
-          p_player_key: playerKey || null,
+          p_short_name: null,
+          p_shirt_number: null,
+          p_player_key: null,
         },
       );
 
@@ -3184,19 +3439,37 @@ function App() {
         ),
       ) + 1;
 
+    const visibilityWasChanged = Object.prototype.hasOwnProperty.call(
+      patch,
+      "isPublicVisible",
+    );
+    const nextVisibility = visibilityWasChanged
+      ? Boolean(patch.isPublicVisible)
+      : Boolean(player.isPublicVisible);
+    const nextProtagonistGroupKey = normalizeProtagonistGroupKey(
+      patch.protagonistGroupKey || player.protagonistGroupKey || "e",
+    );
+    const baseAdminNote = patch.adminNote ?? player.adminNote ?? "";
+
     const nextValues = {
       availabilityStatus:
         patch.availabilityStatus ?? player.availabilityStatus ?? "available",
-      isPublicVisible:
-        patch.isPublicVisible ?? Boolean(player.isPublicVisible),
-      eligibleForLineup:
-        patch.eligibleForLineup ?? Boolean(player.eligibleForLineup),
-      eligibleForProtagonist:
-        patch.eligibleForProtagonist ??
-        Boolean(player.eligibleForProtagonist),
-      eligibleForRatings:
-        patch.eligibleForRatings ?? Boolean(player.eligibleForRatings),
-      adminNote: patch.adminNote ?? player.adminNote ?? "",
+      isPublicVisible: nextVisibility,
+      eligibleForLineup: visibilityWasChanged
+        ? nextVisibility
+        : patch.eligibleForLineup ?? Boolean(player.eligibleForLineup),
+      eligibleForProtagonist: visibilityWasChanged
+        ? nextVisibility
+        : patch.eligibleForProtagonist ??
+          Boolean(player.eligibleForProtagonist),
+      eligibleForRatings: visibilityWasChanged
+        ? nextVisibility
+        : patch.eligibleForRatings ?? Boolean(player.eligibleForRatings),
+      protagonistGroupKey: nextProtagonistGroupKey,
+      adminNote: setProtagonistGroupInAdminNote(
+        baseAdminNote,
+        nextProtagonistGroupKey,
+      ),
     };
 
     if (nextValues.isPublicVisible && !player.portraitPath) {
@@ -5218,7 +5491,7 @@ function App() {
 
                     return (
                       <option key={player.id} value={player.id}>
-                        {`${player.name} · +${scoring.hitPoints} si encertes · ${scoring.missPoints} si falles`}
+                        {`${player.name} · ${scoring.groupLabel} · +${scoring.hitPoints} si encertes · ${scoring.missPoints} si falles`}
                       </option>
                     );
                   })}
@@ -5866,10 +6139,6 @@ function App() {
                       <span>NOU FITXATGE</span>
                       <strong>Afegeix un jugador al catàleg</strong>
                     </div>
-                    <small>
-                      Primer crea’l. Després puja la xapa i decideix si apareix
-                      al partit.
-                    </small>
                   </header>
 
                   <form
@@ -5882,10 +6151,9 @@ function App() {
                         type="text"
                         value={adminPlayerForm.displayName}
                         onChange={(event) =>
-                          setAdminPlayerForm((currentForm) => ({
-                            ...currentForm,
+                          setAdminPlayerForm({
                             displayName: event.target.value,
-                          }))
+                          })
                         }
                         placeholder="Hèctor Fort"
                         maxLength={80}
@@ -5893,59 +6161,7 @@ function App() {
                       />
                     </label>
 
-                    <label>
-                      <span>NOM CURT</span>
-                      <input
-                        type="text"
-                        value={adminPlayerForm.shortName}
-                        onChange={(event) =>
-                          setAdminPlayerForm((currentForm) => ({
-                            ...currentForm,
-                            shortName: event.target.value,
-                          }))
-                        }
-                        placeholder="Hèctor"
-                        maxLength={40}
-                      />
-                    </label>
-
-                    <label>
-                      <span>DORSAL</span>
-                      <input
-                        type="number"
-                        min="1"
-                        max="99"
-                        value={adminPlayerForm.shirtNumber}
-                        onChange={(event) =>
-                          setAdminPlayerForm((currentForm) => ({
-                            ...currentForm,
-                            shirtNumber: event.target.value,
-                          }))
-                        }
-                        placeholder="32"
-                      />
-                    </label>
-
-                    <label>
-                      <span>CLAU OPCIONAL</span>
-                      <input
-                        type="text"
-                        value={adminPlayerForm.playerKey}
-                        onChange={(event) =>
-                          setAdminPlayerForm((currentForm) => ({
-                            ...currentForm,
-                            playerKey: event.target.value,
-                          }))
-                        }
-                        placeholder="hector-fort"
-                        maxLength={80}
-                      />
-                    </label>
-
-                    <button
-                      type="submit"
-                      disabled={adminPlayerCreating}
-                    >
+                    <button type="submit" disabled={adminPlayerCreating}>
                       {adminPlayerCreating
                         ? "CREANT JUGADOR..."
                         : "+ AFEGEIX JUGADOR"}
@@ -6166,9 +6382,8 @@ function App() {
                                   onClick={() =>
                                     saveAdminMatchPlayer(player, {
                                       isPublicVisible: false,
-                                      eligibleForLineup: true,
-                                      eligibleForProtagonist: true,
-                                      eligibleForRatings: true,
+                                      protagonistGroupKey:
+                                        player.protagonistGroupKey || "e",
                                     })
                                   }
                                 >
@@ -6178,8 +6393,8 @@ function App() {
                             </div>
 
                             {player.assignedToMatch && (
-                              <div className="admin-catalog-toggles">
-                                <label>
+                              <div className="admin-jornada-controls">
+                                <label className="admin-jornada-visibility">
                                   <input
                                     type="checkbox"
                                     checked={player.isPublicVisible}
@@ -6190,53 +6405,64 @@ function App() {
                                       })
                                     }
                                   />
-                                  <span>VISIBLE A LA PORRA</span>
+
+                                  <span>
+                                    <strong>VISIBLE A LA JORNADA</strong>
+                                    <small>
+                                      Activa XI, protagonista i Les Notes del
+                                      partit. En desactivar-lo desapareix de
+                                      totes tres opcions d’aquesta jornada.
+                                    </small>
+                                  </span>
                                 </label>
 
-                                <label>
-                                  <input
-                                    type="checkbox"
-                                    checked={player.eligibleForLineup}
-                                    disabled={isBusy}
-                                    onChange={(event) =>
-                                      saveAdminMatchPlayer(player, {
-                                        eligibleForLineup:
-                                          event.target.checked,
-                                      })
-                                    }
-                                  />
-                                  <span>XI TITULAR</span>
-                                </label>
+                                <div className="admin-protagonist-group-control">
+                                  <label
+                                    htmlFor={`protagonist-group-${player.playerId}`}
+                                  >
+                                    GRUP DE PROTAGONISTA
+                                  </label>
 
-                                <label>
-                                  <input
-                                    type="checkbox"
-                                    checked={player.eligibleForProtagonist}
-                                    disabled={isBusy}
-                                    onChange={(event) =>
-                                      saveAdminMatchPlayer(player, {
-                                        eligibleForProtagonist:
-                                          event.target.checked,
-                                      })
-                                    }
-                                  />
-                                  <span>PROTAGONISTA</span>
-                                </label>
+                                  <div>
+                                    <select
+                                      id={`protagonist-group-${player.playerId}`}
+                                      value={normalizeProtagonistGroupKey(
+                                        player.protagonistGroupKey,
+                                      )}
+                                      disabled={isBusy}
+                                      onChange={(event) =>
+                                        saveAdminMatchPlayer(player, {
+                                          protagonistGroupKey:
+                                            event.target.value,
+                                        })
+                                      }
+                                    >
+                                      {PROTAGONIST_GROUP_OPTIONS.map((group) => (
+                                        <option key={group.key} value={group.key}>
+                                          {group.label}
+                                        </option>
+                                      ))}
+                                    </select>
 
-                                <label>
-                                  <input
-                                    type="checkbox"
-                                    checked={player.eligibleForRatings}
-                                    disabled={isBusy}
-                                    onChange={(event) =>
-                                      saveAdminMatchPlayer(player, {
-                                        eligibleForRatings:
-                                          event.target.checked,
-                                      })
-                                    }
-                                  />
-                                  <span>LES NOTES</span>
-                                </label>
+                                    {(() => {
+                                      const group =
+                                        PROTAGONIST_GROUP_BY_KEY[
+                                          normalizeProtagonistGroupKey(
+                                            player.protagonistGroupKey,
+                                          )
+                                        ];
+
+                                      return (
+                                        <span className="admin-protagonist-group-points">
+                                          <strong>+{group.hitPoints}</strong>
+                                          <small>si encerta</small>
+                                          <strong>{group.missPoints}</strong>
+                                          <small>si falla</small>
+                                        </span>
+                                      );
+                                    })()}
+                                  </div>
+                                </div>
                               </div>
                             )}
 
@@ -7067,7 +7293,7 @@ function App() {
                         }
                       >
                         <span className="profile-achievement-icon">
-                          {achievement.icon}
+                          <AchievementIconGraphic achievement={achievement} />
                         </span>
 
                         <div>
