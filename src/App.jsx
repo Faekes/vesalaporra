@@ -558,31 +558,154 @@ const getMatchTeamBadgeColors = (row, side) =>
       row?.[`${side}_secondary_color`],
     ],
     [
+      row?.[`${side}_color_primary`],
+      row?.[`${side}_color_secondary`],
+    ],
+    [
       row?.[`${side}_team_primary_color`],
       row?.[`${side}_team_secondary_color`],
     ],
   );
 
-const normalizeCurrentMatch = (row) => ({
-  id: row?.match_id ? String(row.match_id) : null,
-  homeTeamId: row?.home_team_key || "barcelona",
-  homeName: row?.home_display_name || "Barça",
-  homeLocation: row?.venue_name || row?.competition_name || "",
-  homeBadgeColors: getMatchTeamBadgeColors(row, "home"),
-  awayTeamId: row?.away_team_key || "",
-  awayName: row?.away_display_name || "",
-  awayCountry: row?.opponent_country || "",
-  awayBadgeColors: getMatchTeamBadgeColors(row, "away"),
-  kickoffLabel: formatCurrentMatchKickoffLabel(
-    row?.scheduled_kickoff_at,
-  ),
-  kickoffAt: row?.scheduled_kickoff_at || null,
-  predictionsCloseAt:
-    row?.predictions_close_at ||
-    row?.scheduled_kickoff_at ||
-    null,
-  predictionsAreOpen: Boolean(row?.predictions_are_open),
-});
+const readOptionalBoolean = (...values) => {
+  for (const value of values) {
+    if (typeof value === "boolean") {
+      return value;
+    }
+
+    if (value === 1 || value === "1") {
+      return true;
+    }
+
+    if (value === 0 || value === "0") {
+      return false;
+    }
+
+    if (typeof value === "string") {
+      const normalizedValue = value.trim().toLowerCase();
+
+      if (["true", "t", "yes", "y", "home", "local"].includes(normalizedValue)) {
+        return true;
+      }
+
+      if (["false", "f", "no", "n", "away", "visitant"].includes(normalizedValue)) {
+        return false;
+      }
+    }
+  }
+
+  return null;
+};
+
+const normalizeCurrentMatch = (row) => {
+  const explicitHomeTeamId = row?.home_team_key || "";
+  const explicitHomeName = row?.home_display_name || "";
+  const explicitAwayTeamId = row?.away_team_key || "";
+  const explicitAwayName = row?.away_display_name || "";
+
+  const barcelonaFirst = readOptionalBoolean(
+    row?.barcelona_first,
+    row?.barcelonaFirst,
+    row?.barca_is_home,
+    row?.barcaIsHome,
+  );
+
+  const opponentTeamId =
+    row?.opponent_team_key ||
+    row?.rival_team_key ||
+    (barcelonaFirst === true
+      ? explicitAwayTeamId
+      : barcelonaFirst === false
+        ? explicitHomeTeamId
+        : "");
+
+  const opponentName =
+    row?.opponent_display_name ||
+    row?.rival_display_name ||
+    (barcelonaFirst === true
+      ? explicitAwayName
+      : barcelonaFirst === false
+        ? explicitHomeName
+        : "");
+
+  const opponentColors = normalizeTeamBadgeColors(
+    getMatchTeamBadgeColors(row, "opponent"),
+    getMatchTeamBadgeColors(row, "rival"),
+    barcelonaFirst === true
+      ? getMatchTeamBadgeColors(row, "away")
+      : barcelonaFirst === false
+        ? getMatchTeamBadgeColors(row, "home")
+        : null,
+  );
+
+  const barcelonaColors = normalizeTeamBadgeColors(
+    getMatchTeamBadgeColors(row, "barcelona"),
+    teamBadgeVisualsById.barcelona.colors,
+  );
+
+  const useCanonicalSideOrder = typeof barcelonaFirst === "boolean";
+
+  const homeTeamId = useCanonicalSideOrder
+    ? barcelonaFirst
+      ? "barcelona"
+      : opponentTeamId
+    : explicitHomeTeamId || "barcelona";
+
+  const homeName = useCanonicalSideOrder
+    ? barcelonaFirst
+      ? "Barça"
+      : opponentName
+    : explicitHomeName || "Barça";
+
+  const awayTeamId = useCanonicalSideOrder
+    ? barcelonaFirst
+      ? opponentTeamId
+      : "barcelona"
+    : explicitAwayTeamId;
+
+  const awayName = useCanonicalSideOrder
+    ? barcelonaFirst
+      ? opponentName
+      : "Barça"
+    : explicitAwayName;
+
+  const homeBadgeColors = useCanonicalSideOrder
+    ? barcelonaFirst
+      ? barcelonaColors
+      : opponentColors
+    : getMatchTeamBadgeColors(row, "home");
+
+  const awayBadgeColors = useCanonicalSideOrder
+    ? barcelonaFirst
+      ? opponentColors
+      : barcelonaColors
+    : getMatchTeamBadgeColors(row, "away");
+
+  return {
+    id: row?.match_id ? String(row.match_id) : null,
+    homeTeamId,
+    homeName,
+    homeLocation: row?.venue_name || row?.competition_name || "",
+    homeBadgeColors,
+    awayTeamId,
+    awayName,
+    awayCountry: row?.opponent_country || row?.rival_country || "",
+    awayBadgeColors,
+    kickoffLabel: formatCurrentMatchKickoffLabel(
+      row?.scheduled_kickoff_at,
+    ),
+    kickoffAt: row?.scheduled_kickoff_at || null,
+    predictionsCloseAt:
+      row?.predictions_close_at ||
+      row?.scheduled_kickoff_at ||
+      null,
+    predictionsAreOpen: Boolean(row?.predictions_are_open),
+    barcelonaFirst:
+      typeof barcelonaFirst === "boolean"
+        ? barcelonaFirst
+        : homeTeamId === "barcelona",
+  };
+};
 
 const getCountdown = (predictionsCloseAt) => {
   if (!predictionsCloseAt) {
@@ -2443,18 +2566,63 @@ const isBarcelonaTeam = (teamKey, displayName) => {
 };
 
 const normalizeAdminMatch = (row) => {
-  const homeTeamKey = row?.home_team_key || row?.homeTeamKey || "";
-  const awayTeamKey = row?.away_team_key || row?.awayTeamKey || "";
-  const homeDisplayName =
+  const explicitHomeTeamKey =
+    row?.home_team_key || row?.homeTeamKey || "";
+  const explicitAwayTeamKey =
+    row?.away_team_key || row?.awayTeamKey || "";
+  const explicitHomeDisplayName =
     row?.home_display_name || row?.homeDisplayName || "";
-  const awayDisplayName =
+  const explicitAwayDisplayName =
     row?.away_display_name || row?.awayDisplayName || "";
-  const barcaIsHome = isBarcelonaTeam(homeTeamKey, homeDisplayName);
-  const rivalSide = barcaIsHome ? "away" : "home";
-  const rivalTeamKey = barcaIsHome ? awayTeamKey : homeTeamKey;
-  const rivalDisplayName = barcaIsHome
-    ? awayDisplayName
-    : homeDisplayName;
+
+  const storedBarcelonaFirst = readOptionalBoolean(
+    row?.barcelona_first,
+    row?.barcelonaFirst,
+    row?.barca_is_home,
+    row?.barcaIsHome,
+  );
+
+  const detectedBarcelonaFirst = isBarcelonaTeam(
+    explicitHomeTeamKey,
+    explicitHomeDisplayName,
+  );
+
+  const barcaIsHome =
+    typeof storedBarcelonaFirst === "boolean"
+      ? storedBarcelonaFirst
+      : detectedBarcelonaFirst;
+
+  const canonicalOpponentTeamKey =
+    row?.opponent_team_key || row?.rival_team_key || "";
+  const canonicalOpponentDisplayName =
+    row?.opponent_display_name || row?.rival_display_name || "";
+
+  const rivalTeamKey =
+    canonicalOpponentTeamKey ||
+    (barcaIsHome ? explicitAwayTeamKey : explicitHomeTeamKey);
+
+  const rivalDisplayName =
+    canonicalOpponentDisplayName ||
+    (barcaIsHome ? explicitAwayDisplayName : explicitHomeDisplayName);
+
+  const homeTeamKey = barcaIsHome
+    ? explicitHomeTeamKey || "barcelona"
+    : rivalTeamKey;
+  const homeDisplayName = barcaIsHome
+    ? explicitHomeDisplayName || "Barça"
+    : rivalDisplayName;
+  const awayTeamKey = barcaIsHome
+    ? rivalTeamKey
+    : explicitAwayTeamKey || "barcelona";
+  const awayDisplayName = barcaIsHome
+    ? rivalDisplayName
+    : explicitAwayDisplayName || "Barça";
+
+  const rivalColors = normalizeTeamBadgeColors(
+    getMatchTeamBadgeColors(row, "opponent"),
+    getMatchTeamBadgeColors(row, "rival"),
+    getMatchTeamBadgeColors(row, barcaIsHome ? "away" : "home"),
+  );
 
   return {
     matchId: String(row?.match_id || row?.id || ""),
@@ -2468,7 +2636,7 @@ const normalizeAdminMatch = (row) => {
     rivalCountry:
       row?.opponent_country ||
       row?.rival_country ||
-      row?.[`${rivalSide}_country`] ||
+      row?.[`${barcaIsHome ? "away" : "home"}_country`] ||
       "",
     competitionName:
       row?.competition_name || row?.competitionName || "",
@@ -2477,7 +2645,7 @@ const normalizeAdminMatch = (row) => {
       row?.scheduled_kickoff_at || row?.kickoff_at || row?.kickoffAt || null,
     predictionsCloseAt:
       row?.predictions_close_at || row?.predictionsCloseAt || null,
-    rivalColors: getMatchTeamBadgeColors(row, rivalSide),
+    rivalColors,
     status: row?.match_status || row?.status || "scheduled",
     predictionsAreOpen: Boolean(
       row?.predictions_are_open ?? row?.predictionsAreOpen,
@@ -2841,6 +3009,37 @@ function App() {
 
   const activeAdminMatchId =
     matchData.id || VESALAPORRA_CURRENT_MATCH_ID;
+
+  const barcaIsHome = isBarcelonaTeam(
+    matchData.homeTeamId,
+    matchData.homeName,
+  );
+
+  const homePredictionScore = barcaIsHome ? barcaScore : rivalScore;
+  const awayPredictionScore = barcaIsHome ? rivalScore : barcaScore;
+
+  const changeHomePredictionScore = (updater) => {
+    if (barcaIsHome) {
+      setBarcaScore(updater);
+      return;
+    }
+
+    setRivalScore(updater);
+  };
+
+  const changeAwayPredictionScore = (updater) => {
+    if (barcaIsHome) {
+      setRivalScore(updater);
+      return;
+    }
+
+    setBarcaScore(updater);
+  };
+
+  const formatPredictionScore = (barcelonaGoals, opponentGoals) =>
+    barcaIsHome
+      ? `${barcelonaGoals}-${opponentGoals}`
+      : `${opponentGoals}-${barcelonaGoals}`;
 
   const publicMatchPlayersWithAdminConfig = publicMatchPlayers.map(
     (publicPlayer) => {
@@ -5905,9 +6104,11 @@ const saveAdminMatchPlayer = async (player, patch) => {
                         }
 
                         setScoreTouched(true);
-                        setBarcaScore((score) => Math.max(0, score - 1));
+                        changeHomePredictionScore((score) =>
+                          Math.max(0, score - 1),
+                        );
                       }}
-                      aria-label="Resta un gol al Barça"
+                      aria-label={`Resta un gol a ${matchData.homeName}`}
                     >
                       −
                     </button>
@@ -5921,9 +6122,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
                           setScoreTouched(true);
                         }
                       }}
-                      aria-label={`Confirmar ${barcaScore} gols del Barça`}
+                      aria-label={`Confirmar ${homePredictionScore} gols de ${matchData.homeName}`}
                     >
-                      {barcaScore}
+                      {homePredictionScore}
                     </button>
 
                     <button
@@ -5935,9 +6136,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
                         }
 
                         setScoreTouched(true);
-                        setBarcaScore((score) => score + 1);
+                        changeHomePredictionScore((score) => score + 1);
                       }}
-                      aria-label="Suma un gol al Barça"
+                      aria-label={`Suma un gol a ${matchData.homeName}`}
                     >
                       +
                     </button>
@@ -5957,9 +6158,11 @@ const saveAdminMatchPlayer = async (player, patch) => {
                         }
 
                         setScoreTouched(true);
-                        setRivalScore((score) => Math.max(0, score - 1));
+                        changeAwayPredictionScore((score) =>
+                          Math.max(0, score - 1),
+                        );
                       }}
-                      aria-label="Resta un gol a l'Al-Ahly"
+                      aria-label={`Resta un gol a ${matchData.awayName}`}
                     >
                       −
                     </button>
@@ -5973,9 +6176,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
                           setScoreTouched(true);
                         }
                       }}
-                      aria-label={`Confirmar ${rivalScore} gols de l'Al-Ahly`}
+                      aria-label={`Confirmar ${awayPredictionScore} gols de ${matchData.awayName}`}
                     >
-                      {rivalScore}
+                      {awayPredictionScore}
                     </button>
 
                     <button
@@ -5987,9 +6190,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
                         }
 
                         setScoreTouched(true);
-                        setRivalScore((score) => score + 1);
+                        changeAwayPredictionScore((score) => score + 1);
                       }}
-                      aria-label="Suma un gol a l'Al-Ahly"
+                      aria-label={`Suma un gol a ${matchData.awayName}`}
                     >
                       +
                     </button>
@@ -6522,7 +6725,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
               <div className="prediction-summary">
                 <span>
                   {scoreTouched
-                    ? `RESULTAT ${barcaScore}-${rivalScore}`
+                    ? `RESULTAT ${formatPredictionScore(barcaScore, rivalScore)}`
                     : "RESULTAT PENDENT"}
                 </span>
 
@@ -8677,7 +8880,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
             </p>
 
             <div className="prediction-confirm-dialog-summary">
-              <span>RESULTAT {barcaScore}-{rivalScore}</span>
+              <span>
+                RESULTAT {formatPredictionScore(barcaScore, rivalScore)}
+              </span>
               <span>XI {lineupCount}/11</span>
               <span>
                 {protagonistIsComplete
@@ -8718,8 +8923,10 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
             <div className="prediction-celebration-summary">
               <span>
-                RESULTAT {confirmedPrediction.barcaScore}-
-                {confirmedPrediction.rivalScore}
+                RESULTAT {formatPredictionScore(
+                  confirmedPrediction.barcaScore,
+                  confirmedPrediction.rivalScore,
+                )}
               </span>
 
               <span>
