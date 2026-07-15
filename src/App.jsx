@@ -137,6 +137,24 @@ const normalizeTeamBadgeColors = (...colorSources) => {
   ];
 };
 
+const normalizeTeamBadgePattern = (pattern, colors = []) => {
+  const normalizedPattern = String(pattern || "")
+    .trim()
+    .toLowerCase();
+
+  if (normalizedPattern === "solid") {
+    return "solid";
+  }
+
+  if (normalizedPattern === "striped") {
+    return "striped";
+  }
+
+  return normalizeTeamBadgeColors(colors).length > 1
+    ? "striped"
+    : "solid";
+};
+
 const getTeamBadgeBackground = (
   teamId,
   overrideColors = null,
@@ -211,10 +229,12 @@ const EMPTY_MATCH_DATA = {
   homeName: "Barça",
   homeLocation: "",
   homeBadgeColors: teamBadgeVisualsById.barcelona.colors,
+  homeBadgePattern: "striped",
   awayTeamId: "",
   awayName: "CARREGANT...",
   awayCountry: "",
   awayBadgeColors: DEFAULT_TEAM_BADGE_COLORS,
+  awayBadgePattern: "solid",
   kickoffLabel: "CARREGANT PARTIT...",
   kickoffAt: null,
   predictionsCloseAt: null,
@@ -337,6 +357,12 @@ const normalizeCurrentMatch = (row) => {
         : null,
   );
 
+  const opponentBadgePattern = normalizeTeamBadgePattern(
+    row?.opponent_badge_pattern ||
+      row?.rival_badge_pattern,
+    opponentColors,
+  );
+
   const barcelonaColors = normalizeTeamBadgeColors(
     getMatchTeamBadgeColors(row, "barcelona"),
     teamBadgeVisualsById.barcelona.colors,
@@ -380,16 +406,34 @@ const normalizeCurrentMatch = (row) => {
       : barcelonaColors
     : getMatchTeamBadgeColors(row, "away");
 
+  const homeBadgePattern = useCanonicalSideOrder
+    ? barcelonaFirst
+      ? "striped"
+      : opponentBadgePattern
+    : homeTeamId === "barcelona"
+      ? "striped"
+      : opponentBadgePattern;
+
+  const awayBadgePattern = useCanonicalSideOrder
+    ? barcelonaFirst
+      ? opponentBadgePattern
+      : "striped"
+    : awayTeamId === "barcelona"
+      ? "striped"
+      : opponentBadgePattern;
+
   return {
     id: row?.match_id ? String(row.match_id) : null,
     homeTeamId,
     homeName,
     homeLocation: row?.venue_name || row?.competition_name || "",
     homeBadgeColors,
+    homeBadgePattern,
     awayTeamId,
     awayName,
     awayCountry: row?.opponent_country || row?.rival_country || "",
     awayBadgeColors,
+    awayBadgePattern,
     kickoffLabel: formatCurrentMatchKickoffLabel(
       row?.scheduled_kickoff_at,
     ),
@@ -1128,6 +1172,9 @@ function OfficialMatchCard({
   const awayTeamId = match?.awayTeamId || "";
   const homeColors = match?.homeBadgeColors || null;
   const awayColors = match?.awayBadgeColors || null;
+  const homePattern = match?.homeBadgePattern || "striped";
+  const awayPattern = match?.awayBadgePattern || "solid";
+
   const dateLabel = match?.kickoffAt
     ? formatCurrentMatchKickoffLabel(match.kickoffAt)
     : "DATA PENDENT";
@@ -1160,6 +1207,7 @@ function OfficialMatchCard({
           <TeamColorBadge
             teamId={homeTeamId}
             colors={homeColors}
+            pattern={homePattern}
             className="official-match-badge"
           />
 
@@ -1224,6 +1272,7 @@ function OfficialMatchCard({
           <TeamColorBadge
             teamId={awayTeamId}
             colors={awayColors}
+            pattern={awayPattern}
             className="official-match-badge"
           />
 
@@ -1235,6 +1284,7 @@ function OfficialMatchCard({
     </section>
   );
 }
+
 
 function KamikazePlaneIcon({ className = "" }) {
   return (
@@ -1555,13 +1605,14 @@ function RatingStars({ value, onRate, readOnly = false }) {
 const VESALAPORRA_CURRENT_MATCH_ID =
   import.meta.env.VITE_VESALAPORRA_CURRENT_MATCH_ID || null;
 
+const VESALAPORRA_PUBLIC_CURRENT_MATCH_RPC =
+  "vesalaporra_public_current_match_v2";
+
 const VESALAPORRA_ADMIN_MATCH_LIST_RPC =
-  import.meta.env.VITE_VESALAPORRA_ADMIN_MATCH_LIST_RPC ||
-  "vesalaporra_admin_list_matches";
+  "vesalaporra_admin_list_matches_v2";
 
 const VESALAPORRA_ADMIN_MATCH_UPSERT_RPC =
-  import.meta.env.VITE_VESALAPORRA_ADMIN_MATCH_UPSERT_RPC ||
-  "vesalaporra_admin_upsert_match";
+  "vesalaporra_admin_upsert_match_v2";
 
 const VESALAPORRA_PRESENTATION_TIME_ZONE = "Europe/Madrid";
 
@@ -1791,12 +1842,15 @@ const normalizeAdminMatch = (row) => {
   const homeTeamKey = barcaIsHome
     ? explicitHomeTeamKey || "barcelona"
     : rivalTeamKey;
+
   const homeDisplayName = barcaIsHome
     ? explicitHomeDisplayName || "Barça"
     : rivalDisplayName;
+
   const awayTeamKey = barcaIsHome
     ? rivalTeamKey
     : explicitAwayTeamKey || "barcelona";
+
   const awayDisplayName = barcaIsHome
     ? rivalDisplayName
     : explicitAwayDisplayName || "Barça";
@@ -1805,6 +1859,12 @@ const normalizeAdminMatch = (row) => {
     getMatchTeamBadgeColors(row, "opponent"),
     getMatchTeamBadgeColors(row, "rival"),
     getMatchTeamBadgeColors(row, barcaIsHome ? "away" : "home"),
+  );
+
+  const rivalPattern = normalizeTeamBadgePattern(
+    row?.opponent_badge_pattern ||
+      row?.rival_badge_pattern,
+    rivalColors,
   );
 
   return {
@@ -1829,11 +1889,17 @@ const normalizeAdminMatch = (row) => {
     predictionsCloseAt:
       row?.predictions_close_at || row?.predictionsCloseAt || null,
     rivalColors,
+    rivalPattern,
     status: row?.match_status || row?.status || "scheduled",
     predictionsAreOpen: Boolean(
       row?.predictions_are_open ?? row?.predictionsAreOpen,
     ),
-    isCurrent: Boolean(row?.is_current ?? row?.isCurrent),
+    isCurrent: Boolean(
+      row?.is_current ??
+        row?.isCurrent ??
+        row?.is_public ??
+        row?.isPublic,
+    ),
   };
 };
 
@@ -1850,7 +1916,10 @@ const adminMatchToForm = (match) => {
     kickoffText: isoToAdminMatchDateText(match.kickoffAt),
     barcaSide: match.barcaSide || "home",
     rivalColors: rivalColors.length > 0 ? rivalColors : [],
-    rivalPattern: rivalColors.length > 1 ? "striped" : "solid",
+    rivalPattern: normalizeTeamBadgePattern(
+      match.rivalPattern,
+      rivalColors,
+    ),
     makeCurrent: match.isCurrent,
   };
 };
@@ -2852,14 +2921,14 @@ function App() {
     setPublicMatchPlayers(normalizedRows);
   };
 
-  const refreshPublicCurrentMatch = async ({ quiet = false } = {}) => {
+   const refreshPublicCurrentMatch = async ({ quiet = false } = {}) => {
     if (!quiet) {
       setMatchLoading(true);
     }
 
     try {
       const { data, error } = await supabase.rpc(
-        "vesalaporra_public_current_match",
+        VESALAPORRA_PUBLIC_CURRENT_MATCH_RPC,
       );
 
       if (error) {
@@ -3064,7 +3133,7 @@ const validateAdminMatchForm = () => {
     });
 
     try {
-      const { data, error } = await supabase.rpc(
+       const { data, error } = await supabase.rpc(
         VESALAPORRA_ADMIN_MATCH_UPSERT_RPC,
         {
           p_match_id: adminMatchForm.matchId || null,
@@ -3079,6 +3148,10 @@ const validateAdminMatchForm = () => {
           p_rival_primary_color: rivalColors[0] || null,
           p_rival_secondary_color: rivalColors[1] || null,
           p_make_current: Boolean(adminMatchForm.makeCurrent),
+          p_rival_badge_pattern: normalizeTeamBadgePattern(
+            adminMatchForm.rivalPattern,
+            rivalColors,
+          ),
           p_audit_id: createAdminAuditId(
             adminMatchForm.matchId ? "UPDATE_MATCH" : "CREATE_MATCH",
           ),
@@ -4454,12 +4527,12 @@ const saveAdminMatchPlayer = async (player, patch) => {
     useEffect(() => {
     let isCurrent = true;
 
-    const loadCurrentMatch = async () => {
+       const loadCurrentMatch = async () => {
       setMatchLoading(true);
 
       try {
         const { data, error } = await supabase.rpc(
-          "vesalaporra_public_current_match",
+          VESALAPORRA_PUBLIC_CURRENT_MATCH_RPC,
         );
 
         if (error) {
@@ -5435,12 +5508,13 @@ const saveAdminMatchPlayer = async (player, patch) => {
               <div className="scoreboard">
                 <div className="score-team home">
                   <div className="score-team-label">
-                    <span
+                                    <span
                       className="team-color-dot"
                       style={{
                         background: getTeamBadgeBackground(
                           matchData.homeTeamId,
                           matchData.homeBadgeColors,
+                          matchData.homeBadgePattern,
                         ),
                       }}
                       aria-hidden="true"
@@ -5562,12 +5636,13 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                 <div className="score-team away">
                   <div className="score-team-label">
-                    <span
+                                      <span
                       className="team-color-dot"
                       style={{
                         background: getTeamBadgeBackground(
                           matchData.awayTeamId,
                           matchData.awayBadgeColors,
+                          matchData.awayBadgePattern,
                         ),
                       }}
                       aria-hidden="true"
@@ -6935,13 +7010,15 @@ const saveAdminMatchPlayer = async (player, patch) => {
                                   TREU DEL PARTIT
                                 </button>
                               ) : (
-                                <button
+                                                             <button
                                   type="button"
                                   className="assign"
                                   disabled={isBusy}
                                   onClick={() =>
                                     saveAdminMatchPlayer(player, {
-                                      isPublicVisible: false,
+                                      isPublicVisible: true,
+                                      eligibleForLineup: true,
+                                      eligibleForRatings: true,
                                       protagonistGroupKey:
                                         player.protagonistGroupKey || "e",
                                     })
@@ -7391,12 +7468,13 @@ const saveAdminMatchPlayer = async (player, patch) => {
                             className="admin-catalog-player"
                           >
                             <div className="admin-catalog-player-top">
-                              <div
+                                                         <div
                                 className="admin-catalog-portrait"
                                 style={{
                                   background: getTeamBadgeBackground(
                                     match.rivalTeamKey,
                                     match.rivalColors,
+                                    match.rivalPattern,
                                   ),
                                 }}
                                 aria-hidden="true"
