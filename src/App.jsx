@@ -640,9 +640,17 @@ const VESALAPORRA_PUBLIC_MATCH_NOTES_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_MATCH_NOTES_RPC ||
   "vesalaporra_public_match_notes";
 
+const VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC =
+  import.meta.env.VITE_VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC ||
+  "vesalaporra_public_active_season_notes";
+
 const VESALAPORRA_PUBLIC_USER_ACHIEVEMENTS_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_USER_ACHIEVEMENTS_RPC ||
   "vesalaporra_public_user_achievements";
+
+const VESALAPORRA_PUBLIC_PROFILE_HISTORY_RPC =
+  import.meta.env.VITE_VESALAPORRA_PUBLIC_PROFILE_HISTORY_RPC ||
+  "vesalaporra_public_profile_history";
 
 const VESALAPORRA_SUBMIT_RATING_RPC =
   import.meta.env.VITE_VESALAPORRA_SUBMIT_RATING_RPC ||
@@ -651,9 +659,6 @@ const VESALAPORRA_SUBMIT_RATING_RPC =
 const VESALAPORRA_ADMIN_FINALIZE_MATCH_RPC =
   import.meta.env.VITE_VESALAPORRA_ADMIN_FINALIZE_MATCH_RPC ||
   "vesalaporra_admin_finalize_match";
-
-const VESALAPORRA_SCORES_TABLE =
-  "vesalaporra_prediction_scores";
 
 const EMPTY_OFFICIAL_MATCH_STATE = {
   matchId: null,
@@ -921,8 +926,9 @@ const normalizeNotesRow = (row, playersById) => {
     row?.rating_average,
     row?.average,
   );
-  const matchVoteCount = toFiniteNumber(
+   const matchVoteCount = toFiniteNumber(
     row?.match_vote_count,
+    row?.rating_count,
     row?.vote_count,
     row?.ratings_count,
     row?.votes,
@@ -2308,6 +2314,7 @@ function App() {
   const [notesRatingsByPlayerId, setNotesRatingsByPlayerId] = useState({});
 
   const [notesRows, setNotesRows] = useState([]);
+  const [seasonNotesRows, setSeasonNotesRows] = useState([]);
   const [notesMatchData, setNotesMatchData] = useState(null);
   const [notesLoading, setNotesLoading] = useState(false);
   const [notesError, setNotesError] = useState("");
@@ -2370,6 +2377,9 @@ function App() {
   const [adminMatchesLoading, setAdminMatchesLoading] = useState(false);
 
   const [adminMatchSaving, setAdminMatchSaving] = useState(false);
+
+  const [adminDeletingMatchId, setAdminDeletingMatchId] =
+    useState(null);
 
   const [adminMatchForm, setAdminMatchForm] = useState(
     EMPTY_ADMIN_MATCH_FORM,
@@ -2650,7 +2660,7 @@ function App() {
     authUser && selectedProfileUser?.id === String(authUser.id),
   );
 
-  const notesMatchRows = notesRows
+    const notesMatchRows = notesRows
     .filter((row) => row.player.eligibleForRatings !== false)
     .map((row) => ({
       ...row,
@@ -2659,15 +2669,8 @@ function App() {
         notesRatingsByPlayerId[row.player.id] ?? row.displayStars,
     }));
 
-  const notesSeasonRows = notesRows
-    .map((row) => ({
-      ...row,
-      average: row.seasonAverage,
-      voteCount: row.seasonVoteCount,
-      ownStars: 0,
-      displayStars: getStarsFromAverage(row.seasonAverage),
-    }))
-    .filter((row) => row.voteCount > 0 || row.average > 0)
+  const notesSeasonRows = [...seasonNotesRows]
+    .filter((row) => row.player.eligibleForRatings !== false)
     .sort(
       (firstRow, secondRow) =>
         secondRow.average - firstRow.average ||
@@ -3307,6 +3310,126 @@ const validateAdminMatchForm = () => {
     }
   };
 
+  const handleDeleteUnusedMatch = async (match) => {
+    if (
+      !isAdmin ||
+      adminMatchSaving ||
+      adminDeletingMatchId ||
+      !match?.matchId
+    ) {
+      return;
+    }
+
+    const expectedName = String(
+      match.rivalDisplayName || "",
+    ).trim();
+
+    if (!expectedName) {
+      setAdminMatchFeedback({
+        type: "error",
+        message:
+          "Aquest partit no té un nom de rival vàlid i no es pot confirmar l’eliminació.",
+      });
+      return;
+    }
+
+    const confirmation = window.prompt(
+      [
+        "Aquesta acció eliminarà definitivament el partit",
+        `Barça vs ${expectedName}.`,
+        "",
+        "Només funcionarà si no té pronòstics, resultat, puntuacions ni valoracions.",
+        "",
+        `Escriu exactament: ${expectedName}`,
+      ].join("\n"),
+    );
+
+    if (confirmation === null) {
+      return;
+    }
+
+    if (confirmation.trim() !== expectedName) {
+      setAdminMatchFeedback({
+        type: "error",
+        message:
+          "El nom escrit no coincideix. El partit no s’ha eliminat.",
+      });
+      return;
+    }
+
+    setAdminDeletingMatchId(match.matchId);
+    setAdminMatchFeedback({
+      type: "working",
+      message: `Eliminant definitivament el partit contra ${expectedName}...`,
+    });
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "vesalaporra_admin_delete_unused_match",
+        {
+          p_match_id: match.matchId,
+          p_audit_id: createAdminAuditId(
+            "DELETE_UNUSED_MATCH",
+          ),
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const result = Array.isArray(data)
+        ? data[0]
+        : data;
+
+      if (adminMatchForm.matchId === match.matchId) {
+        setAdminMatchForm(EMPTY_ADMIN_MATCH_FORM);
+      }
+
+      await loadAdminUpcomingMatches({
+        quiet: true,
+      });
+
+      try {
+        const refreshedMatch =
+          await refreshPublicCurrentMatch({
+            quiet: true,
+          });
+
+        if (refreshedMatch?.id) {
+          await loadPublicMatchPlayers(
+            refreshedMatch.id,
+          );
+        }
+      } catch (refreshError) {
+        console.warn(
+          "No queda cap partit públic disponible després de l’eliminació:",
+          refreshError,
+        );
+
+        setMatchData(EMPTY_MATCH_DATA);
+        setPublicMatchPlayers([]);
+      }
+
+      setAdminMatchFeedback({
+        type: "success",
+        message:
+          result?.removed_match_player_rows > 0
+            ? `Partit contra ${expectedName} eliminat. També s’han retirat ${result.removed_match_player_rows} assignacions de plantilla.`
+            : `Partit contra ${expectedName} eliminat definitivament.`,
+      });
+    } catch (error) {
+      setAdminMatchFeedback({
+        type: "error",
+        message:
+          error?.message ||
+          "No s’ha pogut eliminar el partit.",
+      });
+    } finally {
+      setAdminDeletingMatchId(null);
+    }
+  };
+
   const loadAdminPlayerWorkspace = async ({ quiet = false } = {}) => {
     if (!isAdmin) {
       return;
@@ -3878,13 +4001,15 @@ const saveAdminMatchPlayer = async (player, patch) => {
     }
   };
 
-  const toggleAdminPlayerArchive = async (player) => {
+    const toggleAdminPlayerArchive = async (player) => {
     if (!isAdmin || adminPlayerBusyId) {
       return;
     }
 
     const nextStatus =
-      player.catalogStatus === "archived" ? "active" : "archived";
+      player.catalogStatus === "archived"
+        ? "active"
+        : "archived";
 
     setAdminPlayerBusyId(player.playerId);
     setAdminPlayerFeedback(null);
@@ -3897,7 +4022,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
           p_patch: {
             catalog_status: nextStatus,
           },
-          p_audit_id: createAdminAuditId("UPDATE_PLAYER_STATUS"),
+          p_audit_id: createAdminAuditId(
+            "UPDATE_PLAYER_STATUS",
+          ),
         },
       );
 
@@ -3913,11 +4040,184 @@ const saveAdminMatchPlayer = async (player, patch) => {
             : "Jugador reactivat al catàleg.",
       });
 
-      await loadAdminPlayerWorkspace({ quiet: true });
+      await loadAdminPlayerWorkspace({
+        quiet: true,
+      });
     } catch (error) {
       setAdminPlayerFeedback({
         type: "error",
-        message: error?.message || "No s’ha pogut actualitzar el jugador.",
+        message:
+          error?.message ||
+          "No s’ha pogut actualitzar el jugador.",
+      });
+    } finally {
+      setAdminPlayerBusyId(null);
+    }
+  };
+
+  const handleDeleteUnusedPlayer = async (player) => {
+    if (
+      !isAdmin ||
+      adminPlayerBusyId ||
+      !player?.playerId
+    ) {
+      return;
+    }
+
+    if (player.catalogStatus !== "archived") {
+      setAdminPlayerFeedback({
+        type: "error",
+        message:
+          "Primer has d’arxivar el jugador. Els jugadors actius no es poden eliminar.",
+      });
+      return;
+    }
+
+    const expectedName = String(
+      player.displayName || "",
+    ).trim();
+
+    if (!expectedName) {
+      setAdminPlayerFeedback({
+        type: "error",
+        message:
+          "Aquest jugador no té un nom vàlid per confirmar l’eliminació.",
+      });
+      return;
+    }
+
+    const confirmation = window.prompt(
+      [
+        "Aquesta acció eliminarà definitivament el jugador",
+        `${expectedName}.`,
+        "",
+        "Només funcionarà si no té historial esportiu real.",
+        "També s’intentaran eliminar les seves imatges i processos de xapa.",
+        "",
+        `Escriu exactament: ${expectedName}`,
+      ].join("\n"),
+    );
+
+    if (confirmation === null) {
+      return;
+    }
+
+    if (confirmation.trim() !== expectedName) {
+      setAdminPlayerFeedback({
+        type: "error",
+        message:
+          "El nom escrit no coincideix. El jugador no s’ha eliminat.",
+      });
+      return;
+    }
+
+    setAdminPlayerBusyId(player.playerId);
+    setAdminPlayerFeedback({
+      type: "working",
+      message: `Eliminant definitivament ${expectedName}...`,
+    });
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "vesalaporra_admin_delete_unused_player",
+        {
+          p_player_id: player.playerId,
+          p_audit_id: createAdminAuditId(
+            "DELETE_UNUSED_PLAYER",
+          ),
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const result = Array.isArray(data)
+        ? data[0]
+        : data;
+
+      const storageObjects = Array.isArray(
+        result?.storage_objects_to_remove,
+      )
+        ? result.storage_objects_to_remove
+        : [];
+
+      const storagePathsByBucket =
+        storageObjects.reduce(
+          (pathsByBucket, storageObject) => {
+            const bucket = String(
+              storageObject?.bucket || "",
+            ).trim();
+
+            const path = String(
+              storageObject?.path || "",
+            ).trim();
+
+            if (!bucket || !path) {
+              return pathsByBucket;
+            }
+
+            if (!pathsByBucket.has(bucket)) {
+              pathsByBucket.set(
+                bucket,
+                new Set(),
+              );
+            }
+
+            pathsByBucket.get(bucket).add(path);
+
+            return pathsByBucket;
+          },
+          new Map(),
+        );
+
+      let storageCleanupFailedBuckets = 0;
+
+      for (const [
+        bucket,
+        pathSet,
+      ] of storagePathsByBucket.entries()) {
+        const paths = [...pathSet];
+
+        const { error: storageError } =
+          await supabase.storage
+            .from(bucket)
+            .remove(paths);
+
+        if (storageError) {
+          storageCleanupFailedBuckets += 1;
+
+          console.warn(
+            `El jugador s’ha eliminat, però no s’han pogut retirar els fitxers del bucket ${bucket}:`,
+            storageError,
+          );
+        }
+      }
+
+      await Promise.all([
+        loadAdminPlayerWorkspace({
+          quiet: true,
+        }),
+        loadPublicMatchPlayers(),
+      ]);
+
+      setAdminPlayerFeedback({
+        type:
+          storageCleanupFailedBuckets > 0
+            ? "error"
+            : "success",
+
+        message:
+          storageCleanupFailedBuckets > 0
+            ? `${expectedName} s’ha eliminat de la base de dades, però ${storageCleanupFailedBuckets} bucket(s) no han permès eliminar els fitxers. El jugador ja no apareixerà al joc.`
+            : `${expectedName} i els seus fitxers associats s’han eliminat definitivament.`,
+      });
+    } catch (error) {
+      setAdminPlayerFeedback({
+        type: "error",
+        message:
+          error?.message ||
+          "No s’ha pogut eliminar el jugador.",
       });
     } finally {
       setAdminPlayerBusyId(null);
@@ -4456,9 +4756,10 @@ const saveAdminMatchPlayer = async (player, patch) => {
     }
   };
 
-  const loadRealNotes = async ({ quiet = false } = {}) => {
+   const loadRealNotes = async ({ quiet = false } = {}) => {
     if (!matchData.id) {
       setNotesRows([]);
+      setSeasonNotesRows([]);
       setNotesMatchData(null);
       return;
     }
@@ -4470,23 +4771,131 @@ const saveAdminMatchPlayer = async (player, patch) => {
     setNotesError("");
 
     try {
-      const payload = await callRpcWithPayloadFallbacks(
-        VESALAPORRA_PUBLIC_MATCH_NOTES_RPC,
-        [
-          { p_match_id: matchData.id },
-          { match_id: matchData.id },
-        ],
+      const [matchPayload, seasonPayload] = await Promise.all([
+        callRpcWithPayloadFallbacks(
+          VESALAPORRA_PUBLIC_MATCH_NOTES_RPC,
+          [
+            { p_match_id: matchData.id },
+            { match_id: matchData.id },
+          ],
+        ),
+        callRpcWithPayloadFallbacks(
+          VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC,
+          [{}],
+        ),
+      ]);
+
+      const rawRows = unwrapRpcRows(
+        matchPayload,
+        ["notes", "rows", "players"],
       );
 
-      const rawRows = unwrapRpcRows(payload, ["notes", "rows", "players"]);
       const normalizedRows = rawRows
         .map((row) => normalizeNotesRow(row, gamePlayersById))
         .filter(Boolean);
 
+      const rawSeasonRows = unwrapRpcRows(
+        seasonPayload,
+        ["notes", "rows", "players"],
+      );
+
+      const normalizedSeasonRows = rawSeasonRows
+        .map((row) => {
+          const playerId = firstNonEmptyText(
+            row?.player_id,
+            row?.id,
+          );
+
+          if (!playerId) {
+            return null;
+          }
+
+          const rosterPlayer = gamePlayersById[playerId] || null;
+
+          const player = rosterPlayer || {
+            id: playerId,
+            name: firstNonEmptyText(
+              row?.display_name,
+              row?.player_name,
+              row?.name,
+              "Jugador",
+            ),
+            shortName: firstNonEmptyText(
+              row?.short_name,
+              row?.display_name,
+              row?.player_name,
+              "Jugador",
+            ),
+            image:
+              getPublicStorageImageUrl(
+                row?.avatar_bucket,
+                row?.avatar_path,
+                row?.avatar_version,
+              ) ||
+              firstNonEmptyText(
+                row?.avatar_url,
+                row?.portrait_url,
+              ) ||
+              "/fcb/PLAYER_PLACEHOLDER.png",
+            eligibleForRatings: true,
+          };
+
+          const average = toFiniteNumber(
+            row?.rating_average,
+            row?.season_average,
+            row?.average,
+          );
+
+          const voteCount = toFiniteNumber(
+            row?.rating_count,
+            row?.season_vote_count,
+            row?.vote_count,
+            row?.ratings_count,
+          );
+
+          return {
+            player,
+            stats: {
+              role: null,
+              starts: toFiniteNumber(
+                row?.starts,
+                row?.season_starts,
+              ),
+              substituteAppearances: toFiniteNumber(
+                row?.substitute_appearances,
+                row?.season_substitute_appearances,
+              ),
+              goals: toFiniteNumber(
+                row?.goals,
+                row?.goals_scored,
+              ),
+              assists: toFiniteNumber(row?.assists),
+            },
+            ownStars: 0,
+            displayStars:
+              voteCount > 0
+                ? getStarsFromAverage(average)
+                : 0,
+            average,
+            voteCount,
+            seasonAverage: average,
+            seasonVoteCount: voteCount,
+            matchId: "",
+            homeScore: 0,
+            awayScore: 0,
+            publishedAt: null,
+          };
+        })
+        .filter(Boolean);
+
       const firstRow = rawRows[0] || {};
+
       const normalizedMatch = {
         ...matchData,
-        id: firstNonEmptyText(firstRow?.match_id, matchData.id),
+        id: firstNonEmptyText(
+          firstRow?.match_id,
+          matchData.id,
+        ),
         homeName: firstNonEmptyText(
           firstRow?.home_display_name,
           matchData.homeName,
@@ -4495,17 +4904,24 @@ const saveAdminMatchPlayer = async (player, patch) => {
           firstRow?.away_display_name,
           matchData.awayName,
         ),
-        kickoffAt: firstRow?.scheduled_kickoff_at || matchData.kickoffAt,
+        kickoffAt:
+          firstRow?.scheduled_kickoff_at ||
+          matchData.kickoffAt,
       };
 
       setNotesRows(normalizedRows);
+      setSeasonNotesRows(normalizedSeasonRows);
       setNotesMatchData(normalizedMatch);
 
       const restoredRatings = Object.fromEntries(
         normalizedRows
           .filter((row) => row.ownStars > 0)
-          .map((row) => [row.player.id, row.ownStars]),
+          .map((row) => [
+            row.player.id,
+            row.ownStars,
+          ]),
       );
+
       setNotesRatingsByPlayerId(restoredRatings);
 
       const statsByPlayerId = Object.fromEntries(
@@ -4520,6 +4936,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
       );
 
       const officialRow = normalizedRows[0] || null;
+
       setOfficialMatchState((currentState) => ({
         ...currentState,
         matchId: matchData.id,
@@ -4539,13 +4956,17 @@ const saveAdminMatchPlayer = async (player, patch) => {
             : currentState.matchId === matchData.id
               ? currentState.statsByPlayerId
               : {},
-        publishedAt: officialRow?.publishedAt || currentState.publishedAt,
+        publishedAt:
+          officialRow?.publishedAt ||
+          currentState.publishedAt,
       }));
     } catch (error) {
       setNotesRows([]);
+      setSeasonNotesRows([]);
       setNotesMatchData(matchData);
       setNotesError(
-        error?.message || "No s’han pogut carregar Les Notes reals.",
+        error?.message ||
+          "No s’han pogut carregar Les Notes reals.",
       );
     } finally {
       if (!quiet) {
@@ -4554,7 +4975,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     }
   };
 
-  const loadRealProfileData = async (userId) => {
+    const loadRealProfileData = async (userId) => {
     if (!userId) {
       setProfileHistory([]);
       setProfileAchievements(
@@ -4571,39 +4992,54 @@ const saveAdminMatchPlayer = async (player, patch) => {
     setProfileDataError("");
 
     try {
-      const achievementPromise = callRpcWithPayloadFallbacks(
-        VESALAPORRA_PUBLIC_USER_ACHIEVEMENTS_RPC,
-        [
-          { p_user_id: userId },
-          { user_id: userId },
-        ],
+      const [achievementPayload, historyPayload] =
+        await Promise.all([
+          callRpcWithPayloadFallbacks(
+            VESALAPORRA_PUBLIC_USER_ACHIEVEMENTS_RPC,
+            [
+              { p_user_id: userId },
+              { user_id: userId },
+            ],
+          ),
+          callRpcWithPayloadFallbacks(
+            VESALAPORRA_PUBLIC_PROFILE_HISTORY_RPC,
+            [
+              { p_user_id: userId },
+              { user_id: userId },
+            ],
+          ),
+        ]);
+
+      const historyRows = unwrapRpcRows(
+        historyPayload,
+        ["history", "rows", "items"],
       );
 
-            const { data: scoreRows, error: scoreError } = await supabase
-        .from(VESALAPORRA_SCORES_TABLE)
-        .select("*")
-        .eq("user_id", userId)
-        .order("scored_at", { ascending: false })
-        .limit(100);
-
-      const achievementPayload = await achievementPromise;
-      setProfileAchievements(normalizeAchievementRows(achievementPayload));
-
-      if (scoreError) {
-        throw scoreError;
-      }
+      setProfileAchievements(
+        normalizeAchievementRows(achievementPayload),
+      );
 
       setProfileHistory(
-        scoreRows.map(normalizeScoreHistoryRow).sort((first, second) => {
-          const firstTime = new Date(first.scoredAt || 0).getTime();
-          const secondTime = new Date(second.scoredAt || 0).getTime();
-          return secondTime - firstTime;
-        }),
+        historyRows
+          .map(normalizeScoreHistoryRow)
+          .sort((first, second) => {
+            const firstTime = new Date(
+              first.scoredAt || 0,
+            ).getTime();
+
+            const secondTime = new Date(
+              second.scoredAt || 0,
+            ).getTime();
+
+            return secondTime - firstTime;
+          })
+          .slice(0, 100),
       );
     } catch (error) {
       setProfileHistory([]);
       setProfileDataError(
-        error?.message || "No s’ha pogut carregar el perfil real.",
+        error?.message ||
+          "No s’ha pogut carregar el perfil real.",
       );
     } finally {
       setProfileDataLoading(false);
@@ -7216,16 +7652,37 @@ const saveAdminMatchPlayer = async (player, patch) => {
                               </div>
                             )}
 
-                            <button
+                                                        <button
                               type="button"
                               className="admin-archive-player"
                               disabled={isBusy}
-                              onClick={() => toggleAdminPlayerArchive(player)}
+                              onClick={() =>
+                                toggleAdminPlayerArchive(player)
+                              }
                             >
                               {player.catalogStatus === "archived"
                                 ? "REACTIVA JUGADOR"
                                 : "ARXIVA JUGADOR"}
                             </button>
+
+                            {player.catalogStatus === "archived" && (
+                              <button
+                                type="button"
+                                className="admin-archive-player"
+                                disabled={isBusy}
+                                onClick={() =>
+                                  handleDeleteUnusedPlayer(player)
+                                }
+                                style={{
+                                  marginTop: "8px",
+                                  background: "#7f1d1d",
+                                  borderColor: "#7f1d1d",
+                                  color: "#ffffff",
+                                }}
+                              >
+                                ELIMINA DEFINITIVAMENT
+                              </button>
+                            )}
                           </article>
                         );
                       })}
@@ -7636,14 +8093,35 @@ const saveAdminMatchPlayer = async (player, patch) => {
                               </span>
                             </div>
 
-                            <div className="admin-catalog-actions primary">
+                                                        <div className="admin-catalog-actions primary">
                               <button
                                 type="button"
                                 className="upload"
-                                disabled={adminMatchSaving}
-                                onClick={() => editAdminMatch(match)}
+                                disabled={
+                                  adminMatchSaving ||
+                                  Boolean(adminDeletingMatchId)
+                                }
+                                onClick={() =>
+                                  editAdminMatch(match)
+                                }
                               >
                                 EDITA PARTIT
+                              </button>
+
+                              <button
+                                type="button"
+                                className="remove"
+                                disabled={
+                                  adminMatchSaving ||
+                                  Boolean(adminDeletingMatchId)
+                                }
+                                onClick={() =>
+                                  handleDeleteUnusedMatch(match)
+                                }
+                              >
+                                {adminDeletingMatchId === match.matchId
+                                  ? "ELIMINANT..."
+                                  : "ELIMINA PARTIT"}
                               </button>
                             </div>
                           </article>
