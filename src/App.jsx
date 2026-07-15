@@ -137,7 +137,11 @@ const normalizeTeamBadgeColors = (...colorSources) => {
   ];
 };
 
-const getTeamBadgeBackground = (teamId, overrideColors = null) => {
+const getTeamBadgeBackground = (
+  teamId,
+  overrideColors = null,
+  pattern = "striped",
+) => {
   const normalizedOverrideColors = normalizeTeamBadgeColors(overrideColors);
   const configuredColors =
     normalizedOverrideColors.length > 0
@@ -163,6 +167,15 @@ const getTeamBadgeBackground = (teamId, overrideColors = null) => {
 
   const [primaryColor, secondaryColor] = colors;
 
+  if (pattern === "solid") {
+    return `linear-gradient(90deg,
+      ${primaryColor} 0%,
+      ${primaryColor} 75%,
+      ${secondaryColor} 75%,
+      ${secondaryColor} 100%
+    )`;
+  }
+
   return `linear-gradient(90deg,
     ${primaryColor} 0%,
     ${primaryColor} 25%,
@@ -174,6 +187,23 @@ const getTeamBadgeBackground = (teamId, overrideColors = null) => {
     ${secondaryColor} 100%
   )`;
 };
+
+function TeamColorBadge({
+  teamId,
+  colors = null,
+  pattern = "striped",
+  className = "",
+}) {
+  return (
+    <span
+      className={`team-color-dot ${className}`.trim()}
+      style={{
+        background: getTeamBadgeBackground(teamId, colors, pattern),
+      }}
+      aria-hidden="true"
+    ></span>
+  );
+}
 
 const EMPTY_MATCH_DATA = {
   id: null,
@@ -1081,17 +1111,8 @@ const formatRatingAverage = (average) =>
     maximumFractionDigits: 1,
   });
 
-function TeamColorBadge({ teamId, colors = null, className = "" }) {
-  return (
-    <span
-      className={`team-color-dot ${className}`.trim()}
-      style={{
-        background: getTeamBadgeBackground(teamId, colors),
-      }}
-      aria-hidden="true"
-    ></span>
-  );
-}
+// TeamColorBadge ja està definit al bloc visual superior amb suport
+// per als patrons "solid" i "striped".
 
 function OfficialMatchCard({
   match = null,
@@ -1548,16 +1569,11 @@ const ADMIN_MATCH_COLOR_OPTIONS = [
   { value: "#ffffff", label: "Blanc" },
   { value: "#111111", label: "Negre" },
   { value: "#d71920", label: "Vermell" },
-  { value: "#8f123f", label: "Grana" },
   { value: "#163f8f", label: "Blau" },
+  { value: "#0a1f44", label: "Blau marí" },
   { value: "#53a7e8", label: "Blau cel" },
   { value: "#f4cf36", label: "Groc" },
-  { value: "#f58232", label: "Taronja" },
   { value: "#1f8f4e", label: "Verd" },
-  { value: "#7b3fb4", label: "Lila" },
-  { value: "#ef6aa7", label: "Rosa" },
-  { value: "#8a5a35", label: "Marró" },
-  { value: "#8b95aa", label: "Gris" },
 ];
 
 const EMPTY_ADMIN_MATCH_FORM = {
@@ -1570,6 +1586,7 @@ const EMPTY_ADMIN_MATCH_FORM = {
   kickoffText: "",
   barcaSide: "home",
   rivalColors: [],
+  rivalPattern: "solid",
   makeCurrent: true,
 };
 
@@ -1832,7 +1849,8 @@ const adminMatchToForm = (match) => {
     venueName: match.venueName || "",
     kickoffText: isoToAdminMatchDateText(match.kickoffAt),
     barcaSide: match.barcaSide || "home",
-    rivalColors: rivalColors.length > 0 ? rivalColors : ["#6f7a95"],
+    rivalColors: rivalColors.length > 0 ? rivalColors : [],
+    rivalPattern: rivalColors.length > 1 ? "striped" : "solid",
     makeCurrent: match.isCurrent,
   };
 };
@@ -2932,68 +2950,82 @@ function App() {
     });
   };
 
-  const updateAdminMatchForm = (field, value) => {
-    setAdminMatchForm((currentForm) => ({
-      ...currentForm,
-      [field]: value,
-    }));
-  };
+ const updateAdminMatchForm = (field, value) => {
+  setAdminMatchForm((currentForm) => ({
+    ...currentForm,
+    [field]: value,
+  }));
+};
 
-  const toggleAdminMatchColor = (colorValue) => {
-    const normalizedColor = normalizeHexColor(colorValue);
+const updateAdminMatchPattern = (pattern) => {
+  setAdminMatchForm((currentForm) => ({
+    ...currentForm,
+    rivalPattern: pattern === "striped" ? "striped" : "solid",
+  }));
+};
 
-    if (!normalizedColor) {
-      return;
-    }
+const toggleAdminMatchColor = (colorValue) => {
+  const normalizedColor = normalizeHexColor(colorValue);
 
-    setAdminMatchForm((currentForm) => {
-      const currentColors = normalizeTeamBadgeColors(
-        currentForm.rivalColors,
-      ).slice(0, 2);
-      const selectedIndex = currentColors.indexOf(normalizedColor);
+  if (!normalizedColor) {
+    return;
+  }
 
-      if (selectedIndex >= 0) {
-        if (currentColors.length === 1) {
-          return currentForm;
-        }
+  setAdminMatchForm((currentForm) => {
+    const currentColors = normalizeTeamBadgeColors(
+      currentForm.rivalColors,
+    ).slice(0, 2);
+    const selectedIndex = currentColors.indexOf(normalizedColor);
 
-        return {
-          ...currentForm,
-          rivalColors: currentColors.filter(
-            (selectedColor) => selectedColor !== normalizedColor,
-          ),
-        };
+    if (selectedIndex >= 0) {
+      if (currentColors.length === 1) {
+        return currentForm;
       }
 
       return {
         ...currentForm,
-        rivalColors:
-          currentColors.length < 2
-            ? [...currentColors, normalizedColor]
-            : [currentColors[0], normalizedColor],
+        rivalColors: currentColors.filter(
+          (selectedColor) => selectedColor !== normalizedColor,
+        ),
       };
-    });
-  };
-
-  const validateAdminMatchForm = () => {
-    if (adminMatchForm.rivalName.trim().length < 2) {
-      return "Escriu el nom complet del rival.";
     }
 
-    if (!parseAdminMatchDateText(adminMatchForm.kickoffText)) {
-      return "Escriu la data així: 31/7/26 i 20:45.";
-    }
+    return {
+      ...currentForm,
+      rivalColors:
+        currentColors.length < 2
+          ? [...currentColors, normalizedColor]
+          : [currentColors[0], normalizedColor],
+    };
+  });
+};
 
-    if (adminMatchForm.rivalColors.length < 1) {
-      return "Tria almenys un color del rival.";
-    }
+const validateAdminMatchForm = () => {
+  if (adminMatchForm.rivalName.trim().length < 2) {
+    return "Escriu el nom complet del rival.";
+  }
 
-    if (adminMatchForm.rivalColors.length > 2) {
-      return "Només pots triar un o dos colors.";
-    }
+  if (!parseAdminMatchDateText(adminMatchForm.kickoffText)) {
+    return "Escriu la data així: 31/7/26 i 20:45.";
+  }
 
-    return null;
-  };
+  if (adminMatchForm.rivalColors.length < 1) {
+    return "Tria almenys un color del rival.";
+  }
+
+  if (adminMatchForm.rivalColors.length > 2) {
+    return "Només pots triar un o dos colors.";
+  }
+
+  if (
+    adminMatchForm.rivalPattern === "striped" &&
+    adminMatchForm.rivalColors.length !== 2
+  ) {
+    return "Si tries franges, has de marcar exactament dos colors.";
+  }
+
+  return null;
+};
 
   const handleSaveAdminMatch = async (event) => {
     event.preventDefault();
@@ -7060,79 +7092,125 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     </label>
 
                     <div className="admin-upcoming-field">
-                      <span className="admin-upcoming-field-label">COLORS</span>
+  <span className="admin-upcoming-field-label">COLORS</span>
 
-                      <details className="admin-color-picker">
-                        <summary>
-                          <span className="admin-color-picker-preview">
-                            {adminMatchForm.rivalColors.length > 0 ? (
-                              adminMatchForm.rivalColors.map((color, index) => (
-                                <i
-                                  key={`${color}-${index}`}
-                                  style={{ background: color }}
-                                  aria-hidden="true"
-                                ></i>
-                              ))
-                            ) : (
-                              <i className="empty" aria-hidden="true"></i>
-                            )}
-                          </span>
+  <details className="admin-color-picker">
+    <summary>
+      <span className="admin-color-picker-preview">
+        {adminMatchForm.rivalColors.length > 0 ? (
+          <i
+            style={{
+              background: getTeamBadgeBackground(
+                "rival",
+                adminMatchForm.rivalColors,
+                adminMatchForm.rivalPattern,
+              ),
+            }}
+            aria-hidden="true"
+          ></i>
+        ) : (
+          <i className="empty" aria-hidden="true"></i>
+        )}
+      </span>
 
-                          <strong>
-                            {adminMatchForm.rivalColors.length > 0
-                              ? `${adminMatchForm.rivalColors.length} COLOR${
-                                  adminMatchForm.rivalColors.length === 1
-                                    ? ""
-                                    : "S"
-                                } TRIAT${
-                                  adminMatchForm.rivalColors.length === 1
-                                    ? ""
-                                    : "S"
-                                }`
-                              : "TRIA 1 O 2 COLORS"}
-                          </strong>
+      <strong>
+        {adminMatchForm.rivalColors.length === 0
+          ? "TRIA LLIS O FRANGES"
+          : adminMatchForm.rivalPattern === "striped"
+            ? `4 FRANGES · ${adminMatchForm.rivalColors.length}/2 COLORS`
+            : adminMatchForm.rivalColors.length === 1
+              ? "LLIS · 1 COLOR TRIAT"
+              : "LLIS · 2 COLORS TRIATS"}
+      </strong>
 
-                          <span aria-hidden="true">⌄</span>
-                        </summary>
+      <span aria-hidden="true">⌄</span>
+    </summary>
 
-                        <div className="admin-color-palette">
-                          {ADMIN_MATCH_COLOR_OPTIONS.map((colorOption) => {
-                            const selectedIndex =
-                              adminMatchForm.rivalColors.indexOf(
-                                colorOption.value,
-                              );
+    <div
+      className="admin-color-palette"
+      style={{
+        gridTemplateColumns: "repeat(8, minmax(0, 1fr))",
+        gap: "6px",
+        padding: "10px",
+      }}
+    >
+      <div
+        className="admin-home-away-toggle"
+        role="group"
+        aria-label="Tipus visual de l'equip rival"
+        style={{
+          gridColumn: "1 / -1",
+          marginBottom: "3px",
+        }}
+      >
+        <button
+          type="button"
+          className={
+            adminMatchForm.rivalPattern === "solid"
+              ? "active"
+              : ""
+          }
+          onClick={() => updateAdminMatchPattern("solid")}
+        >
+          LLIS
+        </button>
 
-                            return (
-                              <button
-                                key={colorOption.value}
-                                type="button"
-                                className={
-                                  selectedIndex >= 0
-                                    ? "admin-color-swatch selected"
-                                    : "admin-color-swatch"
-                                }
-                                onClick={() =>
-                                  toggleAdminMatchColor(colorOption.value)
-                                }
-                                title={colorOption.label}
-                                aria-label={`Tria ${colorOption.label}`}
-                                aria-pressed={selectedIndex >= 0}
-                                style={{ "--swatch-color": colorOption.value }}
-                              >
-                                {selectedIndex >= 0 && (
-                                  <span>{selectedIndex + 1}</span>
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
+        <button
+          type="button"
+          className={
+            adminMatchForm.rivalPattern === "striped"
+              ? "active"
+              : ""
+          }
+          onClick={() => updateAdminMatchPattern("striped")}
+        >
+          4 FRANGES
+        </button>
+      </div>
 
-                        <small>
-                          Amb un color, el rival surt llis. Amb dos, es creen
-                          automàticament quatre franges alternades.
-                        </small>
-                      </details>
-                    </div>
+      {ADMIN_MATCH_COLOR_OPTIONS.map((colorOption) => {
+        const selectedIndex =
+          adminMatchForm.rivalColors.indexOf(
+            colorOption.value,
+          );
+
+        return (
+          <button
+            key={colorOption.value}
+            type="button"
+            className={
+              selectedIndex >= 0
+                ? "admin-color-swatch selected"
+                : "admin-color-swatch"
+            }
+            onClick={() =>
+              toggleAdminMatchColor(colorOption.value)
+            }
+            title={colorOption.label}
+            aria-label={`Tria ${colorOption.label}`}
+            aria-pressed={selectedIndex >= 0}
+            style={{
+              "--swatch-color": colorOption.value,
+              minWidth: 0,
+              minHeight: "30px",
+              borderRadius: "8px",
+            }}
+          >
+            {selectedIndex >= 0 && (
+              <span>{selectedIndex + 1}</span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+
+    <small>
+      {adminMatchForm.rivalPattern === "striped"
+        ? "FRANGES: tria exactament 2 colors i es dibuixaran 4 franges alternades."
+        : "LLIS: amb 1 color surt tot del mateix color; amb 2 colors surt 3/4 del primer i 1/4 del segon."}
+    </small>
+  </details>
+</div>
 
                     <div className="admin-upcoming-field">
                       <span className="admin-upcoming-field-label">
@@ -7189,67 +7267,69 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     </label>
 
                     <div className="admin-upcoming-preview-card">
-                      <span>PREVISUALITZACIÓ</span>
+  <span>PREVISUALITZACIÓ</span>
 
-                      <div className="admin-upcoming-preview-match">
-                        {adminMatchForm.barcaSide === "home" ? (
-                          <>
-                            <div>
-                              <TeamColorBadge
-                                teamId="barcelona"
-                                colors={teamBadgeVisualsById.barcelona.colors}
-                              />
-                              <strong>Barça</strong>
-                            </div>
+  <div className="admin-upcoming-preview-match">
+    {adminMatchForm.barcaSide === "home" ? (
+      <>
+        <div>
+          <TeamColorBadge
+            teamId="barcelona"
+            colors={teamBadgeVisualsById.barcelona.colors}
+          />
+          <strong>Barça</strong>
+        </div>
 
-                            <b>VS</b>
+        <b>VS</b>
 
-                            <div>
-                              <TeamColorBadge
-                                teamId={
-                                  slugifyTeamKey(adminMatchForm.rivalName) ||
-                                  "rival"
-                                }
-                                colors={adminMatchForm.rivalColors}
-                              />
-                              <strong>
-                                {adminMatchForm.rivalName.trim() || "Rival"}
-                              </strong>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div>
-                              <TeamColorBadge
-                                teamId={
-                                  slugifyTeamKey(adminMatchForm.rivalName) ||
-                                  "rival"
-                                }
-                                colors={adminMatchForm.rivalColors}
-                              />
-                              <strong>
-                                {adminMatchForm.rivalName.trim() || "Rival"}
-                              </strong>
-                            </div>
+        <div>
+          <TeamColorBadge
+            teamId={
+              slugifyTeamKey(adminMatchForm.rivalName) ||
+              "rival"
+            }
+            colors={adminMatchForm.rivalColors}
+            pattern={adminMatchForm.rivalPattern}
+          />
+          <strong>
+            {adminMatchForm.rivalName.trim() || "Rival"}
+          </strong>
+        </div>
+      </>
+    ) : (
+      <>
+        <div>
+          <TeamColorBadge
+            teamId={
+              slugifyTeamKey(adminMatchForm.rivalName) ||
+              "rival"
+            }
+            colors={adminMatchForm.rivalColors}
+            pattern={adminMatchForm.rivalPattern}
+          />
+          <strong>
+            {adminMatchForm.rivalName.trim() || "Rival"}
+          </strong>
+        </div>
 
-                            <b>VS</b>
+        <b>VS</b>
 
-                            <div>
-                              <TeamColorBadge
-                                teamId="barcelona"
-                                colors={teamBadgeVisualsById.barcelona.colors}
-                              />
-                              <strong>Barça</strong>
-                            </div>
-                          </>
-                        )}
-                      </div>
+        <div>
+          <TeamColorBadge
+            teamId="barcelona"
+            colors={teamBadgeVisualsById.barcelona.colors}
+          />
+          <strong>Barça</strong>
+        </div>
+      </>
+    )}
+  </div>
 
-                      <small>
-                        {adminMatchForm.kickoffText.trim() ||
-                          "31/7/26 i 20:45"}
-                      </small>
-                    </div>
+  <small>
+    {adminMatchForm.kickoffText.trim() ||
+      "31/7/26 i 20:45"}
+  </small>
+</div>
 
                     <div className="admin-upcoming-form-actions">
                       <button type="submit" disabled={adminMatchSaving}>
