@@ -800,7 +800,12 @@ const normalizeRankingUser = (row, scope, currentUserId, fallbackIndex = 0) => {
   };
 
   const achievementIds = [
-    ...(Array.isArray(row?.achievement_ids) ? row.achievement_ids : []),
+    ...(Array.isArray(row?.achievement_keys)
+      ? row.achievement_keys
+      : []),
+    ...(Array.isArray(row?.achievement_ids)
+      ? row.achievement_ids
+      : []),
     ...(Array.isArray(row?.permanent_achievement_ids)
       ? row.permanent_achievement_ids
       : []),
@@ -1000,7 +1005,14 @@ const ACHIEVEMENT_CATALOG = [
     description: "Completa una de les gestes especials del joc.",
   },
   {
-    id: "season-champion-2026-27",
+    id: "preseason_champion_2026",
+    icon: "preseason-sun-sunglasses",
+    title: "Campió de la pretemporada 2026",
+    description:
+      "Guanya la classificació general definitiva de la pretemporada 2026.",
+  },
+  {
+    id: "season_champion_2026_27",
     icon: "vesalaporra-v",
     title: "Campió de la temporada 26/27",
     description: "Guanya la classificació general definitiva 2026/27.",
@@ -1336,7 +1348,9 @@ function VesalaporraChampionIcon({ className = "" }) {
           <stop offset="100%" stopColor="#a41645" />
         </linearGradient>
       </defs>
+
       <circle cx="32" cy="32" r="27" fill="url(#vlpChampionGradient)" />
+
       <circle
         cx="32"
         cy="32"
@@ -1345,6 +1359,7 @@ function VesalaporraChampionIcon({ className = "" }) {
         stroke="#f4d04b"
         strokeWidth="4"
       />
+
       <path
         d="M18 18h9l5 24 5-24h9L37 49H27Z"
         fill="#ffe56f"
@@ -1356,9 +1371,107 @@ function VesalaporraChampionIcon({ className = "" }) {
   );
 }
 
+function PreseasonSunSunglassesIcon({ className = "" }) {
+  return (
+    <svg
+      className={`achievement-custom-icon preseason-sun-sunglasses-icon ${className}`.trim()}
+      viewBox="0 0 64 64"
+      role="img"
+      aria-label="Sol amb ulleres de sol"
+    >
+      <g
+        fill="none"
+        stroke="#efa51d"
+        strokeWidth="4.5"
+        strokeLinecap="round"
+      >
+        <path d="M32 4v7" />
+        <path d="M32 53v7" />
+        <path d="M4 32h7" />
+        <path d="M53 32h7" />
+        <path d="m12.2 12.2 5 5" />
+        <path d="m46.8 46.8 5 5" />
+        <path d="m51.8 12.2-5 5" />
+        <path d="m17.2 46.8-5 5" />
+      </g>
+
+      <circle
+        cx="32"
+        cy="32"
+        r="19.5"
+        fill="#ffd34f"
+        stroke="#e89b18"
+        strokeWidth="2.5"
+      />
+
+      <path
+        d="M15.5 26.5c4.8-1.7 9.9-2.4 15.2-1.8"
+        fill="none"
+        stroke="#191919"
+        strokeWidth="2.8"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M48.5 26.5c-4.8-1.7-9.9-2.4-15.2-1.8"
+        fill="none"
+        stroke="#191919"
+        strokeWidth="2.8"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M16.5 27.2h14.1l-1.2 7.2c-.5 3.2-2.6 5-5.8 5h-.9c-3.1 0-5.2-1.8-5.7-4.9Z"
+        fill="#17191f"
+        stroke="#08090b"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="M33.4 27.2h14.1l-.5 7.3c-.5 3.1-2.6 4.9-5.7 4.9h-.9c-3.2 0-5.3-1.8-5.8-5Z"
+        fill="#17191f"
+        stroke="#08090b"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="M30.2 29.4c1.2-1 2.4-1 3.6 0"
+        fill="none"
+        stroke="#08090b"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="m19.8 29.5 4.8 6.8"
+        fill="none"
+        stroke="#627aa7"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        opacity="0.8"
+      />
+
+      <path
+        d="m36.8 29.5 4.8 6.8"
+        fill="none"
+        stroke="#627aa7"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        opacity="0.8"
+      />
+    </svg>
+  );
+}
+
 function AchievementIconGraphic({ achievement }) {
   if (achievement?.icon === "kamikaze-plane") {
     return <KamikazePlaneIcon />;
+  }
+
+  if (achievement?.icon === "preseason-sun-sunglasses") {
+    return <PreseasonSunSunglassesIcon />;
   }
 
   if (achievement?.icon === "vesalaporra-v") {
