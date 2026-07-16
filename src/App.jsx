@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
+import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLauncher";
 import "./App.css";
 
 // FONT REAL: la plantilla pública no viu al codi.
@@ -5964,9 +5965,13 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 </button>
               </div>
             )}
-          </div>
+                  </div>
         </div>
       </header>
+
+      {activePage === "play" && (
+        <VesalaporraDesktopAppLauncher />
+      )}
 
       {authError && (
         <div className="auth-error-banner" role="alert">
