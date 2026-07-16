@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLauncher";
+import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
 import "./App.css";
 
 // FONT REAL: la plantilla pública no viu al codi.
@@ -8686,7 +8687,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   </form>
                 )}
 
-                {isOwnAuthenticatedProfile && profileFeedback?.message && (
+                               {isOwnAuthenticatedProfile && profileFeedback?.message && (
                   <div
                     className={`profile-feedback ${profileFeedback.type}`}
                     role={profileFeedback.type === "error" ? "alert" : "status"}
@@ -8700,6 +8701,10 @@ const saveAdminMatchPlayer = async (player, patch) => {
                       ×
                     </button>
                   </div>
+                )}
+
+                {isOwnAuthenticatedProfile && (
+                  <NotificationPreferencesCard />
                 )}
 
                 <nav className="profile-tabs" aria-label="Seccions del perfil">
