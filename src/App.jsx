@@ -8227,21 +8227,20 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
             <section className="ranking-board">
               <header className="ranking-board-heading">
-                <div>
-                  <span>
-                    {rankingTab === "general"
-                      ? "CLASSIFICACIÓ GENERAL"
-                      : "ÚLTIMA JORNADA PUNTUADA"}
-                  </span>
-                  <strong>
-                    {rankingLoading
-                      ? "Carregant rànquing real..."
-                      : `${visibleRankingRows.length} culers carregats`}
-                  </strong>
-                </div>
-                <small>20 EN 20 · SUPABASE</small>
-              </header>
-
+  <div>
+    <span>
+      {rankingTab === "general"
+        ? "CLASSIFICACIÓ GENERAL"
+        : "ÚLTIMA JORNADA PUNTUADA"}
+    </span>
+    <strong>
+      {rankingLoading
+        ? "Carregant rànquing real..."
+        : `${visibleRankingRows.length} culers carregats`}
+    </strong>
+  </div>
+  <small>ES CARREGA DE 20 EN 20</small>
+</header>
               {rankingError && (
                 <div className="real-data-state error" role="alert">
                   <strong>No s’ha pogut carregar el rànquing</strong>
