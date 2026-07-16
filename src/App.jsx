@@ -6823,8 +6823,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 </div>
 
                 <p>
-                  Les dades, la participació i les mitjanes provenen només del
-                  partit oficial publicat des de Puntuacions.
+                  Deixa anar les teves neures, filies i fòbies i caga't en les de la resta.
                 </p>
               </div>
 
@@ -6920,8 +6919,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 <div className="real-data-state empty">
                   <strong>Sense valoracions encara</strong>
                   <span>
-                    Quan Puntuacions publiqui la participació oficial i arribin
-                    vots reals, apareixeran aquí.
+                    Quan tinguem les valoracions del primer partit apareixeran aquí.
                   </span>
                 </div>
               )}
@@ -8024,7 +8022,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     </div>
                   ) : adminUpcomingMatches.length === 0 ? (
                     <div className="admin-catalog-empty">
-                      Encara no hi ha propers partits retornats pel backend.
+                      Encara no hi ha propers partits.
                     </div>
                   ) : (
                     <div className="admin-catalog-grid">
@@ -8145,8 +8143,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   </span>
                   <h1>RÀNQUING</h1>
                   <p>
-                    Només puntuacions oficials calculades pel backend a partir
-                    del que s’ha publicat a Puntuacions.
+                    El futbol et torna el que li dones. I qui es lleva molt molt aviat, tal.
                   </p>
                 </div>
 
