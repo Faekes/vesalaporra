@@ -8690,15 +8690,16 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                 {profileTab === "achievements" && (
                   <section className="profile-achievements-card">
-                    <header>
-                      <div>
-                        <span>MEDALLES</span>
-                        <strong>
-                          {selectedProfileData.unlockedAchievements}/
-                          {selectedProfileData.achievements.length} desbloquejades
-                        </strong>
-                      </div>
-                    </header>
+                   <header>
+  <div>
+    <span>MEDALLES</span>
+    <strong>
+      {" · "}
+      {selectedProfileData.unlockedAchievements}/
+      {selectedProfileData.achievements.length} desbloquejades
+    </strong>
+  </div>
+</header>
                     <div className="profile-achievements-grid">
                       {selectedProfileData.achievements.map((achievement) => (
                         <article
