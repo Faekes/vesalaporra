@@ -835,12 +835,45 @@ const normalizeRankingUser = (row, scope, currentUserId, fallbackIndex = 0) => {
     identityLabel: handleSlug ? "X" : "VESALAPORRA",
     joinedYear: toFiniteNumber(row?.joined_year) || null,
     isCurrentUser: Boolean(currentUserId && userId === String(currentUserId)),
-    position: toFiniteNumber(row?.ranking_position, row?.position, row?.rank) || fallbackIndex + 1,
+        position:
+      toFiniteNumber(
+        row?.ranking_position,
+        row?.position,
+        row?.rank,
+      ) || fallbackIndex + 1,
+
+    generalPosition: isGeneral
+      ? toFiniteNumber(
+          row?.ranking_position,
+          row?.position,
+          row?.rank,
+        ) || fallbackIndex + 1
+      : null,
+
+    jornadaPosition: isGeneral
+      ? null
+      : toFiniteNumber(
+          row?.ranking_position,
+          row?.position,
+          row?.rank,
+        ) || fallbackIndex + 1,
+
     general: isGeneral
       ? points
-      : { resultPoints: 0, xiPoints: 0, protagonistPoints: 0, totalPoints: 0 },
+      : {
+          resultPoints: 0,
+          xiPoints: 0,
+          protagonistPoints: 0,
+          totalPoints: 0,
+        },
+
     jornada: isGeneral
-      ? { resultPoints: 0, xiPoints: 0, protagonistPoints: 0, totalPoints: 0 }
+      ? {
+          resultPoints: 0,
+          xiPoints: 0,
+          protagonistPoints: 0,
+          totalPoints: 0,
+        }
       : points,
     achievementIds: [...new Set(achievementIds)],
   };
@@ -864,15 +897,29 @@ const mergeRankingScopes = (generalRows, jornadaRows) => {
     usersById.set(user.id, {
       ...previous,
       ...user,
-      general:
+            general:
         user.general.totalPoints !== 0 || previous.general.totalPoints === 0
           ? user.general
           : previous.general,
+
       jornada:
         user.jornada.totalPoints !== 0 || previous.jornada.totalPoints === 0
           ? user.jornada
           : previous.jornada,
-      isCurrentUser: previous.isCurrentUser || user.isCurrentUser,
+
+      generalPosition:
+        previous.generalPosition ??
+        user.generalPosition ??
+        null,
+
+      jornadaPosition:
+        previous.jornadaPosition ??
+        user.jornadaPosition ??
+        null,
+
+      isCurrentUser:
+        previous.isCurrentUser ||
+        user.isCurrentUser,
       achievementIds: [
         ...new Set([
           ...(previous.achievementIds || []),
@@ -2600,21 +2647,29 @@ function App() {
       ? [...rankingUsers, authenticatedProfileUser]
       : rankingUsers;
 
+  const getRankingScopePosition = (user, scope) => {
+    const rawPosition =
+      scope === "general"
+        ? user?.generalPosition
+        : user?.jornadaPosition;
+
+    const numericPosition = Number(rawPosition);
+
+    return Number.isFinite(numericPosition) &&
+      numericPosition > 0
+      ? numericPosition
+      : Number.MAX_SAFE_INTEGER;
+  };
+
   const rankingRows = [...rankingUsersWithAuth].sort(
-    (firstUser, secondUser) => {
-      const firstPoints = firstUser[rankingTab];
-      const secondPoints = secondUser[rankingTab];
-
-      return (
-        secondPoints.totalPoints - firstPoints.totalPoints ||
-        secondPoints.resultPoints - firstPoints.resultPoints ||
-        secondPoints.xiPoints - firstPoints.xiPoints ||
-        secondPoints.protagonistPoints - firstPoints.protagonistPoints ||
-        firstUser.displayName.localeCompare(secondUser.displayName, "ca")
-      );
-    },
+    (firstUser, secondUser) =>
+      getRankingScopePosition(firstUser, rankingTab) -
+        getRankingScopePosition(secondUser, rankingTab) ||
+      firstUser.displayName.localeCompare(
+        secondUser.displayName,
+        "ca",
+      ),
   );
-
   const visibleRankingRows = rankingRows.slice(0, visibleRankingCount);
   const rankingHasMore = visibleRankingCount < rankingRows.length;
   const currentRankingPosition =
@@ -2627,16 +2682,24 @@ function App() {
     currentRankingUser ||
     null;
 
-  const generalRankingRows = [...rankingUsersWithAuth].sort(
+    const generalRankingRows = [...rankingUsersWithAuth].sort(
     (firstUser, secondUser) =>
-      secondUser.general.totalPoints - firstUser.general.totalPoints ||
-      firstUser.displayName.localeCompare(secondUser.displayName, "ca"),
+      getRankingScopePosition(firstUser, "general") -
+        getRankingScopePosition(secondUser, "general") ||
+      firstUser.displayName.localeCompare(
+        secondUser.displayName,
+        "ca",
+      ),
   );
 
   const jornadaRankingRows = [...rankingUsersWithAuth].sort(
     (firstUser, secondUser) =>
-      secondUser.jornada.totalPoints - firstUser.jornada.totalPoints ||
-      firstUser.displayName.localeCompare(secondUser.displayName, "ca"),
+      getRankingScopePosition(firstUser, "jornada") -
+        getRankingScopePosition(secondUser, "jornada") ||
+      firstUser.displayName.localeCompare(
+        secondUser.displayName,
+        "ca",
+      ),
   );
 
   const selectedProfilePosition = selectedProfileUser
@@ -8137,11 +8200,30 @@ const saveAdminMatchPlayer = async (player, patch) => {
           <section className="ranking-page">
             <header className="ranking-hero">
               <div className="ranking-hero-top">
-                <div>
+                               <div>
                   <span className="ranking-kicker">
                     LA CLASSIFICACIÓ DE LA CULERADA
                   </span>
-                  <h1>RÀNQUING</h1>
+
+                  <div className="notes-title-row">
+                    <h1>RÀNQUING</h1>
+
+                    <button
+                      type="button"
+                      className="section-info-button"
+                      onClick={() =>
+                        toggleInfoSection("ranking")
+                      }
+                      aria-label="Informació sobre el rànquing i els desempats"
+                      aria-expanded={
+                        openInfoSection === "ranking"
+                      }
+                      title="Com s’ordena la classificació?"
+                    >
+                      i
+                    </button>
+                  </div>
+
                   <p>
                     El futbol et torna el que li dones. I qui es lleva molt molt aviat, tal.
                   </p>
@@ -8188,8 +8270,73 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     </strong>
                   </span>
                 </button>
-              )}
+                           )}
             </header>
+
+            {openInfoSection === "ranking" && (
+              <div
+                className="section-info-panel"
+                role="note"
+              >
+                <strong className="section-info-title">
+                  CRITERIS DE CLASSIFICACIÓ I DESEMPAT
+                </strong>
+
+                <div className="section-info-points-list">
+                  <div className="section-info-points-row featured">
+                    <span>1. Més punts totals</span>
+                    <strong>1r</strong>
+                  </div>
+
+                  <div className="section-info-points-row">
+                    <span>2. Més jornades guanyades</span>
+                    <strong>2n</strong>
+                  </div>
+
+                  <div className="section-info-points-row">
+                    <span>
+                      3. Més medalles desbloquejades
+                    </span>
+                    <strong>3r</strong>
+                  </div>
+
+                  <div className="section-info-points-row">
+                    <span>4. Més punts de Resultat</span>
+                    <strong>4t</strong>
+                  </div>
+
+                  <div className="section-info-points-row">
+                    <span>5. Més punts d’XI</span>
+                    <strong>5è</strong>
+                  </div>
+
+                  <div className="section-info-points-row">
+                    <span>
+                      6. Més punts de Protagonista
+                    </span>
+                    <strong>6è</strong>
+                  </div>
+
+                  <div className="section-info-points-row">
+                    <span>
+                      7. Major participació a la porra
+                    </span>
+                    <strong>7è</strong>
+                  </div>
+                </div>
+
+                <small className="section-info-note">
+                  Els criteris s’apliquen exactament en aquest
+                  ordre i només dins de la temporada activa.
+                  Participació significa porres confirmades
+                  vàlides. Si una jornada acaba empatada,
+                  tots els co-guanyadors sumen una jornada
+                  guanyada. Després de sis partits consecutius
+                  sense participar, el compte deixa d’aparèixer
+                  fins que torna a confirmar una porra.
+                </small>
+              </div>
+            )}
 
             <div
               className="ranking-tabs"
