@@ -5087,14 +5087,14 @@ button:focus-visible {
     font-size: 8px;
   }
 
-  .profile-identity-block {
+   .profile-identity-block {
     align-items: flex-start;
   }
 
   .ranking-avatar-profile {
-    width: 76px;
-    height: 76px;
-    flex-basis: 76px;
+    width: 88px;
+    height: 88px;
+    flex-basis: 88px;
     border-width: 3px;
   }
 
@@ -6091,7 +6091,7 @@ button:focus-visible {
 }
 
 @media (max-width: 500px) {
-  .profile-identity-copy {
+    .profile-identity-copy {
     width: 100%;
     flex: 1 1 auto;
   }
@@ -6101,7 +6101,9 @@ button:focus-visible {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: stretch;
     gap: 8px;
-    width: 100%;
+    width: calc(100% + 103px);
+    margin-top: 18px;
+    margin-left: -103px;
     flex-wrap: nowrap;
   }
 

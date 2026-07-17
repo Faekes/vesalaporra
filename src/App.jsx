@@ -8230,15 +8230,10 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     </button>
                   </div>
 
-                  <p>
+                                   <p>
                     El futbol et torna el que li dones. I qui es lleva molt molt aviat, tal.
                   </p>
                 </div>
-
-                <span className="ranking-x-origin">
-                  <strong>✓</strong>
-                  DADES REALS
-                </span>
               </div>
 
               {currentRankingUser && (
