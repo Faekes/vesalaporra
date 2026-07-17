@@ -8573,7 +8573,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                       ) : null}
 
                       {isOwnAuthenticatedProfile ? (
-                        <div className="profile-inline-actions">
+                                                <div className="profile-inline-actions">
                           <button
                             type="button"
                             className="profile-inline-action"
@@ -8601,6 +8601,8 @@ const saveAdminMatchPlayer = async (player, patch) => {
                             <span aria-hidden="true">◉</span>
                             CANVIA AVATAR
                           </button>
+
+                          <NotificationPreferencesCard variant="desktop-inline" />
 
                           <input
                             ref={profileAvatarInputRef}
