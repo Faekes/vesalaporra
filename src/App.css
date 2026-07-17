@@ -2019,6 +2019,16 @@ button:focus-visible {
     font-size: 13px;
   }
 
+  .lineup-card .section-help {
+    width: 100%;
+    max-width: 560px;
+    margin: 22px auto 0;
+    padding: 0 10px;
+    font-size: 13px;
+    line-height: 1.6;
+    text-align: center;
+  }
+
   .scoreboard {
     gap: 7px;
     margin-top: 22px;
@@ -5987,16 +5997,27 @@ button:focus-visible {
 }
 
 @media (max-width: 500px) {
-  .profile-inline-actions {
-    align-items: stretch;
+  .profile-identity-copy {
     width: 100%;
+    flex: 1 1 auto;
+  }
+
+  .profile-inline-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    flex-wrap: nowrap;
   }
 
   .profile-inline-action {
-    flex: 1 1 130px;
+    width: 100%;
+    min-width: 0;
     min-height: 36px;
-    padding: 0 9px;
+    padding: 0 7px;
     font-size: 7px;
+    white-space: nowrap;
   }
 
   .profile-account-source {
