@@ -370,10 +370,7 @@ export default function NotificationPreferencesCard() {
     }
   };
 
-  const permissionBlocked =
-    pushState.permission === "denied";
-
-  const permissionBlocked =
+    const permissionBlocked =
     pushState.permission === "denied";
 
   const statusLabel = loading
