@@ -491,6 +491,17 @@ const X_AUTO_LOGIN_STORAGE_KEY = "vesalaporra_x_auto_login_started_at";
 
 const X_AUTO_LOGIN_COOLDOWN_MS = 15000;
 
+const VESALAPORRA_ACTIVE_PAGE_STORAGE_KEY =
+  "vesalaporra_active_page";
+
+const VESALAPORRA_ACTIVE_PAGES = [
+  "play",
+  "notes",
+  "ranking",
+  "profile",
+  "scoring",
+];
+
 const PROFILE_AVATAR_BUCKET = "vesalaporra-profile-avatars";
 
 const PROFILE_AVATAR_MAX_BYTES = 2 * 1024 * 1024;
@@ -2286,7 +2297,25 @@ const formation433 = [
 ];
 
 function App() {
-  const [activePage, setActivePage] = useState("play");
+  const [activePage, setActivePage] = useState(() => {
+    const storedActivePage =
+      window.sessionStorage.getItem(
+        VESALAPORRA_ACTIVE_PAGE_STORAGE_KEY,
+      );
+
+    return VESALAPORRA_ACTIVE_PAGES.includes(
+      storedActivePage,
+    )
+      ? storedActivePage
+      : "play";
+  });
+
+  useEffect(() => {
+    window.sessionStorage.setItem(
+      VESALAPORRA_ACTIVE_PAGE_STORAGE_KEY,
+      activePage,
+    );
+  }, [activePage]);
 
   const [rankingTab, setRankingTab] = useState("general");
 
@@ -5304,9 +5333,8 @@ const saveAdminMatchPlayer = async (player, patch) => {
       setAuthSession(data.session ?? null);
       setAuthLoading(false);
 
-      if (data.session) {
+          if (data.session) {
         window.sessionStorage.removeItem(X_AUTO_LOGIN_STORAGE_KEY);
-        setActivePage("play");
         cleanAuthUrl();
 
         return;
@@ -5328,11 +5356,10 @@ const saveAdminMatchPlayer = async (player, patch) => {
       setAuthLoading(false);
       setAuthActionLoading(false);
 
-      if (event === "SIGNED_IN") {
+            if (event === "SIGNED_IN") {
         window.sessionStorage.removeItem(X_AUTO_LOGIN_STORAGE_KEY);
         setAuthError("");
         setAccountMenuOpen(false);
-        setActivePage("play");
         cleanAuthUrl();
       }
 
