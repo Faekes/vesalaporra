@@ -172,10 +172,8 @@ export default function NotificationPreferencesCard() {
     INITIAL_PUSH_STATE,
   );
 
-   const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
-  const [testWorking, setTestWorking] =
-    useState(false);
   const [feedback, setFeedback] =
     useState(null);
 
@@ -316,60 +314,7 @@ export default function NotificationPreferencesCard() {
     }
   };
 
-  const handleLocalNotificationTest = async () => {
-    if (
-      testWorking ||
-      !pushState.supported ||
-      pushState.permission !== "granted"
-    ) {
-      return;
-    }
-
-    setTestWorking(true);
-    setFeedback(null);
-
-    try {
-      const registration =
-        await navigator.serviceWorker.ready;
-
-      await registration.showNotification(
-        "Prova Vesalaporra",
-        {
-          body:
-            "Si veus aquest avís, aquest dispositiu pot mostrar notificacions.",
-          icon: "/icon-192.png",
-          badge: "/icon-192.png",
-          tag:
-            `vesalaporra:local-test:${Date.now()}`,
-          data: {
-            url:
-              "/?source=local-notification-test",
-          },
-        },
-      );
-
-      setFeedback({
-        type: "success",
-        message:
-          "Prova local enviada a aquest dispositiu.",
-      });
-    } catch (error) {
-      console.error(
-        "[VESALAPORRA_PUSH] Error mostrant la prova local:",
-        error,
-      );
-
-      setFeedback({
-        type: "error",
-        message:
-          error?.message ||
-          "Aquest dispositiu no ha pogut mostrar la notificació de prova.",
-      });
-    } finally {
-      setTestWorking(false);
-    }
-  };
-
+  
     const permissionBlocked =
     pushState.permission === "denied";
 
@@ -564,26 +509,7 @@ export default function NotificationPreferencesCard() {
           opacity: 0.55;
         }
 
-        .vlp-push-test-button {
-          width: 100%;
-          min-height: 42px;
-          padding: 10px 16px;
-          border: 1px solid rgba(96, 165, 250, 0.38);
-          border-radius: 999px;
-          background: rgba(37, 99, 235, 0.08);
-          color: #bfdbfe;
-          font: inherit;
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: 0.1em;
-          cursor: pointer;
-        }
-
-        .vlp-push-test-button:disabled {
-          cursor: default;
-          opacity: 0.5;
-        }
-
+     
         .vlp-push-feedback {
           display: flex;
           align-items: center;
@@ -748,24 +674,7 @@ export default function NotificationPreferencesCard() {
           {buttonLabel}
         </button>
 
-        {pushState.enabled && (
-          <button
-            type="button"
-            className="vlp-push-test-button"
-            disabled={
-              loading ||
-              working ||
-              testWorking ||
-              permissionBlocked
-            }
-            onClick={handleLocalNotificationTest}
-          >
-            {testWorking
-              ? "ENVIANT PROVA..."
-              : "PROVA EN AQUEST DISPOSITIU"}
-          </button>
-        )}
-
+      
         {feedback?.message && (
           <div
             className={`vlp-push-feedback ${feedback.type}`}
