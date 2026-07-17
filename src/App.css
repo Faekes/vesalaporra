@@ -9819,3 +9819,100 @@ button.notes-star:hover {
     border-radius: 15px;
   }
 }
+/* =========================================================
+   PERFIL FINAL · AVATAR RESPONSIVE + ACCIONS MOBILE ALINEADES
+   ========================================================= */
+
+/* Desktop: recupera exactament la mida original */
+.ranking-avatar-profile {
+  width: 118px;
+  height: 118px;
+  flex-basis: 118px;
+}
+
+/* Tablet: manté la mida responsive original */
+@media (max-width: 760px) {
+  .ranking-avatar-profile {
+    width: 92px;
+    height: 92px;
+    flex-basis: 92px;
+  }
+}
+
+/* Mòbil: avatar una mica més gran i botons en una sola línia */
+@media (max-width: 500px) {
+  .profile-identity-block {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 0;
+    width: 100%;
+  }
+
+  .ranking-avatar-profile {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    align-self: center;
+    width: 84px;
+    height: 84px;
+    flex-basis: 84px;
+    border-width: 3px;
+  }
+
+  .profile-identity-copy {
+    display: contents;
+  }
+
+  .profile-kicker {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+  }
+
+  .profile-identity-copy h1 {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    min-width: 0;
+    margin-top: 6px;
+    font-size: 27px;
+    white-space: normal;
+  }
+
+  .profile-x-handle,
+  .profile-identity-badges {
+    grid-column: 2;
+    grid-row: 3;
+  }
+
+  .profile-inline-actions {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+    margin: 18px 0 0;
+    margin-left: 0;
+    padding: 0;
+    transform: none;
+  }
+
+  .profile-inline-action {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 9px;
+    border-radius: 16px;
+    font-size: 8px;
+    letter-spacing: 0.075em;
+    white-space: nowrap;
+  }
+
+  .profile-inline-action > span {
+    font-size: 14px;
+  }
+}
