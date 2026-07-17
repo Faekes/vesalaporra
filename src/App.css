@@ -3721,10 +3721,7 @@ button:focus-visible {
   grid-template-columns:
     58px
     minmax(220px, 1fr)
-    100px
-    88px
-    128px
-    88px;
+    repeat(4, 108px);
   align-items: center;
   gap: 8px;
 }
