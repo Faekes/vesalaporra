@@ -4096,8 +4096,10 @@ button:focus-visible {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: repeat(2, minmax(94px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+  width: 286px;
+  max-width: 100%;
 }
 
 .profile-hero-stats > div {
@@ -4105,14 +4107,15 @@ button:focus-visible {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-width: 0;
   min-height: 88px;
-  padding: 13px;
+  padding: 11px 9px;
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 18px;
   background: rgba(3, 8, 20, 0.54);
 }
 
-.profile-hero-stats span {
+.profile-hero-stats > div > span {
   color: #75809a;
   font-size: 7px;
   font-weight: 950;
@@ -4136,6 +4139,51 @@ button:focus-visible {
 
 .profile-hero-stats .gold strong {
   color: #f6d65b;
+}
+
+.profile-hero-medals {
+  border-color: rgba(244, 208, 75, 0.2);
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(244, 208, 75, 0.09),
+      transparent 68%
+    ),
+    rgba(3, 8, 20, 0.54);
+}
+
+.profile-hero-medals .profile-hero-medal-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 3px;
+  width: 100%;
+  max-width: 82px;
+  margin-top: 7px;
+  overflow: visible;
+}
+
+.profile-hero-medals .ranking-achievement-icon {
+  width: 18px;
+  height: 18px;
+  flex-basis: 18px;
+  font-size: 9px;
+}
+
+.profile-hero-medals
+  .ranking-achievement-icon
+  .achievement-custom-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.profile-hero-medals > small {
+  margin-top: 8px;
+  color: #69758f;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
 }
 
 .profile-hero-actions {
@@ -5307,13 +5355,13 @@ button:focus-visible {
     line-height: 1.35;
   }
 
-   .ranking-row {
+     .ranking-row {
     grid-template-columns:
       36px
       repeat(3, minmax(0, 1fr))
       60px;
     gap: 8px 5px;
-    min-height: 96px;
+    min-height: 108px;
   }
 
   .ranking-position {
@@ -5330,15 +5378,51 @@ button:focus-visible {
   .ranking-identity {
     grid-column: 2 / 5;
     grid-row: 1;
+    align-items: flex-start;
     gap: 9px;
+  }
+
+  .ranking-identity-copy {
+    gap: 1px;
   }
 
   .ranking-identity-copy > strong {
     font-size: 11px;
+    line-height: 1.1;
   }
 
   .ranking-identity-copy > small {
+    gap: 4px;
+    margin-top: 1px;
     font-size: 8px;
+    line-height: 1.1;
+  }
+
+  .ranking-desktop-medals {
+    display: none;
+  }
+
+  .ranking-achievement-icons.ranking-mobile-medals {
+    display: flex;
+    width: 100%;
+    max-width: none;
+    margin-top: 5px;
+    overflow: visible;
+    gap: 2px;
+  }
+
+  .ranking-mobile-medals .ranking-achievement-icon {
+    width: 16px;
+    height: 16px;
+    flex-basis: 16px;
+    font-size: 8px;
+  }
+
+  .ranking-mobile-medals
+    .ranking-achievement-icon
+    .achievement-custom-icon {
+    width: 12px;
+    height: 12px;
   }
 
   .ranking-total {
@@ -8131,6 +8215,10 @@ button.notes-star:hover {
   flex: 0 0 auto;
   max-width: 148px;
   overflow: hidden;
+}
+
+.ranking-mobile-medals {
+  display: none;
 }
 
 .ranking-achievement-icon {

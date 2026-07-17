@@ -8461,14 +8461,17 @@ const saveAdminMatchPlayer = async (player, patch) => {
                           >
                             <RankingAvatar user={user} />
 
-                            <span className="ranking-identity-copy">
+                                                    <span className="ranking-identity-copy">
                               <strong>
                                 <span className="ranking-name-text">
                                   {user.displayName}
                                 </span>
+
                                 <RankingAchievementIcons
                                   achievements={getRankingAchievements(user)}
+                                  className="ranking-desktop-medals"
                                 />
+
                                 {user.isCurrentUser && (
                                   <span className="ranking-you-badge">TU</span>
                                 )}
@@ -8480,6 +8483,11 @@ const saveAdminMatchPlayer = async (player, patch) => {
                                   {user.handle}
                                 </small>
                               )}
+
+                              <RankingAchievementIcons
+                                achievements={getRankingAchievements(user)}
+                                className="ranking-mobile-medals"
+                              />
                             </span>
                           </button>
 
@@ -8616,7 +8624,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     </div>
                   </div>
 
-                  <div className="profile-hero-stats">
+                               <div className="profile-hero-stats">
                     <div>
                       <span>POSICIÓ GENERAL</span>
                       <strong>
@@ -8625,11 +8633,25 @@ const saveAdminMatchPlayer = async (player, patch) => {
                           : "—"}
                       </strong>
                     </div>
+
                     <div className="gold">
                       <span>PUNTS</span>
                       <strong>
                         {selectedProfileUser.general.totalPoints}
                       </strong>
+                    </div>
+
+                    <div className="profile-hero-medals">
+                      <span>MEDALLES</span>
+
+                      {selectedProfileData.unlockedAchievements > 0 ? (
+                        <RankingAchievementIcons
+                          achievements={selectedProfileData.achievements}
+                          className="profile-hero-medal-icons"
+                        />
+                      ) : (
+                        <small>CAP ENCARA</small>
+                      )}
                     </div>
                   </div>
 
