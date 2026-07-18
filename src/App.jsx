@@ -6734,7 +6734,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 <div className="protagonist-picker-copy">
                   <span>PROTAGONISTA</span>
 
-                  <strong>Tria un dels 21 jugadors de camp</strong>
+                  <strong>Tria un dels jugadors de camp</strong>
 
                   <small>Cada opció mostra premi i penalització</small>
                 </div>
@@ -6748,7 +6748,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   aria-label="Selecciona el protagonista"
                 >
                   <option value="">
-                    Selecciona un dels 21 jugadors de camp
+                    Selecciona un dels jugadors de camp
                   </option>
 
                   {eligibleProtagonistPlayers.map((player) => {
