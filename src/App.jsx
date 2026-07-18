@@ -6780,10 +6780,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 </div>
               )}
 
-              <p className="section-help">
+                           <p className="section-help">
                 Tria qualsevol jugador de camp. Encertes si marca o dona una
-                assistència. Cada jugador té un premi i un risc segons el seu
-                grup.
+                assistència. Cada jugador té el seu propi premi i penalització.
               </p>
 
               <div className="protagonist-combined-rule">
@@ -6830,12 +6829,12 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     Selecciona un dels jugadors de camp
                   </option>
 
-                  {eligibleProtagonistPlayers.map((player) => {
+                                 {eligibleProtagonistPlayers.map((player) => {
                     const scoring = getPlayerProtagonistScoring(player);
 
                     return (
                       <option key={player.id} value={player.id}>
-                        {`${player.name} · ${scoring.groupLabel} · +${scoring.hitPoints} si encertes · ${scoring.missPoints} si falles`}
+                        {`${player.name} · +${scoring.hitPoints} si encertes · ${scoring.missPoints} si falles`}
                       </option>
                     );
                   })}
