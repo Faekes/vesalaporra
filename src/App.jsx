@@ -6564,7 +6564,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
               <div className="player-tray">
                 <div className="player-tray-header">
-                  <strong>23 XAPES DEL BARÇA</strong>
+                  <strong>XAPES DEL BARÇA</strong>
 
                   <span>{lineupPlayers.length} jugadors</span>
                 </div>
