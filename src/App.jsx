@@ -665,6 +665,11 @@ const VESALAPORRA_PUBLIC_PROFILE_HISTORY_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_PROFILE_HISTORY_RPC ||
   "vesalaporra_public_profile_history";
 
+const VESALAPORRA_PUBLIC_PROFILE_COMPETITIVE_SUMMARY_RPC =
+  import.meta.env
+    .VITE_VESALAPORRA_PUBLIC_PROFILE_COMPETITIVE_SUMMARY_RPC ||
+  "vesalaporra_public_profile_competitive_summary";
+
 const VESALAPORRA_SUBMIT_RATING_RPC =
   import.meta.env.VITE_VESALAPORRA_SUBMIT_RATING_RPC ||
   "vesalaporra_submit_rating";
@@ -2403,6 +2408,7 @@ function App() {
   const [rankingError, setRankingError] = useState("");
 
   const [profileHistory, setProfileHistory] = useState([]);
+
   const [profileAchievements, setProfileAchievements] = useState(
     ACHIEVEMENT_CATALOG.map((achievement) => ({
       ...achievement,
@@ -2410,6 +2416,9 @@ function App() {
       progress: "",
     })),
   );
+
+  const [profileJornadaWins, setProfileJornadaWins] = useState(0);
+
   const [profileDataLoading, setProfileDataLoading] = useState(false);
   const [profileDataError, setProfileDataError] = useState("");
 
@@ -5069,9 +5078,11 @@ const saveAdminMatchPlayer = async (player, patch) => {
     }
   };
 
-    const loadRealProfileData = async (userId) => {
+     const loadRealProfileData = async (userId) => {
     if (!userId) {
       setProfileHistory([]);
+      setProfileJornadaWins(0);
+
       setProfileAchievements(
         ACHIEVEMENT_CATALOG.map((achievement) => ({
           ...achievement,
@@ -5079,38 +5090,66 @@ const saveAdminMatchPlayer = async (player, patch) => {
           progress: "",
         })),
       );
+
       return;
     }
 
     setProfileDataLoading(true);
     setProfileDataError("");
+    setProfileJornadaWins(0);
 
     try {
-      const [achievementPayload, historyPayload] =
-        await Promise.all([
-          callRpcWithPayloadFallbacks(
-            VESALAPORRA_PUBLIC_USER_ACHIEVEMENTS_RPC,
-            [
-              { p_user_id: userId },
-              { user_id: userId },
-            ],
-          ),
-          callRpcWithPayloadFallbacks(
-            VESALAPORRA_PUBLIC_PROFILE_HISTORY_RPC,
-            [
-              { p_user_id: userId },
-              { user_id: userId },
-            ],
-          ),
-        ]);
+      const [
+        achievementPayload,
+        historyPayload,
+        competitiveSummaryPayload,
+      ] = await Promise.all([
+        callRpcWithPayloadFallbacks(
+          VESALAPORRA_PUBLIC_USER_ACHIEVEMENTS_RPC,
+          [
+            { p_user_id: userId },
+            { user_id: userId },
+          ],
+        ),
+
+        callRpcWithPayloadFallbacks(
+          VESALAPORRA_PUBLIC_PROFILE_HISTORY_RPC,
+          [
+            { p_user_id: userId },
+            { user_id: userId },
+          ],
+        ),
+
+        callRpcWithPayloadFallbacks(
+          VESALAPORRA_PUBLIC_PROFILE_COMPETITIVE_SUMMARY_RPC,
+          [
+            { p_user_id: userId },
+            { user_id: userId },
+          ],
+        ),
+      ]);
 
       const historyRows = unwrapRpcRows(
         historyPayload,
         ["history", "rows", "items"],
       );
 
+      const competitiveSummaryRows = unwrapRpcRows(
+        competitiveSummaryPayload,
+        ["summary", "rows", "items"],
+      );
+
+      const competitiveSummaryRow =
+        competitiveSummaryRows[0] || null;
+
       setProfileAchievements(
         normalizeAchievementRows(achievementPayload),
+      );
+
+      setProfileJornadaWins(
+        toFiniteNumber(
+          competitiveSummaryRow?.jornada_wins,
+        ),
       );
 
       setProfileHistory(
@@ -5131,6 +5170,8 @@ const saveAdminMatchPlayer = async (player, patch) => {
       );
     } catch (error) {
       setProfileHistory([]);
+      setProfileJornadaWins(0);
+
       setProfileDataError(
         error?.message ||
           "No s’ha pogut carregar el perfil real.",
@@ -8798,41 +8839,68 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                 {profileTab === "overview" && (
                   <div className="profile-overview">
-                    <section className="profile-main-stats">
+                                        <section className="profile-main-stats">
                       <article>
                         <span>POSICIÓ</span>
+
                         <strong>
                           {selectedProfilePosition > 0
                             ? `#${selectedProfilePosition}`
                             : "—"}
                         </strong>
+
                         <small>classificació general</small>
                       </article>
+
                       <article className="featured">
                         <span>PUNTS TOTALS</span>
+
                         <strong>
                           {selectedProfileUser.general.totalPoints}
                         </strong>
+
                         <small>temporada actual</small>
                       </article>
+
+                      <article>
+                        <span>JORNADES GUANYADES</span>
+
+                        <strong>{profileJornadaWins}</strong>
+
+                        <small>els empatats al màxim també compten</small>
+                      </article>
+
                       <article>
                         <span>PORRES PUNTUADES</span>
+
                         <strong>{selectedProfileData.played}</strong>
+
                         <small>historial oficial</small>
                       </article>
+
                       <article>
                         <span>RESULTATS EXACTES</span>
+
                         <strong>{selectedProfileData.exactScores}</strong>
+
                         <small>dades reals</small>
                       </article>
+
                       <article>
                         <span>XI EXACTES</span>
+
                         <strong>{selectedProfileData.exactXiCount}</strong>
+
                         <small>11/11 oficials</small>
                       </article>
+
                       <article>
                         <span>PROTAGONISTES</span>
-                        <strong>{selectedProfileData.protagonistHits}</strong>
+
+                        <strong>
+                          {selectedProfileData.protagonistHits}
+                        </strong>
+
                         <small>encerts oficials</small>
                       </article>
                     </section>
