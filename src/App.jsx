@@ -1075,12 +1075,19 @@ const ACHIEVEMENT_CATALOG = [
     title: "Kamikaze",
     description: "Completa una de les gestes especials del joc.",
   },
-  {
+   {
     id: "preseason_champion_2026",
     icon: "preseason-sun-sunglasses",
     title: "Campió de la pretemporada 2026",
     description:
       "Guanya la classificació general definitiva de la pretemporada 2026.",
+  },
+  {
+    id: "winter_champion_2026",
+    icon: "winter-snowflake",
+    title: "Campió d’hivern 2026",
+    description:
+      "Lidera la classificació general de Vesalaporra en acabar l’any natural 2026.",
   },
   {
     id: "season_champion_2026_27",
@@ -1536,6 +1543,74 @@ function PreseasonSunSunglassesIcon({ className = "" }) {
   );
 }
 
+function WinterSnowflakeIcon({ className = "" }) {
+  return (
+    <svg
+      className={`achievement-custom-icon winter-snowflake-icon ${className}`.trim()}
+      viewBox="0 0 64 64"
+      role="img"
+      aria-label="Floc de neu d’hivern"
+    >
+      <circle
+        cx="32"
+        cy="32"
+        r="27"
+        fill="#e9f7ff"
+        stroke="#79bfe8"
+        strokeWidth="3"
+      />
+
+      <circle
+        cx="32"
+        cy="32"
+        r="21.5"
+        fill="#d9f1ff"
+        stroke="#b7e3fa"
+        strokeWidth="1.5"
+      />
+
+      <g
+        fill="none"
+        stroke="#2f91cf"
+        strokeWidth="3.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M32 13v38" />
+        <path d="M15.5 22.5 48.5 41.5" />
+        <path d="M15.5 41.5 48.5 22.5" />
+
+        <path d="m32 13-5 5" />
+        <path d="m32 13 5 5" />
+
+        <path d="m32 51-5-5" />
+        <path d="m32 51 5-5" />
+
+        <path d="m15.5 22.5 7 .8" />
+        <path d="m15.5 22.5 2.8 6.4" />
+
+        <path d="m48.5 41.5-7-.8" />
+        <path d="m48.5 41.5-2.8-6.4" />
+
+        <path d="m15.5 41.5 2.8-6.4" />
+        <path d="m15.5 41.5 7-.8" />
+
+        <path d="m48.5 22.5-2.8 6.4" />
+        <path d="m48.5 22.5-7 .8" />
+      </g>
+
+      <circle
+        cx="32"
+        cy="32"
+        r="4.5"
+        fill="#ffffff"
+        stroke="#2f91cf"
+        strokeWidth="2.5"
+      />
+    </svg>
+  );
+}
+
 function AchievementIconGraphic({ achievement }) {
   if (achievement?.icon === "kamikaze-plane") {
     return <KamikazePlaneIcon />;
@@ -1543,6 +1618,10 @@ function AchievementIconGraphic({ achievement }) {
 
   if (achievement?.icon === "preseason-sun-sunglasses") {
     return <PreseasonSunSunglassesIcon />;
+  }
+
+  if (achievement?.icon === "winter-snowflake") {
+    return <WinterSnowflakeIcon />;
   }
 
   if (achievement?.icon === "vesalaporra-v") {
