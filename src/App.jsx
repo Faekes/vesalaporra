@@ -2444,6 +2444,11 @@ function App() {
 
   const [protagonistId, setProtagonistId] = useState(null);
 
+  const [protagonistSelectionActive, setProtagonistSelectionActive] =
+    useState(false);
+
+  const [protagonistPreviewId, setProtagonistPreviewId] = useState(null);
+
   const [openInfoSection, setOpenInfoSection] = useState(null);
 
   const [matchData, setMatchData] = useState(EMPTY_MATCH_DATA);
@@ -2470,6 +2475,14 @@ function App() {
     useState(false);
 
   const confirmationAnimationTimerRef = useRef(null);
+
+  const protagonistSelectionAreaRef = useRef(null);
+
+  const protagonistCardRef = useRef(null);
+
+  const protagonistInputTypeRef = useRef("mouse");
+
+  const protagonistTouchPreviewIdRef = useRef(null);
 
   const [notesTab, setNotesTab] = useState("match");
 
@@ -2695,23 +2708,18 @@ function App() {
   const lineupCount = lineup.filter(Boolean).length;
   const lineupIsComplete = lineupCount === 11;
 
-  const eligibleProtagonistPlayers = gamePlayers
-    .filter(
-      (player) =>
-        !player.isGoalkeeper &&
-        player.eligibleForProtagonist !== false &&
-        Boolean(getPlayerProtagonistScoring(player)),
-    )
-    .sort(
-      (firstPlayer, secondPlayer) =>
-        getPlayerProtagonistScoring(firstPlayer).order -
-        getPlayerProtagonistScoring(secondPlayer).order,
-    );
-
   const protagonist = protagonistId ? gamePlayersById[protagonistId] : null;
 
   const protagonistScoring = protagonist
     ? getPlayerProtagonistScoring(protagonist)
+    : null;
+
+  const protagonistPreview = protagonistPreviewId
+    ? gamePlayersById[protagonistPreviewId]
+    : null;
+
+  const protagonistPreviewScoring = protagonistPreview
+    ? getPlayerProtagonistScoring(protagonistPreview)
     : null;
 
   const protagonistIsComplete = Boolean(protagonist && protagonistScoring);
@@ -4917,6 +4925,10 @@ const saveAdminMatchPlayer = async (player, patch) => {
           protagonistDraftBeforeSubmit ||
           null,
       );
+      setProtagonistSelectionActive(false);
+      setProtagonistPreviewId(null);
+      protagonistInputTypeRef.current = "mouse";
+      protagonistTouchPreviewIdRef.current = null;
       setConfirmedPrediction(predictionSnapshot);
       setPredictionConfirmed(true);
       setConfirmationMode("prediction");
@@ -5681,6 +5693,10 @@ const saveAdminMatchPlayer = async (player, patch) => {
       setScoreTouched(false);
       setLineup(Array.from({ length: 11 }, () => null));
       setProtagonistId(null);
+      setProtagonistSelectionActive(false);
+      setProtagonistPreviewId(null);
+      protagonistInputTypeRef.current = "mouse";
+      protagonistTouchPreviewIdRef.current = null;
       setSelectedSlotIndex(null);
       setSelectedPlayerId(null);
       setPredictionConfirmed(false);
@@ -5753,6 +5769,10 @@ const saveAdminMatchPlayer = async (player, patch) => {
         setScoreTouched(true);
         setLineup(restoredLineup);
         setProtagonistId(predictionSnapshot.protagonistId);
+        setProtagonistSelectionActive(false);
+        setProtagonistPreviewId(null);
+        protagonistInputTypeRef.current = "mouse";
+        protagonistTouchPreviewIdRef.current = null;
         setConfirmedPrediction(predictionSnapshot);
         setPredictionConfirmed(true);
       } catch (error) {
@@ -5849,6 +5869,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
     if (!isStillEligible) {
       setProtagonistId(null);
+      setProtagonistSelectionActive(false);
+      setProtagonistPreviewId(null);
+      protagonistTouchPreviewIdRef.current = null;
     }
   }, [protagonistId, publicMatchPlayers]);
 
@@ -5888,6 +5911,112 @@ const saveAdminMatchPlayer = async (player, patch) => {
       setActivePage("play");
     }
   }, [activePage, isAdmin]);
+
+  const isPlayerEligibleForProtagonist = (player) =>
+    Boolean(
+      player &&
+        !player.isGoalkeeper &&
+        player.eligibleForProtagonist !== false &&
+        getPlayerProtagonistScoring(player),
+    );
+
+  const clearProtagonistSelectionMode = () => {
+    setProtagonistSelectionActive(false);
+    setProtagonistPreviewId(null);
+    protagonistInputTypeRef.current = "mouse";
+    protagonistTouchPreviewIdRef.current = null;
+  };
+
+  const handleProtagonistSelectorClick = () => {
+    if (protagonistIsConfirmed || predictionSubmitting || countdown.isClosed) {
+      return;
+    }
+
+    if (protagonistId) {
+      setProtagonistId(null);
+      clearProtagonistSelectionMode();
+      return;
+    }
+
+    setProtagonistPreviewId(null);
+    protagonistTouchPreviewIdRef.current = null;
+
+    setProtagonistSelectionActive((currentValue) => {
+      const nextValue = !currentValue;
+
+      if (nextValue) {
+        window.requestAnimationFrame(() => {
+          protagonistSelectionAreaRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        });
+      }
+
+      return nextValue;
+    });
+  };
+
+  const handleProtagonistPlayerPreview = (playerId) => {
+    const player = gamePlayersById[playerId];
+
+    if (
+      !protagonistSelectionActive ||
+      protagonistIsConfirmed ||
+      !isPlayerEligibleForProtagonist(player)
+    ) {
+      return;
+    }
+
+    setProtagonistPreviewId(playerId);
+  };
+
+  const handleProtagonistPlayerPreviewEnd = (playerId) => {
+    if (protagonistInputTypeRef.current !== "mouse") {
+      return;
+    }
+
+    setProtagonistPreviewId((currentPlayerId) =>
+      currentPlayerId === playerId ? null : currentPlayerId,
+    );
+  };
+
+  const handleProtagonistPlayerClick = (
+    playerId,
+    interactionType = "mouse",
+  ) => {
+    const player = gamePlayersById[playerId];
+
+    if (
+      !protagonistSelectionActive ||
+      protagonistIsConfirmed ||
+      !isPlayerEligibleForProtagonist(player)
+    ) {
+      return;
+    }
+
+    const isTouchInteraction =
+      interactionType === "touch" || interactionType === "pen";
+
+    if (
+      isTouchInteraction &&
+      protagonistTouchPreviewIdRef.current !== playerId
+    ) {
+      protagonistTouchPreviewIdRef.current = playerId;
+      setProtagonistPreviewId(playerId);
+      return;
+    }
+
+    setProtagonistId(playerId);
+    clearProtagonistSelectionMode();
+
+    window.requestAnimationFrame(() => {
+      protagonistCardRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
+  };
 
   const placePlayerInSlot = (playerId, targetSlotIndex) => {
     if (lineupIsConfirmed || !gamePlayersById[playerId]) {
@@ -5934,11 +6063,22 @@ const saveAdminMatchPlayer = async (player, patch) => {
   };
 
   const handleSlotClick = (slotIndex) => {
-    if (lineupIsConfirmed) {
+    const fieldPlayerId = lineup[slotIndex];
+
+    if (protagonistSelectionActive) {
+      if (fieldPlayerId) {
+        handleProtagonistPlayerClick(
+          fieldPlayerId,
+          protagonistInputTypeRef.current,
+        );
+      }
+
       return;
     }
 
-    const fieldPlayerId = lineup[slotIndex];
+    if (lineupIsConfirmed) {
+      return;
+    }
 
     if (selectedPlayerId) {
       if (fieldPlayerId && selectedPlayerId === fieldPlayerId) {
@@ -5965,6 +6105,15 @@ const saveAdminMatchPlayer = async (player, patch) => {
   };
 
   const handlePlayerClick = (playerId) => {
+    if (protagonistSelectionActive) {
+      handleProtagonistPlayerClick(
+        playerId,
+        protagonistInputTypeRef.current,
+      );
+
+      return;
+    }
+
     if (lineupIsConfirmed) {
       return;
     }
@@ -5991,7 +6140,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
   const handlePlayerBadgeDrop = (event, targetPlayerId) => {
     event.preventDefault();
 
-    if (lineupIsConfirmed) {
+    if (lineupIsConfirmed || protagonistSelectionActive) {
       return;
     }
 
@@ -6006,7 +6155,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
   };
 
   const handleDragStart = (event, playerId) => {
-    if (lineupIsConfirmed) {
+    if (lineupIsConfirmed || protagonistSelectionActive) {
       event.preventDefault();
       return;
     }
@@ -6019,7 +6168,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
   const handleDrop = (event, targetSlotIndex) => {
     event.preventDefault();
 
-    if (lineupIsConfirmed) {
+    if (lineupIsConfirmed || protagonistSelectionActive) {
       return;
     }
 
@@ -6181,6 +6330,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
               resultIsConfirmed ? "result-locked" : "",
               lineupIsConfirmed ? "lineup-locked" : "",
               protagonistIsConfirmed ? "protagonist-locked" : "",
+              protagonistSelectionActive ? "protagonist-pick-mode" : "",
             ]
               .filter(Boolean)
               .join(" ")}
@@ -6496,7 +6646,14 @@ const saveAdminMatchPlayer = async (player, patch) => {
               </div>
             </section>
 
-            <section className="prediction-card lineup-card">
+            <section
+              className="prediction-card lineup-card"
+              aria-label={
+                protagonistSelectionActive
+                  ? "Mode de selecció de protagonista actiu"
+                  : "La Lotto Flick"
+              }
+            >
               <div className="section-heading lotto-heading">
                 <div className="lotto-heading-main">
                   <span className="flick-avatar-shell">
@@ -6615,6 +6772,27 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 </div>
               )}
 
+              {protagonistSelectionActive && (
+                <div className="protagonist-selection-guide" role="status">
+                  <span className="protagonist-selection-guide-star">★</span>
+
+                  <div>
+                    <strong>MODE PROTAGONISTA ACTIU</strong>
+                    <span>
+                      Passa per sobre d’una xapa i clica-la. En mòbil: primer
+                      toc per veure els punts, segon toc per escollir.
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={clearProtagonistSelectionMode}
+                  >
+                    CANCEL·LA
+                  </button>
+                </div>
+              )}
+
               <p className="section-help">
                 Selecciona una posició i una xapa en l’ordre que vulguis. Per
                 desfer, selecciona el jugador del camp i després torna a clicar
@@ -6622,7 +6800,14 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 pots arrossegar-lo sobre la seva xapa.
               </p>
 
-              <div className="football-field">
+              <div
+                ref={protagonistSelectionAreaRef}
+                className={
+                  protagonistSelectionActive
+                    ? "football-field protagonist-pick-field"
+                    : "football-field"
+                }
+              >
                 <div className="field-line halfway-line"></div>
 
                 <div className="field-circle"></div>
@@ -6652,12 +6837,25 @@ const saveAdminMatchPlayer = async (player, patch) => {
                         const isPlayerSelected =
                           Boolean(player) && selectedPlayerId === player.id;
 
+                        const isEligibleProtagonist =
+                          isPlayerEligibleForProtagonist(player);
+
+                        const isProtagonistPreview =
+                          Boolean(player) &&
+                          protagonistPreviewId === player.id;
+
                         const fieldSlotClassName = [
                           "field-slot",
                           player ? "occupied" : "",
                           isTargetSelected ? "target-selected" : "",
                           isPlayerSelected ? "player-selected" : "",
                           isProtagonist ? "protagonist" : "",
+                          isEligibleProtagonist
+                            ? "protagonist-eligible"
+                            : "",
+                          isProtagonistPreview
+                            ? "protagonist-preview"
+                            : "",
                         ]
                           .filter(Boolean)
                           .join(" ");
@@ -6667,8 +6865,36 @@ const saveAdminMatchPlayer = async (player, patch) => {
                             key={slotIndex}
                             type="button"
                             className={fieldSlotClassName}
-                            disabled={lineupIsConfirmed}
-                            draggable={!lineupIsConfirmed && Boolean(player)}
+                            disabled={
+                              lineupIsConfirmed &&
+                              !(
+                                protagonistSelectionActive &&
+                                isEligibleProtagonist &&
+                                !protagonistIsConfirmed
+                              )
+                            }
+                            draggable={
+                              !lineupIsConfirmed &&
+                              !protagonistSelectionActive &&
+                              Boolean(player)
+                            }
+                            onPointerDown={(event) => {
+                              if (protagonistSelectionActive) {
+                                protagonistInputTypeRef.current =
+                                  event.pointerType || "mouse";
+                              }
+                            }}
+                            onMouseEnter={() => {
+                              if (player) {
+                                protagonistInputTypeRef.current = "mouse";
+                                handleProtagonistPlayerPreview(player.id);
+                              }
+                            }}
+                            onMouseLeave={() => {
+                              if (player) {
+                                handleProtagonistPlayerPreviewEnd(player.id);
+                              }
+                            }}
                             onDragStart={(event) => {
                               if (player) {
                                 handleDragStart(event, player.id);
@@ -6677,10 +6903,17 @@ const saveAdminMatchPlayer = async (player, patch) => {
                             onDragOver={(event) => event.preventDefault()}
                             onDrop={(event) => handleDrop(event, slotIndex)}
                             onClick={() => handleSlotClick(slotIndex)}
-                            aria-pressed={isTargetSelected || isPlayerSelected}
+                            aria-pressed={
+                              protagonistSelectionActive
+                                ? isProtagonistPreview
+                                : isTargetSelected || isPlayerSelected
+                            }
                             aria-label={
                               player
-                                ? `Posició de ${player.name}`
+                                ? protagonistSelectionActive &&
+                                  isEligibleProtagonist
+                                  ? `${player.name}. Protagonista: +${getPlayerProtagonistScoring(player).hitPoints} si marca o assisteix; ${getPlayerProtagonistScoring(player).missPoints} si no ho fa.`
+                                  : `Posició de ${player.name}`
                                 : `Posició lliure ${slotIndex + 1}`
                             }
                           >
@@ -6729,10 +6962,28 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                     const isPendingSelection = selectedPlayerId === player.id;
 
+                    const isEligibleProtagonist =
+                      isPlayerEligibleForProtagonist(player);
+
+                    const isProtagonistPreview =
+                      protagonistPreviewId === player.id;
+
+                    const isSelectedProtagonist =
+                      protagonistId === player.id;
+
                     const playerBadgeClassName = [
                       "player-badge",
                       isInLineup ? "selected" : "",
                       isPendingSelection ? "pending-selection" : "",
+                      isEligibleProtagonist
+                        ? "protagonist-eligible"
+                        : "",
+                      isProtagonistPreview
+                        ? "protagonist-preview"
+                        : "",
+                      isSelectedProtagonist
+                        ? "protagonist-selected"
+                        : "",
                     ]
                       .filter(Boolean)
                       .join(" ");
@@ -6742,8 +6993,31 @@ const saveAdminMatchPlayer = async (player, patch) => {
                         key={player.id}
                         type="button"
                         className={playerBadgeClassName}
-                        disabled={lineupIsConfirmed}
-                        draggable={!lineupIsConfirmed}
+                        disabled={
+                          lineupIsConfirmed &&
+                          !(
+                            protagonistSelectionActive &&
+                            isEligibleProtagonist &&
+                            !protagonistIsConfirmed
+                          )
+                        }
+                        draggable={
+                          !lineupIsConfirmed &&
+                          !protagonistSelectionActive
+                        }
+                        onPointerDown={(event) => {
+                          if (protagonistSelectionActive) {
+                            protagonistInputTypeRef.current =
+                              event.pointerType || "mouse";
+                          }
+                        }}
+                        onMouseEnter={() => {
+                          protagonistInputTypeRef.current = "mouse";
+                          handleProtagonistPlayerPreview(player.id);
+                        }}
+                        onMouseLeave={() =>
+                          handleProtagonistPlayerPreviewEnd(player.id)
+                        }
                         onDragStart={(event) =>
                           handleDragStart(event, player.id)
                         }
@@ -6752,7 +7026,17 @@ const saveAdminMatchPlayer = async (player, patch) => {
                           handlePlayerBadgeDrop(event, player.id)
                         }
                         onClick={() => handlePlayerClick(player.id)}
-                        aria-pressed={isPendingSelection}
+                        aria-pressed={
+                          protagonistSelectionActive
+                            ? isProtagonistPreview
+                            : isPendingSelection
+                        }
+                        aria-label={
+                          protagonistSelectionActive &&
+                          isEligibleProtagonist
+                            ? `${player.name}. Protagonista: +${getPlayerProtagonistScoring(player).hitPoints} si marca o assisteix; ${getPlayerProtagonistScoring(player).missPoints} si no ho fa.`
+                            : player.name
+                        }
                       >
                         <img
                           src={player.image}
@@ -6766,9 +7050,43 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   })}
                 </div>
               </div>
+
+              {protagonistSelectionActive &&
+                protagonistPreview &&
+                protagonistPreviewScoring && (
+                  <div
+                    className="protagonist-preview-hud"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <img src={protagonistPreview.image} alt="" />
+
+                    <div>
+                      <span>PROTAGONISTA</span>
+                      <strong>{protagonistPreview.name}</strong>
+                      <small>
+                        Clica la xapa per escollir-lo · en mòbil, toca-la de
+                        nou.
+                      </small>
+                    </div>
+
+                    <span className="protagonist-preview-hit">
+                      <small>MARCA O ASSISTEIX</small>
+                      <strong>+{protagonistPreviewScoring.hitPoints}</strong>
+                    </span>
+
+                    <span className="protagonist-preview-miss">
+                      <small>NO PARTICIPA EN GOL</small>
+                      <strong>{protagonistPreviewScoring.missPoints}</strong>
+                    </span>
+                  </div>
+                )}
             </section>
 
-            <section className="prediction-card protagonist-card">
+            <section
+              ref={protagonistCardRef}
+              className="prediction-card protagonist-card"
+            >
               <div className="section-heading">
                 <div>
                   <h2>Marca el protagonista</h2>
@@ -6807,48 +7125,42 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   </strong>
 
                   <div className="section-info-protagonist-grid">
-                    <div className="section-info-points-row special">
-                      <span>Lamine Yamal</span>
+                    {PROTAGONIST_GROUP_OPTIONS.filter(
+                      (group) => !group.excludesProtagonist,
+                    ).map((group) => {
+                      const groupPlayers = gamePlayers.filter(
+                        (player) =>
+                          isPlayerEligibleForProtagonist(player) &&
+                          normalizeProtagonistGroupKey(
+                            player.protagonistGroupKey,
+                          ) === group.key,
+                      );
 
-                      <strong>+5 / −5</strong>
-                    </div>
+                      if (groupPlayers.length === 0) {
+                        return null;
+                      }
 
-                    <div className="section-info-points-row">
-                      <span>
-                        Fermín López · Raphinha · Ferran Torres · Anthony Gordon
-                      </span>
+                      return (
+                        <div
+                          key={group.key}
+                          className={
+                            group.key === "special"
+                              ? "section-info-points-row special"
+                              : "section-info-points-row"
+                          }
+                        >
+                          <span>
+                            {groupPlayers
+                              .map((player) => player.name)
+                              .join(" · ")}
+                          </span>
 
-                      <strong>+10 / −10</strong>
-                    </div>
-
-                    <div className="section-info-points-row">
-                      <span>Dani Olmo · Karim Adeyemi · Pedri</span>
-
-                      <strong>+20 / −10</strong>
-                    </div>
-
-                    <div className="section-info-points-row">
-                      <span>Frenkie de Jong · Jules Koundé · Marc Bernal</span>
-
-                      <strong>+30 / −10</strong>
-                    </div>
-
-                    <div className="section-info-points-row">
-                      <span>
-                        João Cancelo · Ronald Araújo · Eric Garcia · Gavi
-                      </span>
-
-                      <strong>+40 / −5</strong>
-                    </div>
-
-                    <div className="section-info-points-row">
-                      <span>
-                        Alejandro Balde · Gerard Martín · Marc Casadó · Pau
-                        Cubarsí · Andreas Christensen · Jofre Torrents
-                      </span>
-
-                      <strong>+50 / −5</strong>
-                    </div>
+                          <strong>
+                            {`+${group.hitPoints} / ${group.missPoints}`}
+                          </strong>
+                        </div>
+                      );
+                    })}
                   </div>
 
                   <small className="section-info-note">
@@ -6859,136 +7171,109 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 </div>
               )}
 
-                           <p className="section-help">
-                Tria qualsevol jugador de camp. Encertes si marca o dona una
-                assistència. Cada jugador té el seu propi premi i penalització.
-              </p>
+              <div
+                className={[
+                  "protagonist-combined-rule",
+                  protagonistSelectionActive ? "selector-active" : "",
+                  protagonistIsComplete ? "selector-selected" : "",
+                  protagonistIsConfirmed ? "selector-confirmed" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                <button
+                  type="button"
+                  className={[
+                    "protagonist-selector-button",
+                    protagonistSelectionActive ? "active" : "",
+                    protagonistIsComplete ? "selected" : "",
+                    protagonistIsConfirmed ? "confirmed" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  disabled={
+                    protagonistIsConfirmed ||
+                    predictionSubmitting ||
+                    countdown.isClosed
+                  }
+                  onClick={handleProtagonistSelectorClick}
+                  aria-pressed={
+                    protagonistSelectionActive || protagonistIsComplete
+                  }
+                  aria-label={
+                    protagonistIsConfirmed
+                      ? `${protagonist.name}, protagonista enviat`
+                      : protagonistIsComplete
+                        ? `Treu ${protagonist.name} com a protagonista`
+                        : protagonistSelectionActive
+                          ? "Desactiva el mode protagonista"
+                          : "Activa el mode protagonista"
+                  }
+                >
+                  {protagonistIsComplete ? (
+                    <span className="protagonist-selector-player">
+                      <img
+                        src={protagonist.image}
+                        alt=""
+                      />
 
-              <div className="protagonist-combined-rule">
-                <div className="protagonist-combined-icons">
-                  <span className="protagonist-combined-icon goal">⚽</span>
-
-                  <span className="protagonist-combined-or">O</span>
-
-                  <span className="protagonist-combined-icon assist">A</span>
-                </div>
+                      <span aria-hidden="true">
+                        ★
+                      </span>
+                    </span>
+                  ) : (
+                    <span
+                      className="protagonist-selector-star"
+                      aria-hidden="true"
+                    >
+                      ★
+                    </span>
+                  )}
+                </button>
 
                 <div className="protagonist-combined-copy">
-                  <span>UNA ÚNICA APOSTA</span>
+                  <span>
+                    {protagonistIsConfirmed
+                      ? "APOSTA ENVIADA"
+                      : protagonistIsComplete
+                        ? "PROTAGONISTA ESCOLLIT"
+                        : protagonistSelectionActive
+                          ? "MODE PROTAGONISTA ACTIU"
+                          : "UNA ÚNICA APOSTA"}
+                  </span>
 
                   <strong>MARCA O ASSISTEIX</strong>
 
                   <small>
-                    Gol o assistència donen el mateix encert. Si fa totes dues
-                    coses, només puntua una vegada.
+                    {protagonistIsComplete
+                      ? `${protagonist.name} · +${protagonistScoring.hitPoints} si marca o assisteix · ${protagonistScoring.missPoints} si no participa en cap gol.${
+                          protagonistIsConfirmed
+                            ? " Ja no es pot canviar."
+                            : " Clica el seu cromo de l’esquerra per desfer."
+                        }`
+                      : protagonistSelectionActive
+                        ? "Passa per sobre d’una xapa per veure el premi i la penalització; clica-la per escollir."
+                        : "Clica l’estrella i escull qualsevol jugador de camp, sigui o no al teu XI."}
                   </small>
                 </div>
 
-                <span className="protagonist-binary-pill">RESULTAT BINARI</span>
-              </div>
-
-              <div className="protagonist-picker">
-                <div className="protagonist-picker-copy">
-                  <span>PROTAGONISTA</span>
-
-                  <strong>Tria un dels jugadors de camp</strong>
-
-                  <small>Cada opció mostra premi i penalització</small>
-                </div>
-
-                <select
-                  value={protagonistId ?? ""}
-                  disabled={protagonistIsConfirmed}
-                  onChange={(event) =>
-                    setProtagonistId(event.target.value || null)
-                  }
-                  aria-label="Selecciona el protagonista"
+                <span
+                  className={[
+                    "protagonist-binary-pill",
+                    protagonistSelectionActive ? "active" : "",
+                    protagonistIsComplete ? "selected" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                 >
-                  <option value="">
-                    Selecciona un dels jugadors de camp
-                  </option>
-
-                                 {eligibleProtagonistPlayers.map((player) => {
-                    const scoring = getPlayerProtagonistScoring(player);
-
-                    return (
-                      <option key={player.id} value={player.id}>
-                        {`${player.name} · +${scoring.hitPoints} si encertes · ${scoring.missPoints} si falles`}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-
-              <div
-                className={
-                  protagonistIsComplete
-                    ? "protagonist-showcase selected"
-                    : "protagonist-showcase"
-                }
-              >
-                {protagonistIsComplete ? (
-                  <>
-                    <div className="protagonist-image-wrap">
-                      <img
-                        src={protagonist.image}
-                        className="protagonist-showcase-image"
-                        alt=""
-                      />
-
-                      <span
-                        className="protagonist-showcase-star"
-                        aria-hidden="true"
-                      >
-                        ★
-                      </span>
-                    </div>
-
-                    <div className="protagonist-showcase-copy">
-                      <span className="protagonist-kicker">
-                        PROTAGONISTA ESCOLLIT
-                      </span>
-
-                      <strong>{protagonist.name}</strong>
-
-                      <div className="protagonist-score-grid">
-                        <div className="protagonist-score-box hit">
-                          <span>SI MARCA O ASSISTEIX</span>
-
-                          <strong>+{protagonistScoring.hitPoints}</strong>
-                        </div>
-
-                        <div className="protagonist-score-box miss">
-                          <span>SI NO PARTICIPA EN GOL</span>
-
-                          <strong>{protagonistScoring.missPoints}</strong>
-                        </div>
-                      </div>
-
-                      <small className="protagonist-single-score-note">
-                        L’aposta no es multiplica: encara que faci més d’un gol,
-                        més d’una assistència o totes dues coses, només genera
-                        un encert.
-                      </small>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="protagonist-empty-icon">★</div>
-
-                    <div className="protagonist-showcase-copy">
-                      <span className="protagonist-kicker">
-                        FALTA UN ÚLTIM PAS
-                      </span>
-
-                      <strong>Tria el teu protagonista</strong>
-
-                      <small>
-                        Aposta qui marcarà o assistirà. Veuràs els punts que et pot donar o treure cada jugador.
-                      </small>
-                    </div>
-                  </>
-                )}
+                  {protagonistIsConfirmed
+                    ? "ENVIAT"
+                    : protagonistIsComplete
+                      ? "ESCOLLIT"
+                      : protagonistSelectionActive
+                        ? "TRIA UNA XAPA"
+                        : "OPCIONAL"}
+                </span>
               </div>
             </section>
 
