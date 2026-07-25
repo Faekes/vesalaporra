@@ -5927,7 +5927,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     protagonistTouchPreviewIdRef.current = null;
   };
 
-  const handleProtagonistSelectorClick = () => {
+    const handleProtagonistSelectorClick = () => {
     if (protagonistIsConfirmed || predictionSubmitting || countdown.isClosed) {
       return;
     }
@@ -5941,20 +5941,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     setProtagonistPreviewId(null);
     protagonistTouchPreviewIdRef.current = null;
 
-    setProtagonistSelectionActive((currentValue) => {
-      const nextValue = !currentValue;
-
-      if (nextValue) {
-        window.requestAnimationFrame(() => {
-          protagonistSelectionAreaRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        });
-      }
-
-      return nextValue;
-    });
+    setProtagonistSelectionActive((currentValue) => !currentValue);
   };
 
   const handleProtagonistPlayerPreview = (playerId) => {
