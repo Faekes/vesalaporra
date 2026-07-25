@@ -7236,11 +7236,11 @@ const saveAdminMatchPlayer = async (player, patch) => {
                       ? `${protagonist.name} · +${protagonistScoring.hitPoints} si marca o assisteix · ${protagonistScoring.missPoints} si no participa en cap gol.${
                           protagonistIsConfirmed
                             ? " Ja no es pot canviar."
-                            : " Clica el seu cromo de l’esquerra per desfer."
+                            : " Clica el cromo amb estrella per desfer."
                         }`
                       : protagonistSelectionActive
                         ? "Passa per sobre d’una xapa per veure el premi i la penalització; clica-la per escollir."
-                        : "Clica l’estrella i escull qualsevol jugador de camp, sigui o no al teu XI."}
+                        : "Clica l’estrella i escull quin jugador creus que marcarà o assistirà."}
                   </small>
                 </div>
 
