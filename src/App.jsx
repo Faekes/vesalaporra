@@ -2460,6 +2460,8 @@ function App() {
 
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
+  const [confirmationMode, setConfirmationMode] = useState("prediction");
+
   const [predictionConfirmed, setPredictionConfirmed] = useState(false);
 
   const [confirmedPrediction, setConfirmedPrediction] = useState(null);
@@ -2714,7 +2716,23 @@ function App() {
 
   const protagonistIsComplete = Boolean(protagonist && protagonistScoring);
 
-   const confirmButtonLabel = predictionConfirmed
+  const resultIsConfirmed = predictionConfirmed;
+
+  const lineupIsConfirmed =
+    confirmedPrediction?.lineup?.filter(Boolean).length === 11;
+
+  const protagonistIsConfirmed = Boolean(
+    confirmedPrediction?.protagonistId,
+  );
+
+  const predictionIsComplete =
+    resultIsConfirmed && lineupIsConfirmed && protagonistIsConfirmed;
+
+  const hasNewSectionToSubmit =
+    (!lineupIsConfirmed && lineupIsComplete) ||
+    (!protagonistIsConfirmed && protagonistIsComplete);
+
+  const confirmButtonLabel = predictionIsComplete
     ? "PRONÒSTIC CONFIRMAT"
     : matchLoading || predictionLoading
       ? "CARREGANT PORRA..."
@@ -2724,7 +2742,9 @@ function App() {
           ? "PORRA TANCADA"
           : !authLoading && !authUser
             ? "ENTRA PER CONFIRMAR"
-            : "CONFIRMA EL TEU PRONÒSTIC";
+            : resultIsConfirmed
+              ? "COMPLETA EL PRONÒSTIC"
+              : "CONFIRMA EL TEU PRONÒSTIC";
 
   const authenticatedProfileUser = authUser
     ? {
@@ -4719,9 +4739,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
     }
   };
 
-    const handleConfirmPrediction = () => {
+  const handleConfirmResultOnly = () => {
     if (
-      predictionConfirmed ||
+      resultIsConfirmed ||
       predictionLoading ||
       predictionSubmitting ||
       matchLoading ||
@@ -4739,6 +4759,32 @@ const saveAdminMatchPlayer = async (player, patch) => {
       return;
     }
 
+    setConfirmationMode("result-only");
+    setConfirmationDialogOpen(true);
+  };
+
+  const handleConfirmPrediction = () => {
+    if (
+      predictionIsComplete ||
+      predictionLoading ||
+      predictionSubmitting ||
+      matchLoading ||
+      !matchData.id ||
+      countdown.isClosed ||
+      !scoreTouched ||
+      authLoading ||
+      authActionLoading ||
+      (resultIsConfirmed && !hasNewSectionToSubmit)
+    ) {
+      return;
+    }
+
+    if (!authUser) {
+      handleXSignIn();
+      return;
+    }
+
+    setConfirmationMode("prediction");
     setConfirmationDialogOpen(true);
   };
 
@@ -4747,6 +4793,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
       return;
     }
 
+    setConfirmationMode("prediction");
     setConfirmationDialogOpen(false);
   };
 
@@ -4754,10 +4801,13 @@ const saveAdminMatchPlayer = async (player, patch) => {
     if (
       !authUser ||
       !matchData.id ||
-      predictionConfirmed ||
       predictionSubmitting ||
       countdown.isClosed ||
-      !scoreTouched
+      !scoreTouched ||
+      predictionIsComplete ||
+      (resultIsConfirmed &&
+        !hasNewSectionToSubmit &&
+        confirmationMode !== "result-only")
     ) {
       return;
     }
@@ -4766,9 +4816,18 @@ const saveAdminMatchPlayer = async (player, patch) => {
     setAuthError("");
 
     try {
-      const submittedLineup = lineupIsComplete
+      const lineupDraftBeforeSubmit = [...lineup];
+      const protagonistDraftBeforeSubmit = protagonistId;
+
+      const submittedLineup =
+        confirmationMode !== "result-only" && lineupIsComplete
         ? lineup.filter(Boolean)
         : [];
+
+      const submittedProtagonistId =
+        confirmationMode !== "result-only"
+          ? protagonistId || null
+          : null;
 
       const { data: submitPayload, error: submitError } =
         await supabase.rpc(
@@ -4778,9 +4837,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
             p_barcelona_goals: barcaScore,
             p_opponent_goals: rivalScore,
             p_lineup_player_ids: submittedLineup,
-            p_protagonist_player_id: protagonistId || null,
+            p_protagonist_player_id: submittedProtagonistId,
             p_audit_id:
-              `VLP_UI_SUBMIT_PREDICTION_20260714_060_${crypto.randomUUID()}`,
+              `VLP_UI_INCREMENTAL_PREDICTION_20260725_061_${crypto.randomUUID()}`,
           },
         );
 
@@ -4792,6 +4851,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
       if (
         submitStatus !== "PREDICTION_CONFIRMED" &&
+        submitStatus !== "PREDICTION_COMPLETED" &&
         submitStatus !== "PREDICTION_ALREADY_CONFIRMED"
       ) {
         throw new Error(
@@ -4841,15 +4901,25 @@ const saveAdminMatchPlayer = async (player, patch) => {
         lineup: restoredLineup,
         protagonistId:
           savedPrediction.protagonist_player_id || null,
+        submissionMode: confirmationMode,
       };
 
       setBarcaScore(predictionSnapshot.barcaScore);
       setRivalScore(predictionSnapshot.rivalScore);
       setScoreTouched(true);
-      setLineup(restoredLineup);
-      setProtagonistId(predictionSnapshot.protagonistId);
+      setLineup(
+        restoredLineup.filter(Boolean).length === 11
+          ? restoredLineup
+          : lineupDraftBeforeSubmit,
+      );
+      setProtagonistId(
+        predictionSnapshot.protagonistId ||
+          protagonistDraftBeforeSubmit ||
+          null,
+      );
       setConfirmedPrediction(predictionSnapshot);
       setPredictionConfirmed(true);
+      setConfirmationMode("prediction");
       setConfirmationDialogOpen(false);
       setSelectedSlotIndex(null);
       setSelectedPlayerId(null);
@@ -5615,6 +5685,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
       setSelectedPlayerId(null);
       setPredictionConfirmed(false);
       setConfirmedPrediction(null);
+      setConfirmationMode("prediction");
       setConfirmationDialogOpen(false);
       setConfirmationAnimationActive(false);
     };
@@ -5819,7 +5890,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
   }, [activePage, isAdmin]);
 
   const placePlayerInSlot = (playerId, targetSlotIndex) => {
-    if (predictionConfirmed || !gamePlayersById[playerId]) {
+    if (lineupIsConfirmed || !gamePlayersById[playerId]) {
       return;
     }
 
@@ -5848,7 +5919,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
   };
 
   const removePlayerFromLineup = (playerId) => {
-    if (predictionConfirmed || !gamePlayersById[playerId]) {
+    if (lineupIsConfirmed || !gamePlayersById[playerId]) {
       return;
     }
 
@@ -5863,7 +5934,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
   };
 
   const handleSlotClick = (slotIndex) => {
-    if (predictionConfirmed) {
+    if (lineupIsConfirmed) {
       return;
     }
 
@@ -5894,7 +5965,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
   };
 
   const handlePlayerClick = (playerId) => {
-    if (predictionConfirmed) {
+    if (lineupIsConfirmed) {
       return;
     }
 
@@ -5920,7 +5991,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
   const handlePlayerBadgeDrop = (event, targetPlayerId) => {
     event.preventDefault();
 
-    if (predictionConfirmed) {
+    if (lineupIsConfirmed) {
       return;
     }
 
@@ -5935,7 +6006,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
   };
 
   const handleDragStart = (event, playerId) => {
-    if (predictionConfirmed) {
+    if (lineupIsConfirmed) {
       event.preventDefault();
       return;
     }
@@ -5948,7 +6019,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
   const handleDrop = (event, targetSlotIndex) => {
     event.preventDefault();
 
-    if (predictionConfirmed) {
+    if (lineupIsConfirmed) {
       return;
     }
 
@@ -6105,11 +6176,14 @@ const saveAdminMatchPlayer = async (player, patch) => {
       <main className="app-main">
         {activePage === "play" && (
           <section
-            className={
-              predictionConfirmed
-                ? "play-page prediction-locked"
-                : "play-page"
-            }
+            className={[
+              "play-page",
+              resultIsConfirmed ? "result-locked" : "",
+              lineupIsConfirmed ? "lineup-locked" : "",
+              protagonistIsConfirmed ? "protagonist-locked" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
           >
             <section className="prediction-card score-card">
               <div className="section-heading score-heading">
@@ -6130,10 +6204,16 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                 <span
                   className={
-                    scoreTouched ? "status-pill completed" : "status-pill"
+                    resultIsConfirmed || scoreTouched
+                      ? "status-pill completed"
+                      : "status-pill"
                   }
                 >
-                  {scoreTouched ? "FET" : "PENDENT"}
+                  {resultIsConfirmed
+                    ? "ENVIAT"
+                    : scoreTouched
+                      ? "FET"
+                      : "PENDENT"}
                 </span>
               </div>
 
@@ -6264,9 +6344,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   <div className="score-control">
                     <button
                       type="button"
-                      disabled={predictionConfirmed}
+                      disabled={resultIsConfirmed}
                       onClick={() => {
-                        if (predictionConfirmed) {
+                        if (resultIsConfirmed) {
                           return;
                         }
 
@@ -6283,9 +6363,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     <button
                       type="button"
                       className="score-value"
-                      disabled={predictionConfirmed}
+                      disabled={resultIsConfirmed}
                       onClick={() => {
-                        if (!predictionConfirmed) {
+                        if (!resultIsConfirmed) {
                           setScoreTouched(true);
                         }
                       }}
@@ -6296,9 +6376,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                     <button
                       type="button"
-                      disabled={predictionConfirmed}
+                      disabled={resultIsConfirmed}
                       onClick={() => {
-                        if (predictionConfirmed) {
+                        if (resultIsConfirmed) {
                           return;
                         }
 
@@ -6318,9 +6398,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   <div className="score-control">
                     <button
                       type="button"
-                      disabled={predictionConfirmed}
+                      disabled={resultIsConfirmed}
                       onClick={() => {
-                        if (predictionConfirmed) {
+                        if (resultIsConfirmed) {
                           return;
                         }
 
@@ -6337,9 +6417,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     <button
                       type="button"
                       className="score-value"
-                      disabled={predictionConfirmed}
+                      disabled={resultIsConfirmed}
                       onClick={() => {
-                        if (!predictionConfirmed) {
+                        if (!resultIsConfirmed) {
                           setScoreTouched(true);
                         }
                       }}
@@ -6350,9 +6430,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                     <button
                       type="button"
-                      disabled={predictionConfirmed}
+                      disabled={resultIsConfirmed}
                       onClick={() => {
-                        if (predictionConfirmed) {
+                        if (resultIsConfirmed) {
                           return;
                         }
 
@@ -6388,6 +6468,32 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   </div>
                 </div>
               </div>
+
+              <div className="result-only-action">
+                <button
+                  type="button"
+                  className={
+                    resultIsConfirmed
+                      ? "result-only-button confirmed"
+                      : "result-only-button"
+                  }
+                  disabled={
+                    !scoreTouched ||
+                    matchLoading ||
+                    predictionLoading ||
+                    predictionSubmitting ||
+                    countdown.isClosed ||
+                    authLoading ||
+                    authActionLoading ||
+                    resultIsConfirmed
+                  }
+                  onClick={handleConfirmResultOnly}
+                >
+                  {resultIsConfirmed
+                    ? "✓ RESULTAT ENVIAT"
+                    : "NOMÉS VULL PRONOSTICAR EL RESULTAT"}
+                </button>
+              </div>
             </section>
 
             <section className="prediction-card lineup-card">
@@ -6421,13 +6527,15 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                 <span
                   className={
-                    lineupIsComplete
+                    lineupIsConfirmed || lineupIsComplete
                       ? "lineup-counter completed"
                       : "lineup-counter"
                   }
                 >
-                  {lineupIsComplete
-                    ? "FET · 11 / 11"
+                  {lineupIsConfirmed
+                    ? "ENVIADA · 11 / 11"
+                    : lineupIsComplete
+                      ? "FET · 11 / 11"
                     : `OPCIONAL · ${lineupCount} / 11`}
                 </span>
               </div>
@@ -6559,8 +6667,8 @@ const saveAdminMatchPlayer = async (player, patch) => {
                             key={slotIndex}
                             type="button"
                             className={fieldSlotClassName}
-                            disabled={predictionConfirmed}
-                            draggable={!predictionConfirmed && Boolean(player)}
+                            disabled={lineupIsConfirmed}
+                            draggable={!lineupIsConfirmed && Boolean(player)}
                             onDragStart={(event) => {
                               if (player) {
                                 handleDragStart(event, player.id);
@@ -6634,8 +6742,8 @@ const saveAdminMatchPlayer = async (player, patch) => {
                         key={player.id}
                         type="button"
                         className={playerBadgeClassName}
-                        disabled={predictionConfirmed}
-                        draggable={!predictionConfirmed}
+                        disabled={lineupIsConfirmed}
+                        draggable={!lineupIsConfirmed}
                         onDragStart={(event) =>
                           handleDragStart(event, player.id)
                         }
@@ -6679,12 +6787,16 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                 <span
                   className={
-                    protagonistIsComplete
+                    protagonistIsConfirmed || protagonistIsComplete
                       ? "status-pill completed"
                       : "status-pill"
                   }
                 >
-                  {protagonistIsComplete ? "FET" : "OPCIONAL"}
+                  {protagonistIsConfirmed
+                    ? "ENVIAT"
+                    : protagonistIsComplete
+                      ? "FET"
+                      : "OPCIONAL"}
                 </span>
               </div>
 
@@ -6786,7 +6898,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                 <select
                   value={protagonistId ?? ""}
-                  disabled={predictionConfirmed}
+                  disabled={protagonistIsConfirmed}
                   onChange={(event) =>
                     setProtagonistId(event.target.value || null)
                   }
@@ -6884,7 +6996,8 @@ const saveAdminMatchPlayer = async (player, patch) => {
               className={[
                 "confirm-section",
                 confirmationDialogOpen ? "confirming" : "",
-                predictionConfirmed ? "confirmed" : "",
+                predictionIsComplete ? "confirmed" : "",
+                resultIsConfirmed && !predictionIsComplete ? "partial" : "",
               ]
                 .filter(Boolean)
                 .join(" ")}
@@ -6973,7 +7086,8 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   countdown.isClosed ||
                   authLoading ||
                   authActionLoading ||
-                  predictionConfirmed
+                  predictionIsComplete ||
+                  (resultIsConfirmed && !hasNewSectionToSubmit)
                 }
                 onClick={handleConfirmPrediction}
               >
@@ -9113,7 +9227,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
         )}
       </main>
 
-      {confirmationDialogOpen && !predictionConfirmed && (
+      {confirmationDialogOpen && (
         <div className="prediction-confirm-dialog-backdrop">
           <section
             className="prediction-confirm-dialog"
@@ -9129,20 +9243,39 @@ const saveAdminMatchPlayer = async (player, patch) => {
             <h2 id="prediction-confirm-dialog-title">N’ESTÀS SEGUR?</h2>
 
             <p id="prediction-confirm-dialog-description">
-              Quan confirmis el pronòstic ja no el podràs modificar fins que
-              s’obri una jornada nova.
+              {confirmationMode === "result-only"
+                ? "El resultat quedarà bloquejat. Podràs tornar abans del tancament per afegir la Lotto Flick i el protagonista."
+                : resultIsConfirmed
+                  ? "Només s’afegiran els apartats nous. Tot el que ja havies enviat continuarà bloquejat."
+                  : "Cada apartat que enviïs quedarà bloquejat. Els que deixis buits els podràs afegir abans del tancament."}
             </p>
 
             <div className="prediction-confirm-dialog-summary">
               <span>
                 RESULTAT {formatPredictionScore(barcaScore, rivalScore)}
               </span>
-              <span>XI {lineupCount}/11</span>
-              <span>
-                {protagonistIsComplete
-                  ? `PROTAGONISTA ${protagonist.shortName.toUpperCase()}`
-                  : "SENSE PROTAGONISTA"}
-              </span>
+
+              {confirmationMode === "result-only" ? (
+                <span>LA RESTA QUEDARÀ OBERTA</span>
+              ) : (
+                <>
+                  <span>
+                    {lineupIsConfirmed
+                      ? "XI JA ENVIADA"
+                      : lineupIsComplete
+                        ? "XI 11/11"
+                        : "SENSE XI"}
+                  </span>
+
+                  <span>
+                    {protagonistIsConfirmed
+                      ? `PROTAGONISTA JA ENVIAT`
+                      : protagonistIsComplete
+                        ? `PROTAGONISTA ${protagonist.shortName.toUpperCase()}`
+                        : "SENSE PROTAGONISTA"}
+                  </span>
+                </>
+              )}
             </div>
 
             <div className="prediction-confirm-dialog-actions">
@@ -9150,14 +9283,20 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 type="button"
                 className="prediction-confirm-yes"
                 onClick={handleFinalizePrediction}
+                disabled={predictionSubmitting}
               >
-                SÍ, CONFIRMA’L
+                {predictionSubmitting
+                  ? "CONFIRMANT..."
+                  : confirmationMode === "result-only"
+                    ? "SÍ, ENVIA EL RESULTAT"
+                    : "SÍ, CONFIRMA’L"}
               </button>
 
               <button
                 type="button"
                 className="prediction-confirm-no"
                 onClick={handleCancelPredictionConfirmation}
+                disabled={predictionSubmitting}
               >
                 NO, TORNA ENRERE
               </button>
@@ -9170,7 +9309,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
         <div className="prediction-celebration-overlay" aria-hidden="true">
           <section className="prediction-celebration-card">
             <span className="prediction-celebration-kicker">
-              PRONÒSTIC ENREGISTRAT
+              {confirmedPrediction.submissionMode === "result-only"
+                ? "RESULTAT ENREGISTRAT"
+                : "PRONÒSTIC ENREGISTRAT"}
             </span>
 
             <strong>VISCA EL BARÇA!</strong>
@@ -9183,18 +9324,24 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 )}
               </span>
 
-              <span>
-                XI {confirmedPrediction.lineup.filter(Boolean).length}/11
-              </span>
+              {confirmedPrediction.submissionMode === "result-only" ? (
+                <span>POTS COMPLETAR LA RESTA FINS AL TANCAMENT</span>
+              ) : (
+                <>
+                  <span>
+                    XI {confirmedPrediction.lineup.filter(Boolean).length}/11
+                  </span>
 
-              <span>
-                {confirmedPrediction.protagonistId &&
-                gamePlayersById[confirmedPrediction.protagonistId]
-                  ? `PROTAGONISTA ${gamePlayersById[
-                      confirmedPrediction.protagonistId
-                    ].shortName.toUpperCase()}`
-                  : "SENSE PROTAGONISTA"}
-              </span>
+                  <span>
+                    {confirmedPrediction.protagonistId &&
+                    gamePlayersById[confirmedPrediction.protagonistId]
+                      ? `PROTAGONISTA ${gamePlayersById[
+                          confirmedPrediction.protagonistId
+                        ].shortName.toUpperCase()}`
+                      : "SENSE PROTAGONISTA"}
+                  </span>
+                </>
+              )}
             </div>
           </section>
         </div>
