@@ -2418,7 +2418,6 @@ function App() {
 
   const [authError, setAuthError] = useState("");
 
-  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
   const [authProfile, setAuthProfile] = useState(null);
 
@@ -4697,7 +4696,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     }
   };
 
-  const handleSignOut = async () => {
+    const handleSignOut = async () => {
     if (authActionLoading) {
       return;
     }
@@ -4712,7 +4711,8 @@ const saveAdminMatchPlayer = async (player, patch) => {
         throw error;
       }
 
-      setAccountMenuOpen(false);
+      setActivePage("play");
+      setSelectedProfileUserId(null);
     } catch (error) {
       setAuthError(error?.message || "No s’ha pogut tancar la sessió.");
     } finally {
@@ -5422,39 +5422,37 @@ const saveAdminMatchPlayer = async (player, patch) => {
       });
     };
 
-    const loadSession = async () => {
+       const loadSession = async () => {
       const oauthError = readOAuthErrorFromUrl();
-
-      if (oauthError) {
-        window.sessionStorage.removeItem(X_AUTO_LOGIN_STORAGE_KEY);
-
-        if (isMounted) {
-          setAuthError(oauthError);
-          setAuthLoading(false);
-          setAuthActionLoading(false);
-          cleanAuthUrl();
-        }
-
-        return;
-      }
-
       const { data, error } = await supabase.auth.getSession();
 
       if (!isMounted) {
         return;
       }
 
-      if (error) {
-        setAuthError(error.message);
-      }
-
       setAuthSession(data.session ?? null);
       setAuthLoading(false);
+      setAuthActionLoading(false);
 
-          if (data.session) {
+      if (data.session) {
         window.sessionStorage.removeItem(X_AUTO_LOGIN_STORAGE_KEY);
+        setAuthError("");
         cleanAuthUrl();
+        return;
+      }
 
+      if (error) {
+        setAuthError(error.message);
+        cleanAuthUrl();
+        return;
+      }
+
+      if (oauthError) {
+        window.sessionStorage.removeItem(X_AUTO_LOGIN_STORAGE_KEY);
+        setAuthError(
+          "L’enllaç d’accés ha caducat. Torna a entrar amb Google o X.",
+        );
+        cleanAuthUrl();
         return;
       }
 
@@ -5474,15 +5472,13 @@ const saveAdminMatchPlayer = async (player, patch) => {
       setAuthLoading(false);
       setAuthActionLoading(false);
 
-            if (event === "SIGNED_IN") {
+          if (event === "SIGNED_IN") {
         window.sessionStorage.removeItem(X_AUTO_LOGIN_STORAGE_KEY);
         setAuthError("");
-        setAccountMenuOpen(false);
         cleanAuthUrl();
       }
 
       if (event === "SIGNED_OUT") {
-        setAccountMenuOpen(false);
         setAuthProfile(null);
         setProfileDraftName("");
         setProfileNameEditorOpen(false);
@@ -6042,17 +6038,14 @@ const saveAdminMatchPlayer = async (player, patch) => {
             )}
           </nav>
 
-          <div className="auth-area">
+                    <div className="auth-area">
             {authUser ? (
               <button
                 type="button"
                 className="auth-account-button signed-in"
                 disabled={authLoading || authActionLoading}
-                onClick={() =>
-                  setAccountMenuOpen((currentValue) => !currentValue)
-                }
-                aria-label={`Obre el compte de ${profileDisplayName}`}
-                aria-expanded={accountMenuOpen}
+                onClick={() => openRankingProfile(String(authUser.id))}
+                aria-label={`Obre el perfil de ${profileDisplayName}`}
                 title={profileDisplayName}
               >
                 <AuthAvatar
@@ -6088,30 +6081,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 </button>
               </div>
             )}
-
-            {authUser && accountMenuOpen && (
-              <div className="auth-menu">
-                <div className="auth-menu-identity">
-                  <AuthAvatar
-                    imageUrl={profileAvatarUrl}
-                    displayName={profileDisplayName}
-                  />
-
-                                  <span>
-                    <strong>{profileDisplayName}</strong>
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  disabled={authActionLoading}
-                >
-                  TANCA SESSIÓ
-                </button>
-              </div>
-            )}
-                  </div>
+          </div>
         </div>
       </header>
 
@@ -9115,7 +9085,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                               <span>XI {match.xiPoints}</span>
                               <span>PRO {match.protagonistPoints}</span>
                             </div>
-                            <strong className="profile-history-total">
+                                                 <strong className="profile-history-total">
                               {match.totalPoints > 0 ? "+" : ""}
                               {match.totalPoints}
                             </strong>
@@ -9124,6 +9094,19 @@ const saveAdminMatchPlayer = async (player, patch) => {
                       </div>
                     )}
                   </section>
+                )}
+
+                {isOwnAuthenticatedProfile && (
+                  <div className="profile-inline-actions">
+                    <button
+                      type="button"
+                      className="profile-inline-action"
+                      onClick={handleSignOut}
+                      disabled={authActionLoading}
+                    >
+                      {authActionLoading ? "TANCANT..." : "TANCA SESSIÓ"}
+                    </button>
+                  </div>
                 )}
               </>
             )}
