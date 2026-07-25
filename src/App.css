@@ -1295,7 +1295,7 @@ button:focus-visible {
 }
 
 .player-badge.selected::after {
-  content: "âœ“";
+  content: "✓";
   position: absolute;
   top: 2px;
   right: 12%;
@@ -1956,7 +1956,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   RÃ€NQUING I PERFIL PROVISIONALS
+   RÀNQUING I PERFIL PROVISIONALS
    ========================================================= */
 
 .placeholder-page {
@@ -1988,7 +1988,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   TABLET I MÃ’BIL
+   TABLET I MÒBIL
    ========================================================= */
 
 @media (max-width: 760px) {
@@ -2305,7 +2305,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   MÃ’BIL PETIT
+   MÒBIL PETIT
    ========================================================= */
 
 @media (max-width: 430px) {
@@ -2485,7 +2485,7 @@ button:focus-visible {
   }
 }
 /* =========================================================
-   PROTAGONISTA â€” REDISSENY PREMIUM
+   PROTAGONISTA — REDISSENY PREMIUM
    ========================================================= */
 
 .protagonist-type-tabs {
@@ -2872,7 +2872,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   PROTAGONISTA â€” APOSTA ÃšNICA I GRUPS
+   PROTAGONISTA — APOSTA ÚNICA I GRUPS
    ========================================================= */
 
 .protagonist-combined-rule {
@@ -3164,7 +3164,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   INFORMACIÃ“ CLICABLE DE CADA SECCIÃ“
+   INFORMACIÓ CLICABLE DE CADA SECCIÓ
    ========================================================= */
 
 .section-info-button {
@@ -3239,7 +3239,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   PANells D'INFORMACIÃ“ â€” PUNTUACIÃ“
+   PANells D'INFORMACIÓ — PUNTUACIÓ
    ========================================================= */
 
 .section-info-title {
@@ -3344,7 +3344,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   PARTIT I PROTAGONISTA â€” AJUSTOS RESPONSIVE
+   PARTIT I PROTAGONISTA — AJUSTOS RESPONSIVE
    ========================================================= */
 
 .section-info-protagonist-grid .section-info-points-row {
@@ -3445,7 +3445,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   SELECCIÃ“ INVERSA SENSE TAB DE BANQUETA
+   SELECCIÓ INVERSA SENSE TAB DE BANQUETA
    ========================================================= */
 
 .field-slot.player-selected .field-player-image {
@@ -3465,7 +3465,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   RÃ€NQUING â€” IDENTITAT X I CÃ€RREGA 20 EN 20
+   RÀNQUING — IDENTITAT X I CÀRREGA 20 EN 20
    ========================================================= */
 
 .ranking-page {
@@ -4021,7 +4021,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   PERFIL VESALAPORRA â€” IDENTITAT X, ESTADÃSTIQUES I MEDALLES
+   PERFIL VESALAPORRA — IDENTITAT X, ESTADÍSTIQUES I MEDALLES
    ========================================================= */
 
 .profile-page {
@@ -5268,7 +5268,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   RÃ€NQUING RESPONSIVE
+   RÀNQUING RESPONSIVE
    ========================================================= */
 
 @media (max-width: 860px) {
@@ -5556,7 +5556,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   AUTH X + GOOGLE â€” ICONES NETES I SESSIÃ“ REAL
+   AUTH X + GOOGLE — ICONES NETES I SESSIÓ REAL
    ========================================================= */
 
 .header-actions {
@@ -5911,7 +5911,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   PERFIL AUTENTICAT â€” GOOGLE/X + EDICIÃ“ DE NOM I AVATAR
+   PERFIL AUTENTICAT — GOOGLE/X + EDICIÓ DE NOM I AVATAR
    ========================================================= */
 
 .profile-account-source,
@@ -6208,7 +6208,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   CARD RESULTAT â€” PARTIT, TERMINI I XAPES DE COLORS
+   CARD RESULTAT — PARTIT, TERMINI I XAPES DE COLORS
    ========================================================= */
 
 .score-card {
@@ -6843,7 +6843,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   LES NOTES â€” PARTIT I TEMPORADA
+   LES NOTES — PARTIT I TEMPORADA
    ========================================================= */
 
 .admin-nav-short {
@@ -7430,7 +7430,7 @@ button.notes-star:hover {
 }
 
 /* =========================================================
-   PUNTUACIONS â€” Ã€REA PRIVADA
+   PUNTUACIONS — ÀREA PRIVADA
    ========================================================= */
 
 .admin-scoring-hero {
@@ -7919,7 +7919,7 @@ button.notes-star:hover {
   }
 }
 /* =========================================================
-   ICONES DE PARTICIPACIÃ“ I EVENTS â€” COLOR ÃšNIC DEL GOL
+   ICONES DE PARTICIPACIÓ I EVENTS — COLOR ÚNIC DEL GOL
    ========================================================= */
 
 .protagonist-combined-icon.assist,
@@ -7935,7 +7935,7 @@ button.notes-star:hover {
 
 
 /* =========================================================
-   FONT OFICIAL DEL PARTIT â€” NOTES, PUNTUACIONS I REALTIME
+   FONT OFICIAL DEL PARTIT — NOTES, PUNTUACIONS I REALTIME
    ========================================================= */
 
 .official-match-card {
@@ -8125,7 +8125,7 @@ button.notes-star:hover {
 }
 
 /* =========================================================
-   PUBLICACIÃ“ OFICIAL I CÃ€LCUL GLOBAL
+   PUBLICACIÓ OFICIAL I CÀLCUL GLOBAL
    ========================================================= */
 
 .admin-publish-card {
@@ -8229,7 +8229,7 @@ button.notes-star:hover {
 }
 
 /* =========================================================
-   MEDALLES CANÃ’NIQUES I ICONES ACUMULABLES AL RÃ€NQUING
+   MEDALLES CANÒNIQUES I ICONES ACUMULABLES AL RÀNQUING
    ========================================================= */
 
 .profile-achievements-grid {
@@ -8319,7 +8319,7 @@ button.notes-star:hover {
   font-size: 12px;
 }
 
-/* El gol continua sent la referÃ¨ncia visual per als quatre tipus. */
+/* El gol continua sent la referència visual per als quatre tipus. */
 .protagonist-combined-icon.assist,
 .participation-role-icon.starter,
 .participation-role-icon.substitute,
@@ -8415,7 +8415,7 @@ button.notes-star:hover {
   }
 }
 /* =========================================================
-   PUNTUACIONS â€” RESULTAT CENTRAL, NET I MÃ‰S GRAN
+   PUNTUACIONS — RESULTAT CENTRAL, NET I MÉS GRAN
    ========================================================= */
 
 .admin-scoring-hero.admin-scoring-hero-compact {
@@ -8595,7 +8595,7 @@ button.notes-star:hover {
   }
 }
 /* =========================================================
-   PUNTUACIONS Â· JUGADORS I XAPES DINÃ€MIQUES
+   PUNTUACIONS · JUGADORS I XAPES DINÀMIQUES
    VLP_UI_DYNAMIC_PLAYER_ADMIN_20260713_016
    ========================================================= */
 
@@ -9329,7 +9329,7 @@ button.notes-star:hover {
 
 
 /* =========================================================
-   PUNTUACIONS Â· PROPERS PARTITS SIMPLE
+   PUNTUACIONS · PROPERS PARTITS SIMPLE
    ========================================================= */
 
 .admin-upcoming-match-form {
@@ -9733,7 +9733,7 @@ button.notes-star:hover {
 
 
 /* =========================================================
-   MEDALLES ESPECIALS Â· KAMIKAZE I CAMPIÃ“ 26/27
+   MEDALLES ESPECIALS · KAMIKAZE I CAMPIÓ 26/27
    ========================================================= */
 
 .achievement-custom-icon {
@@ -9822,7 +9822,7 @@ button.notes-star:hover {
 
 
 /* =========================================================
-   FONT REAL ÃšNICA Â· ESTATS SUPABASE
+   FONT REAL ÚNICA · ESTATS SUPABASE
    ========================================================= */
 
 .real-data-state {
@@ -9891,7 +9891,7 @@ button.notes-star:hover {
   }
 }
 /* =========================================================
-   PERFIL FINAL Â· AVATAR RESPONSIVE + ACCIONS MOBILE ALINEADES
+   PERFIL FINAL · AVATAR RESPONSIVE + ACCIONS MOBILE ALINEADES
    ========================================================= */
 
 /* Desktop: recupera exactament la mida original */
@@ -9901,7 +9901,7 @@ button.notes-star:hover {
   flex-basis: 118px;
 }
 
-/* Tablet: mantÃ© la mida responsive original */
+/* Tablet: manté la mida responsive original */
 @media (max-width: 760px) {
   .ranking-avatar-profile {
     width: 92px;
@@ -9910,7 +9910,7 @@ button.notes-star:hover {
   }
 }
 
-/* MÃ²bil: avatar una mica mÃ©s gran i botons en una sola lÃ­nia */
+/* Mòbil: avatar una mica més gran i botons en una sola línia */
 @media (max-width: 500px) {
   .profile-identity-block {
     display: grid;
