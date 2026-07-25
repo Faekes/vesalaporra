@@ -2431,8 +2431,7 @@ function App() {
 
   const [profileFeedback, setProfileFeedback] = useState(null);
 
-  const profileAvatarInputRef = useRef(null);
-
+  
   const [barcaScore, setBarcaScore] = useState(0);
   const [rivalScore, setRivalScore] = useState(0);
   const [scoreTouched, setScoreTouched] = useState(false);
@@ -8707,27 +8706,27 @@ const saveAdminMatchPlayer = async (player, patch) => {
                             CANVIA NOM
                           </button>
 
-                          <button
-                            type="button"
+                                                    <label
                             className="profile-inline-action"
-                            disabled={profileLoading || profileActionLoading}
-                            onClick={() =>
-                              profileAvatarInputRef.current?.click()
+                            aria-disabled={
+                              profileLoading || profileActionLoading
                             }
                           >
                             <span aria-hidden="true">◉</span>
                             CANVIA AVATAR
-                          </button>
+
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="profile-avatar-input"
+                              disabled={
+                                profileLoading || profileActionLoading
+                              }
+                              onChange={handleProfileAvatarChange}
+                            />
+                          </label>
 
                           <NotificationPreferencesCard variant="desktop-inline" />
-
-                          <input
-                            ref={profileAvatarInputRef}
-                            type="file"
-                            accept="image/png,image/jpeg,image/webp"
-                            className="profile-avatar-input"
-                            onChange={handleProfileAvatarChange}
-                          />
                         </div>
                       ) : null}
                     </div>
