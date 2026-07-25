@@ -4477,8 +4477,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
     }
   };
 
-  const handleSaveProfileName = async (event) => {
+   const handleSaveProfileName = async (event) => {
     event.preventDefault();
+    event.stopPropagation();
 
     if (!authUser || profileActionLoading) {
       return;
@@ -4519,6 +4520,11 @@ const saveAdminMatchPlayer = async (player, patch) => {
     setProfileActionLoading(true);
     setProfileFeedback(null);
 
+    window.sessionStorage.setItem(
+      VESALAPORRA_ACTIVE_PAGE_STORAGE_KEY,
+      "profile",
+    );
+
     try {
       await persistProfile({
         displayName: nextDisplayName,
@@ -4526,36 +4532,28 @@ const saveAdminMatchPlayer = async (player, patch) => {
         avatarPath: authProfile?.avatarPath || null,
       });
 
-      const { data, error } = await supabase.auth.updateUser({
-        data: {
-          display_name: nextDisplayName,
-        },
-      });
-
-      if (error) {
-        console.warn(
-          "No s’ha pogut sincronitzar el nom amb auth metadata:",
-          error,
-        );
-      }
-
-      if (data?.user) {
-        setAuthSession((currentSession) =>
-          currentSession
-            ? {
-                ...currentSession,
-                user: data.user,
-              }
-            : currentSession,
-        );
-      }
-
       setAuthProfile((currentProfile) => ({
         ...(currentProfile || {}),
         displayName: nextDisplayName,
         avatarUrl: profileAvatarUrl,
       }));
+
+      setRankingUsers((currentUsers) =>
+        currentUsers.map((user) =>
+          user.id === String(authUser.id)
+            ? {
+                ...user,
+                displayName: nextDisplayName,
+              }
+            : user,
+        ),
+      );
+
+      setProfileDraftName(nextDisplayName);
+      setSelectedProfileUserId(String(authUser.id));
+      setActivePage("profile");
       setProfileNameEditorOpen(false);
+
       setProfileFeedback({
         type: "success",
         message: "Nom actualitzat correctament.",
