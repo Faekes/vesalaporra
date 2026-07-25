@@ -2752,7 +2752,7 @@ function App() {
             ? "ENTRA PER CONFIRMAR"
             : resultIsConfirmed
               ? "COMPLETA EL PRONÒSTIC"
-              : "CONFIRMA EL TEU PRONÒSTIC";
+              : "CONFIRMA ELS TEUS PRONÒSTICS";
 
   const authenticatedProfileUser = authUser
     ? {
