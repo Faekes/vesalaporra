@@ -6477,7 +6477,10 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   </div>
                 </div>
 
-                <div className="score-center-controls">
+                <div
+  className="score-center-controls"
+  style={{ position: "relative" }}
+>
                   <div className="score-control">
                     <button
                       type="button"
@@ -6577,10 +6580,26 @@ const saveAdminMatchPlayer = async (player, patch) => {
                         changeAwayPredictionScore((score) => score + 1);
                       }}
                       aria-label={`Suma un gol a ${matchData.awayName}`}
-                    >
+                                        >
                       +
                     </button>
                   </div>
+
+                  <small
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 26px)",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      color: "#8190bd",
+                      fontSize: "11px",
+                      fontWeight: "900",
+                      letterSpacing: "0.08em",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    EL PARTIT
+                  </small>
                 </div>
 
                 <div className="score-team away">
