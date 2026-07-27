@@ -5,7 +5,7 @@ import NotificationPreferencesCard from "./components/NotificationPreferencesCar
 import "./App.css";
 
 // FONT REAL: la plantilla pública no viu al codi.
-// Tots els jugadors visibles venen del roster real del partit a Supabase.
+// Tots els jugadors visibles venen del roster real del partit.
 
 const PROTAGONIST_GROUP_OPTIONS = [
   {
@@ -1289,7 +1289,7 @@ function OfficialMatchCard({
       aria-label={`${homeName} ${homeScore}–${awayScore} ${awayName}`}
     >
       <span className="official-match-eyebrow">
-        {editable ? "PARTIT ACTIU A SUPABASE" : "ÚLTIM PARTIT PUNTUAT"}
+        {editable ? "PARTIT ACTIU" : "ÚLTIM PARTIT PUNTUAT"}
       </span>
 
       <div className="official-match-line">
@@ -3152,7 +3152,7 @@ function App() {
         type: "error",
         message:
           error?.message ||
-          "Supabase no ha pogut publicar el partit oficial.",
+          "No s'ha pogut publicar el partit oficial.",
       });
     } finally {
       setOfficialMatchSaving(false);
@@ -3262,7 +3262,7 @@ function App() {
       const currentMatchRow = Array.isArray(data) ? data[0] : data;
 
       if (!currentMatchRow?.match_id) {
-        throw new Error("No hi ha cap partit públic programat a Supabase.");
+        throw new Error("No hi ha cap partit públic programat.");
       }
 
       const normalizedMatch = normalizeCurrentMatch(currentMatchRow);
@@ -5387,7 +5387,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
         if (!currentMatchRow?.match_id) {
           throw new Error(
-            "No hi ha cap partit públic programat a Supabase.",
+            "No hi ha cap partit públic programat.",
           );
         }
 
@@ -8587,7 +8587,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 <section className="admin-catalog-board">
                   <header>
                     <div>
-                      <span>CALENDARI DE SUPABASE</span>
+                      <span>CALENDARI</span>
                       <strong>Propers partits reals</strong>
                     </div>
 
@@ -9449,7 +9449,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     <header>
                       <div>
                         <span>HISTORIAL DE PORRES</span>
-                        <strong>Partits puntuats a Supabase</strong>
+                        <strong>Partits puntuats</strong>
                       </div>
                       <small>
                         {profileDataLoading
