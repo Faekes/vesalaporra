@@ -6472,7 +6472,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     <span className="score-team-copy">
                       <strong>{matchData.homeName}</strong>
 
-                      <small>{matchData.homeLocation}</small>
+                      
                     </span>
                   </div>
                 </div>
