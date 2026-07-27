@@ -6800,10 +6800,8 @@ const saveAdminMatchPlayer = async (player, patch) => {
               )}
 
               <p className="section-help">
-                Selecciona una posició i una xapa en l’ordre que vulguis. Per
-                desfer, selecciona el jugador del camp i després torna a clicar
-                la seva mateixa xapa de la safata, o fes-ho a l’inrevés. També
-                pots arrossegar-lo sobre la seva xapa.
+                Clica una posició i després un jugador (o a la inversa) i el jugador es posarà al lloc on vulguis. 
+                També pots arrossegar les xapes.
               </p>
 
               <div
