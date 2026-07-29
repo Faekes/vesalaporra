@@ -245,6 +245,48 @@ const EMPTY_MATCH_DATA = {
 
 const PREDICTION_CELEBRATION_MS = 5600;
 
+const PREDICTION_CONFETTI_COLORS = [
+  "#004d98",
+  "#a50044",
+  "#0068b5",
+  "#c8104b",
+];
+
+const PREDICTION_CONFETTI_PIECES = Array.from(
+  { length: 72 },
+  (_, index) => {
+    const direction = index % 2 === 0 ? -1 : 1;
+    const horizontalDistance =
+      direction * (28 + ((index * 47) % 250));
+    const riseDistance = 170 + ((index * 37) % 210);
+    const fallDistance = 250 + ((index * 29) % 230);
+    const rotation =
+      direction * (540 + ((index * 71) % 720));
+
+    return {
+      id: index,
+      color:
+        PREDICTION_CONFETTI_COLORS[
+          index % PREDICTION_CONFETTI_COLORS.length
+        ],
+      width: 6 + ((index * 3) % 6),
+      height: 10 + ((index * 5) % 10),
+      borderRadius: index % 4 === 0 ? "50%" : "2px",
+      delay: (index % 12) * 30,
+      duration: 2050 + ((index * 41) % 650),
+      endX: `${horizontalDistance}px`,
+      middleX: `${Math.round(horizontalDistance * 0.42)}px`,
+      secondX: `${Math.round(horizontalDistance * 0.78)}px`,
+      peakY: `-${riseDistance}px`,
+      secondY: `-${Math.round(riseDistance * 0.48)}px`,
+      fallY: `${fallDistance}px`,
+      middleRotation: `${Math.round(rotation * 0.45)}deg`,
+      secondRotation: `${Math.round(rotation * 0.78)}deg`,
+      endRotation: `${rotation}deg`,
+    };
+  },
+);
+
 const formatCurrentMatchKickoffLabel = (kickoffAt) => {
   if (!kickoffAt) {
     return "PARTIT PENDENT DE DATA";
@@ -2473,6 +2515,12 @@ function App() {
 
   const [confirmationAnimationActive, setConfirmationAnimationActive] =
     useState(false);
+
+  const [predictionCelebrationOrigin, setPredictionCelebrationOrigin] =
+    useState({
+      left: "50vw",
+      top: "78vh",
+    });
 
   const confirmationAnimationTimerRef = useRef(null);
 
@@ -4747,7 +4795,20 @@ const saveAdminMatchPlayer = async (player, patch) => {
     }
   };
 
-  const handleConfirmResultOnly = () => {
+  const rememberPredictionCelebrationOrigin = (buttonElement) => {
+    const buttonBounds = buttonElement?.getBoundingClientRect();
+
+    if (!buttonBounds) {
+      return;
+    }
+
+    setPredictionCelebrationOrigin({
+      left: `${buttonBounds.left + buttonBounds.width / 2}px`,
+      top: `${buttonBounds.top + Math.min(8, buttonBounds.height / 2)}px`,
+    });
+  };
+
+  const handleConfirmResultOnly = (event) => {
     if (
       resultIsConfirmed ||
       predictionLoading ||
@@ -4767,11 +4828,12 @@ const saveAdminMatchPlayer = async (player, patch) => {
       return;
     }
 
+    rememberPredictionCelebrationOrigin(event?.currentTarget);
     setConfirmationMode("result-only");
     setConfirmationDialogOpen(true);
   };
 
-  const handleConfirmPrediction = () => {
+  const handleConfirmPrediction = (event) => {
     if (
       predictionIsComplete ||
       predictionLoading ||
@@ -4792,6 +4854,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
       return;
     }
 
+    rememberPredictionCelebrationOrigin(event?.currentTarget);
     setConfirmationMode("prediction");
     setConfirmationDialogOpen(true);
   };
@@ -9596,6 +9659,119 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
       {confirmationAnimationActive && confirmedPrediction && (
         <div className="prediction-celebration-overlay" aria-hidden="true">
+          <style>{`
+            .prediction-celebration-overlay {
+              isolation: isolate;
+              overflow: hidden;
+            }
+
+            .prediction-celebration-card {
+              position: relative;
+              z-index: 3;
+            }
+
+            .prediction-confetti-fountain {
+              position: fixed;
+              width: 1px;
+              height: 1px;
+              z-index: 2;
+              pointer-events: none;
+            }
+
+            .prediction-confetti-piece {
+              position: absolute;
+              top: 0;
+              left: 0;
+              display: block;
+              opacity: 0;
+              box-shadow: 0 0 7px currentColor;
+              animation-name: prediction-confetti-fountain;
+              animation-timing-function: cubic-bezier(0.18, 0.76, 0.26, 1);
+              animation-fill-mode: both;
+              will-change: transform, opacity;
+            }
+
+            @keyframes prediction-confetti-fountain {
+              0% {
+                opacity: 0;
+                transform: translate3d(0, 5px, 0) rotate(0deg);
+              }
+
+              8% {
+                opacity: 1;
+              }
+
+              44% {
+                opacity: 1;
+                transform:
+                  translate3d(
+                    var(--confetti-middle-x),
+                    var(--confetti-peak-y),
+                    0
+                  )
+                  rotate(var(--confetti-middle-rotation));
+              }
+
+              70% {
+                opacity: 1;
+                transform:
+                  translate3d(
+                    var(--confetti-second-x),
+                    var(--confetti-second-y),
+                    0
+                  )
+                  rotate(var(--confetti-second-rotation));
+              }
+
+              100% {
+                opacity: 0;
+                transform:
+                  translate3d(
+                    var(--confetti-end-x),
+                    var(--confetti-fall-y),
+                    0
+                  )
+                  rotate(var(--confetti-end-rotation));
+              }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+              .prediction-confetti-fountain {
+                display: none;
+              }
+            }
+          `}</style>
+
+          <div
+            className="prediction-confetti-fountain"
+            style={predictionCelebrationOrigin}
+          >
+            {PREDICTION_CONFETTI_PIECES.map((piece) => (
+              <i
+                key={piece.id}
+                className="prediction-confetti-piece"
+                style={{
+                  width: `${piece.width}px`,
+                  height: `${piece.height}px`,
+                  color: piece.color,
+                  backgroundColor: piece.color,
+                  borderRadius: piece.borderRadius,
+                  animationDelay: `${piece.delay}ms`,
+                  animationDuration: `${piece.duration}ms`,
+                  "--confetti-end-x": piece.endX,
+                  "--confetti-middle-x": piece.middleX,
+                  "--confetti-second-x": piece.secondX,
+                  "--confetti-peak-y": piece.peakY,
+                  "--confetti-second-y": piece.secondY,
+                  "--confetti-fall-y": piece.fallY,
+                  "--confetti-middle-rotation": piece.middleRotation,
+                  "--confetti-second-rotation": piece.secondRotation,
+                  "--confetti-end-rotation": piece.endRotation,
+                }}
+              ></i>
+            ))}
+          </div>
+
           <section className="prediction-celebration-card">
             <span className="prediction-celebration-kicker">
               {confirmedPrediction.submissionMode === "result-only"
