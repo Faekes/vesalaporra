@@ -9218,10 +9218,10 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     <div className="profile-hero-medals">
                       <span>MEDALLES</span>
 
-                      <small>
-                        {selectedProfileData.unlockedAchievements}/
-                        {selectedProfileData.achievements.length}
-                      </small>
+                      <strong>
+  {selectedProfileData.unlockedAchievements}/
+  {selectedProfileData.achievements.length}
+</strong>
                     </div>
                   </div>
 
