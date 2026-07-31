@@ -975,13 +975,15 @@ const mergeRankingScopes = (generalRows, jornadaRows) => {
     usersById.set(user.id, {
       ...previous,
       ...user,
-            general:
-        user.general.totalPoints !== 0 || previous.general.totalPoints === 0
-          ? user.general
-          : previous.general,
+                general:
+        previous.generalPosition !== null &&
+        previous.generalPosition !== undefined
+          ? previous.general
+          : user.general,
 
       jornada:
-        user.jornada.totalPoints !== 0 || previous.jornada.totalPoints === 0
+        user.jornadaPosition !== null &&
+        user.jornadaPosition !== undefined
           ? user.jornada
           : previous.jornada,
 
