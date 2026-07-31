@@ -1041,8 +1041,13 @@ const normalizeNotesRow = (row, playersById) => {
     name: firstNonEmptyText(row?.display_name, row?.player_name, row?.name, "Jugador"),
     shortName: firstNonEmptyText(row?.short_name, row?.display_name, row?.player_name, "Jugador"),
     image:
-      firstNonEmptyText(row?.avatar_url, row?.portrait_url) ||
-      "/fcb/PLAYER_PLACEHOLDER.png",
+  getPublicStorageImageUrl(
+    row?.avatar_bucket,
+    row?.avatar_path,
+    row?.avatar_version,
+  ) ||
+  firstNonEmptyText(row?.avatar_url, row?.portrait_url) ||
+  "/fcb/PLAYER_PLACEHOLDER.png",
     eligibleForRatings: true,
   };
 
