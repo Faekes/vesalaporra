@@ -694,7 +694,8 @@ const VESALAPORRA_PUBLIC_RANKING_RPC =
 const VESALAPORRA_PUBLIC_MATCH_NOTES_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_MATCH_NOTES_RPC ||
   "vesalaporra_public_match_notes";
-
+const VESALAPORRA_PUBLIC_LATEST_SCORED_MATCH_RPC =
+  "vesalaporra_public_latest_scored_match_id";
 const VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC ||
   "vesalaporra_public_active_season_notes";
@@ -5110,14 +5111,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     }
   };
 
-   const loadRealNotes = async ({ quiet = false } = {}) => {
-    if (!matchData.id) {
-      setNotesRows([]);
-      setSeasonNotesRows([]);
-      setNotesMatchData(null);
-      return;
-    }
-
+   const loadRealNotes = async ({ quiet = false, matchId = null } = {}) => {
     if (!quiet) {
       setNotesLoading(true);
     }
@@ -5125,12 +5119,42 @@ const saveAdminMatchPlayer = async (player, patch) => {
     setNotesError("");
 
     try {
+      let notesTargetMatchId = matchId;
+
+      if (!notesTargetMatchId) {
+        const { data, error } = await supabase.rpc(
+          VESALAPORRA_PUBLIC_LATEST_SCORED_MATCH_RPC,
+        );
+
+        if (error) {
+          throw error;
+        }
+
+        notesTargetMatchId = Array.isArray(data)
+          ? firstNonEmptyText(
+              data[0]?.match_id,
+              data[0]?.id,
+              data[0],
+            )
+          : firstNonEmptyText(
+              data?.match_id,
+              data?.id,
+              data,
+            );
+      }
+
+      if (!notesTargetMatchId) {
+        setNotesRows([]);
+        setSeasonNotesRows([]);
+        setNotesMatchData(null);
+        return;
+      }
       const [matchPayload, seasonPayload] = await Promise.all([
         callRpcWithPayloadFallbacks(
           VESALAPORRA_PUBLIC_MATCH_NOTES_RPC,
           [
-            { p_match_id: matchData.id },
-            { match_id: matchData.id },
+                       { p_match_id: notesTargetMatchId },
+            { match_id: notesTargetMatchId },
           ],
         ),
         callRpcWithPayloadFallbacks(
@@ -5246,9 +5270,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
       const normalizedMatch = {
         ...matchData,
-        id: firstNonEmptyText(
+                id: firstNonEmptyText(
           firstRow?.match_id,
-          matchData.id,
+          notesTargetMatchId,
         ),
         homeName: firstNonEmptyText(
           firstRow?.home_display_name,
@@ -5293,7 +5317,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
       setOfficialMatchState((currentState) => ({
         ...currentState,
-        matchId: matchData.id,
+        matchId: notesTargetMatchId,
         homeScore: officialRow
           ? officialRow.homeScore
           : currentState.matchId === matchData.id
