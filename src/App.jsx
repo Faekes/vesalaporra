@@ -1098,18 +1098,18 @@ const normalizeNotesRow = (row, playersById) => {
     seasonAverage,
     seasonVoteCount,
     matchId: firstNonEmptyText(row?.match_id),
-    homeScore: toFiniteNumber(
-  row?.home_score,
-  row?.official_home_score,
-  row?.official_home_goals,
-  row?.home_goals,
-),
-awayScore: toFiniteNumber(
-  row?.away_score,
-  row?.official_away_score,
-  row?.official_away_goals,
-  row?.away_goals,
-),
+     homeScore: toFiniteNumber(
+      row?.official_home_goals,
+      row?.official_home_score,
+      row?.home_goals,
+      row?.home_score,
+    ),
+    awayScore: toFiniteNumber(
+      row?.official_away_goals,
+      row?.official_away_score,
+      row?.away_goals,
+      row?.away_score,
+    ),
     publishedAt: row?.published_at || row?.finalized_at || null,
   };
 };
@@ -7555,10 +7555,14 @@ const normalizedMatch = {
                 </p>
               </div>
 
-              <OfficialMatchCard
+                            <OfficialMatchCard
                 match={notesMatchData || matchData}
-                homeScore={officialHomeScore}
-                awayScore={officialAwayScore}
+                homeScore={
+                  notesMatchRows[0]?.homeScore ?? officialHomeScore
+                }
+                awayScore={
+                  notesMatchRows[0]?.awayScore ?? officialAwayScore
+                }
               />
             </header>
 
@@ -9681,32 +9685,80 @@ const normalizedMatch = {
                         <span>No es mostra cap historial inventat.</span>
                       </div>
                     ) : (
-                      <div className="profile-history-list">
+                                            <div className="profile-history-list-v2">
                         {selectedProfileData.history.map((match) => (
-                          <article key={match.id} className="profile-history-row">
-                            <div className="profile-history-match">
-                              <span>{match.label}</span>
+                          <article
+                            key={match.id}
+                            className="profile-history-row-v2"
+                          >
+                            <div className="profile-history-match-v2">
+                              <span>
+                                {String(match.label || "PARTIT").toUpperCase()}
+                              </span>
                               <strong>{match.opponent}</strong>
                               <small>{match.dateLabel || ""}</small>
                             </div>
-                            <div className="profile-history-prediction">
-                              <span>PRONÒSTIC</span>
+
+                            <div className="profile-history-score-v2">
+                              <div>
+                                <span>PRONÒSTIC</span>
+                                <strong>
+                                  {match.predictedHome}–{match.predictedAway}
+                                </strong>
+                              </div>
+
+                              <span className="profile-history-score-arrow">
+                                →
+                              </span>
+
+                              <div>
+                                <span>OFICIAL</span>
+                                <strong>
+                                  {match.actualHome}–{match.actualAway}
+                                </strong>
+                              </div>
+                            </div>
+
+                            <div className="profile-history-points-v2">
+                              {[
+                                ["RESULTAT", match.resultPoints],
+                                ["XI", match.xiPoints],
+                                ["PRO", match.protagonistPoints],
+                              ].map(([label, points]) => (
+                                <div
+                                  key={label}
+                                  className={
+                                    points > 0
+                                      ? "positive"
+                                      : points < 0
+                                        ? "negative"
+                                        : "neutral"
+                                  }
+                                >
+                                  <span>{label}</span>
+                                  <strong>
+                                    {points > 0 ? "+" : ""}
+                                    {points}
+                                  </strong>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div
+                              className={
+                                match.totalPoints > 0
+                                  ? "profile-history-total-v2 positive"
+                                  : match.totalPoints < 0
+                                    ? "profile-history-total-v2 negative"
+                                    : "profile-history-total-v2 neutral"
+                              }
+                            >
+                              <span>TOTAL</span>
                               <strong>
-                                {match.predictedHome}–{match.predictedAway}
+                                {match.totalPoints > 0 ? "+" : ""}
+                                {match.totalPoints}
                               </strong>
-                              <small>
-                                OFICIAL {match.actualHome}–{match.actualAway}
-                              </small>
                             </div>
-                            <div className="profile-history-breakdown">
-                              <span>RES {match.resultPoints}</span>
-                              <span>XI {match.xiPoints}</span>
-                              <span>PRO {match.protagonistPoints}</span>
-                            </div>
-                                                 <strong className="profile-history-total">
-                              {match.totalPoints > 0 ? "+" : ""}
-                              {match.totalPoints}
-                            </strong>
                           </article>
                         ))}
                       </div>
