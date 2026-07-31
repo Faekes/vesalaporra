@@ -238,9 +238,11 @@ const EMPTY_MATCH_DATA = {
   awayBadgeColors: DEFAULT_TEAM_BADGE_COLORS,
   awayBadgePattern: "solid",
   kickoffLabel: "CARREGANT PARTIT...",
-  kickoffAt: null,
+    kickoffAt: null,
+  predictionsOpenAt: null,
   predictionsCloseAt: null,
   predictionsAreOpen: false,
+  isUpcomingPreview: false,
 };
 
 const PREDICTION_CELEBRATION_MS = 5600;
@@ -482,11 +484,14 @@ const normalizeCurrentMatch = (row) => {
       row?.scheduled_kickoff_at,
     ),
     kickoffAt: row?.scheduled_kickoff_at || null,
+    predictionsOpenAt:
+      row?.predictions_open_at || null,
     predictionsCloseAt:
       row?.predictions_close_at ||
       row?.scheduled_kickoff_at ||
       null,
     predictionsAreOpen: Boolean(row?.predictions_are_open),
+    isUpcomingPreview: false,
     barcelonaFirst:
       typeof barcelonaFirst === "boolean"
         ? barcelonaFirst
@@ -1958,6 +1963,9 @@ const VESALAPORRA_CURRENT_MATCH_ID =
 const VESALAPORRA_PUBLIC_CURRENT_MATCH_RPC =
   "vesalaporra_public_current_match_v2";
 
+const VESALAPORRA_PUBLIC_NEXT_MATCH_RPC =
+  "vesalaporra_public_next_match_v1";
+
 const VESALAPORRA_ADMIN_MATCH_LIST_RPC =
   "vesalaporra_admin_list_matches_v2";
 
@@ -2548,7 +2556,11 @@ function App() {
 
   const [matchLoading, setMatchLoading] = useState(true);
 
-  const [countdown, setCountdown] = useState(() =>
+   const [countdown, setCountdown] = useState(() =>
+    getCountdown(null),
+  );
+
+  const [openingCountdown, setOpeningCountdown] = useState(() =>
     getCountdown(null),
   );
 
@@ -2679,7 +2691,15 @@ function App() {
       authUser && VESALAPORRA_ADMIN_USER_IDS.includes(String(authUser.id)),
     );
 
-  const activeAdminMatchId = matchData.id || VESALAPORRA_CURRENT_MATCH_ID || null;
+    const activeAdminMatchId = matchData.id || VESALAPORRA_CURRENT_MATCH_ID || null;
+
+  const isWaitingForOpening = Boolean(
+    matchData.id && matchData.isUpcomingPreview,
+  );
+
+  const displayedCountdown = isWaitingForOpening
+    ? openingCountdown
+    : countdown;
 
   const barcaIsHome = isBarcelonaTeam(
     matchData.homeTeamId,
@@ -3344,30 +3364,85 @@ function App() {
     setPublicMatchPlayers(normalizedRows);
   };
 
-   const refreshPublicCurrentMatch = async ({ quiet = false } = {}) => {
+      const refreshPublicCurrentMatch = async ({ quiet = false } = {}) => {
     if (!quiet) {
       setMatchLoading(true);
     }
 
     try {
-      const { data, error } = await supabase.rpc(
-        VESALAPORRA_PUBLIC_CURRENT_MATCH_RPC,
+      const { data: currentData, error: currentError } =
+        await supabase.rpc(
+          VESALAPORRA_PUBLIC_CURRENT_MATCH_RPC,
+        );
+
+      if (currentError) {
+        throw currentError;
+      }
+
+      const currentMatchRow = Array.isArray(currentData)
+        ? currentData[0]
+        : currentData;
+
+      const currentKickoffTime = currentMatchRow?.scheduled_kickoff_at
+        ? new Date(currentMatchRow.scheduled_kickoff_at).getTime()
+        : null;
+
+      const currentMatchIsPast = Boolean(
+        currentMatchRow?.match_id &&
+          currentKickoffTime &&
+          currentKickoffTime <= Date.now() &&
+          !currentMatchRow?.predictions_are_open,
       );
 
-      if (error) {
-        throw error;
+      let displayedMatchRow = currentMatchRow;
+      let isUpcomingPreview = Boolean(
+        currentMatchRow?.match_id &&
+          !currentMatchRow?.predictions_are_open &&
+          currentMatchRow?.predictions_open_at &&
+          new Date(currentMatchRow.predictions_open_at).getTime() >
+            Date.now(),
+      );
+
+      if (!currentMatchRow?.match_id || currentMatchIsPast) {
+        const { data: nextData, error: nextError } =
+          await supabase.rpc(
+            VESALAPORRA_PUBLIC_NEXT_MATCH_RPC,
+          );
+
+        if (nextError) {
+          throw nextError;
+        }
+
+        displayedMatchRow = Array.isArray(nextData)
+          ? nextData[0]
+          : nextData;
+
+        isUpcomingPreview = Boolean(
+          displayedMatchRow?.match_id,
+        );
       }
 
-      const currentMatchRow = Array.isArray(data) ? data[0] : data;
-
-      if (!currentMatchRow?.match_id) {
-        throw new Error("No hi ha cap partit públic programat.");
+      if (!displayedMatchRow?.match_id) {
+        throw new Error("No hi ha cap proper partit programat.");
       }
 
-      const normalizedMatch = normalizeCurrentMatch(currentMatchRow);
+      const baseMatch = normalizeCurrentMatch(displayedMatchRow);
+
+      const normalizedMatch = {
+        ...baseMatch,
+        predictionsAreOpen: isUpcomingPreview
+          ? false
+          : baseMatch.predictionsAreOpen,
+        predictionsCloseAt: isUpcomingPreview
+          ? null
+          : baseMatch.predictionsCloseAt,
+        isUpcomingPreview,
+      };
 
       setMatchData(normalizedMatch);
-      setCountdown(getCountdown(normalizedMatch.predictionsCloseAt));
+      setCountdown(
+        getCountdown(normalizedMatch.predictionsCloseAt),
+      );
 
       return normalizedMatch;
     } finally {
@@ -5508,61 +5583,20 @@ const saveAdminMatchPlayer = async (player, patch) => {
     useEffect(() => {
     let isCurrent = true;
 
-       const loadCurrentMatch = async () => {
-      setMatchLoading(true);
+    refreshPublicCurrentMatch().catch((error) => {
+      console.warn(
+        "No s’ha pogut carregar la porra ni el següent partit:",
+        error,
+      );
 
-      try {
-        const { data, error } = await supabase.rpc(
-          VESALAPORRA_PUBLIC_CURRENT_MATCH_RPC,
+      if (isCurrent) {
+        setMatchData(EMPTY_MATCH_DATA);
+        setAuthError(
+          error?.message ||
+            "No s’ha pogut carregar el pròxim partit.",
         );
-
-        if (error) {
-          throw error;
-        }
-
-        const currentMatchRow = Array.isArray(data)
-          ? data[0]
-          : data;
-
-        if (!currentMatchRow?.match_id) {
-          throw new Error(
-            "No hi ha cap partit públic programat.",
-          );
-        }
-
-        if (!isCurrent) {
-          return;
-        }
-
-        const normalizedMatch =
-          normalizeCurrentMatch(currentMatchRow);
-
-        setMatchData(normalizedMatch);
-
-        setCountdown(
-          getCountdown(normalizedMatch.predictionsCloseAt),
-        );
-      } catch (error) {
-        console.warn(
-          "No s’ha pogut carregar el partit públic actual:",
-          error,
-        );
-
-        if (isCurrent) {
-          setMatchData(EMPTY_MATCH_DATA);
-          setAuthError(
-            error?.message ||
-              "No s’ha pogut carregar el pròxim partit.",
-          );
-        }
-      } finally {
-        if (isCurrent) {
-          setMatchLoading(false);
-        }
       }
-    };
-
-    loadCurrentMatch();
+    });
 
     return () => {
       isCurrent = false;
@@ -5951,7 +5985,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     [],
   );
 
-    useEffect(() => {
+     useEffect(() => {
     setCountdown(
       getCountdown(matchData.predictionsCloseAt),
     );
@@ -5969,6 +6003,54 @@ const saveAdminMatchPlayer = async (player, patch) => {
     return () =>
       window.clearInterval(countdownInterval);
   }, [matchData.predictionsCloseAt]);
+
+  useEffect(() => {
+    if (
+      !isWaitingForOpening ||
+      !matchData.predictionsOpenAt
+    ) {
+      setOpeningCountdown(getCountdown(null));
+      return undefined;
+    }
+
+    let refreshInFlight = false;
+
+    const updateOpeningCountdown = () => {
+      const nextCountdown = getCountdown(
+        matchData.predictionsOpenAt,
+      );
+
+      setOpeningCountdown(nextCountdown);
+
+      if (nextCountdown.isClosed && !refreshInFlight) {
+        refreshInFlight = true;
+
+        refreshPublicCurrentMatch({ quiet: true })
+          .catch((error) => {
+            console.warn(
+              "La porra encara no s’ha activat:",
+              error,
+            );
+          })
+          .finally(() => {
+            refreshInFlight = false;
+          });
+      }
+    };
+
+    updateOpeningCountdown();
+
+    const openingInterval = window.setInterval(
+      updateOpeningCountdown,
+      1000,
+    );
+
+    return () =>
+      window.clearInterval(openingInterval);
+  }, [
+    isWaitingForOpening,
+    matchData.predictionsOpenAt,
+  ]);
 
   useEffect(() => {
     if (activePage !== "ranking" || !rankingHasMore) {
@@ -6478,40 +6560,50 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   </button>
                 </div>
 
-                <span
+                             <span
                   className={
                     resultIsConfirmed || scoreTouched
                       ? "status-pill completed"
                       : "status-pill"
                   }
                 >
-                  {resultIsConfirmed
-                    ? "ENVIAT"
-                    : scoreTouched
-                      ? "FET"
-                      : "PENDENT"}
+                  {isWaitingForOpening
+                    ? "TANCADA"
+                    : resultIsConfirmed
+                      ? "ENVIAT"
+                      : scoreTouched
+                        ? "FET"
+                        : "PENDENT"}
                 </span>
               </div>
 
-              <div className="score-match-overview">
+                           <div className="score-match-overview">
                 <div className="score-match-date">
-                  <span>PROPER PARTIT</span>
+                  <span>
+                    {isWaitingForOpening
+                      ? "SEGÜENT PARTIT"
+                      : "PROPER PARTIT"}
+                  </span>
 
                   <strong>{matchData.kickoffLabel}</strong>
                 </div>
 
                 <div
                   className={
-                    countdown.isClosed
+                    isWaitingForOpening || countdown.isClosed
                       ? "score-deadline closed"
                       : "score-deadline"
                   }
                 >
                   <span className="score-deadline-title">
-                    {countdown.isClosed ? "ESTAT" : "TANCA EN"}
+                    {isWaitingForOpening
+                      ? "PORRA TANCADA · S’OBRE EN"
+                      : countdown.isClosed
+                        ? "ESTAT"
+                        : "TANCA EN"}
                   </span>
 
-                  {countdown.isClosed ? (
+                  {!isWaitingForOpening && countdown.isClosed ? (
                     <strong className="score-deadline-closed">
                       PORRA TANCADA
                     </strong>
@@ -6519,7 +6611,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     <div className="score-countdown-grid">
                       <div className="score-countdown-unit">
                         <strong>
-                          {String(countdown.days).padStart(2, "0")}
+                          {String(displayedCountdown.days).padStart(2, "0")}
                         </strong>
 
                         <span>DIES</span>
@@ -6527,7 +6619,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                       <div className="score-countdown-unit">
                         <strong>
-                          {String(countdown.hours).padStart(2, "0")}
+                          {String(displayedCountdown.hours).padStart(2, "0")}
                         </strong>
 
                         <span>HORES</span>
@@ -6535,7 +6627,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                       <div className="score-countdown-unit">
                         <strong>
-                          {String(countdown.minutes).padStart(2, "0")}
+                          {String(displayedCountdown.minutes).padStart(2, "0")}
                         </strong>
 
                         <span>MIN</span>
@@ -6543,7 +6635,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                       <div className="score-countdown-unit">
                         <strong>
-                          {String(countdown.seconds).padStart(2, "0")}
+                          {String(displayedCountdown.seconds).padStart(2, "0")}
                         </strong>
 
                         <span>SEG</span>
@@ -6623,9 +6715,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   <div className="score-control">
                     <button
                       type="button"
-                      disabled={resultIsConfirmed}
+                      disabled={resultIsConfirmed || countdown.isClosed}
                       onClick={() => {
-                        if (resultIsConfirmed) {
+                        if (resultIsConfirmed || countdown.isClosed) {
                           return;
                         }
 
@@ -6644,7 +6736,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                       className="score-value"
                       disabled={resultIsConfirmed}
                       onClick={() => {
-                        if (!resultIsConfirmed) {
+                        if (!resultIsConfirmed && !countdown.isClosed) {
                           setScoreTouched(true);
                         }
                       }}
@@ -6698,7 +6790,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                       className="score-value"
                       disabled={resultIsConfirmed}
                       onClick={() => {
-                        if (!resultIsConfirmed) {
+                        if (!resultIsConfirmed && !countdown.isClosed) {
                           setScoreTouched(true);
                         }
                       }}
