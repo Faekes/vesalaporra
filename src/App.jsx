@@ -2436,11 +2436,17 @@ function App() {
       : "play";
   });
 
-  useEffect(() => {
+   useEffect(() => {
     window.sessionStorage.setItem(
       VESALAPORRA_ACTIVE_PAGE_STORAGE_KEY,
       activePage,
     );
+
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "auto",
+    });
   }, [activePage]);
 
   const [rankingTab, setRankingTab] = useState("general");
