@@ -9959,3 +9959,14 @@ button.notes-star:hover {
 .auth-avatar {
   border-color: rgba(47, 91, 210, 0.94);
 }
+/* JUGADORS: NOMÉS CERCLE GRANA */
+.field-slot.occupied .field-player-image,
+.field-slot.protagonist .field-player-image,
+.player-badge > img.player-badge-avatar,
+.notes-player-avatar,
+.protagonist-preview-hud > img,
+.protagonist-selector-player > img,
+.admin-review-preview,
+.admin-catalog-portrait {
+  border-color: #981747 !important;
+}
