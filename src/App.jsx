@@ -1098,8 +1098,18 @@ const normalizeNotesRow = (row, playersById) => {
     seasonAverage,
     seasonVoteCount,
     matchId: firstNonEmptyText(row?.match_id),
-    homeScore: toFiniteNumber(row?.home_score, row?.official_home_score),
-    awayScore: toFiniteNumber(row?.away_score, row?.official_away_score),
+    homeScore: toFiniteNumber(
+  row?.home_score,
+  row?.official_home_score,
+  row?.official_home_goals,
+  row?.home_goals,
+),
+awayScore: toFiniteNumber(
+  row?.away_score,
+  row?.official_away_score,
+  row?.official_away_goals,
+  row?.away_goals,
+),
     publishedAt: row?.published_at || row?.finalized_at || null,
   };
 };
@@ -5273,25 +5283,36 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
       const firstRow = rawRows[0] || {};
 
-      const normalizedMatch = {
-        ...matchData,
-                id: firstNonEmptyText(
-          firstRow?.match_id,
-          notesTargetMatchId,
-        ),
-        homeName: firstNonEmptyText(
-          firstRow?.home_display_name,
-          matchData.homeName,
-        ),
-        awayName: firstNonEmptyText(
-          firstRow?.away_display_name,
-          matchData.awayName,
-        ),
-        kickoffAt:
-          firstRow?.scheduled_kickoff_at ||
-          matchData.kickoffAt,
-      };
+const normalizedNotesMatch = normalizeCurrentMatch({
+  ...firstRow,
+  match_id: firstNonEmptyText(
+    firstRow?.match_id,
+    notesTargetMatchId,
+  ),
+});
 
+const normalizedMatch = {
+  ...matchData,
+  ...normalizedNotesMatch,
+  id: firstNonEmptyText(
+    firstRow?.match_id,
+    notesTargetMatchId,
+  ),
+  homeName: firstNonEmptyText(
+    firstRow?.home_display_name,
+    normalizedNotesMatch.homeName,
+    matchData.homeName,
+  ),
+  awayName: firstNonEmptyText(
+    firstRow?.away_display_name,
+    normalizedNotesMatch.awayName,
+    matchData.awayName,
+  ),
+  kickoffAt:
+    firstRow?.scheduled_kickoff_at ||
+    normalizedNotesMatch.kickoffAt ||
+    matchData.kickoffAt,
+};
       setNotesRows(normalizedRows);
       setSeasonNotesRows(normalizedSeasonRows);
       setNotesMatchData(normalizedMatch);
