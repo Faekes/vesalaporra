@@ -9946,3 +9946,16 @@ button.notes-star:hover {
     font-size: 14px;
   }
 }
+/* AVATARS UNIFICATS AMB ELS COLORS DE HANSI FLICK */
+.field-slot.occupied .field-player-image,
+.field-slot.protagonist .field-player-image,
+.player-badge > img.player-badge-avatar,
+.notes-player-avatar,
+.protagonist-preview-hud > img,
+.protagonist-selector-player > img,
+.admin-review-preview,
+.admin-catalog-portrait,
+.ranking-avatar,
+.auth-avatar {
+  border-color: rgba(47, 91, 210, 0.94);
+}
