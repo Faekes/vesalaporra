@@ -696,6 +696,9 @@ const VESALAPORRA_PUBLIC_MATCH_NOTES_RPC =
   "vesalaporra_public_match_notes";
 const VESALAPORRA_PUBLIC_LATEST_SCORED_MATCH_RPC =
   "vesalaporra_public_latest_scored_match_id";
+
+const VESALAPORRA_PUBLIC_SCORED_MATCH_CARD_RPC =
+  "vesalaporra_public_scored_match_card";
 const VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC ||
   "vesalaporra_public_active_season_notes";
@@ -5164,19 +5167,24 @@ const saveAdminMatchPlayer = async (player, patch) => {
         setNotesMatchData(null);
         return;
       }
-      const [matchPayload, seasonPayload] = await Promise.all([
-        callRpcWithPayloadFallbacks(
-          VESALAPORRA_PUBLIC_MATCH_NOTES_RPC,
-          [
-                       { p_match_id: notesTargetMatchId },
-            { match_id: notesTargetMatchId },
-          ],
-        ),
-        callRpcWithPayloadFallbacks(
-          VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC,
-          [{}],
-        ),
-      ]);
+     const [matchPayload, seasonPayload, matchCardPayload] =
+  await Promise.all([
+    callRpcWithPayloadFallbacks(
+      VESALAPORRA_PUBLIC_MATCH_NOTES_RPC,
+      [
+        { p_match_id: notesTargetMatchId },
+        { match_id: notesTargetMatchId },
+      ],
+    ),
+    callRpcWithPayloadFallbacks(
+      VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC,
+      [{}],
+    ),
+    callRpcWithPayloadFallbacks(
+      VESALAPORRA_PUBLIC_SCORED_MATCH_CARD_RPC,
+      [{ p_match_id: notesTargetMatchId }],
+    ),
+  ]);
 
       const rawRows = unwrapRpcRows(
         matchPayload,
@@ -5281,38 +5289,33 @@ const saveAdminMatchPlayer = async (player, patch) => {
         })
         .filter(Boolean);
 
-      const firstRow = rawRows[0] || {};
+           const matchCardRow =
+        unwrapRpcRows(
+          matchCardPayload,
+          ["match", "card", "rows"],
+        )[0] || {};
 
-const normalizedNotesMatch = normalizeCurrentMatch({
-  ...firstRow,
-  match_id: firstNonEmptyText(
-    firstRow?.match_id,
-    notesTargetMatchId,
-  ),
-});
+      const normalizedNotesMatch = normalizeCurrentMatch({
+        ...matchCardRow,
+        match_id: firstNonEmptyText(
+          matchCardRow?.match_id,
+          notesTargetMatchId,
+        ),
+      });
 
-const normalizedMatch = {
-  ...matchData,
-  ...normalizedNotesMatch,
-  id: firstNonEmptyText(
-    firstRow?.match_id,
-    notesTargetMatchId,
-  ),
-  homeName: firstNonEmptyText(
-    firstRow?.home_display_name,
-    normalizedNotesMatch.homeName,
-    matchData.homeName,
-  ),
-  awayName: firstNonEmptyText(
-    firstRow?.away_display_name,
-    normalizedNotesMatch.awayName,
-    matchData.awayName,
-  ),
-  kickoffAt:
-    firstRow?.scheduled_kickoff_at ||
-    normalizedNotesMatch.kickoffAt ||
-    matchData.kickoffAt,
-};
+      const normalizedMatch = {
+        ...normalizedNotesMatch,
+        id: firstNonEmptyText(
+          matchCardRow?.match_id,
+          notesTargetMatchId,
+        ),
+        homeScore: toFiniteNumber(
+          matchCardRow?.official_home_goals,
+        ),
+        awayScore: toFiniteNumber(
+          matchCardRow?.official_away_goals,
+        ),
+      };
       setNotesRows(normalizedRows);
       setSeasonNotesRows(normalizedSeasonRows);
       setNotesMatchData(normalizedMatch);
@@ -5339,28 +5342,19 @@ const normalizedMatch = {
         ]),
       );
 
-      const officialRow = normalizedRows[0] || null;
+            const officialRow = normalizedRows[0] || null;
 
       setOfficialMatchState((currentState) => ({
         ...currentState,
         matchId: notesTargetMatchId,
-        homeScore: officialRow
-          ? officialRow.homeScore
-          : currentState.matchId === matchData.id
-            ? currentState.homeScore
-            : 0,
-        awayScore: officialRow
-          ? officialRow.awayScore
-          : currentState.matchId === matchData.id
-            ? currentState.awayScore
-            : 0,
+        homeScore: normalizedMatch.homeScore,
+        awayScore: normalizedMatch.awayScore,
         statsByPlayerId:
           normalizedRows.length > 0
             ? statsByPlayerId
-            : currentState.matchId === matchData.id
-              ? currentState.statsByPlayerId
-              : {},
+            : currentState.statsByPlayerId,
         publishedAt:
+          matchCardRow?.finalized_at ||
           officialRow?.publishedAt ||
           currentState.publishedAt,
       }));
@@ -7555,13 +7549,13 @@ const normalizedMatch = {
                 </p>
               </div>
 
-                            <OfficialMatchCard
+                                        <OfficialMatchCard
                 match={notesMatchData || matchData}
                 homeScore={
-                  notesMatchRows[0]?.homeScore ?? officialHomeScore
+                  notesMatchData?.homeScore ?? officialHomeScore
                 }
                 awayScore={
-                  notesMatchRows[0]?.awayScore ?? officialAwayScore
+                  notesMatchData?.awayScore ?? officialAwayScore
                 }
               />
             </header>
@@ -9674,7 +9668,11 @@ const normalizedMatch = {
                       <small>
                         {profileDataLoading
                           ? "CARREGANT..."
-                          : `${selectedProfileData.history.length} JORNADES`}
+                                                   : `${selectedProfileData.history.length} ${
+                              selectedProfileData.history.length === 1
+                                ? "JORNADA"
+                                : "JORNADES"
+                            }`}
                       </small>
                     </header>
 
