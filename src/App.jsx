@@ -910,13 +910,27 @@ const normalizeRankingUser = (row, scope, currentUserId, fallbackIndex = 0) => {
         ) || fallbackIndex + 1
       : null,
 
-    jornadaPosition: isGeneral
+        jornadaPosition: isGeneral
       ? null
       : toFiniteNumber(
           row?.ranking_position,
           row?.position,
           row?.rank,
         ) || fallbackIndex + 1,
+
+    generalPreviousPosition:
+      isGeneral &&
+      row?.previous_position !== null &&
+      row?.previous_position !== undefined
+        ? toFiniteNumber(row?.previous_position)
+        : null,
+
+    generalMovement:
+      isGeneral &&
+      row?.movement !== null &&
+      row?.movement !== undefined
+        ? toFiniteNumber(row?.movement)
+        : null,
 
     general: isGeneral
       ? points
@@ -972,9 +986,19 @@ const mergeRankingScopes = (generalRows, jornadaRows) => {
         user.generalPosition ??
         null,
 
-      jornadaPosition:
+            jornadaPosition:
         previous.jornadaPosition ??
         user.jornadaPosition ??
+        null,
+
+      generalPreviousPosition:
+        previous.generalPreviousPosition ??
+        user.generalPreviousPosition ??
+        null,
+
+      generalMovement:
+        previous.generalMovement ??
+        user.generalMovement ??
         null,
 
       isCurrentUser:
@@ -9004,8 +9028,14 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                   <div className="ranking-list">
                     {visibleRankingRows.map((user, index) => {
-                      const position = index + 1;
+                                            const position = index + 1;
                       const points = user[rankingTab];
+                      const movement =
+                        rankingTab === "general"
+                          ? user.generalMovement
+                          : null;
+                      const showMovement =
+                        Number.isFinite(movement) && movement !== 0;
                       const medal =
                         position === 1
                           ? "🥇"
@@ -9026,11 +9056,82 @@ const saveAdminMatchPlayer = async (player, patch) => {
                             .filter(Boolean)
                             .join(" ")}
                         >
-                          <span className="ranking-position">
-                            {medal ? (
-                              <span className="ranking-medal">{medal}</span>
-                            ) : (
-                              position
+                                                    <span
+                            className="ranking-position"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "6px",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              {medal ? (
+                                <span className="ranking-medal">{medal}</span>
+                              ) : (
+                                position
+                              )}
+                            </span>
+
+                            {showMovement && (
+                              <span
+                                className={`ranking-movement ${
+                                  movement > 0 ? "up" : "down"
+                                }`}
+                                aria-label={
+                                  movement > 0
+                                    ? `Ha pujat ${movement} posicions`
+                                    : `Ha baixat ${Math.abs(movement)} posicions`
+                                }
+                                title={
+                                  movement > 0
+                                    ? `Ha pujat ${movement} posicions`
+                                    : `Ha baixat ${Math.abs(movement)} posicions`
+                                }
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  gap: "2px",
+                                  minWidth: "30px",
+                                  padding: "3px 5px",
+                                  borderRadius: "999px",
+                                  border:
+                                    movement > 0
+                                      ? "1px solid rgba(74, 222, 128, 0.5)"
+                                      : "1px solid rgba(251, 113, 133, 0.52)",
+                                  background:
+                                    movement > 0
+                                      ? "linear-gradient(135deg, rgba(20, 138, 83, 0.34), rgba(34, 197, 94, 0.14))"
+                                      : "linear-gradient(135deg, rgba(190, 24, 93, 0.34), rgba(239, 68, 68, 0.14))",
+                                  color:
+                                    movement > 0 ? "#86efac" : "#fda4af",
+                                  boxShadow:
+                                    movement > 0
+                                      ? "0 0 12px rgba(34, 197, 94, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.08)"
+                                      : "0 0 12px rgba(244, 63, 94, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08)",
+                                  fontSize: "10px",
+                                  fontWeight: 900,
+                                  lineHeight: 1,
+                                  letterSpacing: "-0.02em",
+                                }}
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  style={{ fontSize: "12px", lineHeight: 1 }}
+                                >
+                                  {movement > 0 ? "↑" : "↓"}
+                                </span>
+
+                                <span>{Math.abs(movement)}</span>
+                              </span>
                             )}
                           </span>
 
