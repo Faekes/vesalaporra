@@ -541,13 +541,154 @@ const X_AUTO_LOGIN_COOLDOWN_MS = 15000;
 const VESALAPORRA_ACTIVE_PAGE_STORAGE_KEY =
   "vesalaporra_active_page";
 
-const VESALAPORRA_ACTIVE_PAGES = [
-  "play",
-  "notes",
-  "ranking",
-  "profile",
-  "scoring",
-];
+const VESALAPORRA_PROFILE_TAB_BY_PATH = {
+  resum: "overview",
+  medalles: "achievements",
+  historial: "history",
+};
+
+const VESALAPORRA_PROFILE_PATH_BY_TAB = {
+  overview: "resum",
+  achievements: "medalles",
+  history: "historial",
+};
+
+const decodeRouteSegment = (value) => {
+  try {
+    return decodeURIComponent(value || "");
+  } catch {
+    return "";
+  }
+};
+
+const getVesalaporraRouteState = (
+  pathname = window.location.pathname,
+) => {
+  const normalizedPath =
+    String(pathname || "/")
+      .replace(/\/{2,}/g, "/")
+      .replace(/\/+$/, "") || "/";
+
+  const segments = normalizedPath
+    .split("/")
+    .filter(Boolean)
+    .map(decodeRouteSegment);
+
+  const section = String(segments[0] || "").toLowerCase();
+  const secondSegment = segments[1] || "";
+  const secondSlug = secondSegment.toLowerCase();
+  const thirdSlug = String(segments[2] || "").toLowerCase();
+
+  const defaultRouteState = {
+    activePage: "play",
+    notesTab: "match",
+    rankingTab: "general",
+    profileTab: "overview",
+    adminScoringTab: "match",
+    selectedProfileUserId: null,
+  };
+
+  if (section === "notes") {
+    return {
+      ...defaultRouteState,
+      activePage: "notes",
+      notesTab: secondSlug === "temporada" ? "season" : "match",
+    };
+  }
+
+  if (section === "ranquing" || section === "ranking") {
+    return {
+      ...defaultRouteState,
+      activePage: "ranking",
+      rankingTab: secondSlug === "jornada" ? "jornada" : "general",
+    };
+  }
+
+  if (section === "perfil") {
+    const secondSegmentIsTab = Boolean(
+      VESALAPORRA_PROFILE_TAB_BY_PATH[secondSlug],
+    );
+
+    const profilePath = secondSegmentIsTab
+      ? secondSlug
+      : thirdSlug;
+
+    return {
+      ...defaultRouteState,
+      activePage: "profile",
+      profileTab:
+        VESALAPORRA_PROFILE_TAB_BY_PATH[profilePath] ||
+        "overview",
+      selectedProfileUserId:
+        secondSegment && !secondSegmentIsTab
+          ? secondSegment
+          : null,
+    };
+  }
+
+  if (section === "puntuacions") {
+    const adminScoringTab =
+      secondSlug === "jugadors"
+        ? "players"
+        : secondSlug === "propers-partits"
+          ? "upcoming"
+          : "match";
+
+    return {
+      ...defaultRouteState,
+      activePage: "scoring",
+      adminScoringTab,
+    };
+  }
+
+  return defaultRouteState;
+};
+
+const getVesalaporraPath = ({
+  activePage,
+  notesTab,
+  rankingTab,
+  profileTab,
+  adminScoringTab,
+  selectedProfileUserId,
+}) => {
+  if (activePage === "notes") {
+    return notesTab === "season"
+      ? "/notes/temporada"
+      : "/notes/partit";
+  }
+
+  if (activePage === "ranking") {
+    return rankingTab === "jornada"
+      ? "/ranquing/jornada"
+      : "/ranquing/general";
+  }
+
+  if (activePage === "profile") {
+    const profilePath =
+      VESALAPORRA_PROFILE_PATH_BY_TAB[profileTab] || "resum";
+
+    const profileUserPath = selectedProfileUserId
+      ? `/${encodeURIComponent(String(selectedProfileUserId))}`
+      : "";
+
+    return `/perfil${profileUserPath}/${profilePath}`;
+  }
+
+  if (activePage === "scoring") {
+    if (adminScoringTab === "players") {
+      return "/puntuacions/jugadors";
+    }
+
+    if (adminScoringTab === "upcoming") {
+      return "/puntuacions/propers-partits";
+    }
+
+    return "/puntuacions/partit";
+  }
+
+  return "/porra";
+};
 
 const PROFILE_AVATAR_BUCKET = "vesalaporra-profile-avatars";
 
@@ -2476,40 +2617,29 @@ const formation433 = [
 ];
 
 function App() {
-  const [activePage, setActivePage] = useState(() => {
-    const storedActivePage =
-      window.sessionStorage.getItem(
-        VESALAPORRA_ACTIVE_PAGE_STORAGE_KEY,
-      );
+  const initialRouteState = useRef(
+    getVesalaporraRouteState(),
+  ).current;
 
-    return VESALAPORRA_ACTIVE_PAGES.includes(
-      storedActivePage,
-    )
-      ? storedActivePage
-      : "play";
-  });
+  const routeHistoryReadyRef = useRef(false);
 
-   useEffect(() => {
-    window.sessionStorage.setItem(
-      VESALAPORRA_ACTIVE_PAGE_STORAGE_KEY,
-      activePage,
-    );
+  const [activePage, setActivePage] = useState(
+    initialRouteState.activePage,
+  );
 
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "auto",
-    });
-  }, [activePage]);
-
-  const [rankingTab, setRankingTab] = useState("general");
+  const [rankingTab, setRankingTab] = useState(
+    initialRouteState.rankingTab,
+  );
 
   const [visibleRankingCount, setVisibleRankingCount] =
     useState(RANKING_PAGE_SIZE);
 
-  const [selectedProfileUserId, setSelectedProfileUserId] = useState(null);
+  const [selectedProfileUserId, setSelectedProfileUserId] =
+    useState(initialRouteState.selectedProfileUserId);
 
-  const [profileTab, setProfileTab] = useState("overview");
+  const [profileTab, setProfileTab] = useState(
+    initialRouteState.profileTab,
+  );
 
   const [authSession, setAuthSession] = useState(null);
 
@@ -2595,7 +2725,9 @@ function App() {
 
   const protagonistTouchPreviewIdRef = useRef(null);
 
-  const [notesTab, setNotesTab] = useState("match");
+    const [notesTab, setNotesTab] = useState(
+    initialRouteState.notesTab,
+  );
 
   const [notesRatingsByPlayerId, setNotesRatingsByPlayerId] = useState({});
 
@@ -2636,7 +2768,90 @@ function App() {
 
   const [backendIsAdmin, setBackendIsAdmin] = useState(false);
 
-  const [adminScoringTab, setAdminScoringTab] = useState("match");
+   const [adminScoringTab, setAdminScoringTab] = useState(
+    initialRouteState.adminScoringTab,
+  );
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const routeState = getVesalaporraRouteState();
+
+      setActivePage(routeState.activePage);
+      setNotesTab(routeState.notesTab);
+      setRankingTab(routeState.rankingTab);
+      setProfileTab(routeState.profileTab);
+      setAdminScoringTab(routeState.adminScoringTab);
+      setSelectedProfileUserId(
+        routeState.selectedProfileUserId,
+      );
+      setVisibleRankingCount(RANKING_PAGE_SIZE);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () =>
+      window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  useEffect(() => {
+    window.sessionStorage.setItem(
+      VESALAPORRA_ACTIVE_PAGE_STORAGE_KEY,
+      activePage,
+    );
+
+    const currentPath =
+      window.location.pathname.replace(/\/+$/, "") || "/";
+
+    const isAuthPath =
+      currentPath === "/auth/callback" ||
+      currentPath === "/entra-x";
+
+    let shouldScroll = false;
+
+    if (!isAuthPath) {
+      const nextPath = getVesalaporraPath({
+        activePage,
+        notesTab,
+        rankingTab,
+        profileTab,
+        adminScoringTab,
+        selectedProfileUserId,
+      });
+
+      shouldScroll =
+        !routeHistoryReadyRef.current ||
+        currentPath !== nextPath;
+
+      if (currentPath !== nextPath) {
+        const historyMethod = routeHistoryReadyRef.current
+          ? "pushState"
+          : "replaceState";
+
+        window.history[historyMethod](
+          { vesalaporra: true },
+          document.title,
+          nextPath,
+        );
+      }
+    }
+
+    routeHistoryReadyRef.current = true;
+
+    if (shouldScroll) {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "auto",
+      });
+    }
+  }, [
+    activePage,
+    notesTab,
+    rankingTab,
+    profileTab,
+    adminScoringTab,
+    selectedProfileUserId,
+  ]);
 
   const [publicMatchPlayers, setPublicMatchPlayers] = useState([]);
 
@@ -5635,7 +5850,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
         window.location.pathname === "/auth/callback" ||
         window.location.pathname === "/entra-x"
       ) {
-        window.history.replaceState({}, document.title, "/");
+                window.history.replaceState({}, document.title, "/porra");
       }
     };
 

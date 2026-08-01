@@ -1,0 +1,11 @@
+/porra /index.html 200
+/notes /index.html 200
+/notes/* /index.html 200
+/ranquing /index.html 200
+/ranquing/* /index.html 200
+/perfil /index.html 200
+/perfil/* /index.html 200
+/puntuacions /index.html 200
+/puntuacions/* /index.html 200
+/auth/callback /index.html 200
+/entra-x /index.html 200
