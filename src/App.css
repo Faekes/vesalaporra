@@ -529,6 +529,10 @@ button:focus-visible {
   line-height: 1.55;
 }
 
+.lineup-card > .section-help {
+  color: #f5d34b;
+}
+
 /* =========================================================
    RESULTAT
    ========================================================= */
@@ -630,10 +634,12 @@ button:focus-visible {
 }
 
 .score-separator {
-  padding-bottom: 8px;
+  padding: 0;
   color: #5b6682;
-  font-size: 36px;
-  font-weight: 900;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0.08em;
 }
 
 .result-only-action {
@@ -901,7 +907,7 @@ button:focus-visible {
 }
 
 /* =========================================================
-   4-3-3 FIX
+   4-2-3-1 FIX
    ========================================================= */
 
 .field-slots {
@@ -910,15 +916,11 @@ button:focus-visible {
   z-index: 5;
 }
 
-.formation-433 {
+.formation-4231 {
   display: grid;
-  grid-template-rows:
-    minmax(0, 1fr)
-    minmax(0, 1fr)
-    minmax(0, 1fr)
-    minmax(0, 0.85fr);
+  grid-template-rows: repeat(5, minmax(0, 1fr));
   align-items: center;
-  gap: 2%;
+  gap: 0.4%;
 }
 
 .formation-row {
@@ -928,14 +930,18 @@ button:focus-visible {
   width: 100%;
 }
 
-.formation-forwards {
-  justify-content: space-around;
-  padding: 0 10%;
+.formation-striker {
+  justify-content: center;
 }
 
-.formation-midfielders {
+.formation-attacking-midfielders {
   justify-content: space-around;
-  padding: 0 14%;
+  padding: 0 11%;
+}
+
+.formation-holding-midfielders {
+  justify-content: center;
+  gap: clamp(82px, 13vw, 126px);
 }
 
 .formation-defenders {
@@ -1923,7 +1929,7 @@ button:focus-visible {
   }
 
   .score-separator {
-    font-size: 26px;
+    font-size: 12px;
   }
 
   .result-only-action {
@@ -1989,16 +1995,16 @@ button:focus-visible {
     inset: 5% 5% 4%;
   }
 
-  .formation-433 {
-    gap: 1%;
+  .formation-4231 {
+    gap: 0;
   }
 
-  .formation-forwards {
-    padding: 0 7%;
+  .formation-attacking-midfielders {
+    padding: 0 4%;
   }
 
-  .formation-midfielders {
-    padding: 0 10%;
+  .formation-holding-midfielders {
+    gap: clamp(62px, 18vw, 92px);
   }
 
   .formation-defenders {
@@ -6453,6 +6459,18 @@ button:focus-visible {
   min-width: 0;
 }
 
+.score-match-label {
+  position: absolute;
+  top: calc(100% + 26px);
+  left: 50%;
+  color: #8190bd;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
 .score-control {
   display: grid;
   grid-template-columns:
@@ -6478,9 +6496,10 @@ button:focus-visible {
   align-self: center;
   padding: 0;
   color: #626d88;
-  font-size: 32px;
-  font-weight: 900;
+  font-size: 13px;
+  font-weight: 950;
   line-height: 1;
+  letter-spacing: 0.08em;
 }
 
 /* =========================================================
@@ -6577,6 +6596,10 @@ button:focus-visible {
     gap: 8px;
   }
 
+  .score-match-label {
+    top: calc(100% + 15px);
+  }
+
   .score-control {
     grid-template-columns:
       31px
@@ -6595,7 +6618,7 @@ button:focus-visible {
   }
 
   .score-separator {
-    font-size: 26px;
+    font-size: 12px;
   }
 
   .flick-avatar-shell {
@@ -6661,7 +6684,7 @@ button:focus-visible {
   }
 
   .score-separator {
-    font-size: 22px;
+    font-size: 11px;
   }
 }
 
@@ -6769,6 +6792,10 @@ button:focus-visible {
     min-width: 0;
   }
 
+  .score-match-label {
+    top: calc(100% + 10px);
+  }
+
   .score-control {
     grid-template-columns:
       20px
@@ -6791,7 +6818,7 @@ button:focus-visible {
   }
 
   .score-separator {
-    font-size: 18px;
+    font-size: 10px;
   }
 
   .flick-avatar-shell {

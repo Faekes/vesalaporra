@@ -2593,16 +2593,21 @@ const getDefaultDynamicProtagonistScoring = (player) => {
   };
 };
 
-const formation433 = [
+const formation4231 = [
   {
-    id: "forwards",
-    label: "Davanters",
-    slots: [0, 1, 2],
+    id: "striker",
+    label: "Davanter centre",
+    slots: [0],
   },
   {
-    id: "midfielders",
-    label: "Migcampistes",
-    slots: [3, 4, 5],
+    id: "attacking-midfielders",
+    label: "Línia de tres mitjapuntes",
+    slots: [1, 2, 3],
+  },
+  {
+    id: "holding-midfielders",
+    label: "Doble pivot",
+    slots: [4, 5],
   },
   {
     id: "defenders",
@@ -6978,7 +6983,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   </div>
 
                   <span className="score-separator" aria-hidden="true">
-                    :
+                    vs
                   </span>
 
                   <div className="score-control">
@@ -7031,19 +7036,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                     </button>
                   </div>
 
-                  <small
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 26px)",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      color: "#8190bd",
-                      fontSize: "11px",
-                      fontWeight: "900",
-                      letterSpacing: "0.08em",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
+                  <small className="score-match-label">
                     EL PARTIT
                   </small>
                 </div>
@@ -7119,7 +7112,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   <div className="lotto-title-copy">
                     <h2>La Lotto Flick</h2>
 
-                    <span className="formation-label">4-3-3 FIX</span>
+                    <span className="formation-label">4-2-3-1 FIX</span>
                   </div>
 
                   <button
@@ -7266,8 +7259,8 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
                 <div className="penalty-area penalty-area-bottom"></div>
 
-                <div className="field-slots formation-433">
-                  {formation433.map((line) => (
+                <div className="field-slots formation-4231">
+                  {formation4231.map((line) => (
                     <div
                       key={line.id}
                       className={`formation-row formation-${line.id}`}
