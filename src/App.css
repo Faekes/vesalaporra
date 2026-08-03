@@ -10167,3 +10167,12 @@ border-color: #f5c542 !important;
     gap: 5px;
   }
 }
+/* COLORS: FORMACIÓ I MARCADOR */
+.formation-label {
+  color: #ffffff;
+}
+
+.score-match-label,
+.score-separator {
+  color: #f5d34b;
+}
