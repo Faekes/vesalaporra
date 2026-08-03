@@ -12,7 +12,7 @@ const PROTAGONIST_GROUP_OPTIONS = [
     key: "special",
     label: "YAMAL SPECIAL",
     hitPoints: 5,
-    missPoints: -15,
+    missPoints: -10,
     sortOrder: 0,
     excludesProtagonist: false,
   },
@@ -20,7 +20,7 @@ const PROTAGONIST_GROUP_OPTIONS = [
     key: "a",
     label: "GRUP A",
     hitPoints: 10,
-    missPoints: -5,
+    missPoints: -10,
     sortOrder: 100,
     excludesProtagonist: false,
   },
@@ -44,7 +44,7 @@ const PROTAGONIST_GROUP_OPTIONS = [
     key: "d",
     label: "GRUP D",
     hitPoints: 40,
-    missPoints: -5,
+    missPoints: -10,
     sortOrder: 400,
     excludesProtagonist: false,
   },
@@ -52,7 +52,7 @@ const PROTAGONIST_GROUP_OPTIONS = [
     key: "e",
     label: "GRUP E",
     hitPoints: 50,
-    missPoints: -5,
+    missPoints: -10,
     sortOrder: 500,
     excludesProtagonist: false,
   },
@@ -7001,9 +7001,8 @@ const saveAdminMatchPlayer = async (player, patch) => {
                   </div>
 
                   <small className="section-info-note">
-                    Si claves el marcador exacte, obtens +50. Si no, pots sumar
-                    els parcials. El número dels gols del Barça no es duplica si
-                    ja està cobert pel bonus de +15.
+                    Si encertes el marcador exacte, obtens +50 i no se sumen els
+                    parcials. Si no, pots combinar els punts parcials.
                   </small>
                 </div>
               )}
