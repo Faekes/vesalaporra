@@ -5628,33 +5628,6 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
       setNotesRatingsByPlayerId(restoredRatings);
 
-      const statsByPlayerId = Object.fromEntries(
-        normalizedRows.map((row) => [
-          row.player.id,
-          {
-            role: row.stats.role,
-            goals: row.stats.goals,
-            assists: row.stats.assists,
-          },
-        ]),
-      );
-
-            const officialRow = normalizedRows[0] || null;
-
-      setOfficialMatchState((currentState) => ({
-        ...currentState,
-        matchId: notesTargetMatchId,
-        homeScore: normalizedMatch.homeScore,
-        awayScore: normalizedMatch.awayScore,
-        statsByPlayerId:
-          normalizedRows.length > 0
-            ? statsByPlayerId
-            : currentState.statsByPlayerId,
-        publishedAt:
-          matchCardRow?.finalized_at ||
-          officialRow?.publishedAt ||
-          currentState.publishedAt,
-      }));
     } catch (error) {
       setNotesRows([]);
       setSeasonNotesRows([]);
@@ -6326,14 +6299,11 @@ const saveAdminMatchPlayer = async (player, patch) => {
     }
   }, [activePage, authUser?.id, matchData.id]);
 
-  useEffect(() => {
-    if (
-      activePage === "notes" ||
-      (activePage === "scoring" && adminScoringTab === "match")
-    ) {
+    useEffect(() => {
+    if (activePage === "notes") {
       loadRealNotes();
     }
-  }, [activePage, adminScoringTab, matchData.id, publicMatchPlayers.length]);
+  }, [activePage, matchData.id, publicMatchPlayers.length]);
 
   useEffect(() => {
     if (activePage === "profile" && selectedProfileUser?.id) {
