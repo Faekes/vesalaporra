@@ -243,6 +243,7 @@ const EMPTY_MATCH_DATA = {
   predictionsCloseAt: null,
   predictionsAreOpen: false,
   isUpcomingPreview: false,
+  pointsMultiplier: 1,
 };
 
 const PREDICTION_CELEBRATION_MS = 5600;
@@ -2113,6 +2114,12 @@ const VESALAPORRA_ADMIN_MATCH_LIST_RPC =
 const VESALAPORRA_ADMIN_MATCH_UPSERT_RPC =
   "vesalaporra_admin_upsert_match_v2";
 
+const VESALAPORRA_ADMIN_SET_MATCH_POINTS_MULTIPLIER_RPC =
+  "vesalaporra_admin_set_match_points_multiplier";
+
+const VESALAPORRA_MATCH_SCORING_RULES_TABLE =
+  "vesalaporra_match_scoring_rules";
+
 const VESALAPORRA_PRESENTATION_TIME_ZONE = "Europe/Madrid";
 
 const ADMIN_MATCH_COLOR_OPTIONS = [
@@ -2138,6 +2145,40 @@ const EMPTY_ADMIN_MATCH_FORM = {
   rivalColors: [],
   rivalPattern: "solid",
   makeCurrent: true,
+  pointsMultiplier: 1,
+};
+
+const normalizePointsMultiplier = (value) =>
+  Number(value) === 2 ? 2 : 1;
+
+const loadMatchPointsMultipliers = async (matchIds) => {
+  const normalizedMatchIds = [
+    ...new Set(
+      (Array.isArray(matchIds) ? matchIds : [matchIds])
+        .map((matchId) => String(matchId || "").trim())
+        .filter(Boolean),
+    ),
+  ];
+
+  if (normalizedMatchIds.length === 0) {
+    return {};
+  }
+
+  const { data, error } = await supabase
+    .from(VESALAPORRA_MATCH_SCORING_RULES_TABLE)
+    .select("match_id, points_multiplier")
+    .in("match_id", normalizedMatchIds);
+
+  if (error) {
+    throw error;
+  }
+
+  return Object.fromEntries(
+    (Array.isArray(data) ? data : []).map((row) => [
+      String(row.match_id),
+      normalizePointsMultiplier(row.points_multiplier),
+    ]),
+  );
 };
 
 const slugifyTeamKey = (value) =>
@@ -2393,6 +2434,9 @@ const normalizeAdminMatch = (row) => {
     predictionsAreOpen: Boolean(
       row?.predictions_are_open ?? row?.predictionsAreOpen,
     ),
+    pointsMultiplier: normalizePointsMultiplier(
+      row?.points_multiplier ?? row?.pointsMultiplier,
+    ),
     isCurrent: Boolean(
       row?.is_current ??
         row?.isCurrent ??
@@ -2420,6 +2464,7 @@ const adminMatchToForm = (match) => {
       rivalColors,
     ),
     makeCurrent: match.isCurrent,
+    pointsMultiplier: normalizePointsMultiplier(match.pointsMultiplier),
   };
 };
 
@@ -3647,6 +3692,9 @@ function App() {
       }
 
       const baseMatch = normalizeCurrentMatch(displayedMatchRow);
+      const pointsMultipliers = await loadMatchPointsMultipliers(
+        baseMatch.id,
+      );
 
       const normalizedMatch = {
         ...baseMatch,
@@ -3657,6 +3705,9 @@ function App() {
           ? null
           : baseMatch.predictionsCloseAt,
         isUpcomingPreview,
+        pointsMultiplier: normalizePointsMultiplier(
+          pointsMultipliers[baseMatch.id],
+        ),
       };
 
       setMatchData(normalizedMatch);
@@ -3699,7 +3750,7 @@ function App() {
           ? data.matches
           : [];
 
-      const normalizedMatches = rows
+      const baseMatches = rows
         .map(normalizeAdminMatch)
         .filter((match) => match.matchId && match.kickoffAt)
         .sort(
@@ -3707,6 +3758,17 @@ function App() {
             new Date(firstMatch.kickoffAt).getTime() -
             new Date(secondMatch.kickoffAt).getTime(),
         );
+
+      const pointsMultipliers = await loadMatchPointsMultipliers(
+        baseMatches.map((match) => match.matchId),
+      );
+
+      const normalizedMatches = baseMatches.map((match) => ({
+        ...match,
+        pointsMultiplier: normalizePointsMultiplier(
+          pointsMultipliers[match.matchId],
+        ),
+      }));
 
       setAdminUpcomingMatches(normalizedMatches);
     } catch (error) {
@@ -3841,6 +3903,9 @@ const validateAdminMatchForm = () => {
     const rivalKey =
       slugifyTeamKey(adminMatchForm.rivalKey) ||
       slugifyTeamKey(adminMatchForm.rivalName);
+    const savedPointsMultiplier = normalizePointsMultiplier(
+      adminMatchForm.pointsMultiplier,
+    );
 
     setAdminMatchSaving(true);
     setAdminMatchFeedback({
@@ -3886,6 +3951,31 @@ const validateAdminMatchForm = () => {
         "id",
       ]);
 
+      const scoringMatchId = savedMatchId || adminMatchForm.matchId;
+
+      if (!scoringMatchId) {
+        throw new Error(
+          "El partit s’ha guardat, però no s’ha pogut identificar per aplicar-hi els punts.",
+        );
+      }
+
+      const { error: multiplierError } = await supabase.rpc(
+        VESALAPORRA_ADMIN_SET_MATCH_POINTS_MULTIPLIER_RPC,
+        {
+          p_match_id: scoringMatchId,
+          p_points_multiplier: savedPointsMultiplier,
+          p_audit_id: createAdminAuditId(
+            savedPointsMultiplier === 2
+              ? "SET_MATCH_POINTS_X2"
+              : "SET_MATCH_POINTS_NORMAL",
+          ),
+        },
+      );
+
+      if (multiplierError) {
+        throw multiplierError;
+      }
+
       await loadAdminUpcomingMatches({ quiet: true });
 
       const refreshedMatch = await refreshPublicCurrentMatch({ quiet: true });
@@ -3897,9 +3987,12 @@ const validateAdminMatchForm = () => {
       setAdminMatchForm(EMPTY_ADMIN_MATCH_FORM);
       setAdminMatchFeedback({
         type: "success",
-        message: savedMatchId
-          ? "Partit guardat i portada actualitzada amb la nova font real."
-          : "Partit guardat. La portada ja ha rellegit el partit públic real.",
+        message:
+          savedPointsMultiplier === 2
+            ? "Partit guardat com a PARTIT DOBLE. Tots els punts comptaran x2."
+            : savedMatchId
+              ? "Partit guardat i portada actualitzada amb la nova font real."
+              : "Partit guardat. La portada ja ha rellegit el partit públic real.",
       });
     } catch (error) {
       setAdminMatchFeedback({
@@ -6835,6 +6928,46 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 </div>
               </div>
 
+              {matchData.pointsMultiplier === 2 && (
+                <div
+                  role="note"
+                  aria-label="Partit doble, tots els punts compten per dos"
+                  style={{
+                    display: "grid",
+                    gap: "4px",
+                    margin: "0 0 18px",
+                    padding: "13px 16px",
+                    border: "1px solid rgba(244, 207, 54, 0.68)",
+                    borderRadius: "14px",
+                    background:
+                      "linear-gradient(135deg, rgba(244, 207, 54, 0.2), rgba(165, 0, 68, 0.18))",
+                    boxShadow:
+                      "0 12px 28px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+                    textAlign: "center",
+                  }}
+                >
+                  <strong
+                    style={{
+                      color: "#f4cf36",
+                      fontSize: "clamp(0.98rem, 3.6vw, 1.18rem)",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    🔥 PARTIT DOBLE · PUNTS x2
+                  </strong>
+
+                  <span
+                    style={{
+                      color: "rgba(255, 255, 255, 0.92)",
+                      fontSize: "0.78rem",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Tots els punts positius i negatius compten el doble.
+                  </span>
+                </div>
+              )}
+
               {openInfoSection === "score" && (
                 <div className="section-info-panel" role="note">
                   <strong className="section-info-title">
@@ -8891,6 +9024,65 @@ const saveAdminMatchPlayer = async (player, patch) => {
                       </div>
                     </div>
 
+                    <div className="admin-upcoming-field">
+                      <span className="admin-upcoming-field-label">
+                        PUNTS DEL PARTIT
+                      </span>
+
+                      <div
+                        className="admin-home-away-toggle"
+                        role="group"
+                        aria-label="Multiplicador de punts del partit"
+                      >
+                        <button
+                          type="button"
+                          className={
+                            adminMatchForm.pointsMultiplier === 1
+                              ? "active"
+                              : ""
+                          }
+                          onClick={() =>
+                            updateAdminMatchForm("pointsMultiplier", 1)
+                          }
+                        >
+                          NORMAL
+                        </button>
+
+                        <button
+                          type="button"
+                          className={
+                            adminMatchForm.pointsMultiplier === 2
+                              ? "active"
+                              : ""
+                          }
+                          onClick={() =>
+                            updateAdminMatchForm("pointsMultiplier", 2)
+                          }
+                        >
+                          🔥 PUNTS x2
+                        </button>
+                      </div>
+
+                      <small
+                        style={{
+                          display: "block",
+                          marginTop: "8px",
+                          color:
+                            adminMatchForm.pointsMultiplier === 2
+                              ? "#f4cf36"
+                              : undefined,
+                          fontWeight:
+                            adminMatchForm.pointsMultiplier === 2
+                              ? 800
+                              : undefined,
+                        }}
+                      >
+                        {adminMatchForm.pointsMultiplier === 2
+                          ? "Es doblaran tots els punts positius i negatius."
+                          : "S’aplicarà la puntuació habitual."}
+                      </small>
+                    </div>
+
                     <label className="admin-upcoming-field">
                       <span>DATA</span>
                       <input
@@ -8972,6 +9164,27 @@ const saveAdminMatchPlayer = async (player, patch) => {
     {adminMatchForm.kickoffText.trim() ||
       "31/7/26 i 20:45"}
   </small>
+
+  {adminMatchForm.pointsMultiplier === 2 && (
+    <strong
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        alignSelf: "center",
+        marginTop: "10px",
+        padding: "7px 12px",
+        border: "1px solid rgba(244, 207, 54, 0.62)",
+        borderRadius: "999px",
+        background: "rgba(244, 207, 54, 0.12)",
+        color: "#f4cf36",
+        fontSize: "0.78rem",
+        letterSpacing: "0.08em",
+      }}
+    >
+      🔥 PARTIT DOBLE · PUNTS x2
+    </strong>
+  )}
 </div>
 
                     <div className="admin-upcoming-form-actions">
@@ -9087,6 +9300,19 @@ const saveAdminMatchPlayer = async (player, patch) => {
                                   ? "PORRA OBERTA"
                                   : "PORRA NO OBERTA"}
                               </span>
+
+                              {match.pointsMultiplier === 2 && (
+                                <span
+                                  className="ok"
+                                  style={{
+                                    borderColor: "rgba(244, 207, 54, 0.62)",
+                                    background: "rgba(244, 207, 54, 0.12)",
+                                    color: "#f4cf36",
+                                  }}
+                                >
+                                  🔥 PARTIT DOBLE · x2
+                                </span>
+                              )}
                             </div>
 
                                                         <div className="admin-catalog-actions primary">
