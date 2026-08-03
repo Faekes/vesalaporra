@@ -2312,6 +2312,10 @@ button:focus-visible {
   letter-spacing: 0.14em;
 }
 
+.protagonist-combined-copy > span:empty {
+  display: none;
+}
+
 .protagonist-combined-copy > strong {
   color: #ffffff;
   font-size: clamp(17px, 3vw, 23px);
@@ -2321,10 +2325,10 @@ button:focus-visible {
 
 .protagonist-combined-copy > small {
   max-width: 520px;
-  color: #909ab4;
-  font-size: 11px;
-  font-weight: 680;
-  line-height: 1.45;
+  color: #f0ca39;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
 }
 
 .protagonist-binary-pill {
@@ -5177,7 +5181,7 @@ button:focus-visible {
   }
 
   .protagonist-combined-copy > small {
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .protagonist-preview-hud {

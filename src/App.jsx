@@ -7651,8 +7651,8 @@ const saveAdminMatchPlayer = async (player, patch) => {
                       : protagonistIsComplete
                         ? "PROTAGONISTA ESCOLLIT"
                         : protagonistSelectionActive
-                          ? "MODE PROTAGONISTA ACTIU"
-                          : "UNA ÚNICA APOSTA"}
+                                                  ? "MODE PROTAGONISTA ACTIU"
+                          : ""}
                   </span>
 
                   <strong>MARCA O ASSISTEIX</strong>
