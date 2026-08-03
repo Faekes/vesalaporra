@@ -7634,7 +7634,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
             >
               <div className="section-heading">
                 <div>
-                  <h2>Marca el protagonista</h2>
+                  <h2>El protagonista</h2>
 
                   <button
                     type="button"
