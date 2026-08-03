@@ -2306,14 +2306,14 @@ button:focus-visible {
 }
 
 .protagonist-combined-copy > span {
-  color: #f0ca39;
+  color: #ffffff;
   font-size: 9px;
   font-weight: 950;
   letter-spacing: 0.14em;
 }
 
 .protagonist-combined-copy > strong {
-  color: #ffffff;
+  color: #f0ca39;
   font-size: clamp(17px, 3vw, 23px);
   font-weight: 950;
   letter-spacing: -0.02em;
