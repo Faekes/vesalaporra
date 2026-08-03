@@ -7645,17 +7645,15 @@ const saveAdminMatchPlayer = async (player, patch) => {
                 </button>
 
                 <div className="protagonist-combined-copy">
-                                  {(protagonistIsConfirmed ||
-                    protagonistIsComplete ||
-                    protagonistSelectionActive) && (
-                    <span>
-                      {protagonistIsConfirmed
-                        ? "APOSTA ENVIADA"
-                        : protagonistIsComplete
-                          ? "PROTAGONISTA ESCOLLIT"
-                          : "MODE PROTAGONISTA ACTIU"}
-                    </span>
-                  )}
+                  <span>
+                    {protagonistIsConfirmed
+                      ? "APOSTA ENVIADA"
+                      : protagonistIsComplete
+                        ? "PROTAGONISTA ESCOLLIT"
+                        : protagonistSelectionActive
+                          ? "MODE PROTAGONISTA ACTIU"
+                          : "UNA ÚNICA APOSTA"}
+                  </span>
 
                   <strong>MARCA O ASSISTEIX</strong>
 
