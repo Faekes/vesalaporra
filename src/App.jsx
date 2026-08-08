@@ -5469,24 +5469,25 @@ const saveAdminMatchPlayer = async (player, patch) => {
     }
   };
 
-  const fetchRankingScope = async (scope) => {
-    const payload = await callRpcWithPayloadFallbacks(
-      VESALAPORRA_PUBLIC_RANKING_RPC,
-      [
-        { p_scope: scope, p_limit: 500, p_offset: 0 },
-        { p_ranking_scope: scope, p_limit: 500, p_offset: 0 },
-        { p_mode: scope, p_limit: 500 },
-        { p_limit: 500 },
-        {},
-      ],
-    );
+const fetchRankingScope = async (scope) => {
+  const { data: payload, error } = await supabase.rpc(
+    VESALAPORRA_PUBLIC_RANKING_RPC,
+    {
+      p_scope: scope,
+      p_limit: 500,
+    },
+  );
 
-    return unwrapRpcRows(payload, ["ranking", "rows", "items", "users"])
-      .map((row, index) =>
-        normalizeRankingUser(row, scope, authUser?.id, index),
-      )
-      .filter(Boolean);
-  };
+  if (error) {
+    throw error;
+  }
+
+  return unwrapRpcRows(payload, ["ranking", "rows", "items", "users"])
+    .map((row, index) =>
+      normalizeRankingUser(row, scope, authUser?.id, index),
+    )
+    .filter(Boolean);
+};
 
   const loadRealRanking = async ({ quiet = false } = {}) => {
     if (!quiet) {
