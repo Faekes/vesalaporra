@@ -5918,6 +5918,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       error: "",
       lineupPlayerNames: [],
       protagonistDisplayName: "",
+      protagonistImageUrl: "",
     });
 
     try {
@@ -5947,6 +5948,13 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         data.protagonist_display_name,
       );
 
+      const protagonistImageUrl =
+        getPublicStorageImageUrl(
+          data.protagonist_avatar_bucket,
+          data.protagonist_avatar_path,
+          data.protagonist_avatar_version,
+        ) || "";
+
       setExpandedProfilePrediction((currentPrediction) =>
         currentPrediction?.key === detailKey
           ? {
@@ -5955,6 +5963,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               error: "",
               lineupPlayerNames,
               protagonistDisplayName,
+              protagonistImageUrl,
             }
           : currentPrediction,
       );
@@ -6863,12 +6872,36 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         }
 
         .profile-history-protagonist-detail {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          gap: 7px;
+          min-height: 174px;
+          display: grid;
+          grid-template-columns: minmax(86px, 0.9fr) minmax(0, 1.1fr);
+          align-items: center;
+          gap: 14px;
+          overflow: hidden;
           border-color: rgba(247, 207, 74, 0.28);
           background: rgba(247, 207, 74, 0.07);
+        }
+
+        .profile-history-protagonist-detail.no-player {
+          min-height: auto;
+          grid-template-columns: 1fr;
+        }
+
+        .profile-history-protagonist-image {
+          align-self: end;
+          width: 100%;
+          max-width: 140px;
+          height: 160px;
+          object-fit: contain;
+          object-position: center bottom;
+          filter: drop-shadow(0 10px 13px rgba(0, 0, 0, 0.3));
+        }
+
+        .profile-history-protagonist-copy {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 7px;
         }
 
         .profile-history-protagonist-detail span,
@@ -6882,6 +6915,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         .profile-history-protagonist-detail strong {
           color: #fff;
           font-size: 16px;
+          line-height: 1.15;
         }
 
         .profile-history-lineup-detail header {
@@ -10607,22 +10641,46 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                     </div>
                                   ) : (
                                     <>
-                                      <section className="profile-history-protagonist-detail">
-                                        <span>⭐ PROTAGONISTA</span>
-                                        <strong>
-                                          {expandedProfilePrediction.protagonistDisplayName ||
-                                            "Sense protagonista"}
-                                        </strong>
+                                      <section
+                                        className={
+                                          expandedProfilePrediction.protagonistImageUrl
+                                            ? "profile-history-protagonist-detail"
+                                            : "profile-history-protagonist-detail no-player"
+                                        }
+                                      >
+                                        {expandedProfilePrediction.protagonistImageUrl && (
+                                          <img
+                                            className="profile-history-protagonist-image"
+                                            src={
+                                              expandedProfilePrediction.protagonistImageUrl
+                                            }
+                                            alt={`Cromo de ${
+                                              expandedProfilePrediction.protagonistDisplayName ||
+                                              "protagonista"
+                                            }`}
+                                          />
+                                        )}
+
+                                        <div className="profile-history-protagonist-copy">
+                                          <span>⭐ PROTAGONISTA</span>
+                                          <strong>
+                                            {expandedProfilePrediction.protagonistDisplayName ||
+                                              "Sense protagonista"}
+                                          </strong>
+                                        </div>
                                       </section>
 
                                       <section className="profile-history-lineup-detail">
                                         <header>
                                           <span>🧠 LOTTO FLICK</span>
                                           <strong>
-                                            {
-                                              expandedProfilePrediction
-                                                .lineupPlayerNames.length
-                                            }
+                                            {Math.max(
+                                              0,
+                                              Math.min(
+                                                11,
+                                                toFiniteNumber(match.xiHits),
+                                              ),
+                                            )}
                                             /11
                                           </strong>
                                         </header>
