@@ -3262,7 +3262,21 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       ownStars: notesRatingsByPlayerId[row.player.id] ?? row.ownStars,
       displayStars:
         notesRatingsByPlayerId[row.player.id] ?? row.displayStars,
-    }));
+    }))
+    .sort((firstRow, secondRow) => {
+      const firstRowHasVotes = firstRow.voteCount > 0;
+      const secondRowHasVotes = secondRow.voteCount > 0;
+
+      if (firstRowHasVotes !== secondRowHasVotes) {
+        return firstRowHasVotes ? -1 : 1;
+      }
+
+      return (
+        secondRow.average - firstRow.average ||
+        secondRow.voteCount - firstRow.voteCount ||
+        firstRow.player.name.localeCompare(secondRow.player.name, "ca")
+      );
+    });
 
   const notesSeasonRows = [...seasonNotesRows]
     .filter((row) => row.player.eligibleForRatings !== false)
