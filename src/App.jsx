@@ -2794,6 +2794,9 @@ function App() {
 
   const [profileHistory, setProfileHistory] = useState([]);
 
+const [expandedProfilePrediction, setExpandedProfilePrediction] =
+  useState(null);
+
   const [profileAchievements, setProfileAchievements] = useState(
     ACHIEVEMENT_CATALOG.map((achievement) => ({
       ...achievement,
@@ -5840,6 +5843,82 @@ const fetchRankingScope = async (scope) => {
     }
   };
 
+  const handleToggleProfilePrediction = async (match) => {
+    const userId = selectedProfileUser?.id;
+    const matchId = match?.matchId;
+
+    if (!userId || !matchId) {
+      return;
+    }
+
+    const detailKey = `${userId}:${matchId}`;
+
+    if (expandedProfilePrediction?.key === detailKey) {
+      setExpandedProfilePrediction(null);
+      return;
+    }
+
+    setExpandedProfilePrediction({
+      key: detailKey,
+      loading: true,
+      error: "",
+      lineupPlayerNames: [],
+      protagonistDisplayName: "",
+    });
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "vesalaporra_public_prediction_detail",
+        {
+          p_user_id: userId,
+          p_match_id: matchId,
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error("No s’ha trobat el detall d’aquesta aposta.");
+      }
+
+      const lineupPlayerNames = Array.isArray(data.lineup_player_names)
+        ? data.lineup_player_names
+            .map((playerName) => String(playerName || "").trim())
+            .filter(Boolean)
+        : [];
+
+      const protagonistDisplayName = firstNonEmptyText(
+        data.protagonist_display_name,
+      );
+
+      setExpandedProfilePrediction((currentPrediction) =>
+        currentPrediction?.key === detailKey
+          ? {
+              key: detailKey,
+              loading: false,
+              error: "",
+              lineupPlayerNames,
+              protagonistDisplayName,
+            }
+          : currentPrediction,
+      );
+    } catch (error) {
+      setExpandedProfilePrediction((currentPrediction) =>
+        currentPrediction?.key === detailKey
+          ? {
+              ...currentPrediction,
+              loading: false,
+              error:
+                error?.message ||
+                "No s’ha pogut carregar aquesta aposta.",
+            }
+          : currentPrediction,
+      );
+    }
+  };
+
   useEffect(() => {
     let isCurrent = true;
 
@@ -6675,6 +6754,172 @@ const fetchRankingScope = async (scope) => {
 
   return (
     <div className="app-shell">
+      <style>{`
+        .profile-history-bet-toggle {
+          display: inline-flex;
+          align-items: center;
+          align-self: flex-start;
+          gap: 6px;
+          margin-top: 8px;
+          padding: 2px 0;
+          border: 0;
+          background: transparent;
+          color: #f7cf4a;
+          font: inherit;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 0.08em;
+          cursor: pointer;
+        }
+
+        .profile-history-bet-toggle span {
+          display: inline-block;
+          font-size: 14px;
+          line-height: 1;
+          transition: transform 180ms ease;
+        }
+
+        .profile-history-bet-toggle.open span {
+          transform: rotate(180deg);
+        }
+
+        .profile-history-bet-toggle:disabled {
+          opacity: 0.45;
+          cursor: default;
+        }
+
+        .profile-history-bet-detail {
+          grid-column: 1 / -1;
+          width: 100%;
+          display: grid;
+          grid-template-columns: minmax(190px, 0.7fr) minmax(0, 1.6fr);
+          gap: 14px;
+          padding-top: 16px;
+          margin-top: 4px;
+          border-top: 1px solid rgba(255, 255, 255, 0.09);
+          animation: profile-history-bet-open 180ms ease-out;
+        }
+
+        .profile-history-protagonist-detail,
+        .profile-history-lineup-detail {
+          padding: 14px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.04);
+        }
+
+        .profile-history-protagonist-detail {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 7px;
+          border-color: rgba(247, 207, 74, 0.28);
+          background: rgba(247, 207, 74, 0.07);
+        }
+
+        .profile-history-protagonist-detail span,
+        .profile-history-lineup-detail header span {
+          color: #f7cf4a;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 0.08em;
+        }
+
+        .profile-history-protagonist-detail strong {
+          color: #fff;
+          font-size: 16px;
+        }
+
+        .profile-history-lineup-detail header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 10px;
+        }
+
+        .profile-history-lineup-detail header strong {
+          color: #fff;
+          font-size: 12px;
+        }
+
+        .profile-history-lineup-list {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 6px;
+        }
+
+        .profile-history-lineup-player {
+          min-width: 0;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 7px 9px;
+          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.055);
+        }
+
+        .profile-history-lineup-player > span {
+          flex: 0 0 21px;
+          display: grid;
+          place-items: center;
+          width: 21px;
+          height: 21px;
+          border-radius: 50%;
+          background: rgba(247, 207, 74, 0.14);
+          color: #f7cf4a;
+          font-size: 9px;
+          font-weight: 900;
+        }
+
+        .profile-history-lineup-player > strong {
+          min-width: 0;
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 11px;
+          line-height: 1.25;
+        }
+
+        .profile-history-bet-state {
+          grid-column: 1 / -1;
+          padding: 16px;
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.04);
+          color: rgba(255, 255, 255, 0.72);
+          text-align: center;
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        .profile-history-bet-state.error {
+          color: #ff9898;
+          background: rgba(255, 70, 70, 0.08);
+        }
+
+        @keyframes profile-history-bet-open {
+          from {
+            opacity: 0;
+            transform: translateY(-4px);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @media (max-width: 680px) {
+          .profile-history-bet-detail {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 430px) {
+          .profile-history-lineup-list {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
+
       <header className="app-header">
         <div className="brand">
           <span className="brand-mark">V</span>
@@ -10181,82 +10426,185 @@ const fetchRankingScope = async (scope) => {
                         <span>No es mostra cap historial inventat.</span>
                       </div>
                     ) : (
-                                            <div className="profile-history-list-v2">
-                        {selectedProfileData.history.map((match) => (
-                          <article
-                            key={match.id}
-                            className="profile-history-row-v2"
-                          >
-                            <div className="profile-history-match-v2">
-                              <span>
-                                {String(match.label || "PARTIT").toUpperCase()}
-                              </span>
-                              <strong>{match.opponent}</strong>
-                              <small>{match.dateLabel || ""}</small>
-                            </div>
+                      <div className="profile-history-list-v2">
+                        {selectedProfileData.history.map((match) => {
+                          const detailKey = `${selectedProfileUser?.id || ""}:${match.matchId}`;
+                          const isPredictionOpen =
+                            expandedProfilePrediction?.key === detailKey;
 
-                            <div className="profile-history-score-v2">
-                              <div>
-                                <span>PRONÒSTIC</span>
-                                <strong>
-                                  {match.predictedHome}–{match.predictedAway}
-                                </strong>
-                              </div>
+                          return (
+                            <article
+                              key={match.id}
+                              className="profile-history-row-v2"
+                            >
+                              <div className="profile-history-match-v2">
+                                <span>
+                                  {String(
+                                    match.label || "PARTIT",
+                                  ).toUpperCase()}
+                                </span>
+                                <strong>{match.opponent}</strong>
+                                <small>{match.dateLabel || ""}</small>
 
-                              <span className="profile-history-score-arrow">
-                                →
-                              </span>
-
-                              <div>
-                                <span>OFICIAL</span>
-                                <strong>
-                                  {match.actualHome}–{match.actualAway}
-                                </strong>
-                              </div>
-                            </div>
-
-                            <div className="profile-history-points-v2">
-                              {[
-                                ["RESULTAT", match.resultPoints],
-                                ["XI", match.xiPoints],
-                                ["PRO", match.protagonistPoints],
-                              ].map(([label, points]) => (
-                                <div
-                                  key={label}
+                                <button
+                                  type="button"
                                   className={
-                                    points > 0
-                                      ? "positive"
-                                      : points < 0
-                                        ? "negative"
-                                        : "neutral"
+                                    isPredictionOpen
+                                      ? "profile-history-bet-toggle open"
+                                      : "profile-history-bet-toggle"
                                   }
+                                  onClick={() =>
+                                    handleToggleProfilePrediction(match)
+                                  }
+                                  aria-expanded={isPredictionOpen}
+                                  aria-controls={`profile-history-bet-${match.matchId}`}
+                                  disabled={!match.matchId}
                                 >
-                                  <span>{label}</span>
+                                  {isPredictionOpen
+                                    ? expandedProfilePrediction.loading
+                                      ? "CARREGANT..."
+                                      : "AMAGAR APOSTA"
+                                    : "VEURE APOSTA"}
+
+                                  <span aria-hidden="true">⌄</span>
+                                </button>
+                              </div>
+
+                              <div className="profile-history-score-v2">
+                                <div>
+                                  <span>PRONÒSTIC</span>
                                   <strong>
-                                    {points > 0 ? "+" : ""}
-                                    {points}
+                                    {match.predictedHome}–
+                                    {match.predictedAway}
                                   </strong>
                                 </div>
-                              ))}
-                            </div>
 
-                            <div
-                              className={
-                                match.totalPoints > 0
-                                  ? "profile-history-total-v2 positive"
-                                  : match.totalPoints < 0
-                                    ? "profile-history-total-v2 negative"
-                                    : "profile-history-total-v2 neutral"
-                              }
-                            >
-                              <span>TOTAL</span>
-                              <strong>
-                                {match.totalPoints > 0 ? "+" : ""}
-                                {match.totalPoints}
-                              </strong>
-                            </div>
-                          </article>
-                        ))}
+                                <span className="profile-history-score-arrow">
+                                  →
+                                </span>
+
+                                <div>
+                                  <span>OFICIAL</span>
+                                  <strong>
+                                    {match.actualHome}–{match.actualAway}
+                                  </strong>
+                                </div>
+                              </div>
+
+                              <div className="profile-history-points-v2">
+                                {[
+                                  ["RESULTAT", match.resultPoints],
+                                  ["XI", match.xiPoints],
+                                  ["PRO", match.protagonistPoints],
+                                ].map(([label, points]) => (
+                                  <div
+                                    key={label}
+                                    className={
+                                      points > 0
+                                        ? "positive"
+                                        : points < 0
+                                          ? "negative"
+                                          : "neutral"
+                                    }
+                                  >
+                                    <span>{label}</span>
+                                    <strong>
+                                      {points > 0 ? "+" : ""}
+                                      {points}
+                                    </strong>
+                                  </div>
+                                ))}
+                              </div>
+
+                              <div
+                                className={
+                                  match.totalPoints > 0
+                                    ? "profile-history-total-v2 positive"
+                                    : match.totalPoints < 0
+                                      ? "profile-history-total-v2 negative"
+                                      : "profile-history-total-v2 neutral"
+                                }
+                              >
+                                <span>TOTAL</span>
+                                <strong>
+                                  {match.totalPoints > 0 ? "+" : ""}
+                                  {match.totalPoints}
+                                </strong>
+                              </div>
+
+                              {isPredictionOpen && (
+                                <div
+                                  id={`profile-history-bet-${match.matchId}`}
+                                  className="profile-history-bet-detail"
+                                >
+                                  {expandedProfilePrediction.loading ? (
+                                    <div
+                                      className="profile-history-bet-state"
+                                      role="status"
+                                    >
+                                      Carregant l’aposta...
+                                    </div>
+                                  ) : expandedProfilePrediction.error ? (
+                                    <div
+                                      className="profile-history-bet-state error"
+                                      role="alert"
+                                    >
+                                      {expandedProfilePrediction.error}
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <section className="profile-history-protagonist-detail">
+                                        <span>⭐ PROTAGONISTA</span>
+                                        <strong>
+                                          {expandedProfilePrediction.protagonistDisplayName ||
+                                            "Sense protagonista"}
+                                        </strong>
+                                      </section>
+
+                                      <section className="profile-history-lineup-detail">
+                                        <header>
+                                          <span>🧠 LOTTO FLICK</span>
+                                          <strong>
+                                            {
+                                              expandedProfilePrediction
+                                                .lineupPlayerNames.length
+                                            }
+                                            /11
+                                          </strong>
+                                        </header>
+
+                                        {expandedProfilePrediction
+                                          .lineupPlayerNames.length > 0 ? (
+                                          <div className="profile-history-lineup-list">
+                                            {expandedProfilePrediction.lineupPlayerNames.map(
+                                              (playerName, playerIndex) => (
+                                                <div
+                                                  key={`${playerName}-${playerIndex}`}
+                                                  className="profile-history-lineup-player"
+                                                >
+                                                  <span>
+                                                    {playerIndex + 1}
+                                                  </span>
+                                                  <strong>
+                                                    {playerName}
+                                                  </strong>
+                                                </div>
+                                              ),
+                                            )}
+                                          </div>
+                                        ) : (
+                                          <small>
+                                            No es va enviar cap Lotto Flick.
+                                          </small>
+                                        )}
+                                      </section>
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                            </article>
+                          );
+                        })}
                       </div>
                     )}
                   </section>
