@@ -9837,11 +9837,9 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     ? `JORNADA ${rankingJornadaNumber}`
     : "JORNADA"}
     </span>
-    <strong>
-      {rankingLoading
-        ? "Carregant rànquing real..."
-        : `${visibleRankingRows.length} culers carregats`}
-    </strong>
+    {rankingLoading && (
+  <strong>Carregant rànquing real...</strong>
+)}
   </div>
   <small>ES CARREGA DE 20 EN 20</small>
 </header>
