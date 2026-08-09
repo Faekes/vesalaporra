@@ -6955,6 +6955,15 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
           gap: 10px;
         }
 
+        .profile-history-protagonist-detail
+          .profile-history-protagonist-star {
+          display: inline-block;
+          font-size: 20px;
+          line-height: 1;
+          letter-spacing: 0;
+          vertical-align: middle;
+        }
+
         .profile-history-protagonist-detail span,
         .profile-history-lineup-detail header span {
           color: #f7cf4a;
@@ -10753,7 +10762,15 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                         )}
 
                                         <div className="profile-history-protagonist-copy">
-                                          <span>⭐ PROTAGONISTA</span>
+                                          <span>
+                                            <span
+                                              className="profile-history-protagonist-star"
+                                              aria-hidden="true"
+                                            >
+                                              ⭐
+                                            </span>{" "}
+                                            PROTAGONISTA
+                                          </span>
 
                                           <div className="profile-history-protagonist-result">
                                             <strong>
@@ -10775,7 +10792,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                                 }
                                               >
                                                 {match.protagonistHit
-                                                  ? "V"
+                                                  ? "✓"
                                                   : "X"}
                                               </span>
                                             )}
