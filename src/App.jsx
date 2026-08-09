@@ -844,6 +844,9 @@ const VESALAPORRA_PUBLIC_MATCH_NOTES_RPC =
 const VESALAPORRA_PUBLIC_LATEST_SCORED_MATCH_RPC =
   "vesalaporra_public_latest_scored_match_id";
 
+const VESALAPORRA_PUBLIC_LATEST_SCORED_JORNADA_NUMBER_RPC =
+  "vesalaporra_public_latest_scored_jornada_number";
+
 const VESALAPORRA_PUBLIC_SCORED_MATCH_CARD_RPC =
   "vesalaporra_public_scored_match_card";
 const VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC =
@@ -2788,9 +2791,11 @@ function App() {
   const [notesError, setNotesError] = useState("");
   const [ratingSavingPlayerId, setRatingSavingPlayerId] = useState(null);
 
-  const [rankingUsers, setRankingUsers] = useState([]);
-  const [rankingLoading, setRankingLoading] = useState(false);
-  const [rankingError, setRankingError] = useState("");
+const [rankingUsers, setRankingUsers] = useState([]);
+const [rankingLoading, setRankingLoading] = useState(false);
+const [rankingError, setRankingError] = useState("");
+const [rankingJornadaNumber, setRankingJornadaNumber] =
+  useState(null);
 
   const [profileHistory, setProfileHistory] = useState([]);
 
@@ -5506,36 +5511,71 @@ const fetchRankingScope = async (scope) => {
     .filter(Boolean);
 };
 
-  const loadRealRanking = async ({ quiet = false } = {}) => {
-    if (!quiet) {
-      setRankingLoading(true);
-    }
+const fetchLatestScoredJornadaNumber = async () => {
+  const { data: payload, error } = await supabase.rpc(
+    VESALAPORRA_PUBLIC_LATEST_SCORED_JORNADA_NUMBER_RPC,
+  );
 
-    setRankingError("");
+  if (error) {
+    throw error;
+  }
 
-    try {
-      const [generalRows, jornadaRows] = await Promise.all([
+  const rawValue = Array.isArray(payload)
+    ? payload[0]?.jornada_number ?? payload[0]
+    : payload?.jornada_number ?? payload;
+
+  const jornadaNumber = toFiniteNumber(rawValue);
+
+  return Number.isInteger(jornadaNumber) && jornadaNumber > 0
+    ? jornadaNumber
+    : null;
+};
+
+const loadRealRanking = async ({ quiet = false } = {}) => {
+  if (!quiet) {
+    setRankingLoading(true);
+  }
+
+  setRankingError("");
+
+  try {
+    const [generalRows, jornadaRows, jornadaNumber] =
+      await Promise.all([
         fetchRankingScope("general"),
         fetchRankingScope("jornada"),
+        fetchLatestScoredJornadaNumber().catch((error) => {
+          console.warn(
+            "No s’ha pogut carregar el número de jornada:",
+            error,
+          );
+
+          return null;
+        }),
       ]);
 
-      const mergedRows = mergeRankingScopes(generalRows, jornadaRows);
-      setRankingUsers(mergedRows);
+    const mergedRows = mergeRankingScopes(
+      generalRows,
+      jornadaRows,
+    );
 
-      if (!selectedProfileUserId && authUser?.id) {
-        setSelectedProfileUserId(String(authUser.id));
-      }
-    } catch (error) {
-      setRankingUsers([]);
-      setRankingError(
-        error?.message || "No s’ha pogut carregar el rànquing real.",
-      );
-    } finally {
-      if (!quiet) {
-        setRankingLoading(false);
-      }
+    setRankingUsers(mergedRows);
+    setRankingJornadaNumber(jornadaNumber);
+
+    if (!selectedProfileUserId && authUser?.id) {
+      setSelectedProfileUserId(String(authUser.id));
     }
-  };
+  } catch (error) {
+    setRankingUsers([]);
+    setRankingJornadaNumber(null);
+    setRankingError(
+      error?.message || "No s’ha pogut carregar el rànquing real.",
+    );
+  } finally {
+    if (!quiet) {
+      setRankingLoading(false);
+    }
+  }
+};
 
    const loadRealNotes = async ({ quiet = false, matchId = null } = {}) => {
     if (!quiet) {
@@ -9791,9 +9831,11 @@ const fetchRankingScope = async (scope) => {
               <header className="ranking-board-heading">
   <div>
     <span>
-      {rankingTab === "general"
-        ? "CLASSIFICACIÓ GENERAL"
-        : "ÚLTIMA JORNADA PUNTUADA"}
+     {rankingTab === "general"
+  ? "CLASSIFICACIÓ GENERAL"
+  : rankingJornadaNumber
+    ? `JORNADA ${rankingJornadaNumber}`
+    : "JORNADA"}
     </span>
     <strong>
       {rankingLoading
