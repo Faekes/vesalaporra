@@ -5916,19 +5916,28 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       key: detailKey,
       loading: true,
       error: "",
-      lineupPlayerNames: [],
+      lineupPlayers: [],
       protagonistDisplayName: "",
       protagonistImageUrl: "",
     });
 
     try {
-      const { data, error } = await supabase.rpc(
-        "vesalaporra_public_prediction_detail",
-        {
-          p_user_id: userId,
-          p_match_id: matchId,
-        },
-      );
+      const [{ data, error }, matchNotesPayload] = await Promise.all([
+        supabase.rpc(
+          "vesalaporra_public_prediction_detail",
+          {
+            p_user_id: userId,
+            p_match_id: matchId,
+          },
+        ),
+        callRpcWithPayloadFallbacks(
+          VESALAPORRA_PUBLIC_MATCH_NOTES_RPC,
+          [
+            { p_match_id: matchId },
+            { match_id: matchId },
+          ],
+        ),
+      ]);
 
       if (error) {
         throw error;
@@ -5938,9 +5947,46 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         throw new Error("No s’ha trobat el detall d’aquesta aposta.");
       }
 
-      const lineupPlayerNames = Array.isArray(data.lineup_player_names)
-        ? data.lineup_player_names
-            .map((playerName) => String(playerName || "").trim())
+      const officialStarterPlayerIds = new Set(
+        unwrapRpcRows(matchNotesPayload, ["notes", "rows", "players"])
+          .filter((row) =>
+            ["T", "STARTER", "TITULAR"].includes(
+              firstNonEmptyText(
+                row?.role,
+                row?.participation_role,
+                row?.lineup_role,
+              ).toUpperCase(),
+            ),
+          )
+          .map((row) => firstNonEmptyText(row?.player_id, row?.id))
+          .filter(Boolean),
+      );
+
+      const lineupPlayers = Array.isArray(data.lineup_players)
+        ? data.lineup_players
+            .map((player, playerIndex) => {
+              const playerId = firstNonEmptyText(
+                player?.player_id,
+                player?.id,
+              );
+
+              const displayName = firstNonEmptyText(
+                player?.display_name,
+                player?.player_name,
+                player?.name,
+              );
+
+              if (!playerId || !displayName) {
+                return null;
+              }
+
+              return {
+                id: playerId,
+                displayName,
+                isStarter: officialStarterPlayerIds.has(playerId),
+                position: playerIndex + 1,
+              };
+            })
             .filter(Boolean)
         : [];
 
@@ -5961,7 +6007,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               key: detailKey,
               loading: false,
               error: "",
-              lineupPlayerNames,
+              lineupPlayers,
               protagonistDisplayName,
               protagonistImageUrl,
             }
@@ -6872,11 +6918,12 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         }
 
         .profile-history-protagonist-detail {
-          min-height: 174px;
+          min-height: 210px;
           display: grid;
-          grid-template-columns: minmax(86px, 0.9fr) minmax(0, 1.1fr);
+          grid-template-columns: minmax(150px, 1.35fr) minmax(82px, 0.65fr);
           align-items: center;
-          gap: 14px;
+          gap: 12px;
+          padding: 14px 12px;
           overflow: hidden;
           border-color: rgba(247, 207, 74, 0.28);
           background: rgba(247, 207, 74, 0.07);
@@ -6888,12 +6935,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         }
 
         .profile-history-protagonist-image {
-          align-self: end;
+          align-self: center;
+          justify-self: center;
           width: 100%;
-          max-width: 140px;
-          height: 160px;
-          object-fit: contain;
-          object-position: center bottom;
+          max-width: 160px;
+          height: auto;
+          aspect-ratio: 1;
+          object-fit: cover;
+          object-position: center;
           filter: drop-shadow(0 10px 13px rgba(0, 0, 0, 0.3));
         }
 
@@ -6901,7 +6950,9 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
           min-width: 0;
           display: flex;
           flex-direction: column;
-          gap: 7px;
+          justify-content: center;
+          align-items: flex-start;
+          gap: 10px;
         }
 
         .profile-history-protagonist-detail span,
@@ -6916,6 +6967,38 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
           color: #fff;
           font-size: 16px;
           line-height: 1.15;
+        }
+
+        .profile-history-protagonist-result {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+
+        .profile-history-protagonist-verdict {
+          flex: 0 0 38px;
+          display: grid;
+          place-items: center;
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          font-size: 23px;
+          font-weight: 950;
+          line-height: 1;
+        }
+
+        .profile-history-protagonist-verdict.hit {
+          color: #37f58a;
+          border: 1px solid rgba(55, 245, 138, 0.42);
+          background: rgba(55, 245, 138, 0.12);
+        }
+
+        .profile-history-protagonist-verdict.miss {
+          color: #ff5f6d;
+          border: 1px solid rgba(255, 95, 109, 0.42);
+          background: rgba(255, 95, 109, 0.12);
         }
 
         .profile-history-lineup-detail header {
@@ -6965,6 +7048,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
           color: rgba(255, 255, 255, 0.9);
           font-size: 11px;
           line-height: 1.25;
+        }
+
+        .profile-history-lineup-player.hit > strong {
+          color: #37f58a;
+        }
+
+        .profile-history-lineup-player.miss > strong {
+          color: #ff6b76;
         }
 
         .profile-history-bet-state {
@@ -10663,10 +10754,32 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                                         <div className="profile-history-protagonist-copy">
                                           <span>⭐ PROTAGONISTA</span>
-                                          <strong>
-                                            {expandedProfilePrediction.protagonistDisplayName ||
-                                              "Sense protagonista"}
-                                          </strong>
+
+                                          <div className="profile-history-protagonist-result">
+                                            <strong>
+                                              {expandedProfilePrediction.protagonistDisplayName ||
+                                                "Sense protagonista"}
+                                            </strong>
+
+                                            {expandedProfilePrediction.protagonistDisplayName && (
+                                              <span
+                                                className={
+                                                  match.protagonistHit
+                                                    ? "profile-history-protagonist-verdict hit"
+                                                    : "profile-history-protagonist-verdict miss"
+                                                }
+                                                aria-label={
+                                                  match.protagonistHit
+                                                    ? "Protagonista encertat"
+                                                    : "Protagonista fallat"
+                                                }
+                                              >
+                                                {match.protagonistHit
+                                                  ? "V"
+                                                  : "X"}
+                                              </span>
+                                            )}
+                                          </div>
                                         </div>
                                       </section>
 
@@ -10686,19 +10799,23 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                         </header>
 
                                         {expandedProfilePrediction
-                                          .lineupPlayerNames.length > 0 ? (
+                                          .lineupPlayers.length > 0 ? (
                                           <div className="profile-history-lineup-list">
-                                            {expandedProfilePrediction.lineupPlayerNames.map(
-                                              (playerName, playerIndex) => (
+                                            {expandedProfilePrediction.lineupPlayers.map(
+                                              (player) => (
                                                 <div
-                                                  key={`${playerName}-${playerIndex}`}
-                                                  className="profile-history-lineup-player"
+                                                  key={player.id}
+                                                  className={
+                                                    player.isStarter
+                                                      ? "profile-history-lineup-player hit"
+                                                      : "profile-history-lineup-player miss"
+                                                  }
                                                 >
                                                   <span>
-                                                    {playerIndex + 1}
+                                                    {player.position}
                                                   </span>
                                                   <strong>
-                                                    {playerName}
+                                                    {player.displayName}
                                                   </strong>
                                                 </div>
                                               ),
