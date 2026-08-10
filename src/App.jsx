@@ -2112,10 +2112,10 @@ const VESALAPORRA_PUBLIC_NEXT_MATCH_RPC =
   "vesalaporra_public_next_match_v1";
 
 const VESALAPORRA_ADMIN_MATCH_LIST_RPC =
-  "vesalaporra_admin_list_matches_v2";
+  "vesalaporra_admin_list_matches_v3";
 
 const VESALAPORRA_ADMIN_MATCH_UPSERT_RPC =
-  "vesalaporra_admin_upsert_match_v2";
+  "vesalaporra_admin_upsert_match_v3";
 
 const VESALAPORRA_ADMIN_SET_MATCH_POINTS_MULTIPLIER_RPC =
   "vesalaporra_admin_set_match_points_multiplier";
@@ -2136,8 +2136,25 @@ const ADMIN_MATCH_COLOR_OPTIONS = [
   { value: "#1f8f4e", label: "Verd" },
 ];
 
+const ADMIN_MATCH_SEASON_OPTIONS = [
+  {
+    value: "PRETEMPORADA_2026",
+    label: "PRETEMPORADA 2026",
+  },
+  {
+    value: "TEMPORADA_2026_27",
+    label: "TEMPORADA 26/27",
+  },
+];
+
+const getAdminMatchSeasonLabel = (seasonKey, fallback = "TEMPORADA") =>
+  ADMIN_MATCH_SEASON_OPTIONS.find(
+    (seasonOption) => seasonOption.value === seasonKey,
+  )?.label || fallback;
+
 const EMPTY_ADMIN_MATCH_FORM = {
   matchId: null,
+  seasonKey: "PRETEMPORADA_2026",
   rivalName: "",
   rivalKey: "",
   rivalCountry: "",
@@ -2412,6 +2429,17 @@ const normalizeAdminMatch = (row) => {
 
   return {
     matchId: String(row?.match_id || row?.id || ""),
+    seasonKey:
+      row?.season_key || row?.seasonKey || "PRETEMPORADA_2026",
+    seasonName:
+      row?.season_display_name ||
+      row?.seasonName ||
+      getAdminMatchSeasonLabel(
+        row?.season_key || row?.seasonKey,
+      ),
+    seasonMatchNo: Number(
+      row?.season_match_no || row?.seasonMatchNo || 0,
+    ),
     barcaSide: barcaIsHome ? "home" : "away",
     homeTeamKey,
     homeDisplayName,
@@ -2454,6 +2482,7 @@ const adminMatchToForm = (match) => {
 
   return {
     matchId: match.matchId || null,
+    seasonKey: match.seasonKey || "PRETEMPORADA_2026",
     rivalName: match.rivalDisplayName || "",
     rivalKey: match.rivalTeamKey || "",
     rivalCountry: match.rivalCountry || "",
@@ -3873,6 +3902,14 @@ const toggleAdminMatchColor = (colorValue) => {
 };
 
 const validateAdminMatchForm = () => {
+  if (
+    !ADMIN_MATCH_SEASON_OPTIONS.some(
+      (seasonOption) => seasonOption.value === adminMatchForm.seasonKey,
+    )
+  ) {
+    return "Tria PRETEMPORADA 2026 o TEMPORADA 26/27.";
+  }
+
   if (adminMatchForm.rivalName.trim().length < 2) {
     return "Escriu el nom complet del rival.";
   }
@@ -3958,6 +3995,7 @@ const validateAdminMatchForm = () => {
             adminMatchForm.rivalPattern,
             rivalColors,
           ),
+          p_season_key: adminMatchForm.seasonKey,
           p_audit_id: createAdminAuditId(
             adminMatchForm.matchId ? "UPDATE_MATCH" : "CREATE_MATCH",
           ),
@@ -4007,7 +4045,10 @@ const validateAdminMatchForm = () => {
         await loadPublicMatchPlayers(refreshedMatch.id);
       }
 
-      setAdminMatchForm(EMPTY_ADMIN_MATCH_FORM);
+      setAdminMatchForm({
+        ...EMPTY_ADMIN_MATCH_FORM,
+        seasonKey: adminMatchForm.seasonKey,
+      });
       setAdminMatchFeedback({
         type: "success",
         message:
@@ -9274,11 +9315,12 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                           ? "EDITA PARTIT"
                           : "NOU PROPER PARTIT"}
                       </span>
-                      <strong>Nom, colors, local o visitant i data</strong>
+                      <strong>Temporada, nom, colors, local o visitant i data</strong>
                     </div>
 
                     <small>
-                      Quatre dades i prou. L’hora escrita s’interpreta sempre
+                      La jornada es calcula automàticament dins de la temporada.
+                      L’hora escrita s’interpreta sempre
                       com a Europe/Madrid.
                     </small>
                   </header>
@@ -9300,6 +9342,46 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                         required
                       />
                     </label>
+
+                    <div
+                      className="admin-upcoming-field"
+                      style={{ gridColumn: "1 / -1" }}
+                    >
+                      <span className="admin-upcoming-field-label">
+                        TEMPORADA DE VESALAPORRA
+                      </span>
+
+                      <div
+                        className="admin-home-away-toggle"
+                        role="group"
+                        aria-label="Temporada del partit"
+                      >
+                        {ADMIN_MATCH_SEASON_OPTIONS.map((seasonOption) => (
+                          <button
+                            key={seasonOption.value}
+                            type="button"
+                            className={
+                              adminMatchForm.seasonKey === seasonOption.value
+                                ? "active"
+                                : ""
+                            }
+                            onClick={() =>
+                              updateAdminMatchForm(
+                                "seasonKey",
+                                seasonOption.value,
+                              )
+                            }
+                          >
+                            {seasonOption.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      <small style={{ display: "block", marginTop: "8px" }}>
+                        La jornada serà correlativa dins de la temporada triada,
+                        sigui Lliga, Copa, Supercopa o Champions.
+                      </small>
+                    </div>
 
                     <div className="admin-upcoming-field">
   <span className="admin-upcoming-field-label">COLORS</span>
@@ -9538,6 +9620,25 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     <div className="admin-upcoming-preview-card">
   <span>PREVISUALITZACIÓ</span>
 
+  <strong
+    style={{
+      alignSelf: "center",
+      color: "#f4cf36",
+      fontSize: "0.8rem",
+      letterSpacing: "0.08em",
+      textAlign: "center",
+    }}
+  >
+    {getAdminMatchSeasonLabel(adminMatchForm.seasonKey)} ·{" "}
+    {adminMatchForm.matchId
+      ? `JORNADA ${
+          adminUpcomingMatches.find(
+            (match) => match.matchId === adminMatchForm.matchId,
+          )?.seasonMatchNo || "—"
+        }`
+      : "JORNADA AUTOMÀTICA"}
+  </strong>
+
   <div className="admin-upcoming-preview-match">
     {adminMatchForm.barcaSide === "home" ? (
       <>
@@ -9719,6 +9820,12 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                             </div>
 
                             <div className="admin-catalog-flags">
+                              <span className="ok">
+                                {match.seasonName ||
+                                  getAdminMatchSeasonLabel(match.seasonKey)}
+                                {" · JORNADA "}
+                                {match.seasonMatchNo || "—"}
+                              </span>
                               <span className="ok">
                                 {match.competitionName || "SENSE COMPETICIÓ"}
                               </span>
