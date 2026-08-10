@@ -3705,7 +3705,8 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
           : nextData;
 
         isUpcomingPreview = Boolean(
-          displayedMatchRow?.match_id,
+          displayedMatchRow?.match_id &&
+            !displayedMatchRow?.predictions_are_open,
         );
       }
 
