@@ -10502,9 +10502,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       <section className="profile-records-section">
                         <header>
                           <div>
-                            <span>MILLORS ACTUACIONS</span>
-                            <strong>Records calculats des de scores reals</strong>
-                          </div>
+  <span style={{ fontSize: "18px", fontWeight: 900 }}>
+    MILLORS ACTUACIONS
+  </span>
+</div>
                         </header>
                         <div className="profile-records-grid">
                           <article className="profile-record-card gold">
