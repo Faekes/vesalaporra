@@ -5810,7 +5810,18 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     callRpcWithPayloadFallbacks(
       VESALAPORRA_PUBLIC_MATCH_RATINGS_STATE_RPC,
       [{ p_match_id: notesTargetMatchId }],
-    ),
+    ).catch((error) => {
+      if (isMissingRpcSignatureError(error)) {
+        console.warn(
+          "L’estat temporal de Les Notes encara no està disponible; es carreguen igualment les valoracions.",
+          error,
+        );
+
+        return null;
+      }
+
+      throw error;
+    }),
   ]);
 
       const rawRows = unwrapRpcRows(
@@ -5952,16 +5963,27 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
           ratingsStateRow?.season_match_no,
           matchCardRow?.season_match_no,
           matchCardRow?.jornada_number,
+          normalizedNotesMatch?.seasonMatchNo,
         ),
         ratingsOpenAt:
-          ratingsStateRow?.ratings_open_at || null,
+          ratingsStateRow?.ratings_open_at ||
+          matchCardRow?.ratings_open_at ||
+          normalizedNotesMatch?.ratingsOpenAt ||
+          null,
         ratingsCloseAt:
-          ratingsStateRow?.ratings_close_at || null,
+          ratingsStateRow?.ratings_close_at ||
+          matchCardRow?.ratings_close_at ||
+          normalizedNotesMatch?.ratingsCloseAt ||
+          null,
         ratingsAreOpen: readOptionalBoolean(
-          ratingsStateRow?.ratings_are_open,
+          ratingsStateRow?.ratings_are_open ??
+            matchCardRow?.ratings_are_open ??
+            normalizedNotesMatch?.ratingsAreOpen,
         ),
         ratingsStatus: firstNonEmptyText(
           ratingsStateRow?.ratings_status,
+          matchCardRow?.ratings_status,
+          normalizedNotesMatch?.ratingsStatus,
         ).toLowerCase(),
       };
       setNotesRows(normalizedRows);
@@ -7299,6 +7321,44 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         }
 
         @media (max-width: 680px) {
+          .app-shell .player-tray .player-badges {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            column-gap: 6px;
+            row-gap: 12px;
+          }
+
+          .app-shell .player-tray .player-badge {
+            min-width: 0;
+            width: 100%;
+            box-sizing: border-box;
+          }
+
+          .app-shell .player-tray .player-badge-avatar {
+            width: clamp(54px, 16vw, 62px);
+            height: clamp(54px, 16vw, 62px);
+          }
+
+          .app-shell .score-center-controls .score-match-label {
+            position: absolute;
+            left: 50%;
+            top: auto;
+            bottom: -18px;
+            margin: 0;
+            transform: translateX(-50%);
+          }
+
+          .app-shell
+            .notes-player-stats.season
+            .participation-role-stat.substitute {
+            display: none;
+          }
+
+          .app-shell .notes-player-stats.season {
+            flex-wrap: nowrap;
+            white-space: nowrap;
+          }
+
           .profile-history-bet-detail {
             grid-template-columns: 1fr;
           }
