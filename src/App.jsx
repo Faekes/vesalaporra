@@ -7322,7 +7322,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 .app-shell .score-center-controls .score-match-label {
   position: absolute;
   left: 50%;
-  top: -27px;
+  top: -9px;
   bottom: auto;
   margin: 0;
   transform: translate(-50%, -50%);
@@ -7346,10 +7346,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             height: clamp(54px, 16vw, 62px);
           }
 
-     .app-shell .score-center-controls .score-match-label {
+   .app-shell .score-center-controls .score-match-label {
   position: absolute;
   left: 50%;
-  top: -27px;
+  top: -9px;
   bottom: auto;
   margin: 0;
   font-size: 10px;
