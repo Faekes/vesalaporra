@@ -7336,7 +7336,13 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   white-space: nowrap;
   transform: translateX(-50%);
 }
-        @media (max-width: 680px) {
+
+@media (min-width: 681px) {
+  .app-shell .scoreboard > .score-match-label {
+    top: 16px;
+    font-size: 10px;
+  }
+}     @media (max-width: 680px) {
           .app-shell .player-tray .player-badges {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
