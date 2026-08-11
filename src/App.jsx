@@ -7319,7 +7319,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             transform: translateY(0);
           }
         }
-
+.app-shell .score-center-controls .score-match-label {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: auto;
+  margin: 0;
+  transform: translate(-50%, -50%);
+}
         @media (max-width: 680px) {
           .app-shell .player-tray .player-badges {
             display: grid;
@@ -7339,14 +7346,16 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             height: clamp(54px, 16vw, 62px);
           }
 
-          .app-shell .score-center-controls .score-match-label {
-            position: absolute;
-            left: 50%;
-            top: auto;
-            bottom: -18px;
-            margin: 0;
-            transform: translateX(-50%);
-          }
+         .app-shell .score-center-controls .score-match-label {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: auto;
+  margin: 0;
+  font-size: 10px;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+}
 
           .app-shell
             .notes-player-stats.season
