@@ -471,6 +471,10 @@ const normalizeCurrentMatch = (row) => {
 
   return {
     id: row?.match_id ? String(row.match_id) : null,
+    seasonMatchNo: toFiniteNumber(
+      row?.season_match_no,
+      row?.jornada_number,
+    ),
     homeTeamId,
     homeName,
     homeLocation: row?.venue_name || row?.competition_name || "",
@@ -492,6 +496,16 @@ const normalizeCurrentMatch = (row) => {
       row?.scheduled_kickoff_at ||
       null,
     predictionsAreOpen: Boolean(row?.predictions_are_open),
+    ratingsOpenAt:
+      row?.ratings_open_at || null,
+    ratingsCloseAt:
+      row?.ratings_close_at || null,
+    ratingsAreOpen: readOptionalBoolean(
+      row?.ratings_are_open,
+    ),
+    ratingsStatus: firstNonEmptyText(
+      row?.ratings_status,
+    ).toLowerCase(),
     isUpcomingPreview: false,
     barcelonaFirst:
       typeof barcelonaFirst === "boolean"
@@ -849,6 +863,8 @@ const VESALAPORRA_PUBLIC_LATEST_SCORED_JORNADA_NUMBER_RPC =
 
 const VESALAPORRA_PUBLIC_SCORED_MATCH_CARD_RPC =
   "vesalaporra_public_scored_match_card";
+const VESALAPORRA_PUBLIC_MATCH_RATINGS_STATE_RPC =
+  "vesalaporra_public_match_ratings_state";
 const VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC ||
   "vesalaporra_public_active_season_notes";
@@ -950,6 +966,78 @@ const callRpcWithPayloadFallbacks = async (rpcName, payloads) => {
   }
 
   throw lastError || new Error(`No s’ha pogut executar ${rpcName}.`);
+};
+
+const isMissingRpcSignatureError = (error) => {
+  const errorText = [
+    error?.code,
+    error?.message,
+    error?.details,
+    error?.hint,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return (
+    errorText.includes("pgrst202") ||
+    (errorText.includes("could not find the function") &&
+      errorText.includes("schema cache"))
+  );
+};
+
+const isRatingsClosedError = (error) => {
+  const errorText = [
+    error?.code,
+    error?.message,
+    error?.details,
+    error?.hint,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  const mentionsRatings =
+    errorText.includes("rating") ||
+    errorText.includes("valoraci") ||
+    errorText.includes("les notes") ||
+    errorText.includes("notes_");
+
+  const mentionsClosedWindow =
+    errorText.includes("closed") ||
+    errorText.includes("tancad") ||
+    errorText.includes("not open") ||
+    errorText.includes("no estan obertes") ||
+    errorText.includes("fora de la finestra") ||
+    errorText.includes("outside the window");
+
+  return mentionsRatings && mentionsClosedWindow;
+};
+
+const callSubmitRatingWithPayloadFallbacks = async (payloads) => {
+  let lastSignatureError = null;
+
+  for (const payload of payloads) {
+    const { data, error } = await supabase.rpc(
+      VESALAPORRA_SUBMIT_RATING_RPC,
+      payload,
+    );
+
+    if (!error) {
+      return data;
+    }
+
+    if (!isMissingRpcSignatureError(error)) {
+      throw error;
+    }
+
+    lastSignatureError = error;
+  }
+
+  throw (
+    lastSignatureError ||
+    new Error("No s’ha pogut guardar la valoració.")
+  );
 };
 
 const normalizeRankingUser = (row, scope, currentUserId, fallbackIndex = 0) => {
@@ -2818,6 +2906,7 @@ function App() {
   const [notesMatchData, setNotesMatchData] = useState(null);
   const [notesLoading, setNotesLoading] = useState(false);
   const [notesError, setNotesError] = useState("");
+  const [notesSubmissionClosed, setNotesSubmissionClosed] = useState(false);
   const [ratingSavingPlayerId, setRatingSavingPlayerId] = useState(null);
 
 const [rankingUsers, setRankingUsers] = useState([]);
@@ -3324,6 +3413,28 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
   const visibleNotesRows =
     notesTab === "match" ? notesMatchRows : notesSeasonRows;
 
+  const notesRatingsStatus = firstNonEmptyText(
+    notesMatchData?.ratingsStatus,
+  ).toLowerCase();
+
+  const notesAreClosed =
+    notesSubmissionClosed ||
+    notesRatingsStatus === "closed" ||
+    Boolean(
+      notesMatchData?.ratingsCloseAt &&
+        Date.now() >= new Date(notesMatchData.ratingsCloseAt).getTime(),
+    );
+
+  const notesAreScheduled = notesRatingsStatus === "scheduled";
+
+  const notesJornadaNumber = toFiniteNumber(
+    notesMatchData?.seasonMatchNo,
+  );
+
+  const notesJornadaLabel = notesJornadaNumber > 0
+    ? `Jornada ${notesJornadaNumber}`
+    : "jornada";
+
   const getRankingAchievements = (user) =>
     ACHIEVEMENT_CATALOG.filter((achievement) =>
       (user?.achievementIds || []).includes(achievement.id),
@@ -3376,6 +3487,17 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
   };
 
   const handleRatePlayer = async (playerId, stars) => {
+    if (notesAreClosed) {
+      setNotesSubmissionClosed(true);
+      setNotesError("");
+      return;
+    }
+
+    if (notesAreScheduled) {
+      setNotesError("");
+      return;
+    }
+
     if (!authUser) {
       await handleXSignIn();
       return;
@@ -3389,7 +3511,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     setNotesError("");
 
     try {
-      await callRpcWithPayloadFallbacks(VESALAPORRA_SUBMIT_RATING_RPC, [
+      await callSubmitRatingWithPayloadFallbacks([
         {
           p_match_id: notesMatchData.id,
           p_player_id: playerId,
@@ -3415,9 +3537,14 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
 
       await loadRealNotes({ quiet: true });
     } catch (error) {
-      setNotesError(
-        error?.message || "No s’ha pogut guardar la valoració.",
-      );
+      if (isRatingsClosedError(error)) {
+        setNotesSubmissionClosed(true);
+        setNotesError("");
+      } else {
+        setNotesError(
+          error?.message || "No s’ha pogut guardar la valoració.",
+        );
+      }
     } finally {
       setRatingSavingPlayerId(null);
     }
@@ -5655,9 +5782,15 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         setNotesRows([]);
         setSeasonNotesRows([]);
         setNotesMatchData(null);
+        setNotesSubmissionClosed(false);
         return;
       }
-     const [matchPayload, seasonPayload, matchCardPayload] =
+     const [
+       matchPayload,
+       seasonPayload,
+       matchCardPayload,
+       ratingsStatePayload,
+     ] =
   await Promise.all([
     callRpcWithPayloadFallbacks(
       VESALAPORRA_PUBLIC_MATCH_NOTES_RPC,
@@ -5672,6 +5805,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     ),
     callRpcWithPayloadFallbacks(
       VESALAPORRA_PUBLIC_SCORED_MATCH_CARD_RPC,
+      [{ p_match_id: notesTargetMatchId }],
+    ),
+    callRpcWithPayloadFallbacks(
+      VESALAPORRA_PUBLIC_MATCH_RATINGS_STATE_RPC,
       [{ p_match_id: notesTargetMatchId }],
     ),
   ]);
@@ -5779,10 +5916,16 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         })
         .filter(Boolean);
 
-           const matchCardRow =
+      const matchCardRow =
         unwrapRpcRows(
           matchCardPayload,
           ["match", "card", "rows"],
+        )[0] || {};
+
+      const ratingsStateRow =
+        unwrapRpcRows(
+          ratingsStatePayload,
+          ["state", "match", "rows"],
         )[0] || {};
 
       const normalizedNotesMatch = normalizeCurrentMatch({
@@ -5805,10 +5948,28 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         awayScore: toFiniteNumber(
           matchCardRow?.official_away_goals,
         ),
+        seasonMatchNo: toFiniteNumber(
+          ratingsStateRow?.season_match_no,
+          matchCardRow?.season_match_no,
+          matchCardRow?.jornada_number,
+        ),
+        ratingsOpenAt:
+          ratingsStateRow?.ratings_open_at || null,
+        ratingsCloseAt:
+          ratingsStateRow?.ratings_close_at || null,
+        ratingsAreOpen: readOptionalBoolean(
+          ratingsStateRow?.ratings_are_open,
+        ),
+        ratingsStatus: firstNonEmptyText(
+          ratingsStateRow?.ratings_status,
+        ).toLowerCase(),
       };
       setNotesRows(normalizedRows);
       setSeasonNotesRows(normalizedSeasonRows);
       setNotesMatchData(normalizedMatch);
+      setNotesSubmissionClosed(
+        normalizedMatch.ratingsStatus === "closed",
+      );
 
       const restoredRatings = Object.fromEntries(
         normalizedRows
@@ -8521,7 +8682,36 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 </div>
               )}
 
-              {!notesLoading && !notesError && visibleNotesRows.length === 0 && (
+              {!notesLoading &&
+                !notesError &&
+                notesTab === "match" &&
+                notesAreClosed && (
+                  <div className="real-data-state empty" role="status">
+                    <strong>
+                      Les Notes de la {notesJornadaLabel} estan tancades
+                    </strong>
+                    <span>
+                      Ja no es poden enviar ni modificar valoracions.
+                    </span>
+                  </div>
+                )}
+
+              {!notesLoading &&
+                !notesError &&
+                notesTab === "match" &&
+                notesAreScheduled && (
+                  <div className="real-data-state empty" role="status">
+                    <strong>
+                      Les Notes de la {notesJornadaLabel} encara no estan obertes
+                    </strong>
+                  </div>
+                )}
+
+              {!notesLoading &&
+                !notesError &&
+                !notesAreClosed &&
+                !notesAreScheduled &&
+                visibleNotesRows.length === 0 && (
                 <div className="real-data-state empty">
                   <strong>Sense valoracions encara</strong>
                   <span>
@@ -8558,7 +8748,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     <div className="notes-rating-block">
                       <RatingStars
                         value={row.displayStars}
-                        readOnly={notesTab === "season"}
+                        readOnly={
+                          notesTab === "season" ||
+                          notesAreClosed ||
+                          notesAreScheduled
+                        }
                         onRate={(stars) =>
                           handleRatePlayer(row.player.id, stars)
                         }
