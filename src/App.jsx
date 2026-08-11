@@ -7319,13 +7319,22 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             transform: translateY(0);
           }
         }
+.app-shell .scoreboard {
+  position: relative;
+}
+
 .app-shell .score-center-controls .score-match-label {
   position: absolute;
   left: 50%;
-  top: -9px;
+  top: 13px;
   bottom: auto;
   margin: 0;
-  transform: translate(-50%, -50%);
+  color: #f0cc47;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  transform: translateX(-50%);
 }
         @media (max-width: 680px) {
           .app-shell .player-tray .player-badges {
@@ -7346,16 +7355,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             height: clamp(54px, 16vw, 62px);
           }
 
-   .app-shell .score-center-controls .score-match-label {
-  position: absolute;
-  left: 50%;
-  top: -9px;
-  bottom: auto;
-  margin: 0;
-  font-size: 10px;
-  line-height: 1;
-  transform: translate(-50%, -50%);
-}
+  
 
           .app-shell
             .notes-player-stats.season
@@ -7374,10 +7374,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         }
 
         @media (max-width: 430px) {
-          .profile-history-lineup-list {
-            grid-template-columns: 1fr;
-          }
-        }
+  .app-shell .score-center-controls .score-match-label {
+    top: 12px;
+  }
+
+  .profile-history-lineup-list {
+    grid-template-columns: 1fr;
+  }
+}
       `}</style>
 
       <header className="app-header">
@@ -7736,10 +7740,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   </div>
                 </div>
 
-                <div
-  className="score-center-controls"
-  style={{ position: "relative" }}
->
+                <div className="score-center-controls">
                   <div className="score-control">
                     <button
                       type="button"
