@@ -7323,7 +7323,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   position: relative;
 }
 
-.app-shell .score-center-controls .score-match-label {
+.app-shell .scoreboard > .score-match-label {
   position: absolute;
   left: 50%;
   top: 13px;
@@ -7374,10 +7374,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         }
 
         @media (max-width: 430px) {
-  .app-shell .score-center-controls .score-match-label {
-    top: 12px;
+  .app-shell .score-center-controls {
+    align-self: start;
+    margin-top: 27.2px;
   }
 
+ .app-shell .scoreboard > .score-match-label {
+  top: 12px;
+}
   .profile-history-lineup-list {
     grid-template-columns: 1fr;
   }
@@ -7845,10 +7849,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     </button>
                   </div>
 
-                  <small className="score-match-label">
-                    EL PARTIT
-                  </small>
-                </div>
+                                  </div>
+
+                <small className="score-match-label">
+                  EL PARTIT
+                </small>
 
                 <div className="score-team away">
                   <div className="score-team-label">
