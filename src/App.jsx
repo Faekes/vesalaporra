@@ -4,7 +4,7 @@ import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLau
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
 import "./App.css";
 
-// FONT REAL: la plantilla pÃºblica no viu al codi.
+// FONT REAL: la plantilla pública no viu al codi.
 // Tots els jugadors visibles venen del roster real del partit.
 
 const PROTAGONIST_GROUP_OPTIONS = [
@@ -58,7 +58,7 @@ const PROTAGONIST_GROUP_OPTIONS = [
   },
   {
     key: "f",
-    label: "GRUP F Â· PORTER",
+    label: "GRUP F · PORTER",
     hitPoints: null,
     missPoints: null,
     sortOrder: 600,
@@ -228,7 +228,7 @@ function TeamColorBadge({
 const EMPTY_MATCH_DATA = {
   id: null,
   homeTeamId: "barcelona",
-  homeName: "BarÃ§a",
+  homeName: "Barça",
   homeLocation: "",
   homeBadgeColors: teamBadgeVisualsById.barcelona.colors,
   homeBadgePattern: "striped",
@@ -312,7 +312,7 @@ const formatCurrentMatchKickoffLabel = (kickoffAt) => {
     timeZone: "Europe/Madrid",
   }).format(kickoffDate);
 
-  return `${dateLabel} Â· ${timeLabel}`.toLocaleUpperCase("ca-ES");
+  return `${dateLabel} · ${timeLabel}`.toLocaleUpperCase("ca-ES");
 };
 
 const getMatchTeamBadgeColors = (row, side) =>
@@ -425,9 +425,9 @@ const normalizeCurrentMatch = (row) => {
 
   const homeName = useCanonicalSideOrder
     ? barcelonaFirst
-      ? "BarÃ§a"
+      ? "Barça"
       : opponentName
-    : explicitHomeName || "BarÃ§a";
+    : explicitHomeName || "Barça";
 
   const awayTeamId = useCanonicalSideOrder
     ? barcelonaFirst
@@ -438,7 +438,7 @@ const normalizeCurrentMatch = (row) => {
   const awayName = useCanonicalSideOrder
     ? barcelonaFirst
       ? opponentName
-      : "BarÃ§a"
+      : "Barça"
     : explicitAwayName;
 
   const homeBadgeColors = useCanonicalSideOrder
@@ -877,7 +877,7 @@ function GoogleMark({ className = "" }) {
 
 
 const RATING_SCALE = [
-  { stars: 1, value: 0, label: "PÃ¨ssim" },
+  { stars: 1, value: 0, label: "Pèssim" },
   { stars: 2, value: 2, label: "Fluixet" },
   { stars: 3, value: 4, label: "Ni fu ni fa" },
   { stars: 4, value: 6, label: "Correcte" },
@@ -1067,7 +1067,7 @@ const callRpcWithPayloadFallbacks = async (rpcName, payloads) => {
     lastError = error;
   }
 
-  throw lastError || new Error(`No sâ€™ha pogut executar ${rpcName}.`);
+  throw lastError || new Error(`No s’ha pogut executar ${rpcName}.`);
 };
 
 const isMissingRpcSignatureError = (error) => {
@@ -1138,7 +1138,7 @@ const callSubmitRatingWithPayloadFallbacks = async (payloads) => {
 
   throw (
     lastSignatureError ||
-    new Error("No sâ€™ha pogut guardar la valoraciÃ³.")
+    new Error("No s’ha pogut guardar la valoració.")
   );
 };
 
@@ -1462,39 +1462,39 @@ const normalizeNotesRow = (row, playersById) => {
 const ACHIEVEMENT_CATALOG = [
   {
     id: "flick-reader",
-    icon: "ðŸ§ ",
+    icon: "🧠",
     title: "Llegeix Flick",
-    description: "Encerta 3 vegades lâ€™11 titular exacte.",
+    description: "Encerta 3 vegades l’11 titular exacte.",
   },
   {
     id: "nostradamus",
-    icon: "ðŸ”®",
+    icon: "🔮",
     title: "Nostradamus",
     description: "Encerta el resultat exacte 3 cops.",
   },
   {
     id: "yoyalodije",
-    icon: "ðŸŽ¯",
+    icon: "🎯",
     title: "Yoyalodije",
     description: "Encerta el protagonista 4 cops.",
   },
   {
     id: "winner",
-    icon: "ðŸ‘‘",
+    icon: "👑",
     title: "Winner",
     description: "Guanya 2 jornades.",
   },
   {
     id: "candidat",
-    icon: "ðŸš´",
+    icon: "🚴",
     title: "Candidat",
-    description: "MantÃ©n-te al Top 10 tres jornades seguides.",
+    description: "Mantén-te al Top 10 tres jornades seguides.",
   },
   {
     id: "xop-xop-salinas",
-    icon: "ðŸ™",
+    icon: "🐙",
     title: "Xop xop Salinas",
-    description: "Falla els 11 jugadors dâ€™un XI en una jornada.",
+    description: "Falla els 11 jugadors d’un XI en una jornada.",
   },
   {
     id: "kamikaze",
@@ -1505,22 +1505,22 @@ const ACHIEVEMENT_CATALOG = [
    {
     id: "preseason_champion_2026",
     icon: "preseason-sun-sunglasses",
-    title: "CampiÃ³ de la pretemporada 2026",
+    title: "Campió de la pretemporada 2026",
     description:
-      "Guanya la classificaciÃ³ general definitiva de la pretemporada 2026.",
+      "Guanya la classificació general definitiva de la pretemporada 2026.",
   },
   {
     id: "winter_champion_2026",
     icon: "winter-snowflake",
-    title: "CampiÃ³ dâ€™hivern 2026",
+    title: "Campió d’hivern 2026",
     description:
-      "Lidera la classificaciÃ³ general de Vesalaporra en acabar lâ€™any natural 2026.",
+      "Lidera la classificació general de Vesalaporra en acabar l’any natural 2026.",
   },
   {
     id: "season_champion_2026_27",
     icon: "vesalaporra-v",
-    title: "CampiÃ³ de la temporada 26/27",
-    description: "Guanya la classificaciÃ³ general definitiva 2026/27.",
+    title: "Campió de la temporada 26/27",
+    description: "Guanya la classificació general definitiva 2026/27.",
   },
 ];
 
@@ -1622,13 +1622,13 @@ const ADMIN_SCORING_TOOLS = [
   },
   {
     id: "goal",
-    icon: "âš½",
+    icon: "⚽",
     label: "Gol",
   },
   {
     id: "assist",
     icon: "A",
-    label: "AssistÃ¨ncia",
+    label: "Assistència",
   },
 ];
 
@@ -1672,7 +1672,7 @@ const formatRatingAverage = (average) =>
     maximumFractionDigits: 1,
   });
 
-// TeamColorBadge ja estÃ  definit al bloc visual superior amb suport
+// TeamColorBadge ja està definit al bloc visual superior amb suport
 // per als patrons "solid" i "striped".
 
 function OfficialMatchCard({
@@ -1713,10 +1713,10 @@ function OfficialMatchCard({
       className={
         editable ? "official-match-card editable" : "official-match-card"
       }
-      aria-label={`${homeName} ${homeScore}â€“${awayScore} ${awayName}`}
+      aria-label={`${homeName} ${homeScore}–${awayScore} ${awayName}`}
     >
       <span className="official-match-eyebrow">
-        {editable ? "PARTIT ACTIU" : "ÃšLTIM PARTIT PUNTUAT"}
+        {editable ? "PARTIT ACTIU" : "ÚLTIM PARTIT PUNTUAT"}
       </span>
 
       <div className="official-match-line">
@@ -1739,7 +1739,7 @@ function OfficialMatchCard({
                 onClick={() => changeScore("home", -1)}
                 aria-label={`Resta un gol a ${homeName}`}
               >
-                âˆ’
+                −
               </button>
 
               <strong>{homeScore}</strong>
@@ -1763,7 +1763,7 @@ function OfficialMatchCard({
                 onClick={() => changeScore("away", -1)}
                 aria-label={`Resta un gol a ${awayName}`}
               >
-                âˆ’
+                −
               </button>
 
               <strong>{awayScore}</strong>
@@ -1780,7 +1780,7 @@ function OfficialMatchCard({
         ) : (
           <strong className="official-match-score">
             {homeScore}
-            <span aria-hidden="true">â€“</span>
+            <span aria-hidden="true">–</span>
             {awayScore}
           </strong>
         )}
@@ -1976,7 +1976,7 @@ function WinterSnowflakeIcon({ className = "" }) {
       className={`achievement-custom-icon winter-snowflake-icon ${className}`.trim()}
       viewBox="0 0 64 64"
       role="img"
-      aria-label="Floc de neu dâ€™hivern"
+      aria-label="Floc de neu d’hivern"
     >
       <circle
         cx="32"
@@ -2055,7 +2055,7 @@ function AchievementIconGraphic({ achievement }) {
     return <VesalaporraChampionIcon />;
   }
 
-  return achievement?.icon || "ðŸ…";
+  return achievement?.icon || "🏅";
 }
 
 function RankingAchievementIcons({ achievements, className = "" }) {
@@ -2103,7 +2103,7 @@ function ProtagonistEventIcon({
   ariaLabel = null,
 }) {
   const isGoal = type === "goal";
-  const eventLabel = isGoal ? "Gol" : "AssistÃ¨ncia";
+  const eventLabel = isGoal ? "Gol" : "Assistència";
   const Component = onClick ? "button" : "span";
 
   const interactiveProps = onClick
@@ -2139,7 +2139,7 @@ function ProtagonistEventIcon({
         className={`protagonist-combined-icon ${isGoal ? "goal" : "assist"}`}
         aria-hidden="true"
       >
-        {isGoal ? "âš½" : "A"}
+        {isGoal ? "⚽" : "A"}
       </span>
 
       {count !== null && (
@@ -2216,7 +2216,7 @@ function PlayerNotesStats({ stats, mode }) {
     return (
       <div
         className="notes-player-stats season"
-        aria-label="EstadÃ­stiques de temporada"
+        aria-label="Estadístiques de temporada"
       >
         <ParticipationRoleIcon type="starter" count={stats.starts} />
         <ParticipationRoleIcon
@@ -2232,7 +2232,7 @@ function PlayerNotesStats({ stats, mode }) {
   return (
     <div
       className="notes-player-stats match"
-      aria-label="ParticipaciÃ³ en el partit"
+      aria-label="Participació en el partit"
     >
       {stats.role && (
         <ParticipationRoleIcon
@@ -2268,7 +2268,7 @@ function RatingStars({ value, onRate, readOnly = false }) {
               className={isActive ? "notes-star active" : "notes-star"}
               aria-hidden="true"
             >
-              â˜…
+              ★
             </span>
           );
         }
@@ -2282,7 +2282,7 @@ function RatingStars({ value, onRate, readOnly = false }) {
             aria-label={`Valora amb ${starNumber} estrelles`}
             aria-pressed={value === starNumber}
           >
-            â˜…
+            ★
           </button>
         );
       })}
@@ -2384,7 +2384,7 @@ const ADMIN_MATCH_COLOR_OPTIONS = [
   { value: "#111111", label: "Negre" },
   { value: "#d71920", label: "Vermell" },
   { value: "#163f8f", label: "Blau" },
-  { value: "#0a1f44", label: "Blau marÃ­" },
+  { value: "#0a1f44", label: "Blau marí" },
   { value: "#53a7e8", label: "Blau cel" },
   { value: "#f4cf36", label: "Groc" },
   { value: "#1f8f4e", label: "Verd" },
@@ -2658,7 +2658,7 @@ const normalizeAdminMatch = (row) => {
     : rivalTeamKey;
 
   const homeDisplayName = barcaIsHome
-    ? explicitHomeDisplayName || "BarÃ§a"
+    ? explicitHomeDisplayName || "Barça"
     : rivalDisplayName;
 
   const awayTeamKey = barcaIsHome
@@ -2667,7 +2667,7 @@ const normalizeAdminMatch = (row) => {
 
   const awayDisplayName = barcaIsHome
     ? rivalDisplayName
-    : explicitAwayDisplayName || "BarÃ§a";
+    : explicitAwayDisplayName || "Barça";
 
   const rivalColors = normalizeTeamBadgeColors(
     getMatchTeamBadgeColors(row, "opponent"),
@@ -2932,7 +2932,7 @@ const formation4231 = [
   },
   {
     id: "attacking-midfielders",
-    label: "LÃ­nia de tres mitjapuntes",
+    label: "Línia de tres mitjapuntes",
     slots: [1, 2, 3],
   },
   {
@@ -3436,7 +3436,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     (!protagonistIsConfirmed && protagonistIsComplete);
 
   const confirmButtonLabel = predictionIsComplete
-    ? "PRONÃ’STIC CONFIRMAT"
+    ? "PRONÒSTIC CONFIRMAT"
     : matchLoading || predictionLoading
       ? "CARREGANT PORRA..."
       : predictionSubmitting
@@ -3446,8 +3446,8 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
           : !authLoading && !authUser
             ? "ENTRA PER CONFIRMAR"
             : resultIsConfirmed
-              ? "COMPLETA EL PRONÃ’STIC"
-              : "CONFIRMA ELS TEUS PRONÃ’STICS";
+              ? "COMPLETA EL PRONÒSTIC"
+              : "CONFIRMA ELS TEUS PRONÒSTICS";
 
   const authenticatedProfileUser = authUser &&
     !isVesalaporraTechnicalAccount({
@@ -3738,7 +3738,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
         setNotesError("");
       } else {
         setNotesError(
-          error?.message || "No sâ€™ha pogut guardar la valoraciÃ³.",
+          error?.message || "No s’ha pogut guardar la valoració.",
         );
       }
     } finally {
@@ -3783,7 +3783,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     ).filter((stats) => stats.role === "T").length;
 
     if (starterCount !== 11) {
-      return `Cal marcar exactament 11 titulars. Ara nâ€™hi ha ${starterCount}.`;
+      return `Cal marcar exactament 11 titulars. Ara n’hi ha ${starterCount}.`;
     }
 
     const barcaGoals = Object.values(
@@ -3795,7 +3795,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       : officialMatchState.awayScore;
 
     if (barcaGoals !== officialBarcaScore) {
-      return `Els gols assignats als jugadors (${barcaGoals}) han de coincidir amb els gols del BarÃ§a (${officialBarcaScore}).`;
+      return `Els gols assignats als jugadors (${barcaGoals}) han de coincidir amb els gols del Barça (${officialBarcaScore}).`;
     }
 
     const invalidEventPlayer = gamePlayers.find((player) => {
@@ -3809,7 +3809,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     });
 
     if (invalidEventPlayer) {
-      return `${invalidEventPlayer.name} tÃ© gol o assistÃ¨ncia perÃ² no tÃ© participaciÃ³ marcada.`;
+      return `${invalidEventPlayer.name} té gol o assistència però no té participació marcada.`;
     }
 
     return null;
@@ -3898,7 +3898,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       setOfficialMatchFeedback({
         type: "success",
         message:
-          "Partit publicat al backend. Les Notes, el RÃ nquing i el Perfil ja llegeixen la mateixa realitat oficial.",
+          "Partit publicat al backend. Les Notes, el Rànquing i el Perfil ja llegeixen la mateixa realitat oficial.",
       });
 
       await Promise.all([
@@ -3987,7 +3987,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     );
 
     if (error) {
-      console.warn("No sâ€™ha pogut carregar la plantilla pÃºblica:", error);
+      console.warn("No s’ha pogut carregar la plantilla pública:", error);
       setPublicMatchPlayers([]);
       return;
     }
@@ -4090,7 +4090,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
         }
       } catch (handoffError) {
         console.warn(
-          "No sâ€™ha pogut comprovar el relleu oficial del partit:",
+          "No s’ha pogut comprovar el relleu oficial del partit:",
           handoffError,
         );
       }
@@ -4215,7 +4215,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       setAdminMatchFeedback({
         type: "error",
         message:
-          error?.message || "No sâ€™han pogut carregar els propers partits.",
+          error?.message || "No s’han pogut carregar els propers partits.",
       });
     } finally {
       if (!quiet) {
@@ -4303,7 +4303,7 @@ const validateAdminMatchForm = () => {
   }
 
   if (!parseAdminMatchDateText(adminMatchForm.kickoffText)) {
-    return "Escriu la data aixÃ­: 31/7/26 i 20:45.";
+    return "Escriu la data així: 31/7/26 i 20:45.";
   }
 
   if (adminMatchForm.rivalColors.length < 1) {
@@ -4311,7 +4311,7 @@ const validateAdminMatchForm = () => {
   }
 
   if (adminMatchForm.rivalColors.length > 2) {
-    return "NomÃ©s pots triar un o dos colors.";
+    return "Només pots triar un o dos colors.";
   }
 
   if (
@@ -4404,7 +4404,7 @@ const validateAdminMatchForm = () => {
 
       if (!scoringMatchId) {
         throw new Error(
-          "El partit sâ€™ha guardat, perÃ² no sâ€™ha pogut identificar per aplicar-hi els punts.",
+          "El partit s’ha guardat, però no s’ha pogut identificar per aplicar-hi els punts.",
         );
       }
 
@@ -4444,13 +4444,13 @@ const validateAdminMatchForm = () => {
             ? "Partit guardat com a PARTIT DOBLE. Tots els punts comptaran x2."
             : savedMatchId
               ? "Partit guardat i portada actualitzada amb la nova font real."
-              : "Partit guardat. La portada ja ha rellegit el partit pÃºblic real.",
+              : "Partit guardat. La portada ja ha rellegit el partit públic real.",
       });
     } catch (error) {
       setAdminMatchFeedback({
         type: "error",
         message:
-          error?.message || "No sâ€™ha pogut guardar el proper partit.",
+          error?.message || "No s’ha pogut guardar el proper partit.",
       });
     } finally {
       setAdminMatchSaving(false);
@@ -4475,17 +4475,17 @@ const validateAdminMatchForm = () => {
       setAdminMatchFeedback({
         type: "error",
         message:
-          "Aquest partit no tÃ© un nom de rival vÃ lid i no es pot confirmar lâ€™eliminaciÃ³.",
+          "Aquest partit no té un nom de rival vàlid i no es pot confirmar l’eliminació.",
       });
       return;
     }
 
     const confirmation = window.prompt(
       [
-        "Aquesta acciÃ³ eliminarÃ  definitivament el partit",
-        `BarÃ§a vs ${expectedName}.`,
+        "Aquesta acció eliminarà definitivament el partit",
+        `Barça vs ${expectedName}.`,
         "",
-        "NomÃ©s funcionarÃ  si no tÃ© pronÃ²stics, resultat, puntuacions ni valoracions.",
+        "Només funcionarà si no té pronòstics, resultat, puntuacions ni valoracions.",
         "",
         `Escriu exactament: ${expectedName}`,
       ].join("\n"),
@@ -4499,7 +4499,7 @@ const validateAdminMatchForm = () => {
       setAdminMatchFeedback({
         type: "error",
         message:
-          "El nom escrit no coincideix. El partit no sâ€™ha eliminat.",
+          "El nom escrit no coincideix. El partit no s’ha eliminat.",
       });
       return;
     }
@@ -4550,7 +4550,7 @@ const validateAdminMatchForm = () => {
         }
       } catch (refreshError) {
         console.warn(
-          "No queda cap partit pÃºblic disponible desprÃ©s de lâ€™eliminaciÃ³:",
+          "No queda cap partit públic disponible després de l’eliminació:",
           refreshError,
         );
 
@@ -4562,7 +4562,7 @@ const validateAdminMatchForm = () => {
         type: "success",
         message:
           result?.removed_match_player_rows > 0
-            ? `Partit contra ${expectedName} eliminat. TambÃ© sâ€™han retirat ${result.removed_match_player_rows} assignacions de plantilla.`
+            ? `Partit contra ${expectedName} eliminat. També s’han retirat ${result.removed_match_player_rows} assignacions de plantilla.`
             : `Partit contra ${expectedName} eliminat definitivament.`,
       });
     } catch (error) {
@@ -4570,7 +4570,7 @@ const validateAdminMatchForm = () => {
         type: "error",
         message:
           error?.message ||
-          "No sâ€™ha pogut eliminar el partit.",
+          "No s’ha pogut eliminar el partit.",
       });
     } finally {
       setAdminDeletingMatchId(null);
@@ -4635,7 +4635,7 @@ const validateAdminMatchForm = () => {
 
           if (signedError) {
             console.warn(
-              `No sâ€™ha pogut signar la preview ${job.job_id}:`,
+              `No s’ha pogut signar la preview ${job.job_id}:`,
               signedError,
             );
           }
@@ -4651,7 +4651,7 @@ const validateAdminMatchForm = () => {
       setAdminPlayerFeedback({
         type: "error",
         message:
-          error?.message || "No sâ€™ha pogut carregar el catÃ leg de jugadors.",
+          error?.message || "No s’ha pogut carregar el catàleg de jugadors.",
       });
     } finally {
       if (!quiet) {
@@ -4706,7 +4706,7 @@ const validateAdminMatchForm = () => {
       setAdminPlayerFeedback({
         type: "success",
         message: createdPlayerId
-          ? `Jugador creat correctament Â· ${createdPlayerId}`
+          ? `Jugador creat correctament · ${createdPlayerId}`
           : "Jugador creat correctament.",
       });
 
@@ -4714,7 +4714,7 @@ const validateAdminMatchForm = () => {
     } catch (error) {
       setAdminPlayerFeedback({
         type: "error",
-        message: error?.message || "No sâ€™ha pogut crear el jugador.",
+        message: error?.message || "No s’ha pogut crear el jugador.",
       });
     } finally {
       setAdminPlayerCreating(false);
@@ -4760,7 +4760,7 @@ const validateAdminMatchForm = () => {
     setAdminPlayerBusyId(playerId);
     setAdminPlayerFeedback({
       type: "working",
-      message: "Pujant la imatge i preparant la previsualitzaciÃ³...",
+      message: "Pujant la imatge i preparant la previsualització...",
     });
 
     let uploadId = null;
@@ -4803,7 +4803,7 @@ const validateAdminMatchForm = () => {
 
       if (!uploadId || !sourceBucket || !sourcePath) {
         throw new Error(
-          "La preparaciÃ³ de la pujada no ha retornat upload_id, bucket i storage_path.",
+          "La preparació de la pujada no ha retornat upload_id, bucket i storage_path.",
         );
       }
 
@@ -4839,7 +4839,7 @@ const validateAdminMatchForm = () => {
       ]);
 
       if (!jobId) {
-        throw new Error("La pujada sâ€™ha completat, perÃ² no ha retornat job_id.");
+        throw new Error("La pujada s’ha completat, però no ha retornat job_id.");
       }
 
       const workerResponse = await supabase.functions.invoke(
@@ -4868,7 +4868,7 @@ const validateAdminMatchForm = () => {
       setAdminPlayerFeedback({
         type: "success",
         message:
-          "PrevisualitzaciÃ³ preparada. Revisa-la i aprova-la abans de publicar.",
+          "Previsualització preparada. Revisa-la i aprova-la abans de publicar.",
       });
 
       await loadAdminPlayerWorkspace({ quiet: true });
@@ -4884,7 +4884,7 @@ const validateAdminMatchForm = () => {
 
         if (cancelResponse.error) {
           console.warn(
-            "No sâ€™ha pogut cancelÂ·lar la pujada fallida:",
+            "No s’ha pogut cancel·lar la pujada fallida:",
             cancelResponse.error,
           );
         }
@@ -4893,7 +4893,7 @@ const validateAdminMatchForm = () => {
       setAdminPlayerFeedback({
         type: "error",
         message:
-          error?.message || "No sâ€™ha pogut processar la imatge del jugador.",
+          error?.message || "No s’ha pogut processar la imatge del jugador.",
       });
     } finally {
       setAdminPlayerBusyId(null);
@@ -4911,7 +4911,7 @@ const validateAdminMatchForm = () => {
       type: "working",
       message: isApproval
         ? "Aprovant i publicant la xapa..."
-        : "Rebutjant la previsualitzaciÃ³...",
+        : "Rebutjant la previsualització...",
     });
 
     try {
@@ -4962,7 +4962,7 @@ const validateAdminMatchForm = () => {
         type: "success",
         message: isApproval
           ? "Xapa aprovada i publicada correctament."
-          : "PrevisualitzaciÃ³ rebutjada. Pots pujar una imatge nova.",
+          : "Previsualització rebutjada. Pots pujar una imatge nova.",
       });
 
       await Promise.all([
@@ -4973,7 +4973,7 @@ const validateAdminMatchForm = () => {
       setAdminPlayerFeedback({
         type: "error",
         message:
-          error?.message || "No sâ€™ha pogut completar la revisiÃ³ de la xapa.",
+          error?.message || "No s’ha pogut completar la revisió de la xapa.",
       });
     } finally {
       setAdminPlayerBusyId(null);
@@ -5088,8 +5088,8 @@ const saveAdminMatchPlayer = async (player, patch) => {
     setAdminPlayerFeedback({
       type: "success",
       message: isGoalkeeperGroup
-        ? "Porter guardat. SerÃ  visible a lâ€™XI i Les Notes, perÃ² no com a protagonista."
-        : "ConfiguraciÃ³ del jugador guardada.",
+        ? "Porter guardat. Serà visible a l’XI i Les Notes, però no com a protagonista."
+        : "Configuració del jugador guardada.",
     });
 
     await Promise.all([
@@ -5100,7 +5100,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     setAdminPlayerFeedback({
       type: "error",
       message:
-        error?.message || "No sâ€™ha pogut guardar el jugador del partit.",
+        error?.message || "No s’ha pogut guardar el jugador del partit.",
     });
   } finally {
     setAdminPlayerBusyId(null);
@@ -5131,7 +5131,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
       setAdminPlayerFeedback({
         type: "success",
-        message: "Jugador retirat dâ€™aquest partit. El seu historial es conserva.",
+        message: "Jugador retirat d’aquest partit. El seu historial es conserva.",
       });
 
       await Promise.all([
@@ -5141,7 +5141,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     } catch (error) {
       setAdminPlayerFeedback({
         type: "error",
-        message: error?.message || "No sâ€™ha pogut retirar el jugador.",
+        message: error?.message || "No s’ha pogut retirar el jugador.",
       });
     } finally {
       setAdminPlayerBusyId(null);
@@ -5183,8 +5183,8 @@ const saveAdminMatchPlayer = async (player, patch) => {
         type: "success",
         message:
           nextStatus === "archived"
-            ? "Jugador arxivat. No sâ€™ha esborrat cap historial."
-            : "Jugador reactivat al catÃ leg.",
+            ? "Jugador arxivat. No s’ha esborrat cap historial."
+            : "Jugador reactivat al catàleg.",
       });
 
       await loadAdminPlayerWorkspace({
@@ -5195,7 +5195,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
         type: "error",
         message:
           error?.message ||
-          "No sâ€™ha pogut actualitzar el jugador.",
+          "No s’ha pogut actualitzar el jugador.",
       });
     } finally {
       setAdminPlayerBusyId(null);
@@ -5215,7 +5215,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
       setAdminPlayerFeedback({
         type: "error",
         message:
-          "Primer has dâ€™arxivar el jugador. Els jugadors actius no es poden eliminar.",
+          "Primer has d’arxivar el jugador. Els jugadors actius no es poden eliminar.",
       });
       return;
     }
@@ -5228,18 +5228,18 @@ const saveAdminMatchPlayer = async (player, patch) => {
       setAdminPlayerFeedback({
         type: "error",
         message:
-          "Aquest jugador no tÃ© un nom vÃ lid per confirmar lâ€™eliminaciÃ³.",
+          "Aquest jugador no té un nom vàlid per confirmar l’eliminació.",
       });
       return;
     }
 
     const confirmation = window.prompt(
       [
-        "Aquesta acciÃ³ eliminarÃ  definitivament el jugador",
+        "Aquesta acció eliminarà definitivament el jugador",
         `${expectedName}.`,
         "",
-        "NomÃ©s funcionarÃ  si no tÃ© historial esportiu real.",
-        "TambÃ© sâ€™intentaran eliminar les seves imatges i processos de xapa.",
+        "Només funcionarà si no té historial esportiu real.",
+        "També s’intentaran eliminar les seves imatges i processos de xapa.",
         "",
         `Escriu exactament: ${expectedName}`,
       ].join("\n"),
@@ -5253,7 +5253,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
       setAdminPlayerFeedback({
         type: "error",
         message:
-          "El nom escrit no coincideix. El jugador no sâ€™ha eliminat.",
+          "El nom escrit no coincideix. El jugador no s’ha eliminat.",
       });
       return;
     }
@@ -5335,7 +5335,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
           storageCleanupFailedBuckets += 1;
 
           console.warn(
-            `El jugador sâ€™ha eliminat, perÃ² no sâ€™han pogut retirar els fitxers del bucket ${bucket}:`,
+            `El jugador s’ha eliminat, però no s’han pogut retirar els fitxers del bucket ${bucket}:`,
             storageError,
           );
         }
@@ -5356,15 +5356,15 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
         message:
           storageCleanupFailedBuckets > 0
-            ? `${expectedName} sâ€™ha eliminat de la base de dades, perÃ² ${storageCleanupFailedBuckets} bucket(s) no han permÃ¨s eliminar els fitxers. El jugador ja no apareixerÃ  al joc.`
-            : `${expectedName} i els seus fitxers associats sâ€™han eliminat definitivament.`,
+            ? `${expectedName} s’ha eliminat de la base de dades, però ${storageCleanupFailedBuckets} bucket(s) no han permès eliminar els fitxers. El jugador ja no apareixerà al joc.`
+            : `${expectedName} i els seus fitxers associats s’han eliminat definitivament.`,
       });
     } catch (error) {
       setAdminPlayerFeedback({
         type: "error",
         message:
           error?.message ||
-          "No sâ€™ha pogut eliminar el jugador.",
+          "No s’ha pogut eliminar el jugador.",
       });
     } finally {
       setAdminPlayerBusyId(null);
@@ -5408,7 +5408,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
       setAuthError(
         error?.message ||
-          `No sâ€™ha pogut obrir ${providerLabel}. Torna-ho a provar.`,
+          `No s’ha pogut obrir ${providerLabel}. Torna-ho a provar.`,
       );
       setAuthActionLoading(false);
     }
@@ -5420,7 +5420,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
   const persistProfile = async ({ displayName, avatarUrl, avatarPath }) => {
     if (!authUser) {
-      throw new Error("Has dâ€™entrar abans dâ€™editar el perfil.");
+      throw new Error("Has d’entrar abans d’editar el perfil.");
     }
 
     const { error } = await supabase.from("profiles").upsert(
@@ -5466,7 +5466,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
       setProfileFeedback({
         type: "error",
         message:
-          "El nom pÃºblic no pot ser una adreÃ§a de correu ni el seu identificador privat.",
+          "El nom públic no pot ser una adreça de correu ni el seu identificador privat.",
       });
       return;
     }
@@ -5477,7 +5477,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     ) {
       setProfileFeedback({
         type: "error",
-        message: `El nom ha de tenir entre ${PROFILE_NAME_MIN_LENGTH} i ${PROFILE_NAME_MAX_LENGTH} carÃ cters.`,
+        message: `El nom ha de tenir entre ${PROFILE_NAME_MIN_LENGTH} i ${PROFILE_NAME_MAX_LENGTH} caràcters.`,
       });
       return;
     }
@@ -5526,7 +5526,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     } catch (error) {
       setProfileFeedback({
         type: "error",
-        message: error?.message || "No sâ€™ha pogut guardar el nom.",
+        message: error?.message || "No s’ha pogut guardar el nom.",
       });
     } finally {
       setProfileActionLoading(false);
@@ -5552,7 +5552,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     if (!extension) {
       setProfileFeedback({
         type: "error",
-        message: "Lâ€™avatar ha de ser PNG, JPG o WEBP.",
+        message: "L’avatar ha de ser PNG, JPG o WEBP.",
       });
       return;
     }
@@ -5560,7 +5560,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     if (file.size > PROFILE_AVATAR_MAX_BYTES) {
       setProfileFeedback({
         type: "error",
-        message: "Lâ€™avatar no pot superar els 2 MB.",
+        message: "L’avatar no pot superar els 2 MB.",
       });
       return;
     }
@@ -5594,7 +5594,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
         : null;
 
       if (!nextAvatarUrl) {
-        throw new Error("No sâ€™ha pogut obtenir la URL de lâ€™avatar.");
+        throw new Error("No s’ha pogut obtenir la URL de l’avatar.");
       }
 
       await persistProfile({
@@ -5611,7 +5611,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
       if (error) {
         console.warn(
-          "No sâ€™ha pogut sincronitzar lâ€™avatar amb auth metadata:",
+          "No s’ha pogut sincronitzar l’avatar amb auth metadata:",
           error,
         );
       }
@@ -5655,7 +5655,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
       setProfileFeedback({
         type: "error",
-        message: error?.message || "No sâ€™ha pogut guardar lâ€™avatar.",
+        message: error?.message || "No s’ha pogut guardar l’avatar.",
       });
     } finally {
       setProfileActionLoading(false);
@@ -5680,7 +5680,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
       setActivePage("play");
       setSelectedProfileUserId(null);
     } catch (error) {
-      setAuthError(error?.message || "No sâ€™ha pogut tancar la sessiÃ³.");
+      setAuthError(error?.message || "No s’ha pogut tancar la sessió.");
     } finally {
       setAuthActionLoading(false);
     }
@@ -5841,7 +5841,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
       if (!savedPrediction?.prediction_id) {
         throw new Error(
-          "La porra sâ€™ha enviat perÃ² no sâ€™ha pogut recuperar.",
+          "La porra s’ha enviat però no s’ha pogut recuperar.",
         );
       }
 
@@ -5908,13 +5908,13 @@ const saveAdminMatchPlayer = async (player, patch) => {
         }, PREDICTION_CELEBRATION_MS);
     } catch (error) {
       console.warn(
-        "No sâ€™ha pogut confirmar el pronÃ²stic real:",
+        "No s’ha pogut confirmar el pronòstic real:",
         error,
       );
 
       setAuthError(
         error?.message ||
-          "No sâ€™ha pogut confirmar la porra. Torna-ho a provar.",
+          "No s’ha pogut confirmar la porra. Torna-ho a provar.",
       );
     } finally {
       setPredictionSubmitting(false);
@@ -5975,7 +5975,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         fetchRankingScope("jornada"),
         fetchLatestScoredJornadaNumber().catch((error) => {
           console.warn(
-            "No sâ€™ha pogut carregar el nÃºmero de jornada:",
+            "No s’ha pogut carregar el número de jornada:",
             error,
           );
 
@@ -5998,7 +5998,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     setRankingUsers([]);
     setRankingJornadaNumber(null);
     setRankingError(
-      error?.message || "No sâ€™ha pogut carregar el rÃ nquing real.",
+      error?.message || "No s’ha pogut carregar el rànquing real.",
     );
   } finally {
     if (!quiet) {
@@ -6074,7 +6074,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     ).catch((error) => {
       if (isMissingRpcSignatureError(error)) {
         console.warn(
-          "Lâ€™estat temporal de Les Notes encara no estÃ  disponible; es carreguen igualment les valoracions.",
+          "L’estat temporal de Les Notes encara no està disponible; es carreguen igualment les valoracions.",
           error,
         );
 
@@ -6271,7 +6271,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       setNotesMatchData(matchData);
       setNotesError(
         error?.message ||
-          "No sâ€™han pogut carregar Les Notes reals.",
+          "No s’han pogut carregar Les Notes reals.",
       );
     } finally {
       if (!quiet) {
@@ -6376,7 +6376,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
       setProfileDataError(
         error?.message ||
-          "No sâ€™ha pogut carregar el perfil real.",
+          "No s’ha pogut carregar el perfil real.",
       );
     } finally {
       setProfileDataLoading(false);
@@ -6430,7 +6430,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       }
 
       if (!data) {
-        throw new Error("No sâ€™ha trobat el detall dâ€™aquesta aposta.");
+        throw new Error("No s’ha trobat el detall d’aquesta aposta.");
       }
 
       const officialStarterPlayerIds = new Set(
@@ -6507,7 +6507,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               loading: false,
               error:
                 error?.message ||
-                "No sâ€™ha pogut carregar aquesta aposta.",
+                "No s’ha pogut carregar aquesta aposta.",
             }
           : currentPrediction,
       );
@@ -6546,7 +6546,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
     refreshPublicCurrentMatch().catch((error) => {
       console.warn(
-        "No sâ€™ha pogut carregar la porra ni el segÃ¼ent partit:",
+        "No s’ha pogut carregar la porra ni el següent partit:",
         error,
       );
 
@@ -6554,7 +6554,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         setMatchData(EMPTY_MATCH_DATA);
         setAuthError(
           error?.message ||
-            "No sâ€™ha pogut carregar el prÃ²xim partit.",
+            "No s’ha pogut carregar el pròxim partit.",
         );
       }
     });
@@ -6665,7 +6665,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       if (oauthError) {
         window.sessionStorage.removeItem(X_AUTO_LOGIN_STORAGE_KEY);
         setAuthError(
-          "Lâ€™enllaÃ§ dâ€™accÃ©s ha caducat. Torna a entrar amb Google o X.",
+          "L’enllaç d’accés ha caducat. Torna a entrar amb Google o X.",
         );
         cleanAuthUrl();
         return;
@@ -6794,7 +6794,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         setProfileDraftName(nextProfile.displayName);
       } catch (error) {
         console.warn(
-          "Perfil pÃºblic no disponible; sâ€™utilitzen les dades del proveÃ¯dor:",
+          "Perfil públic no disponible; s’utilitzen les dades del proveïdor:",
           error,
         );
 
@@ -6911,7 +6911,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         setPredictionConfirmed(true);
       } catch (error) {
         console.warn(
-          "No sâ€™ha pogut recuperar el pronÃ²stic real:",
+          "No s’ha pogut recuperar el pronòstic real:",
           error,
         );
 
@@ -6920,7 +6920,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
           setAuthError(
             error?.message ||
-              "No sâ€™ha pogut carregar la teva porra.",
+              "No s’ha pogut carregar la teva porra.",
           );
         }
       } finally {
@@ -6989,7 +6989,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         refreshPublicCurrentMatch({ quiet: true })
           .catch((error) => {
             console.warn(
-              "La porra encara no sâ€™ha activat:",
+              "La porra encara no s’ha activat:",
               error,
             );
           })
@@ -7667,7 +7667,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         </div>
 
         <div className="header-actions">
-          <nav className="main-nav" aria-label="NavegaciÃ³ principal">
+          <nav className="main-nav" aria-label="Navegació principal">
             <button
               type="button"
               className={
@@ -7695,7 +7695,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               }
               onClick={() => setActivePage("ranking")}
             >
-              RÃ€NQUING
+              RÀNQUING
             </button>
 
             <button
@@ -7747,7 +7747,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             ) : (
               <div
                 className="auth-provider-buttons"
-                aria-label="Opcions dâ€™accÃ©s"
+                aria-label="Opcions d’accés"
               >
                 <button
                   type="button"
@@ -7757,7 +7757,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   aria-label="Entra amb X"
                   title="Entra amb X"
                 >
-                  <span aria-hidden="true">ð•</span>
+                  <span aria-hidden="true">𝕏</span>
                 </button>
 
                 <button
@@ -7782,14 +7782,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
       {authError && (
         <div className="auth-error-banner" role="alert">
-          <strong>ACCÃ‰S</strong>
+          <strong>ACCÉS</strong>
           <span>{authError}</span>
           <button
             type="button"
             onClick={() => setAuthError("")}
-            aria-label="Tanca lâ€™avÃ­s dâ€™error"
+            aria-label="Tanca l’avís d’error"
           >
-            Ã—
+            ×
           </button>
         </div>
       )}
@@ -7820,9 +7820,9 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     type="button"
                     className="section-info-button"
                     onClick={() => toggleInfoSection("score")}
-                    aria-label="InformaciÃ³ sobre el pronÃ²stic del resultat"
+                    aria-label="Informació sobre el pronòstic del resultat"
                     aria-expanded={openInfoSection === "score"}
-                    title="Com funciona aquesta secciÃ³?"
+                    title="Com funciona aquesta secció?"
                   >
                     i
                   </button>
@@ -7851,7 +7851,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 <div className="score-match-date">
                   <span>
                     {isWaitingForOpening
-                      ? "SEGÃœENT PARTIT"
+                      ? "SEGÜENT PARTIT"
                       : hasOfficialResult
                         ? "PARTIT PUNTUAT"
                         : "PROPER PARTIT"}
@@ -7869,7 +7869,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 >
                   <span className="score-deadline-title">
                     {isWaitingForOpening
-                      ? "PORRA TANCADA Â· Sâ€™OBRE EN"
+                      ? "PORRA TANCADA · S’OBRE EN"
                       : countdown.isClosed
                         ? "ESTAT"
                         : "TANCA EN"}
@@ -7942,7 +7942,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       letterSpacing: "0.08em",
                     }}
                   >
-                    ðŸ”¥ PARTIT DOBLE Â· PUNTS x2
+                    🔥 PARTIT DOBLE · PUNTS x2
                   </strong>
 
                   <span
@@ -7977,7 +7977,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     </div>
 
                     <div className="section-info-points-row">
-                      <span>Encertar els gols del BarÃ§a</span>
+                      <span>Encertar els gols del Barça</span>
 
                       <strong>+15</strong>
                     </div>
@@ -8036,7 +8036,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       }}
                       aria-label={`Resta un gol a ${matchData.homeName}`}
                     >
-                      âˆ’
+                      −
                     </button>
 
                     <button
@@ -8090,7 +8090,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       }}
                       aria-label={`Resta un gol a ${matchData.awayName}`}
                     >
-                      âˆ’
+                      −
                     </button>
 
                     <button
@@ -8174,8 +8174,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   onClick={handleConfirmResultOnly}
                 >
                   {resultIsConfirmed
-                    ? "âœ“ RESULTAT ENVIAT"
-                    : "NOMÃ‰S VULL PRONOSTICAR EL RESULTAT"}
+                    ? "✓ RESULTAT ENVIAT"
+                    : "NOMÉS VULL PRONOSTICAR EL RESULTAT"}
                 </button>
               </div>
             </section>
@@ -8184,7 +8184,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               className="prediction-card lineup-card"
               aria-label={
                 protagonistSelectionActive
-                  ? "Mode de selecciÃ³ de protagonista actiu"
+                  ? "Mode de selecció de protagonista actiu"
                   : "La Lotto Flick"
               }
             >
@@ -8208,9 +8208,9 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     type="button"
                     className="section-info-button"
                     onClick={() => toggleInfoSection("lineup")}
-                    aria-label="InformaciÃ³ sobre la Lotto Flick"
+                    aria-label="Informació sobre la Lotto Flick"
                     aria-expanded={openInfoSection === "lineup"}
-                    title="Com funciona aquesta secciÃ³?"
+                    title="Com funciona aquesta secció?"
                   >
                     i
                   </button>
@@ -8224,10 +8224,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   }
                 >
                   {lineupIsConfirmed
-                    ? "ENVIADA Â· 11 / 11"
+                    ? "ENVIADA · 11 / 11"
                     : lineupIsComplete
-                      ? "FET Â· 11 / 11"
-                    : `OPCIONAL Â· ${lineupCount} / 11`}
+                      ? "FET · 11 / 11"
+                    : `OPCIONAL · ${lineupCount} / 11`}
                 </span>
               </div>
 
@@ -8265,55 +8265,55 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                     <div className="section-info-points-row negative">
                       <span>6/11 encerts</span>
-                      <strong>âˆ’5</strong>
+                      <strong>−5</strong>
                     </div>
 
                     <div className="section-info-points-row negative">
                       <span>5/11 encerts</span>
-                      <strong>âˆ’10</strong>
+                      <strong>−10</strong>
                     </div>
 
                     <div className="section-info-points-row negative">
                       <span>4/11 encerts</span>
-                      <strong>âˆ’15</strong>
+                      <strong>−15</strong>
                     </div>
 
                     <div className="section-info-points-row negative">
                       <span>3/11 encerts</span>
-                      <strong>âˆ’20</strong>
+                      <strong>−20</strong>
                     </div>
 
                     <div className="section-info-points-row negative">
                       <span>2/11 encerts</span>
-                      <strong>âˆ’25</strong>
+                      <strong>−25</strong>
                     </div>
 
                     <div className="section-info-points-row negative">
                       <span>1/11 encerts</span>
-                      <strong>âˆ’30</strong>
+                      <strong>−30</strong>
                     </div>
 
                     <div className="section-info-points-row troll">
-                      <span>0/11 encerts ðŸ˜ˆ</span>
+                      <span>0/11 encerts 😈</span>
                       <strong>+30</strong>
                     </div>
                   </div>
 
                   <small className="section-info-note">
-                    Compten els jugadors encertats, no la posiciÃ³ on els
-                    colÂ·loques al camp.
+                    Compten els jugadors encertats, no la posició on els
+                    col·loques al camp.
                   </small>
                 </div>
               )}
 
               {protagonistSelectionActive && (
                 <div className="protagonist-selection-guide" role="status">
-                  <span className="protagonist-selection-guide-star">â˜…</span>
+                  <span className="protagonist-selection-guide-star">★</span>
 
                   <div>
                     <strong>MODE PROTAGONISTA ACTIU</strong>
                     <span>
-                      Passa per sobre dâ€™una xapa i clica-la. En mÃ²bil: primer
+                      Passa per sobre d’una xapa i clica-la. En mòbil: primer
                       toc per veure els punts, segon toc per escollir.
                     </span>
                   </div>
@@ -8322,15 +8322,15 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     type="button"
                     onClick={clearProtagonistSelectionMode}
                   >
-                    CANCELÂ·LA
+                    CANCEL·LA
                   </button>
                 </div>
               )}
 
               <p className="section-help">
                 {countdown.isClosed || hasOfficialResult
-                  ? "La porra estÃ  tancada. Lâ€™XI ja no es pot modificar."
-                  : "Clica una posiciÃ³ i desprÃ©s un jugador (o a la inversa) i el jugador es posarÃ  al lloc on vulguis. TambÃ© pots arrossegar les xapes."}
+                  ? "La porra està tancada. L’XI ja no es pot modificar."
+                  : "Clica una posició i després un jugador (o a la inversa) i el jugador es posarà al lloc on vulguis. També pots arrossegar les xapes."}
               </p>
 
               <div
@@ -8446,8 +8446,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                 ? protagonistSelectionActive &&
                                   isEligibleProtagonist
                                   ? `${player.name}. Protagonista: +${getPlayerProtagonistScoring(player).hitPoints} si marca o assisteix; ${getPlayerProtagonistScoring(player).missPoints} si no ho fa.`
-                                  : `PosiciÃ³ de ${player.name}`
-                                : `PosiciÃ³ lliure ${slotIndex + 1}`
+                                  : `Posició de ${player.name}`
+                                : `Posició lliure ${slotIndex + 1}`
                             }
                           >
                             {player ? (
@@ -8463,7 +8463,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                     className="protagonist-crown"
                                     aria-hidden="true"
                                   >
-                                    â˜…
+                                    ★
                                   </span>
                                 )}
 
@@ -8484,7 +8484,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
               <div className="player-tray">
                 <div className="player-tray-header">
-                  <strong>XAPES DEL BARÃ‡A</strong>
+                  <strong>XAPES DEL BARÇA</strong>
 
                   <span>{lineupPlayers.length} jugadors</span>
                 </div>
@@ -8598,7 +8598,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       <span>PROTAGONISTA</span>
                       <strong>{protagonistPreview.name}</strong>
                       <small>
-                        Clica la xapa per escollir-lo Â· en mÃ²bil, toca-la de
+                        Clica la xapa per escollir-lo · en mòbil, toca-la de
                         nou.
                       </small>
                     </div>
@@ -8628,9 +8628,9 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     type="button"
                     className="section-info-button"
                     onClick={() => toggleInfoSection("protagonist")}
-                    aria-label="InformaciÃ³ sobre el protagonista"
+                    aria-label="Informació sobre el protagonista"
                     aria-expanded={openInfoSection === "protagonist"}
-                    title="Com funciona aquesta secciÃ³?"
+                    title="Com funciona aquesta secció?"
                   >
                     i
                   </button>
@@ -8685,7 +8685,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                           <span>
                             {groupPlayers
                               .map((player) => player.name)
-                              .join(" Â· ")}
+                              .join(" · ")}
                           </span>
 
                           <strong>
@@ -8697,9 +8697,9 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   </div>
 
                   <small className="section-info-note">
-                    El primer nÃºmero sÃ³n els punts si marca o assisteix. El
-                    segon Ã©s la penalitzaciÃ³ si no participa en cap gol. Gol i
-                    assistÃ¨ncia no acumulen.
+                    El primer número són els punts si marca o assisteix. El
+                    segon és la penalització si no participa en cap gol. Gol i
+                    assistència no acumulen.
                   </small>
                 </div>
               )}
@@ -8751,7 +8751,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       />
 
                       <span aria-hidden="true">
-                        â˜…
+                        ★
                       </span>
                     </span>
                   ) : (
@@ -8759,7 +8759,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       className="protagonist-selector-star"
                       aria-hidden="true"
                     >
-                      â˜…
+                      ★
                     </span>
                   )}
                 </button>
@@ -8779,14 +8779,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                   <small>
                     {protagonistIsComplete
-                      ? `${protagonist.name} Â· +${protagonistScoring.hitPoints} si marca o assisteix Â· ${protagonistScoring.missPoints} si no participa en cap gol.${
+                      ? `${protagonist.name} · +${protagonistScoring.hitPoints} si marca o assisteix · ${protagonistScoring.missPoints} si no participa en cap gol.${
                           protagonistIsConfirmed
                             ? " Ja no es pot canviar."
                             : " Clica el cromo amb estrella per desfer."
                         }`
                       : protagonistSelectionActive
-                        ? "Passa per sobre dâ€™una xapa per veure el premi i la penalitzaciÃ³; clica-la per escollir."
-                        : "Clica lâ€™estrella i escull quin jugador creus que marcarÃ  o assistirÃ ."}
+                        ? "Passa per sobre d’una xapa per veure el premi i la penalització; clica-la per escollir."
+                        : "Clica l’estrella i escull quin jugador creus que marcarà o assistirà."}
                   </small>
                 </div>
 
@@ -8830,12 +8830,12 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 <span>
                   {lineupIsComplete
                     ? "XI 11/11"
-                    : `XI ${lineupCount}/11 Â· OPCIONAL`}
+                    : `XI ${lineupCount}/11 · OPCIONAL`}
                 </span>
 
                 <span>
                   {protagonistIsComplete
-                    ? `PROTAGONISTA ${protagonist.shortName.toUpperCase()} Â· +${protagonistScoring.hitPoints}/${protagonistScoring.missPoints}`
+                    ? `PROTAGONISTA ${protagonist.shortName.toUpperCase()} · +${protagonistScoring.hitPoints}/${protagonistScoring.missPoints}`
                     : "PROTAGONISTA OPCIONAL"}
                 </span>
 
@@ -8843,9 +8843,9 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   type="button"
                   className="section-info-button confirm-info-button"
                   onClick={() => toggleInfoSection("confirm")}
-                  aria-label="InformaciÃ³ sobre les combinacions de la porra"
+                  aria-label="Informació sobre les combinacions de la porra"
                   aria-expanded={openInfoSection === "confirm"}
-                  title="QuÃ¨ Ã©s obligatori i quÃ¨ Ã©s opcional?"
+                  title="Què és obligatori i què és opcional?"
                 >
                   i
                 </button>
@@ -8858,8 +8858,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   </strong>
 
                   <p className="confirm-info-intro">
-                    <strong>NomÃ©s el resultat Ã©s obligatori.</strong> La Lotto
-                    Flick i el protagonista sÃ³n opcionals i els pots afegir per
+                    <strong>Només el resultat és obligatori.</strong> La Lotto
+                    Flick i el protagonista són opcionals i els pots afegir per
                     separat o combinar-los.
                   </p>
 
@@ -8867,21 +8867,21 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     <div className="confirm-info-option">
                       <strong>RESULTAT</strong>
 
-                      <span>La porra mÃ­nima i vÃ lida.</span>
+                      <span>La porra mínima i vàlida.</span>
                     </div>
 
                     <div className="confirm-info-option">
                       <strong>RESULTAT + LOTTO FLICK</strong>
 
                       <span>
-                        La Lotto sâ€™inclou quan completes els 11 titulars.
+                        La Lotto s’inclou quan completes els 11 titulars.
                       </span>
                     </div>
 
                     <div className="confirm-info-option">
                       <strong>RESULTAT + PROTAGONISTA</strong>
 
-                      <span>Afegeix qui marcarÃ  o assistirÃ .</span>
+                      <span>Afegeix qui marcarà o assistirà.</span>
                     </div>
 
                     <div className="confirm-info-option featured">
@@ -8928,7 +8928,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     type="button"
                     className="section-info-button notes-info-button"
                     onClick={() => toggleInfoSection("notes")}
-                    aria-label="InformaciÃ³ sobre Les Notes"
+                    aria-label="Informació sobre Les Notes"
                     aria-expanded={openInfoSection === "notes"}
                     title="Com funcionen les valoracions?"
                   >
@@ -8937,7 +8937,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 </div>
 
                 <p>
-                  Deixa anar les teves neures, filies i fÃ²bies i caga't en les de la resta.
+                  Deixa anar les teves neures, filies i fòbies i caga't en les de la resta.
                 </p>
               </div>
 
@@ -8986,19 +8986,19 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               <section className="notes-information-panel" role="note">
                 <div>
                   <span>COM FUNCIONEN LES NOTES</span>
-                  <strong>Una valoraciÃ³ real per jugador i partit</strong>
+                  <strong>Una valoració real per jugador i partit</strong>
                 </div>
 
                 <p>
-                  NomÃ©s apareixen els jugadors que Puntuacions ha marcat com a
+                  Només apareixen els jugadors que Puntuacions ha marcat com a
                   titulars o suplents amb minuts. El servidor valida i desa cada
-                  valoraciÃ³.
+                  valoració.
                 </p>
 
                 <div className="notes-scale-grid">
                   {RATING_SCALE.map((rating) => (
                     <div key={rating.stars} className="notes-scale-item">
-                      <span>{"â˜…".repeat(rating.stars)}</span>
+                      <span>{"★".repeat(rating.stars)}</span>
                       <strong>{rating.label}</strong>
                       <small>{rating.value} punts</small>
                     </div>
@@ -9013,7 +9013,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   <span>
                     {notesTab === "match"
                       ? "VALORA EL PARTIT OFICIAL"
-                      : "CLASSIFICACIÃ“ REAL DE LA TEMPORADA"}
+                      : "CLASSIFICACIÓ REAL DE LA TEMPORADA"}
                   </span>
 
                   <strong>
@@ -9028,7 +9028,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
               {notesError && (
                 <div className="real-data-state error" role="alert">
-                  <strong>No sâ€™han pogut carregar Les Notes</strong>
+                  <strong>No s’han pogut carregar Les Notes</strong>
                   <span>{notesError}</span>
                 </div>
               )}
@@ -9066,7 +9066,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 <div className="real-data-state empty">
                   <strong>Sense valoracions encara</strong>
                   <span>
-                    Quan tinguem les valoracions del primer partit apareixeran aquÃ­.
+                    Quan tinguem les valoracions del primer partit apareixeran aquí.
                   </span>
                 </div>
               )}
@@ -9113,7 +9113,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                         <strong>
                           {row.voteCount > 0
                             ? formatRatingAverage(row.average)
-                            : "â€”"}
+                            : "—"}
                         </strong>
                         <span>
                           {row.voteCount > 0
@@ -9151,7 +9151,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 />
               ) : adminScoringTab === "players" ? (
                 <div className="admin-player-hero-summary">
-                  <span>CATÃ€LEG DINÃ€MIC</span>
+                  <span>CATÀLEG DINÀMIC</span>
                   <strong>{adminPlayerCatalog.length} jugadors</strong>
                 </div>
               ) : (
@@ -9225,12 +9225,12 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     </div>
 
                     <small>
-                      T i S alternen la participaciÃ³. Gol i assistÃ¨ncia sumen
-                      amb cada clic; el botÃ³ âˆ’ en resta una.
+                      T i S alternen la participació. Gol i assistència sumen
+                      amb cada clic; el botó − en resta una.
                     </small>
                   </header>
 
-                  <div className="admin-tool-tray" aria-label="Llegenda dâ€™eines">
+                  <div className="admin-tool-tray" aria-label="Llegenda d’eines">
                     {ADMIN_SCORING_TOOLS.map((tool) => (
                       <div
                         key={tool.id}
@@ -9257,7 +9257,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       GOLS <strong>{adminGoalCount}</strong>
                     </span>
                     <span>
-                      ASSISTÃˆNCIES <strong>{adminAssistCount}</strong>
+                      ASSISTÈNCIES <strong>{adminAssistCount}</strong>
                     </span>
                   </div>
                 </section>
@@ -9265,19 +9265,19 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 <section className="admin-player-board">
                   <header>
                     <div>
-                      <span>PLANTILLA DEL BARÃ‡A</span>
+                      <span>PLANTILLA DEL BARÇA</span>
                       <strong>Font oficial del partit</strong>
                     </div>
 
                     <small>
-                      Torna a clicar T o S per desmarcar. T i S sÃ³n excloents.
+                      Torna a clicar T o S per desmarcar. T i S són excloents.
                     </small>
                   </header>
 
                   {gamePlayers.length === 0 ? (
                     <div className="real-data-state empty">
                       <strong>Cap jugador visible en aquest partit</strong>
-                      <span>Assigna jugadors des de JUGADORS I XAPES. No sâ€™utilitza cap plantilla provisional.</span>
+                      <span>Assigna jugadors des de JUGADORS I XAPES. No s’utilitza cap plantilla provisional.</span>
                     </div>
                   ) : (
                   <div className="admin-player-grid">
@@ -9306,7 +9306,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                   ? "TITULAR"
                                   : stats.role === "S"
                                     ? "SUPLENT AMB MINUTS"
-                                    : "SENSE PARTICIPACIÃ“ MARCADA"}
+                                    : "SENSE PARTICIPACIÓ MARCADA"}
                               </small>
                             </div>
                           </div>
@@ -9371,7 +9371,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                 }
                                 aria-label={`Resta un gol a ${player.name}`}
                               >
-                                âˆ’
+                                −
                               </button>
                             </div>
 
@@ -9383,7 +9383,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                 onClick={() =>
                                   applyAdminToolToPlayer(player.id, "assist")
                                 }
-                                ariaLabel={`Suma una assistÃ¨ncia a ${player.name}`}
+                                ariaLabel={`Suma una assistència a ${player.name}`}
                               />
                               <button
                                 type="button"
@@ -9394,9 +9394,9 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                     "assists",
                                   )
                                 }
-                                aria-label={`Resta una assistÃ¨ncia a ${player.name}`}
+                                aria-label={`Resta una assistència a ${player.name}`}
                               >
-                                âˆ’
+                                −
                               </button>
                             </div>
                           </div>
@@ -9409,12 +9409,12 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                 <section className="admin-publish-card">
                   <div className="admin-publish-copy">
-                    <span>FONT OFICIAL ÃšNICA</span>
+                    <span>FONT OFICIAL ÚNICA</span>
                     <strong>
                       Guarda el partit i recalcula totes les puntuacions
                     </strong>
                     <small>
-                      Les Notes, el RÃ nquing i el Perfil llegeixen aquest mateix
+                      Les Notes, el Rànquing i el Perfil llegeixen aquest mateix
                       resultat, els mateixos titulars i els mateixos
                       esdeveniments.
                     </small>
@@ -9470,7 +9470,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   <header>
                     <div>
                       <span>NOU FITXATGE</span>
-                      <strong>Afegeix un jugador al catÃ leg</strong>
+                      <strong>Afegeix un jugador al catàleg</strong>
                     </div>
                   </header>
 
@@ -9488,7 +9488,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                             displayName: event.target.value,
                           })
                         }
-                        placeholder="HÃ¨ctor Fort"
+                        placeholder="Hèctor Fort"
                         maxLength={80}
                         required
                       />
@@ -9506,7 +9506,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   <section className="admin-review-board">
                     <header>
                       <div>
-                        <span>REVISIÃ“ OBLIGATÃ’RIA</span>
+                        <span>REVISIÓ OBLIGATÒRIA</span>
                         <strong>
                           {adminBadgeReviewQueue.length} xapa
                           {adminBadgeReviewQueue.length === 1 ? "" : "es"}
@@ -9529,7 +9529,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                             {adminPreviewUrlsByJobId[job.job_id] ? (
                               <img
                                 src={adminPreviewUrlsByJobId[job.job_id]}
-                                alt={`PrevisualitzaciÃ³ de ${job.display_name}`}
+                                alt={`Previsualització de ${job.display_name}`}
                               />
                             ) : (
                               <span>PREVIEW</span>
@@ -9540,7 +9540,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                             <span>{job.processing_mode}</span>
                             <strong>{job.display_name}</strong>
                             <small>
-                              Estat Â· {job.review_status || "pending"}
+                              Estat · {job.review_status || "pending"}
                             </small>
                           </div>
 
@@ -9576,7 +9576,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 <section className="admin-catalog-board">
                   <header>
                     <div>
-                      <span>CATÃ€LEG GENERAL</span>
+                      <span>CATÀLEG GENERAL</span>
                       <strong>Jugadors, xapes i visibilitat del partit</strong>
                     </div>
 
@@ -9588,17 +9588,17 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     >
                       {adminPlayerCatalogLoading
                         ? "CARREGANT..."
-                        : "â†» ACTUALITZA"}
+                        : "↻ ACTUALITZA"}
                     </button>
                   </header>
 
                   {adminPlayerCatalogLoading ? (
                     <div className="admin-catalog-empty">
-                      Carregant el catÃ leg segurâ€¦
+                      Carregant el catàleg segur…
                     </div>
                   ) : adminPlayerCatalog.length === 0 ? (
                     <div className="admin-catalog-empty">
-                      Encara no hi ha jugadors al catÃ leg. Crea el primer a
+                      Encara no hi ha jugadors al catàleg. Crea el primer a
                       sobre.
                     </div>
                   ) : (
@@ -9746,7 +9746,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                     <small>
                                       Activa XI, protagonista i Les Notes del
                                       partit. En desactivar-lo desapareix de
-                                      totes tres opcions dâ€™aquesta jornada.
+                                      totes tres opcions d’aquesta jornada.
                                     </small>
                                   </span>
                                 </label>
@@ -9864,8 +9864,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     </div>
 
                     <small>
-                      La jornada es calcula automÃ ticament dins de la temporada.
-                      Lâ€™hora escrita sâ€™interpreta sempre
+                      La jornada es calcula automàticament dins de la temporada.
+                      L’hora escrita s’interpreta sempre
                       com a Europe/Madrid.
                     </small>
                   </header>
@@ -9923,7 +9923,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       </div>
 
                       <small style={{ display: "block", marginTop: "8px" }}>
-                        La jornada serÃ  correlativa dins de la temporada triada,
+                        La jornada serà correlativa dins de la temporada triada,
                         sigui Lliga, Copa, Supercopa o Champions.
                       </small>
                     </div>
@@ -9954,13 +9954,13 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         {adminMatchForm.rivalColors.length === 0
           ? "TRIA LLIS O FRANGES"
           : adminMatchForm.rivalPattern === "striped"
-            ? `4 FRANGES Â· ${adminMatchForm.rivalColors.length}/2 COLORS`
+            ? `4 FRANGES · ${adminMatchForm.rivalColors.length}/2 COLORS`
             : adminMatchForm.rivalColors.length === 1
-              ? "LLIS Â· 1 COLOR TRIAT"
-              : "LLIS Â· 2 COLORS TRIATS"}
+              ? "LLIS · 1 COLOR TRIAT"
+              : "LLIS · 2 COLORS TRIATS"}
       </strong>
 
-      <span aria-hidden="true">âŒ„</span>
+      <span aria-hidden="true">⌄</span>
     </summary>
 
     <div
@@ -10057,7 +10057,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       <div
                         className="admin-home-away-toggle"
                         role="group"
-                        aria-label="PosiciÃ³ del BarÃ§a al partit"
+                        aria-label="Posició del Barça al partit"
                       >
                         <button
                           type="button"
@@ -10068,7 +10068,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                             updateAdminMatchForm("barcaSide", "home")
                           }
                         >
-                          BARÃ‡A LOCAL
+                          BARÇA LOCAL
                         </button>
 
                         <button
@@ -10080,7 +10080,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                             updateAdminMatchForm("barcaSide", "away")
                           }
                         >
-                          BARÃ‡A VISITANT
+                          BARÇA VISITANT
                         </button>
                       </div>
                     </div>
@@ -10120,7 +10120,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                             updateAdminMatchForm("pointsMultiplier", 2)
                           }
                         >
-                          ðŸ”¥ PUNTS x2
+                          🔥 PUNTS x2
                         </button>
                       </div>
 
@@ -10140,7 +10140,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       >
                         {adminMatchForm.pointsMultiplier === 2
                           ? "Es doblaran tots els punts positius i negatius."
-                          : "Sâ€™aplicarÃ  la puntuaciÃ³ habitual."}
+                          : "S’aplicarà la puntuació habitual."}
                       </small>
                     </div>
 
@@ -10163,7 +10163,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     </label>
 
                     <div className="admin-upcoming-preview-card">
-  <span>PREVISUALITZACIÃ“</span>
+  <span>PREVISUALITZACIÓ</span>
 
   <strong
     style={{
@@ -10174,14 +10174,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       textAlign: "center",
     }}
   >
-    {getAdminMatchSeasonLabel(adminMatchForm.seasonKey)} Â·{" "}
+    {getAdminMatchSeasonLabel(adminMatchForm.seasonKey)} ·{" "}
     {adminMatchForm.matchId
       ? `JORNADA ${
           adminUpcomingMatches.find(
             (match) => match.matchId === adminMatchForm.matchId,
-          )?.seasonMatchNo || "â€”"
+          )?.seasonMatchNo || "—"
         }`
-      : "JORNADA AUTOMÃ€TICA"}
+      : "JORNADA AUTOMÀTICA"}
   </strong>
 
   <div className="admin-upcoming-preview-match">
@@ -10192,7 +10192,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             teamId="barcelona"
             colors={teamBadgeVisualsById.barcelona.colors}
           />
-          <strong>BarÃ§a</strong>
+          <strong>Barça</strong>
         </div>
 
         <b>VS</b>
@@ -10234,7 +10234,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             teamId="barcelona"
             colors={teamBadgeVisualsById.barcelona.colors}
           />
-          <strong>BarÃ§a</strong>
+          <strong>Barça</strong>
         </div>
       </>
     )}
@@ -10262,7 +10262,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         letterSpacing: "0.08em",
       }}
     >
-      ðŸ”¥ PARTIT DOBLE Â· PUNTS x2
+      🔥 PARTIT DOBLE · PUNTS x2
     </strong>
   )}
 </div>
@@ -10283,7 +10283,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                           disabled={adminMatchSaving}
                           onClick={resetAdminMatchForm}
                         >
-                          CANCELÂ·LA EDICIÃ“
+                          CANCEL·LA EDICIÓ
                         </button>
                       )}
                     </div>
@@ -10303,13 +10303,13 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       disabled={adminMatchesLoading}
                       onClick={() => loadAdminUpcomingMatches()}
                     >
-                      {adminMatchesLoading ? "CARREGANT..." : "â†» ACTUALITZA"}
+                      {adminMatchesLoading ? "CARREGANT..." : "↻ ACTUALITZA"}
                     </button>
                   </header>
 
                   {adminMatchesLoading ? (
                     <div className="admin-catalog-empty">
-                      Carregant el calendari segurâ€¦
+                      Carregant el calendari segur…
                     </div>
                   ) : adminUpcomingMatches.length === 0 ? (
                     <div className="admin-catalog-empty">
@@ -10342,8 +10342,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                               <div className="admin-catalog-player-copy">
                                 <span>
                                   {match.barcaSide === "home"
-                                    ? "BARÃ‡A LOCAL"
-                                    : "BARÃ‡A VISITANT"}
+                                    ? "BARÇA LOCAL"
+                                    : "BARÇA VISITANT"}
                                 </span>
                                 <strong>{match.rivalDisplayName}</strong>
                                 <small>
@@ -10368,11 +10368,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                               <span className="ok">
                                 {match.seasonName ||
                                   getAdminMatchSeasonLabel(match.seasonKey)}
-                                {" Â· JORNADA "}
-                                {match.seasonMatchNo || "â€”"}
+                                {" · JORNADA "}
+                                {match.seasonMatchNo || "—"}
                               </span>
                               <span className="ok">
-                                {match.competitionName || "SENSE COMPETICIÃ“"}
+                                {match.competitionName || "SENSE COMPETICIÓ"}
                               </span>
                               <span className="ok">
                                 {match.venueName || "SEU PENDENT"}
@@ -10396,7 +10396,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                     color: "#f4cf36",
                                   }}
                                 >
-                                  ðŸ”¥ PARTIT DOBLE Â· x2
+                                  🔥 PARTIT DOBLE · x2
                                 </span>
                               )}
                             </div>
@@ -10449,11 +10449,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               <div className="ranking-hero-top">
                                <div>
                   <span className="ranking-kicker">
-                    LA CLASSIFICACIÃ“ DE LA CULERADA
+                    LA CLASSIFICACIÓ DE LA CULERADA
                   </span>
 
                   <div className="notes-title-row">
-                    <h1>RÃ€NQUING</h1>
+                    <h1>RÀNQUING</h1>
 
                     <button
                       type="button"
@@ -10461,11 +10461,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       onClick={() =>
                         toggleInfoSection("ranking")
                       }
-                      aria-label="InformaciÃ³ sobre el rÃ nquing i els desempats"
+                      aria-label="Informació sobre el rànquing i els desempats"
                       aria-expanded={
                         openInfoSection === "ranking"
                       }
-                      title="Com sâ€™ordena la classificaciÃ³?"
+                      title="Com s’ordena la classificació?"
                     >
                       i
                     </button>
@@ -10486,7 +10486,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   <RankingAvatar user={currentRankingUser} size="large" />
 
                   <span className="ranking-current-copy">
-                    <small>LA TEVA POSICIÃ“</small>
+                    <small>LA TEVA POSICIÓ</small>
                     <strong>
                       <span>{currentRankingUser.displayName}</span>
                       <RankingAchievementIcons
@@ -10497,11 +10497,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   </span>
 
                   <span className="ranking-current-stat">
-                    <small>POSICIÃ“</small>
+                    <small>POSICIÓ</small>
                     <strong>
                       {currentRankingPosition > 0
                         ? `#${currentRankingPosition}`
-                        : "â€”"}
+                        : "—"}
                     </strong>
                   </span>
 
@@ -10521,62 +10521,62 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 role="note"
               >
                 <strong className="section-info-title">
-                  CRITERIS DE CLASSIFICACIÃ“ I DESEMPAT
+                  CRITERIS DE CLASSIFICACIÓ I DESEMPAT
                 </strong>
 
                 <div className="section-info-points-list">
                   <div className="section-info-points-row featured">
-                    <span>1. MÃ©s punts totals</span>
+                    <span>1. Més punts totals</span>
                     <strong>1r</strong>
                   </div>
 
                   <div className="section-info-points-row">
-                    <span>2. MÃ©s jornades guanyades</span>
+                    <span>2. Més jornades guanyades</span>
                     <strong>2n</strong>
                   </div>
 
                   <div className="section-info-points-row">
                     <span>
-                      3. MÃ©s medalles desbloquejades
+                      3. Més medalles desbloquejades
                     </span>
                     <strong>3r</strong>
                   </div>
 
                   <div className="section-info-points-row">
-                    <span>4. MÃ©s punts de Resultat</span>
+                    <span>4. Més punts de Resultat</span>
                     <strong>4t</strong>
                   </div>
 
                   <div className="section-info-points-row">
-                    <span>5. MÃ©s punts dâ€™XI</span>
-                    <strong>5Ã¨</strong>
+                    <span>5. Més punts d’XI</span>
+                    <strong>5è</strong>
                   </div>
 
                   <div className="section-info-points-row">
                     <span>
-                      6. MÃ©s punts de Protagonista
+                      6. Més punts de Protagonista
                     </span>
-                    <strong>6Ã¨</strong>
+                    <strong>6è</strong>
                   </div>
 
                   <div className="section-info-points-row">
                     <span>
-                      7. Major participaciÃ³ a la porra
+                      7. Major participació a la porra
                     </span>
-                    <strong>7Ã¨</strong>
+                    <strong>7è</strong>
                   </div>
                 </div>
 
                 <small className="section-info-note">
-                  Els criteris sâ€™apliquen exactament en aquest
-                  ordre i nomÃ©s dins de la temporada activa.
-                  ParticipaciÃ³ significa porres confirmades
-                  vÃ lides. Si una jornada acaba empatada a
-                  punts, nomÃ©s hi ha un guanyador: es desempata
+                  Els criteris s’apliquen exactament en aquest
+                  ordre i només dins de la temporada activa.
+                  Participació significa porres confirmades
+                  vàlides. Si una jornada acaba empatada a
+                  punts, només hi ha un guanyador: es desempata
                   per punts de Resultat, XI, Protagonista, hora
-                  dâ€™enviament i UUID.
-                  DesprÃ©s de sis partits consecutius
-                  sense participar, el compte deixa dâ€™aparÃ¨ixer
+                  d’enviament i UUID.
+                  Després de sis partits consecutius
+                  sense participar, el compte deixa d’aparèixer
                   fins que torna a confirmar una porra.
                 </small>
               </div>
@@ -10585,7 +10585,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             <div
               className="ranking-tabs"
               role="tablist"
-              aria-label="Tipus de rÃ nquing"
+              aria-label="Tipus de rànquing"
             >
               <button
                 type="button"
@@ -10621,20 +10621,20 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   <div>
     <span>
      {rankingTab === "general"
-  ? "CLASSIFICACIÃ“ GENERAL"
+  ? "CLASSIFICACIÓ GENERAL"
   : rankingJornadaNumber
     ? `JORNADA ${rankingJornadaNumber}`
     : "JORNADA"}
     </span>
     {rankingLoading && (
-  <strong>Carregant rÃ nquing real...</strong>
+  <strong>Carregant rànquing real...</strong>
 )}
   </div>
   <small>ES CARREGA DE 20 EN 20</small>
 </header>
               {rankingError && (
                 <div className="real-data-state error" role="alert">
-                  <strong>No sâ€™ha pogut carregar el rÃ nquing</strong>
+                  <strong>No s’ha pogut carregar el rànquing</strong>
                   <span>{rankingError}</span>
                 </div>
               )}
@@ -10643,7 +10643,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 <div className="real-data-state empty">
                   <strong>Encara no hi ha cap jornada puntuada</strong>
                   <span>
-                    El rÃ nquing comenÃ§arÃ  quan Puntuacions publiqui el primer
+                    El rànquing començarà quan Puntuacions publiqui el primer
                     resultat oficial.
                   </span>
                 </div>
@@ -10672,11 +10672,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                         Number.isFinite(movement) && movement !== 0;
                       const medal =
                         position === 1
-                          ? "ðŸ¥‡"
+                          ? "🥇"
                           : position === 2
-                            ? "ðŸ¥ˆ"
+                            ? "🥈"
                             : position === 3
-                              ? "ðŸ¥‰"
+                              ? "🥉"
                               : null;
 
                       return (
@@ -10761,7 +10761,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                   aria-hidden="true"
                                   style={{ fontSize: "12px", lineHeight: 1 }}
                                 >
-                                  {movement > 0 ? "â†‘" : "â†“"}
+                                  {movement > 0 ? "↑" : "↓"}
                                 </span>
 
                                 <span>{Math.abs(movement)}</span>
@@ -10794,7 +10794,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                               {user.hasXIdentity && user.handle && (
                                 <small>
-                                  <span aria-hidden="true">ð•</span>
+                                  <span aria-hidden="true">𝕏</span>
                                   {user.handle}
                                 </small>
                               )}
@@ -10836,14 +10836,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     {rankingHasMore ? (
                       <>
                         <button type="button" onClick={loadMoreRanking}>
-                          CARREGAR 20 MÃ‰S
+                          CARREGAR 20 MÉS
                         </button>
                         <small>
-                          TambÃ© es carreguen automÃ ticament quan baixes.
+                          També es carreguen automàticament quan baixes.
                         </small>
                       </>
                     ) : (
-                      <span>HAS ARRIBAT AL FINAL DEL RÃ€NQUING</span>
+                      <span>HAS ARRIBAT AL FINAL DEL RÀNQUING</span>
                     )}
                   </div>
                 </>
@@ -10858,8 +10858,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               <div className="real-data-state empty profile-real-empty">
                 <strong>Encara no hi ha cap perfil puntuat</strong>
                 <span>
-                  Quan hi hagi dades oficials al rÃ nquing, el perfil apareixerÃ 
-                  aquÃ­.
+                  Quan hi hagi dades oficials al rànquing, el perfil apareixerà
+                  aquí.
                 </span>
               </div>
             ) : (
@@ -10878,7 +10878,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       <span className="profile-kicker">
                         {isOwnAuthenticatedProfile
                           ? "EL TEU PERFIL"
-                          : "PERFIL PÃšBLIC"}
+                          : "PERFIL PÚBLIC"}
                       </span>
                       <h1>{selectedProfileUser.displayName}</h1>
 
@@ -10890,7 +10890,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                           rel="noreferrer"
                           className="profile-x-handle"
                         >
-                          <span aria-hidden="true">ð•</span>
+                          <span aria-hidden="true">𝕏</span>
                           {selectedProfileUser.handle}
                         </a>
                       ) : null}
@@ -10909,7 +10909,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                               setProfileFeedback(null);
                             }}
                           >
-                            <span aria-hidden="true">âœŽ</span>
+                            <span aria-hidden="true">✎</span>
                             CANVIA NOM
                           </button>
 
@@ -10919,7 +10919,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                               profileLoading || profileActionLoading
                             }
                           >
-                            <span aria-hidden="true">â—‰</span>
+                            <span aria-hidden="true">◉</span>
                             CANVIA AVATAR
 
                             <input
@@ -10941,11 +10941,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                                <div className="profile-hero-stats">
                     <div>
-                      <span>POSICIÃ“ GENERAL</span>
+                      <span>POSICIÓ GENERAL</span>
                       <strong>
                         {selectedProfilePosition > 0
                           ? `#${selectedProfilePosition}`
-                          : "â€”"}
+                          : "—"}
                       </strong>
                     </div>
 
@@ -10973,7 +10973,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                         className="profile-action-button back"
                         onClick={() => setActivePage("ranking")}
                       >
-                        â† RÃ€NQUING
+                        ← RÀNQUING
                       </button>
                     </div>
                   )}
@@ -10985,8 +10985,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     onSubmit={handleSaveProfileName}
                   >
                     <div>
-                      <span>EDITA EL TEU NOM PÃšBLIC</span>
-                      <strong>Com vols aparÃ¨ixer a Vesalaporra?</strong>
+                      <span>EDITA EL TEU NOM PÚBLIC</span>
+                      <strong>Com vols aparèixer a Vesalaporra?</strong>
                     </div>
                     <input
                       type="text"
@@ -10997,7 +10997,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                         setProfileDraftName(event.target.value)
                       }
                       autoFocus
-                      aria-label="Nom pÃºblic de Vesalaporra"
+                      aria-label="Nom públic de Vesalaporra"
                     />
                     <div className="profile-name-editor-actions">
                       <button
@@ -11009,7 +11009,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                           setProfileDraftName(profileDisplayName);
                         }}
                       >
-                        CANCELÂ·LA
+                        CANCEL·LA
                       </button>
                       <button
                         type="submit"
@@ -11033,7 +11033,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       onClick={() => setProfileFeedback(null)}
                       aria-label="Tanca el missatge del perfil"
                     >
-                      Ã—
+                      ×
                     </button>
                   </div>
                 )}
@@ -11080,7 +11080,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                 {profileDataError && (
                   <div className="real-data-state error" role="alert">
-                    <strong>No sâ€™ha pogut carregar el perfil complet</strong>
+                    <strong>No s’ha pogut carregar el perfil complet</strong>
                     <span>{profileDataError}</span>
                   </div>
                 )}
@@ -11089,15 +11089,15 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   <div className="profile-overview">
                                         <section className="profile-main-stats">
                       <article>
-                        <span>POSICIÃ“</span>
+                        <span>POSICIÓ</span>
 
                         <strong>
                           {selectedProfilePosition > 0
                             ? `#${selectedProfilePosition}`
-                            : "â€”"}
+                            : "—"}
                         </strong>
 
-                        <small>classificaciÃ³ general</small>
+                        <small>classificació general</small>
                       </article>
 
                       <article className="featured">
@@ -11115,7 +11115,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                         <strong>{profileJornadaWins}</strong>
 
-                        <small>els empatats al mÃ xim tambÃ© compten</small>
+                        <small>els empatats al màxim també compten</small>
                       </article>
 
                       <article>
@@ -11165,25 +11165,25 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                         <div className="profile-records-grid">
                           <article className="profile-record-card gold">
                             <span className="profile-record-ordinal">01</span>
-                            <span className="profile-record-icon">ðŸ†</span>
+                            <span className="profile-record-icon">🏆</span>
                             <strong>
                               {selectedProfileData.bestMatch.totalPoints} PTS
                             </strong>
                             <small>Millor jornada</small>
                             <p>
-                              {selectedProfileData.bestMatch.label} Â· {selectedProfileData.bestMatch.opponent}
+                              {selectedProfileData.bestMatch.label} · {selectedProfileData.bestMatch.opponent}
                             </p>
                           </article>
                           <article className="profile-record-card silver">
                             <span className="profile-record-ordinal">02</span>
-                            <span className="profile-record-icon">ðŸ§ </span>
+                            <span className="profile-record-icon">🧠</span>
                             <strong>{selectedProfileData.bestXi}/11</strong>
                             <small>Millor Lotto Flick</small>
                             <p>Titulars encertats en una jornada real.</p>
                           </article>
                           <article className="profile-record-card bronze">
                             <span className="profile-record-ordinal">03</span>
-                            <span className="profile-record-icon">â­</span>
+                            <span className="profile-record-icon">⭐</span>
                             <strong>
                               {selectedProfileData.bestProtagonistPoints > 0
                                 ? "+"
@@ -11199,8 +11199,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       <div className="real-data-state empty">
                         <strong>Encara no hi ha jornades puntuades.</strong>
                         <span>
-                          El resum i els records apareixeran desprÃ©s de la
-                          primera publicaciÃ³ oficial.
+                          El resum i els records apareixeran després de la
+                          primera publicació oficial.
                         </span>
                       </div>
                     )}
@@ -11213,7 +11213,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   <div>
     <span>MEDALLES</span>
     <strong>
-      {" Â· "}
+      {" · "}
       {selectedProfileData.unlockedAchievements}/
       {selectedProfileData.achievements.length} desbloquejades
     </strong>
@@ -11310,27 +11310,27 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                       : "AMAGAR APOSTA"
                                     : "VEURE APOSTA"}
 
-                                  <span aria-hidden="true">âŒ„</span>
+                                  <span aria-hidden="true">⌄</span>
                                 </button>
                               </div>
 
                               <div className="profile-history-score-v2">
                                 <div>
-                                  <span>PRONÃ’STIC</span>
+                                  <span>PRONÒSTIC</span>
                                   <strong>
-                                    {match.predictedHome}â€“
+                                    {match.predictedHome}–
                                     {match.predictedAway}
                                   </strong>
                                 </div>
 
                                 <span className="profile-history-score-arrow">
-                                  â†’
+                                  →
                                 </span>
 
                                 <div>
                                   <span>OFICIAL</span>
                                   <strong>
-                                    {match.actualHome}â€“{match.actualAway}
+                                    {match.actualHome}–{match.actualAway}
                                   </strong>
                                 </div>
                               </div>
@@ -11386,7 +11386,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                       className="profile-history-bet-state"
                                       role="status"
                                     >
-                                      Carregant lâ€™aposta...
+                                      Carregant l’aposta...
                                     </div>
                                   ) : expandedProfilePrediction.error ? (
                                     <div
@@ -11423,7 +11423,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                               className="profile-history-protagonist-star"
                                               aria-hidden="true"
                                             >
-                                              â­
+                                              ⭐
                                             </span>{" "}
                                             PROTAGONISTA
                                           </span>
@@ -11448,7 +11448,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                                 }
                                               >
                                                 {match.protagonistHit
-                                                  ? "âœ“"
+                                                  ? "✓"
                                                   : "X"}
                                               </span>
                                             )}
@@ -11458,7 +11458,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                                       <section className="profile-history-lineup-detail">
                                         <header>
-                                          <span>ðŸ§  LOTTO FLICK</span>
+                                          <span>🧠 LOTTO FLICK</span>
                                           <strong>
                                             {Math.max(
                                               0,
@@ -11520,7 +11520,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       onClick={handleSignOut}
                       disabled={authActionLoading}
                     >
-                      {authActionLoading ? "TANCANT..." : "TANCA SESSIÃ“"}
+                      {authActionLoading ? "TANCANT..." : "TANCA SESSIÓ"}
                     </button>
                   </div>
                 )}
@@ -11540,17 +11540,17 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             aria-describedby="prediction-confirm-dialog-description"
           >
             <span className="prediction-confirm-dialog-kicker">
-              CONFIRMACIÃ“ DEFINITIVA
+              CONFIRMACIÓ DEFINITIVA
             </span>
 
-            <h2 id="prediction-confirm-dialog-title">Nâ€™ESTÃ€S SEGUR?</h2>
+            <h2 id="prediction-confirm-dialog-title">N’ESTÀS SEGUR?</h2>
 
             <p id="prediction-confirm-dialog-description">
               {confirmationMode === "result-only"
-                ? "El resultat quedarÃ  bloquejat. PodrÃ s tornar abans del tancament per afegir la Lotto Flick i el protagonista."
+                ? "El resultat quedarà bloquejat. Podràs tornar abans del tancament per afegir la Lotto Flick i el protagonista."
                 : resultIsConfirmed
-                  ? "NomÃ©s sâ€™afegiran els apartats nous. Tot el que ja havies enviat continuarÃ  bloquejat."
-                  : "Cada apartat que enviÃ¯s quedarÃ  bloquejat. Els que deixis buits els podrÃ s afegir abans del tancament."}
+                  ? "Només s’afegiran els apartats nous. Tot el que ja havies enviat continuarà bloquejat."
+                  : "Cada apartat que enviïs quedarà bloquejat. Els que deixis buits els podràs afegir abans del tancament."}
             </p>
 
             <div className="prediction-confirm-dialog-summary">
@@ -11559,7 +11559,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               </span>
 
               {confirmationMode === "result-only" ? (
-                <span>LA RESTA QUEDARÃ€ OBERTA</span>
+                <span>LA RESTA QUEDARÀ OBERTA</span>
               ) : (
                 <>
                   <span>
@@ -11591,8 +11591,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 {predictionSubmitting
                   ? "CONFIRMANT..."
                   : confirmationMode === "result-only"
-                    ? "SÃ, ENVIA EL RESULTAT"
-                    : "SÃ, CONFIRMAâ€™L"}
+                    ? "SÍ, ENVIA EL RESULTAT"
+                    : "SÍ, CONFIRMA’L"}
               </button>
 
               <button
@@ -11727,10 +11727,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             <span className="prediction-celebration-kicker">
               {confirmedPrediction.submissionMode === "result-only"
                 ? "RESULTAT ENREGISTRAT"
-                : "PRONÃ’STIC ENREGISTRAT"}
+                : "PRONÒSTIC ENREGISTRAT"}
             </span>
 
-            <strong>VISCA EL BARÃ‡A!</strong>
+            <strong>VISCA EL BARÇA!</strong>
 
             <div className="prediction-celebration-summary">
               <span>
