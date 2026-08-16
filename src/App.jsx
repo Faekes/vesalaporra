@@ -848,6 +848,42 @@ const VESALAPORRA_ADMIN_USER_IDS = String(
   .map((userId) => userId.trim())
   .filter(Boolean);
 
+const normalizeTechnicalAccountKey = (value) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/^@/, "")
+    .replace(/[^a-z0-9]/g, "");
+
+const isVesalaporraTechnicalAccount = (user) => {
+  const userId = String(
+    user?.id ||
+      user?.user_id ||
+      user?.authUserId ||
+      user?.auth_user_id ||
+      "",
+  ).trim();
+
+  const displayNameKey = normalizeTechnicalAccountKey(
+    user?.displayName || user?.display_name,
+  );
+
+  const handleKey = normalizeTechnicalAccountKey(
+    user?.handleSlug ||
+      user?.handle ||
+      user?.x_handle ||
+      user?.username,
+  );
+
+  return Boolean(
+    (userId && VESALAPORRA_ADMIN_USER_IDS.includes(userId)) ||
+      displayNameKey === "vesalaporra" ||
+      handleKey === "vesalaporra",
+  );
+};
+
 const VESALAPORRA_PUBLIC_RANKING_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_RANKING_RPC ||
   "vesalaporra_public_ranking";
@@ -2213,6 +2249,70 @@ const VESALAPORRA_MATCH_SCORING_RULES_TABLE =
 
 const VESALAPORRA_PRESENTATION_TIME_ZONE = "Europe/Madrid";
 
+const getOfficialMatchHandoffTimestamp = (kickoffAt) => {
+  const kickoffDate = new Date(kickoffAt);
+
+  if (Number.isNaN(kickoffDate.getTime())) {
+    return null;
+  }
+
+  const dateTimeFormatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: VESALAPORRA_PRESENTATION_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  });
+
+  const readDateTimeParts = (date) =>
+    Object.fromEntries(
+      dateTimeFormatter
+        .formatToParts(date)
+        .filter((part) => part.type !== "literal")
+        .map((part) => [part.type, Number(part.value)]),
+    );
+
+  const kickoffParts = readDateTimeParts(kickoffDate);
+  const handoffCalendarDate = new Date(
+    Date.UTC(
+      kickoffParts.year,
+      kickoffParts.month - 1,
+      kickoffParts.day + 2,
+      12,
+    ),
+  );
+
+  const targetLocalTimestamp = Date.UTC(
+    handoffCalendarDate.getUTCFullYear(),
+    handoffCalendarDate.getUTCMonth(),
+    handoffCalendarDate.getUTCDate(),
+    18,
+    0,
+    0,
+  );
+
+  let utcTimestamp = targetLocalTimestamp;
+
+  for (let iteration = 0; iteration < 3; iteration += 1) {
+    const actualParts = readDateTimeParts(new Date(utcTimestamp));
+    const actualLocalTimestamp = Date.UTC(
+      actualParts.year,
+      actualParts.month - 1,
+      actualParts.day,
+      actualParts.hour,
+      actualParts.minute,
+      actualParts.second,
+    );
+
+    utcTimestamp += targetLocalTimestamp - actualLocalTimestamp;
+  }
+
+  return utcTimestamp;
+};
+
 const ADMIN_MATCH_COLOR_OPTIONS = [
   { value: "#ffffff", label: "Blanc" },
   { value: "#111111", label: "Negre" },
@@ -3264,7 +3364,12 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
               ? "COMPLETA EL PRONÒSTIC"
               : "CONFIRMA ELS TEUS PRONÒSTICS";
 
-  const authenticatedProfileUser = authUser
+  const authenticatedProfileUser = authUser &&
+    !isVesalaporraTechnicalAccount({
+      id: authUser.id,
+      displayName: profileDisplayName,
+      handleSlug: providerHandleSlug,
+    })
     ? {
         id: String(authUser.id),
         authUserId: String(authUser.id),
@@ -3297,10 +3402,16 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       }
     : null;
 
+  const publicRankingUsers = rankingUsers.filter(
+    (user) => !isVesalaporraTechnicalAccount(user),
+  );
+
   const rankingUsersWithAuth = authenticatedProfileUser &&
-    !rankingUsers.some((user) => user.id === authenticatedProfileUser.id)
-      ? [...rankingUsers, authenticatedProfileUser]
-      : rankingUsers;
+    !publicRankingUsers.some(
+      (user) => user.id === authenticatedProfileUser.id,
+    )
+      ? [...publicRankingUsers, authenticatedProfileUser]
+      : publicRankingUsers;
 
   const getRankingScopePosition = (user, scope) => {
     const rawPosition =
@@ -3827,15 +3938,88 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
         : currentData;
 
       let displayedMatchRow = currentMatchRow;
+      let officialHandoffTimestamp = null;
+
+      try {
+        const { data: latestScoredData, error: latestScoredError } =
+          await supabase.rpc(
+            VESALAPORRA_PUBLIC_LATEST_SCORED_MATCH_RPC,
+          );
+
+        if (latestScoredError) {
+          throw latestScoredError;
+        }
+
+        const latestScoredMatchId = Array.isArray(latestScoredData)
+          ? firstNonEmptyText(
+              latestScoredData[0]?.match_id,
+              latestScoredData[0]?.id,
+              latestScoredData[0],
+            )
+          : firstNonEmptyText(
+              latestScoredData?.match_id,
+              latestScoredData?.id,
+              latestScoredData,
+            );
+
+        if (latestScoredMatchId) {
+          const { data: scoredMatchCardData, error: scoredMatchCardError } =
+            await supabase.rpc(
+              VESALAPORRA_PUBLIC_SCORED_MATCH_CARD_RPC,
+              {
+                p_match_id: latestScoredMatchId,
+              },
+            );
+
+          if (scoredMatchCardError) {
+            throw scoredMatchCardError;
+          }
+
+          const scoredMatchRow =
+            unwrapRpcRows(
+              scoredMatchCardData,
+              ["match", "card", "rows"],
+            )[0] || null;
+
+          const scoredMatchId = firstNonEmptyText(
+            scoredMatchRow?.match_id,
+            latestScoredMatchId,
+          );
+
+          const scoredMatchHandoffTimestamp =
+            getOfficialMatchHandoffTimestamp(
+              scoredMatchRow?.scheduled_kickoff_at,
+            );
+
+          if (
+            scoredMatchId &&
+            scoredMatchHandoffTimestamp &&
+            Date.now() < scoredMatchHandoffTimestamp
+          ) {
+            displayedMatchRow = {
+              ...scoredMatchRow,
+              match_id: scoredMatchId,
+            };
+            officialHandoffTimestamp = scoredMatchHandoffTimestamp;
+          }
+        }
+      } catch (handoffError) {
+        console.warn(
+          "No s’ha pogut comprovar el relleu oficial del partit:",
+          handoffError,
+        );
+      }
+
       let isUpcomingPreview = Boolean(
-        currentMatchRow?.match_id &&
-          !currentMatchRow?.predictions_are_open &&
-          currentMatchRow?.predictions_open_at &&
-          new Date(currentMatchRow.predictions_open_at).getTime() >
+        !officialHandoffTimestamp &&
+          displayedMatchRow?.match_id &&
+          !displayedMatchRow?.predictions_are_open &&
+          displayedMatchRow?.predictions_open_at &&
+          new Date(displayedMatchRow.predictions_open_at).getTime() >
             Date.now(),
       );
 
-      if (!currentMatchRow?.match_id) {
+      if (!displayedMatchRow?.match_id) {
         const { data: nextData, error: nextError } =
           await supabase.rpc(
             VESALAPORRA_PUBLIC_NEXT_MATCH_RPC,
@@ -3873,6 +4057,9 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
           ? null
           : baseMatch.predictionsCloseAt,
         isUpcomingPreview,
+        officialHandoffAt: officialHandoffTimestamp
+          ? new Date(officialHandoffTimestamp).toISOString()
+          : null,
         pointsMultiplier: normalizePointsMultiplier(
           pointsMultipliers[baseMatch.id],
         ),
@@ -10290,9 +10477,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   Els criteris s’apliquen exactament en aquest
                   ordre i només dins de la temporada activa.
                   Participació significa porres confirmades
-                  vàlides. Si una jornada acaba empatada,
-                  tots els co-guanyadors sumen una jornada
-                  guanyada. Després de sis partits consecutius
+                  vàlides. Si una jornada acaba empatada a
+                  punts, només la posició 1 després d’aplicar
+                  aquests desempats suma la jornada guanyada.
+                  Després de sis partits consecutius
                   sense participar, el compte deixa d’aparèixer
                   fins que torna a confirmar una porra.
                 </small>
