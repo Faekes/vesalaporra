@@ -3826,17 +3826,6 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
         ? currentData[0]
         : currentData;
 
-      const currentKickoffTime = currentMatchRow?.scheduled_kickoff_at
-        ? new Date(currentMatchRow.scheduled_kickoff_at).getTime()
-        : null;
-
-      const currentMatchIsPast = Boolean(
-        currentMatchRow?.match_id &&
-          currentKickoffTime &&
-          currentKickoffTime <= Date.now() &&
-          !currentMatchRow?.predictions_are_open,
-      );
-
       let displayedMatchRow = currentMatchRow;
       let isUpcomingPreview = Boolean(
         currentMatchRow?.match_id &&
@@ -3846,7 +3835,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
             Date.now(),
       );
 
-      if (!currentMatchRow?.match_id || currentMatchIsPast) {
+      if (!currentMatchRow?.match_id) {
         const { data: nextData, error: nextError } =
           await supabase.rpc(
             VESALAPORRA_PUBLIC_NEXT_MATCH_RPC,
