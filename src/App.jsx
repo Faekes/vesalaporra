@@ -2338,69 +2338,6 @@ const VESALAPORRA_MATCH_SCORING_RULES_TABLE =
 
 const VESALAPORRA_PRESENTATION_TIME_ZONE = "Europe/Madrid";
 
-const getOfficialMatchHandoffTimestamp = (kickoffAt) => {
-  const kickoffDate = new Date(kickoffAt);
-
-  if (Number.isNaN(kickoffDate.getTime())) {
-    return null;
-  }
-
-  const dateTimeFormatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone: VESALAPORRA_PRESENTATION_TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hourCycle: "h23",
-  });
-
-  const readDateTimeParts = (date) =>
-    Object.fromEntries(
-      dateTimeFormatter
-        .formatToParts(date)
-        .filter((part) => part.type !== "literal")
-        .map((part) => [part.type, Number(part.value)]),
-    );
-
-  const kickoffParts = readDateTimeParts(kickoffDate);
-  const handoffCalendarDate = new Date(
-    Date.UTC(
-      kickoffParts.year,
-      kickoffParts.month - 1,
-      kickoffParts.day + 2,
-      12,
-    ),
-  );
-
-  const targetLocalTimestamp = Date.UTC(
-    handoffCalendarDate.getUTCFullYear(),
-    handoffCalendarDate.getUTCMonth(),
-    handoffCalendarDate.getUTCDate(),
-    18,
-    0,
-    0,
-  );
-
-  let utcTimestamp = targetLocalTimestamp;
-
-  for (let iteration = 0; iteration < 3; iteration += 1) {
-    const actualParts = readDateTimeParts(new Date(utcTimestamp));
-    const actualLocalTimestamp = Date.UTC(
-      actualParts.year,
-      actualParts.month - 1,
-      actualParts.day,
-      actualParts.hour,
-      actualParts.minute,
-      actualParts.second,
-    );
-
-    utcTimestamp += targetLocalTimestamp - actualLocalTimestamp;
-  }
-
-  return utcTimestamp;
-};
 
 const ADMIN_MATCH_COLOR_OPTIONS = [
   { value: "#ffffff", label: "Blanc" },
@@ -3925,6 +3862,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       await Promise.all([
         loadRealNotes({ quiet: true }),
         loadRealRanking({ quiet: true }),
+        refreshPublicCurrentMatch({ quiet: true }),
       ]);
     } catch (error) {
       setOfficialMatchFeedback({
@@ -4044,7 +3982,8 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
         : currentData;
 
       let displayedMatchRow = currentMatchRow;
-      let officialHandoffTimestamp = null;
+      let officialHandoffAt = null;
+      let isHoldingScoredMatch = false;
 
       try {
         const { data: latestScoredData, error: latestScoredError } =
@@ -4069,13 +4008,24 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
             );
 
         if (latestScoredMatchId) {
-          const { data: scoredMatchCardData, error: scoredMatchCardError } =
-            await supabase.rpc(
+          const [
+            { data: scoredMatchCardData, error: scoredMatchCardError },
+            ratingsStatePayload,
+          ] = await Promise.all([
+            supabase.rpc(
               VESALAPORRA_PUBLIC_SCORED_MATCH_CARD_RPC,
               {
                 p_match_id: latestScoredMatchId,
               },
-            );
+            ),
+            callRpcWithPayloadFallbacks(
+              VESALAPORRA_PUBLIC_MATCH_RATINGS_STATE_RPC,
+              [
+                { p_match_id: latestScoredMatchId },
+                { match_id: latestScoredMatchId },
+              ],
+            ),
+          ]);
 
           if (scoredMatchCardError) {
             throw scoredMatchCardError;
@@ -4087,37 +4037,58 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
               ["match", "card", "rows"],
             )[0] || null;
 
+          const ratingsStateRow =
+            unwrapRpcRows(
+              ratingsStatePayload,
+              ["state", "match", "rows"],
+            )[0] || {};
+
           const scoredMatchId = firstNonEmptyText(
             scoredMatchRow?.match_id,
             latestScoredMatchId,
           );
 
-          const scoredMatchHandoffTimestamp =
-            getOfficialMatchHandoffTimestamp(
-              scoredMatchRow?.scheduled_kickoff_at,
-            );
+          const ratingsStatus = firstNonEmptyText(
+            ratingsStateRow?.ratings_status,
+            scoredMatchRow?.ratings_status,
+          ).toLowerCase();
 
-          if (
-            scoredMatchId &&
-            scoredMatchHandoffTimestamp &&
-            Date.now() < scoredMatchHandoffTimestamp
-          ) {
+          const ratingsCloseAt = firstNonEmptyText(
+            ratingsStateRow?.ratings_close_at,
+            scoredMatchRow?.ratings_close_at,
+          );
+
+          const ratingsCloseTimestamp = ratingsCloseAt
+            ? new Date(ratingsCloseAt).getTime()
+            : Number.NaN;
+
+          const ratingsAreClosed =
+            ratingsStatus === "closed" ||
+            (Number.isFinite(ratingsCloseTimestamp) &&
+              Date.now() >= ratingsCloseTimestamp);
+
+          if (scoredMatchId && !ratingsAreClosed) {
             displayedMatchRow = {
               ...scoredMatchRow,
+              ...ratingsStateRow,
               match_id: scoredMatchId,
+              ratings_close_at: ratingsCloseAt || null,
+              ratings_status: ratingsStatus || null,
             };
-            officialHandoffTimestamp = scoredMatchHandoffTimestamp;
+
+            officialHandoffAt = ratingsCloseAt || null;
+            isHoldingScoredMatch = true;
           }
         }
       } catch (handoffError) {
         console.warn(
-          "No s’ha pogut comprovar el relleu oficial del partit:",
+          "No s’ha pogut comprovar el relleu oficial segons Les Notes:",
           handoffError,
         );
       }
 
       let isUpcomingPreview = Boolean(
-        !officialHandoffTimestamp &&
+        !isHoldingScoredMatch &&
           displayedMatchRow?.match_id &&
           !displayedMatchRow?.predictions_are_open &&
           displayedMatchRow?.predictions_open_at &&
@@ -4163,9 +4134,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
           ? null
           : baseMatch.predictionsCloseAt,
         isUpcomingPreview,
-        officialHandoffAt: officialHandoffTimestamp
-          ? new Date(officialHandoffTimestamp).toISOString()
-          : null,
+        officialHandoffAt,
         pointsMultiplier: normalizePointsMultiplier(
           pointsMultipliers[baseMatch.id],
         ),
@@ -7040,6 +7009,48 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   }, [
     isWaitingForOpening,
     matchData.predictionsOpenAt,
+  ]);
+
+  useEffect(() => {
+    const handoffAt =
+      matchData.officialHandoffAt ||
+      matchData.ratingsCloseAt ||
+      null;
+
+    if (
+      !matchData.hasOfficialResult ||
+      !handoffAt
+    ) {
+      return undefined;
+    }
+
+    const handoffTimestamp = new Date(handoffAt).getTime();
+
+    if (!Number.isFinite(handoffTimestamp)) {
+      return undefined;
+    }
+
+    const delayUntilHandoff = Math.max(
+      0,
+      handoffTimestamp - Date.now() + 1000,
+    );
+
+    const handoffTimeout = window.setTimeout(() => {
+      refreshPublicCurrentMatch({ quiet: true }).catch((error) => {
+        console.warn(
+          "No s’ha pogut fer el relleu automàtic després del tancament de Les Notes:",
+          error,
+        );
+      });
+    }, delayUntilHandoff);
+
+    return () =>
+      window.clearTimeout(handoffTimeout);
+  }, [
+    matchData.id,
+    matchData.hasOfficialResult,
+    matchData.officialHandoffAt,
+    matchData.ratingsCloseAt,
   ]);
 
   useEffect(() => {
