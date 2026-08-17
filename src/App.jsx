@@ -7632,6 +7632,87 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     top: 16px;
     font-size: 10px;
   }
+}
+
+/* DESKTOP · capçalera en 3 blocs + accessos equilibrats */
+@media (min-width: 981px) {
+  .app-header {
+    display: grid;
+    grid-template-columns:
+      minmax(190px, 1fr)
+      auto
+      minmax(190px, 1fr);
+    align-items: center;
+  }
+
+  .app-header > .brand {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .app-header > .header-actions {
+    display: contents;
+  }
+
+  .app-header .main-nav {
+    position: relative;
+    grid-column: 2;
+    justify-self: center;
+    justify-content: center;
+  }
+
+  .app-header .auth-area {
+    grid-column: 3;
+    justify-self: end;
+  }
+
+  .app-header .main-nav .nav-button.admin {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 8px);
+    transform: translateY(-50%);
+  }
+
+  .app-header .main-nav .nav-button.admin:active {
+    transform: translateY(-50%) scale(0.97);
+  }
+
+  .auth-provider-button.x > span,
+  .auth-provider-button .auth-google-mark,
+  .auth-provider-button .auth-disqus-mark {
+    display: grid !important;
+    place-items: center !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    flex: 0 0 20px !important;
+  }
+
+  .auth-provider-button.x > span {
+    font-size: 20px;
+    line-height: 1;
+    transform: none;
+  }
+
+  .auth-provider-button .auth-google-mark {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .auth-provider-button .auth-google-mark svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+  }
+
+  .auth-provider-button .auth-disqus-mark {
+    font-size: 11px !important;
+    line-height: 1 !important;
+  }
 }     @media (max-width: 680px) {
           .app-shell .player-tray .player-badges {
             display: grid;
