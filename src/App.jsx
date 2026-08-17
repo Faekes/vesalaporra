@@ -7609,6 +7609,60 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             transform: translateY(0);
           }
         }
+
+/* INFO CLICABLE · una mica més visible sense embrutar el disseny */
+.section-info-button {
+  width: 30px !important;
+  height: 30px !important;
+  flex: 0 0 30px !important;
+  border-color: rgba(255, 222, 99, 0.54) !important;
+  background: rgba(255, 211, 54, 0.105) !important;
+  color: #ffe36a !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 211, 54, 0.08),
+    0 0 10px rgba(255, 211, 54, 0.08);
+  animation: section-info-attention-pulse 900ms ease-out 350ms 2;
+}
+
+.section-info-button:hover {
+  transform: translateY(-1px) scale(1.06);
+  box-shadow:
+    0 0 0 1px rgba(255, 211, 54, 0.14),
+    0 0 15px rgba(255, 211, 54, 0.18);
+}
+
+@keyframes section-info-attention-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 211, 54, 0.08),
+      0 0 10px rgba(255, 211, 54, 0.08);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 4px rgba(255, 211, 54, 0.13),
+      0 0 18px rgba(255, 211, 54, 0.26);
+  }
+}
+
+@media (max-width: 760px) {
+  .section-info-button {
+    width: 28px !important;
+    height: 28px !important;
+    flex-basis: 28px !important;
+    font-size: 14px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-info-button {
+    animation: none;
+  }
+}
+
 .app-shell .scoreboard {
   position: relative;
 }
@@ -10694,64 +10748,113 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 role="note"
               >
                 <strong className="section-info-title">
-                  CRITERIS DE CLASSIFICACIÓ I DESEMPAT
+                  {rankingTab === "general"
+                    ? "CRITERIS DE CLASSIFICACIÓ GENERAL I DESEMPAT"
+                    : "CRITERIS DE LA JORNADA I DESEMPAT"}
                 </strong>
 
-                <div className="section-info-points-list">
-                  <div className="section-info-points-row featured">
-                    <span>1. Més punts totals</span>
-                    <strong>1r</strong>
-                  </div>
+                {rankingTab === "general" ? (
+                  <>
+                    <div className="section-info-points-list">
+                      <div className="section-info-points-row featured">
+                        <span>1. Més punts totals</span>
+                        <strong>1r</strong>
+                      </div>
 
-                  <div className="section-info-points-row">
-                    <span>2. Més jornades guanyades</span>
-                    <strong>2n</strong>
-                  </div>
+                      <div className="section-info-points-row">
+                        <span>2. Més jornades guanyades</span>
+                        <strong>2n</strong>
+                      </div>
 
-                  <div className="section-info-points-row">
-                    <span>
-                      3. Més medalles desbloquejades
-                    </span>
-                    <strong>3r</strong>
-                  </div>
+                      <div className="section-info-points-row">
+                        <span>
+                          3. Més medalles desbloquejades
+                        </span>
+                        <strong>3r</strong>
+                      </div>
 
-                  <div className="section-info-points-row">
-                    <span>4. Més punts de Resultat</span>
-                    <strong>4t</strong>
-                  </div>
+                      <div className="section-info-points-row">
+                        <span>4. Més punts de Resultat</span>
+                        <strong>4t</strong>
+                      </div>
 
-                  <div className="section-info-points-row">
-                    <span>5. Més punts d’XI</span>
-                    <strong>5è</strong>
-                  </div>
+                      <div className="section-info-points-row">
+                        <span>5. Més punts d’XI</span>
+                        <strong>5è</strong>
+                      </div>
 
-                  <div className="section-info-points-row">
-                    <span>
-                      6. Més punts de Protagonista
-                    </span>
-                    <strong>6è</strong>
-                  </div>
+                      <div className="section-info-points-row">
+                        <span>
+                          6. Més punts de Protagonista
+                        </span>
+                        <strong>6è</strong>
+                      </div>
 
-                  <div className="section-info-points-row">
-                    <span>
-                      7. Major participació a la porra
-                    </span>
-                    <strong>7è</strong>
-                  </div>
-                </div>
+                      <div className="section-info-points-row">
+                        <span>
+                          7. Major participació a la porra
+                        </span>
+                        <strong>7è</strong>
+                      </div>
+                    </div>
 
-                <small className="section-info-note">
-                  Els criteris s’apliquen exactament en aquest
-                  ordre i només dins de la temporada activa.
-                  Participació significa porres confirmades
-                  vàlides. Si una jornada acaba empatada a
-                  punts, només hi ha un guanyador: es desempata
-                  per punts de Resultat, XI, Protagonista, hora
-                  d’enviament i UUID.
-                  Després de sis partits consecutius
-                  sense participar, el compte deixa d’aparèixer
-                  fins que torna a confirmar una porra.
-                </small>
+                    <small className="section-info-note">
+                      Els criteris s’apliquen exactament en aquest
+                      ordre i només dins de la temporada activa.
+                      Participació significa porres confirmades
+                      vàlides. Després de sis partits consecutius
+                      sense participar, el compte deixa d’aparèixer
+                      fins que torna a confirmar una porra.
+                    </small>
+                  </>
+                ) : (
+                  <>
+                    <div className="section-info-points-list">
+                      <div className="section-info-points-row featured">
+                        <span>1. Més punts totals de la jornada</span>
+                        <strong>1r</strong>
+                      </div>
+
+                      <div className="section-info-points-row">
+                        <span>2. Més punts de Resultat</span>
+                        <strong>2n</strong>
+                      </div>
+
+                      <div className="section-info-points-row">
+                        <span>3. Més punts d’XI</span>
+                        <strong>3r</strong>
+                      </div>
+
+                      <div className="section-info-points-row">
+                        <span>
+                          4. Més punts de Protagonista
+                        </span>
+                        <strong>4t</strong>
+                      </div>
+
+                      <div className="section-info-points-row">
+                        <span>5. Aposta enviada abans</span>
+                        <strong>5è</strong>
+                      </div>
+
+                      <div className="section-info-points-row">
+                        <span>
+                          6. UUID com a últim desempat tècnic
+                        </span>
+                        <strong>6è</strong>
+                      </div>
+                    </div>
+
+                    <small className="section-info-note">
+                      A la jornada només hi ha un guanyador.
+                      Si dos o més culers acaben amb els mateixos
+                      punts, el desempat segueix exactament aquest
+                      ordre: Resultat, XI, Protagonista, hora
+                      d’enviament i, només si encara persistís
+                      l’empat, UUID.
+                    </small>
+                  </>
+                )}
               </div>
             )}
 
