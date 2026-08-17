@@ -7636,8 +7636,60 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
           }
 
           .profile-history-bet-detail {
-            grid-template-columns: 1fr;
-          }
+  grid-template-columns: 1fr;
+}
+
+/* PERFIL > HISTORIAL · enquadrat correcte en mobile */
+.profile-history-row-v2 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.profile-history-row-v2 > * {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.profile-history-match-v2,
+.profile-history-score-v2,
+.profile-history-bet-detail {
+  grid-column: 1 / -1;
+}
+
+.profile-history-score-v2 {
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.profile-history-score-v2 > div {
+  min-width: 0;
+}
+
+.profile-history-points-v2 {
+  grid-column: 1 / span 3;
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.profile-history-points-v2 > div {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.profile-history-total-v2 {
+  grid-column: 4;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
         }
 
         @media (max-width: 430px) {
