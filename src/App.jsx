@@ -875,6 +875,29 @@ function GoogleMark({ className = "" }) {
   );
 }
 
+function DisqusMark({ className = "" }) {
+  return (
+    <span
+      className={className}
+      aria-hidden="true"
+      style={{
+        display: "grid",
+        placeItems: "center",
+        width: "18px",
+        height: "18px",
+        borderRadius: "50%",
+        background: "#2e9fff",
+        color: "#ffffff",
+        fontSize: "11px",
+        fontWeight: 950,
+        lineHeight: 1,
+      }}
+    >
+      D
+    </span>
+  );
+}
+
 
 const RATING_SCALE = [
   { stars: 1, value: 0, label: "Pèssim" },
@@ -3491,12 +3514,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     (user) => !isVesalaporraTechnicalAccount(user),
   );
 
-  const rankingUsersWithAuth = authenticatedProfileUser &&
-    !publicRankingUsers.some(
-      (user) => user.id === authenticatedProfileUser.id,
-    )
-      ? [...publicRankingUsers, authenticatedProfileUser]
-      : publicRankingUsers;
+  const rankingUsersWithAuth = publicRankingUsers;
 
   const getRankingScopePosition = (user, scope) => {
     const rawPosition =
@@ -3530,6 +3548,9 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
 
   const selectedProfileUser =
     rankingUsersWithAuth.find((user) => user.id === selectedProfileUserId) ||
+    (authenticatedProfileUser?.id === selectedProfileUserId
+      ? authenticatedProfileUser
+      : null) ||
     currentRankingUser ||
     null;
 
@@ -5404,7 +5425,12 @@ const saveAdminMatchPlayer = async (player, patch) => {
         window.sessionStorage.removeItem(X_AUTO_LOGIN_STORAGE_KEY);
       }
 
-      const providerLabel = provider === "x" ? "X" : "Google";
+      const providerLabel =
+        provider === "x"
+          ? "X"
+          : provider === "custom:disqus"
+            ? "Disqus"
+            : "Google";
 
       setAuthError(
         error?.message ||
@@ -5417,6 +5443,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
   const handleGoogleSignIn = () => handleOAuthSignIn("google");
 
   const handleXSignIn = () => handleOAuthSignIn("x");
+
+  const handleDisqusSignIn = () =>
+    handleOAuthSignIn("custom:disqus");
 
   const persistProfile = async ({ displayName, avatarUrl, avatarPath }) => {
     if (!authUser) {
@@ -6665,7 +6694,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       if (oauthError) {
         window.sessionStorage.removeItem(X_AUTO_LOGIN_STORAGE_KEY);
         setAuthError(
-          "L’enllaç d’accés ha caducat. Torna a entrar amb Google o X.",
+          "L’enllaç d’accés ha caducat. Torna a entrar amb X, Google o Disqus.",
         );
         cleanAuthUrl();
         return;
@@ -7821,6 +7850,17 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   title="Entra amb Google"
                 >
                   <GoogleMark className="auth-google-mark" />
+                </button>
+
+                <button
+                  type="button"
+                  className="auth-provider-button disqus"
+                  disabled={authLoading || authActionLoading}
+                  onClick={handleDisqusSignIn}
+                  aria-label="Entra amb Disqus"
+                  title="Entra amb Disqus"
+                >
+                  <DisqusMark className="auth-disqus-mark" />
                 </button>
               </div>
             )}
