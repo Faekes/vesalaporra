@@ -10754,10 +10754,16 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             </header>
 
             {openInfoSection === "ranking" && (
-              <div
-                className="section-info-panel"
-                role="note"
-              >
+  <div
+    className="section-info-panel"
+    role="note"
+    style={{
+      width: "calc(100% - 56px)",
+      maxWidth: "none",
+      margin: "0 auto 18px",
+      boxSizing: "border-box",
+    }}
+  >
                 <strong className="section-info-title">
                   {rankingTab === "general"
                     ? "CRITERIS DE CLASSIFICACIÓ GENERAL I DESEMPAT"
