@@ -11536,7 +11536,15 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                             <AchievementIconGraphic achievement={achievement} />
                           </span>
                           <div>
-                            <strong>{achievement.title}</strong>
+                            <strong
+                              style={{
+                                fontSize: "1rem",
+                                lineHeight: 1.5,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              {achievement.title}
+                            </strong>
                             <p
                               style={{
                                 fontSize: "1rem",
