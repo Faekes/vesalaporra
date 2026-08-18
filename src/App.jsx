@@ -1523,7 +1523,7 @@ const ACHIEVEMENT_CATALOG = [
     id: "kamikaze",
     icon: "kamikaze-plane",
     title: "Kamikaze",
-    description: "Completa una de les gestes especials del joc.",
+    description: "Encertar un 0-0 o el resultat exacte d’una derrota.",
   },
    {
     id: "preseason_champion_2026",
@@ -11537,7 +11537,17 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                           </span>
                           <div>
                             <strong>{achievement.title}</strong>
-                            <p>{achievement.description}</p>
+                            <p
+                              style={{
+                                fontSize: "1rem",
+                                lineHeight: 1.5,
+                                fontWeight: 600,
+                                color: "#e2e8f0",
+                                opacity: 1,
+                              }}
+                            >
+                              {achievement.description}
+                            </p>
                             {achievement.progress && (
                               <small>{achievement.progress}</small>
                             )}
