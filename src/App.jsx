@@ -12,7 +12,7 @@ const PROTAGONIST_GROUP_OPTIONS = [
     key: "special",
     label: "YAMAL SPECIAL",
     hitPoints: 5,
-    missPoints: -10,
+    missPoints: -5,
     sortOrder: 0,
     excludesProtagonist: false,
   },
@@ -20,7 +20,7 @@ const PROTAGONIST_GROUP_OPTIONS = [
     key: "a",
     label: "GRUP A",
     hitPoints: 10,
-    missPoints: -10,
+    missPoints: -5,
     sortOrder: 100,
     excludesProtagonist: false,
   },
@@ -8225,11 +8225,21 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                       <strong>+10</strong>
                     </div>
+
+                    <div className="section-info-points-row">
+                      <span>Encertar els gols totals del partit</span>
+
+                      <strong>+5</strong>
+                    </div>
                   </div>
 
                   <small className="section-info-note">
-                    Si encertes el marcador exacte, obtens +50 i no se sumen els
-                    parcials. Si no, pots combinar els punts parcials.
+                    El marcador exacte val +50 i no suma parcials. Si no és
+                    exacte, el signe (+10) es pot acumular amb els gols del
+                    Barça (+15), amb els gols del rival (+10) o amb els gols
+                    totals del partit (+5). Mai se sumen signe + gols del
+                    Barça + gols del rival: si encertes els dos marcadors és
+                    resultat exacte i són +50.
                   </small>
                 </div>
               )}
@@ -8483,22 +8493,22 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                     <div className="section-info-points-row">
                       <span>10/11 encerts</span>
-                      <strong>+25</strong>
+                      <strong>+30</strong>
                     </div>
 
                     <div className="section-info-points-row">
                       <span>9/11 encerts</span>
-                      <strong>+10</strong>
+                      <strong>+20</strong>
                     </div>
 
                     <div className="section-info-points-row">
                       <span>8/11 encerts</span>
-                      <strong>+5</strong>
+                      <strong>+10</strong>
                     </div>
 
-                    <div className="section-info-points-row neutral">
+                    <div className="section-info-points-row">
                       <span>7/11 encerts</span>
-                      <strong>0</strong>
+                      <strong>+5</strong>
                     </div>
 
                     <div className="section-info-points-row negative">
