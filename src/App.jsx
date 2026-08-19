@@ -1511,7 +1511,7 @@ const ACHIEVEMENT_CATALOG = [
     id: "candidat",
     icon: "🚴",
     title: "Candidat",
-    description: "Mantén-te al Top 10 tres jornades seguides.",
+    description: "Mantén-te al Top 5 de la classificació general durant 4 jornades consecutives.",
   },
   {
     id: "xop-xop-salinas",
