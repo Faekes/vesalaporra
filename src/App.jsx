@@ -2353,6 +2353,8 @@ const VESALAPORRA_MATCH_SCORING_RULES_TABLE =
 
 const VESALAPORRA_PRESENTATION_TIME_ZONE = "Europe/Madrid";
 
+const VESALAPORRA_LIVE_SYNC_INTERVAL_MS = 15000;
+
 
 const ADMIN_MATCH_COLOR_OPTIONS = [
   { value: "#ffffff", label: "Blanc" },
@@ -6019,11 +6021,18 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       setSelectedProfileUserId(String(authUser.id));
     }
   } catch (error) {
-    setRankingUsers([]);
-    setRankingJornadaNumber(null);
-    setRankingError(
-      error?.message || "No s’ha pogut carregar el rànquing real.",
-    );
+    if (quiet) {
+      console.warn(
+        "No s’ha pogut actualitzar el rànquing en segon pla:",
+        error,
+      );
+    } else {
+      setRankingUsers([]);
+      setRankingJornadaNumber(null);
+      setRankingError(
+        error?.message || "No s’ha pogut carregar el rànquing real.",
+      );
+    }
   } finally {
     if (!quiet) {
       setRankingLoading(false);
@@ -6313,13 +6322,20 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       setNotesRatingsByPlayerId(restoredRatings);
 
     } catch (error) {
-      setNotesRows([]);
-      setSeasonNotesRows([]);
-      setNotesMatchData(matchData);
-      setNotesError(
-        error?.message ||
-          "No s’han pogut carregar Les Notes reals.",
-      );
+      if (quiet) {
+        console.warn(
+          "No s’han pogut actualitzar Les Notes en segon pla:",
+          error,
+        );
+      } else {
+        setNotesRows([]);
+        setSeasonNotesRows([]);
+        setNotesMatchData(matchData);
+        setNotesError(
+          error?.message ||
+            "No s’han pogut carregar Les Notes reals.",
+        );
+      }
     } finally {
       if (!quiet) {
         setNotesLoading(false);
@@ -6345,7 +6361,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     }
   };
 
-     const loadRealProfileData = async (userId) => {
+     const loadRealProfileData = async (
+    userId,
+    { quiet = false } = {},
+  ) => {
     if (!userId) {
       setProfileHistory([]);
       setProfileJornadaWins(0);
@@ -6361,9 +6380,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       return;
     }
 
-    setProfileDataLoading(true);
+    if (!quiet) {
+      setProfileDataLoading(true);
+    }
     setProfileDataError("");
-    setProfileJornadaWins(0);
+
+    if (!quiet) {
+      setProfileJornadaWins(0);
+    }
 
     try {
       const [
@@ -6436,15 +6460,24 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
           .slice(0, 100),
       );
     } catch (error) {
-      setProfileHistory([]);
-      setProfileJornadaWins(0);
+      if (quiet) {
+        console.warn(
+          "No s’ha pogut actualitzar el perfil en segon pla:",
+          error,
+        );
+      } else {
+        setProfileHistory([]);
+        setProfileJornadaWins(0);
 
-      setProfileDataError(
-        error?.message ||
-          "No s’ha pogut carregar el perfil real.",
-      );
+        setProfileDataError(
+          error?.message ||
+            "No s’ha pogut carregar el perfil real.",
+        );
+      }
     } finally {
-      setProfileDataLoading(false);
+      if (!quiet) {
+        setProfileDataLoading(false);
+      }
     }
   };
 
@@ -6628,6 +6661,109 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       isCurrent = false;
     };
   }, []);
+
+  /*
+   * Sincronització competitiva silenciosa:
+   * - detecta una puntuació feta en un altre navegador;
+   * - manté portada, rànquing i perfil al dia sense recarregar la web;
+   * - refresca immediatament en tornar a la pestanya;
+   * - evita peticions superposades.
+   */
+  useEffect(() => {
+    let isCancelled = false;
+    let refreshInFlight = false;
+
+    const refreshVisibleCompetitiveState = async () => {
+      if (
+        isCancelled ||
+        refreshInFlight ||
+        document.visibilityState === "hidden"
+      ) {
+        return;
+      }
+
+      refreshInFlight = true;
+
+      try {
+        await refreshPublicCurrentMatch({ quiet: true });
+
+        if (
+          activePage === "ranking" ||
+          activePage === "profile" ||
+          activePage === "scoring"
+        ) {
+          await loadRealRanking({ quiet: true });
+        }
+
+        if (
+          activePage === "notes" &&
+          !ratingSavingPlayerId
+        ) {
+          await loadRealNotes({
+            quiet: true,
+            refreshOrder: false,
+          });
+        }
+
+        if (
+          activePage === "profile" &&
+          selectedProfileUser?.id
+        ) {
+          await loadRealProfileData(
+            selectedProfileUser.id,
+            { quiet: true },
+          );
+        }
+      } catch (error) {
+        console.warn(
+          "No s’ha pogut sincronitzar l’estat competitiu en segon pla:",
+          error,
+        );
+      } finally {
+        refreshInFlight = false;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refreshVisibleCompetitiveState();
+      }
+    };
+
+    const handleWindowFocus = () => {
+      refreshVisibleCompetitiveState();
+    };
+
+    const liveSyncInterval = window.setInterval(
+      refreshVisibleCompetitiveState,
+      VESALAPORRA_LIVE_SYNC_INTERVAL_MS,
+    );
+
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibilityChange,
+    );
+
+    window.addEventListener("focus", handleWindowFocus);
+
+    return () => {
+      isCancelled = true;
+
+      window.clearInterval(liveSyncInterval);
+
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange,
+      );
+
+      window.removeEventListener("focus", handleWindowFocus);
+    };
+  }, [
+    activePage,
+    authUser?.id,
+    ratingSavingPlayerId,
+    selectedProfileUser?.id,
+  ]);
 
   useEffect(() => {
     if (!matchData.id) {
