@@ -1482,6 +1482,21 @@ const normalizeNotesRow = (row, playersById) => {
   };
 };
 
+const compareMatchNotesRows = (firstRow, secondRow) => {
+  const firstRowHasVotes = firstRow.voteCount > 0;
+  const secondRowHasVotes = secondRow.voteCount > 0;
+
+  if (firstRowHasVotes !== secondRowHasVotes) {
+    return firstRowHasVotes ? -1 : 1;
+  }
+
+  return (
+    secondRow.average - firstRow.average ||
+    secondRow.voteCount - firstRow.voteCount ||
+    firstRow.player.name.localeCompare(secondRow.player.name, "ca")
+  );
+};
+
 const ACHIEVEMENT_CATALOG = [
   {
     id: "flick-reader",
@@ -3034,6 +3049,11 @@ function App() {
   const [notesError, setNotesError] = useState("");
   const [notesSubmissionClosed, setNotesSubmissionClosed] = useState(false);
   const [ratingSavingPlayerId, setRatingSavingPlayerId] = useState(null);
+  const [notesMatchOrder, setNotesMatchOrder] = useState({
+    matchId: "",
+    playerIds: [],
+  });
+  const [notesRankingRefreshing, setNotesRankingRefreshing] = useState(false);
 
 const [rankingUsers, setRankingUsers] = useState([]);
 const [rankingLoading, setRankingLoading] = useState(false);
@@ -3532,28 +3552,34 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     authUser && selectedProfileUser?.id === String(authUser.id),
   );
 
-    const notesMatchRows = notesRows
+    const notesMatchLiveRows = notesRows
     .filter((row) => row.player.eligibleForRatings !== false)
     .map((row) => ({
       ...row,
       ownStars: notesRatingsByPlayerId[row.player.id] ?? row.ownStars,
       displayStars:
         notesRatingsByPlayerId[row.player.id] ?? row.displayStars,
-    }))
-    .sort((firstRow, secondRow) => {
-      const firstRowHasVotes = firstRow.voteCount > 0;
-      const secondRowHasVotes = secondRow.voteCount > 0;
+    }));
 
-      if (firstRowHasVotes !== secondRowHasVotes) {
-        return firstRowHasVotes ? -1 : 1;
-      }
+  const notesMatchOrderByPlayerId = new Map(
+    notesMatchOrder.playerIds.map((playerId, index) => [playerId, index]),
+  );
+
+  const notesMatchRows = [...notesMatchLiveRows].sort(
+    (firstRow, secondRow) => {
+      const firstPosition = notesMatchOrderByPlayerId.has(firstRow.player.id)
+        ? notesMatchOrderByPlayerId.get(firstRow.player.id)
+        : Number.MAX_SAFE_INTEGER;
+      const secondPosition = notesMatchOrderByPlayerId.has(secondRow.player.id)
+        ? notesMatchOrderByPlayerId.get(secondRow.player.id)
+        : Number.MAX_SAFE_INTEGER;
 
       return (
-        secondRow.average - firstRow.average ||
-        secondRow.voteCount - firstRow.voteCount ||
-        firstRow.player.name.localeCompare(secondRow.player.name, "ca")
+        firstPosition - secondPosition ||
+        compareMatchNotesRows(firstRow, secondRow)
       );
-    });
+    },
+  );
 
   const notesSeasonRows = [...seasonNotesRows]
     .filter((row) => row.player.eligibleForRatings !== false)
@@ -6005,7 +6031,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   }
 };
 
-   const loadRealNotes = async ({ quiet = false, matchId = null } = {}) => {
+   const loadRealNotes = async ({
+    quiet = false,
+    matchId = null,
+    refreshOrder = false,
+  } = {}) => {
     if (!quiet) {
       setNotesLoading(true);
     }
@@ -6042,6 +6072,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         setSeasonNotesRows([]);
         setNotesMatchData(null);
         setNotesSubmissionClosed(false);
+        setNotesMatchOrder({ matchId: "", playerIds: [] });
         return;
       }
      const [
@@ -6251,6 +6282,24 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       setNotesSubmissionClosed(
         normalizedMatch.ratingsStatus === "closed",
       );
+      setNotesMatchOrder((currentOrder) => {
+        const shouldKeepCurrentOrder =
+          !refreshOrder &&
+          currentOrder.matchId === normalizedMatch.id &&
+          currentOrder.playerIds.length > 0;
+
+        if (shouldKeepCurrentOrder) {
+          return currentOrder;
+        }
+
+        return {
+          matchId: normalizedMatch.id,
+          playerIds: [...normalizedRows]
+            .filter((row) => row.player.eligibleForRatings !== false)
+            .sort(compareMatchNotesRows)
+            .map((row) => row.player.id),
+        };
+      });
 
       const restoredRatings = Object.fromEntries(
         normalizedRows
@@ -6275,6 +6324,24 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       if (!quiet) {
         setNotesLoading(false);
       }
+    }
+  };
+
+  const handleRefreshNotesRanking = async () => {
+    if (notesLoading || notesRankingRefreshing || ratingSavingPlayerId) {
+      return;
+    }
+
+    setNotesRankingRefreshing(true);
+
+    try {
+      await loadRealNotes({
+        quiet: true,
+        matchId: notesMatchData?.id || null,
+        refreshOrder: true,
+      });
+    } finally {
+      setNotesRankingRefreshing(false);
     }
   };
 
@@ -7109,7 +7176,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
     useEffect(() => {
     if (activePage === "notes") {
-      loadRealNotes();
+      loadRealNotes({ refreshOrder: true });
     }
   }, [activePage, matchData.id, publicMatchPlayers.length]);
 
@@ -7674,6 +7741,116 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   }
 }
 
+/* LES NOTES · actualització manual del rànquing sense moure jugadors mentre es vota */
+.notes-board-heading .notes-board-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.notes-board-heading .notes-board-actions > small {
+  color: rgba(166, 178, 215, 0.78);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.notes-ranking-refresh-button {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border: 1px solid rgba(247, 207, 74, 0.38);
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(247, 207, 74, 0.13), rgba(247, 207, 74, 0.045)),
+    rgba(7, 11, 28, 0.72);
+  color: #f7d654;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 8px 20px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.notes-ranking-refresh-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(247, 207, 74, 0.68);
+  background:
+    linear-gradient(135deg, rgba(247, 207, 74, 0.2), rgba(247, 207, 74, 0.07)),
+    rgba(7, 11, 28, 0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 10px 24px rgba(0, 0, 0, 0.28),
+    0 0 18px rgba(247, 207, 74, 0.08);
+}
+
+.notes-ranking-refresh-button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.notes-ranking-refresh-button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.notes-ranking-refresh-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border: 1px solid rgba(247, 207, 74, 0.34);
+  border-radius: 50%;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.notes-ranking-refresh-button.refreshing .notes-ranking-refresh-icon {
+  animation: notes-ranking-refresh-spin 700ms linear infinite;
+}
+
+@keyframes notes-ranking-refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 680px) {
+  .notes-board-heading .notes-board-actions {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .notes-ranking-refresh-button {
+    min-height: 31px;
+    padding: 6px 10px;
+    font-size: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notes-ranking-refresh-button,
+  .notes-ranking-refresh-button.refreshing .notes-ranking-refresh-icon {
+    animation: none;
+    transition: none;
+  }
+}
+
 .app-shell .scoreboard {
   position: relative;
 }
@@ -7908,16 +8085,6 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             <button
               type="button"
               className={
-                activePage === "notes" ? "nav-button active" : "nav-button"
-              }
-              onClick={() => setActivePage("notes")}
-            >
-              LES NOTES
-            </button>
-
-            <button
-              type="button"
-              className={
                 activePage === "ranking" ? "nav-button active" : "nav-button"
               }
               onClick={() => setActivePage("ranking")}
@@ -7937,6 +8104,16 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               }}
             >
               PERFIL
+            </button>
+
+            <button
+              type="button"
+              className={
+                activePage === "notes" ? "nav-button active" : "nav-button"
+              }
+              onClick={() => setActivePage("notes")}
+            >
+              LES NOTES
             </button>
 
             {isAdmin && (
@@ -9271,7 +9448,41 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   </strong>
                 </div>
 
-                <small>MITJANA SOBRE 10</small>
+                <div className="notes-board-actions">
+                  <small>MITJANA SOBRE 10</small>
+
+                  {notesTab === "match" && visibleNotesRows.length > 0 && (
+                    <button
+                      type="button"
+                      className={
+                        notesRankingRefreshing
+                          ? "notes-ranking-refresh-button refreshing"
+                          : "notes-ranking-refresh-button"
+                      }
+                      disabled={
+                        notesLoading ||
+                        notesRankingRefreshing ||
+                        Boolean(ratingSavingPlayerId)
+                      }
+                      onClick={handleRefreshNotesRanking}
+                      aria-label="Actualitza l’ordre del rànquing de Les Notes"
+                      title="Reordena els jugadors amb les valoracions més recents"
+                    >
+                      <span
+                        className="notes-ranking-refresh-icon"
+                        aria-hidden="true"
+                      >
+                        ↻
+                      </span>
+
+                      <span>
+                        {notesRankingRefreshing
+                          ? "ACTUALITZANT..."
+                          : "ACTUALITZA RÀNQUING"}
+                      </span>
+                    </button>
+                  )}
+                </div>
               </header>
 
               {notesError && (
