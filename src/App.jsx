@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLauncher";
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
+import instructionsHtml from "./content/instruccions.html?raw";
 import "./App.css";
 
 // FONT REAL: la plantilla pública no viu al codi.
@@ -653,6 +654,13 @@ const getVesalaporraRouteState = (
     selectedProfileUserId: null,
   };
 
+  if (section === "com-jugar" || section === "instruccions") {
+    return {
+      ...defaultRouteState,
+      activePage: "instructions",
+    };
+  }
+
   if (section === "notes") {
     return {
       ...defaultRouteState,
@@ -717,6 +725,10 @@ const getVesalaporraPath = ({
   adminScoringTab,
   selectedProfileUserId,
 }) => {
+  if (activePage === "instructions") {
+    return "/com-jugar";
+  }
+
   if (activePage === "notes") {
     return notesTab === "season"
       ? "/notes/temporada"
@@ -763,6 +775,16 @@ const PROFILE_NAME_MIN_LENGTH = 2;
 const PROFILE_NAME_MAX_LENGTH = 32;
 
 const RANKING_PAGE_SIZE = 20;
+
+const PRESEASON_2026_ENDED_AT = Date.parse(
+  "2026-08-19T20:07:10.543578+00:00",
+);
+
+const getRankingSignupTimestamp = (user) => {
+  const timestamp = Date.parse(String(user?.createdAt || ""));
+
+  return Number.isFinite(timestamp) ? timestamp : null;
+};
 
 const getRankingInitials = (name) =>
   String(name || "VP")
@@ -1261,6 +1283,12 @@ const normalizeRankingUser = (row, scope, currentUserId, fallbackIndex = 0) => {
     identityProvider: firstNonEmptyText(row?.identity_provider, row?.provider),
     identityLabel: handleSlug ? "X" : "VESALAPORRA",
     joinedYear: toFiniteNumber(row?.joined_year) || null,
+    createdAt:
+      firstNonEmptyText(
+        row?.created_at,
+        row?.profile_created_at,
+        row?.joined_at,
+      ) || null,
     isCurrentUser: Boolean(currentUserId && userId === String(currentUserId)),
         position:
       toFiniteNumber(
@@ -1368,6 +1396,11 @@ const mergeRankingScopes = (generalRows, jornadaRows) => {
       generalMovement:
         previous.generalMovement ??
         user.generalMovement ??
+        null,
+
+      createdAt:
+        previous.createdAt ||
+        user.createdAt ||
         null,
 
       isCurrentUser:
@@ -3451,6 +3484,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
         identityProvider: authProvider || "vesalaporra",
         identityLabel: authIsX ? "X" : "VESALAPORRA",
         joinedYear: profileJoinedYear,
+        createdAt: authUser.created_at || null,
         isCurrentUser: true,
         position: 0,
         general: {
@@ -3489,14 +3523,46 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       : Number.MAX_SAFE_INTEGER;
   };
 
-  const rankingRows = [...rankingUsersWithAuth].sort(
-    (firstUser, secondUser) =>
-      getRankingScopePosition(firstUser, rankingTab) -
-        getRankingScopePosition(secondUser, rankingTab) ||
+  const generalRankingHasOfficialPoints = rankingUsersWithAuth.some(
+    (user) => Number(user?.general?.totalPoints || 0) !== 0,
+  );
+
+  const compareRankingUsers = (firstUser, secondUser, scope) => {
+    if (scope === "general" && !generalRankingHasOfficialPoints) {
+      const firstSignupAt = getRankingSignupTimestamp(firstUser);
+      const secondSignupAt = getRankingSignupTimestamp(secondUser);
+      const firstIsNew =
+        firstSignupAt !== null &&
+        firstSignupAt > PRESEASON_2026_ENDED_AT;
+      const secondIsNew =
+        secondSignupAt !== null &&
+        secondSignupAt > PRESEASON_2026_ENDED_AT;
+
+      if (firstIsNew !== secondIsNew) {
+        return firstIsNew ? 1 : -1;
+      }
+
+      if (firstIsNew && secondIsNew) {
+        return (
+          firstSignupAt - secondSignupAt ||
+          String(firstUser.id).localeCompare(String(secondUser.id))
+        );
+      }
+    }
+
+    return (
+      getRankingScopePosition(firstUser, scope) -
+        getRankingScopePosition(secondUser, scope) ||
       firstUser.displayName.localeCompare(
         secondUser.displayName,
         "ca",
-      ),
+      )
+    );
+  };
+
+  const rankingRows = [...rankingUsersWithAuth].sort(
+    (firstUser, secondUser) =>
+      compareRankingUsers(firstUser, secondUser, rankingTab),
   );
   const visibleRankingRows = rankingRows.slice(0, visibleRankingCount);
   const rankingHasMore = visibleRankingCount < rankingRows.length;
@@ -3515,22 +3581,12 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
 
     const generalRankingRows = [...rankingUsersWithAuth].sort(
     (firstUser, secondUser) =>
-      getRankingScopePosition(firstUser, "general") -
-        getRankingScopePosition(secondUser, "general") ||
-      firstUser.displayName.localeCompare(
-        secondUser.displayName,
-        "ca",
-      ),
+      compareRankingUsers(firstUser, secondUser, "general"),
   );
 
   const jornadaRankingRows = [...rankingUsersWithAuth].sort(
     (firstUser, secondUser) =>
-      getRankingScopePosition(firstUser, "jornada") -
-        getRankingScopePosition(secondUser, "jornada") ||
-      firstUser.displayName.localeCompare(
-        secondUser.displayName,
-        "ca",
-      ),
+      compareRankingUsers(firstUser, secondUser, "jornada"),
   );
 
   const selectedProfilePosition = selectedProfileUser
@@ -5967,6 +6023,36 @@ const fetchRankingScope = async (scope) => {
     .filter(Boolean);
 };
 
+const fetchRankingProfileCreatedAtMap = async (userIds) => {
+  const safeUserIds = [
+    ...new Set((userIds || []).map(String).filter(Boolean)),
+  ];
+
+  if (safeUserIds.length === 0) {
+    return {};
+  }
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, created_at")
+    .in("id", safeUserIds);
+
+  if (error) {
+    console.warn(
+      "No s’han pogut carregar les dates d’alta del rànquing:",
+      error,
+    );
+
+    return {};
+  }
+
+  return Object.fromEntries(
+    (data || [])
+      .filter((row) => row?.id)
+      .map((row) => [String(row.id), row.created_at || null]),
+  );
+};
+
 const fetchLatestScoredJornadaNumber = async () => {
   const { data: payload, error } = await supabase.rpc(
     VESALAPORRA_PUBLIC_LATEST_SCORED_JORNADA_NUMBER_RPC,
@@ -6014,7 +6100,20 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       jornadaRows,
     );
 
-    setRankingUsers(mergedRows);
+    const profileCreatedAtById =
+      await fetchRankingProfileCreatedAtMap(
+        mergedRows.map((user) => user.id),
+      );
+
+    const mergedRowsWithSignupDates = mergedRows.map((user) => ({
+      ...user,
+      createdAt:
+        profileCreatedAtById[user.id] ||
+        user.createdAt ||
+        null,
+    }));
+
+    setRankingUsers(mergedRowsWithSignupDates);
     setRankingJornadaNumber(jornadaNumber);
 
     if (!selectedProfileUserId && authUser?.id) {
@@ -8091,7 +8190,48 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     font-size: 11px !important;
     line-height: 1 !important;
   }
-}     @media (max-width: 680px) {
+}
+
+.nav-help-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.nav-help-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.instructions-page {
+  width: min(calc(100% - 24px), 1240px);
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 44px) 0 100px;
+}
+
+@media (max-width: 520px) {
+  .nav-help-button {
+    width: 32px;
+    height: 32px;
+    padding: 0 !important;
+  }
+
+  .nav-help-label {
+    display: none;
+  }
+}
+
+     @media (max-width: 680px) {
           .app-shell .player-tray .player-badges {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -8252,6 +8392,23 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               LES NOTES
             </button>
 
+            <button
+              type="button"
+              className={
+                activePage === "instructions"
+                  ? "nav-button nav-help-button active"
+                  : "nav-button nav-help-button"
+              }
+              onClick={() => setActivePage("instructions")}
+              aria-label="Com jugar: instruccions de Vesalaporra"
+              title="Com jugar"
+            >
+              <span className="nav-help-icon" aria-hidden="true">
+                ?
+              </span>
+              <span className="nav-help-label">COM JUGAR</span>
+            </button>
+
             {isAdmin && (
               <button
                 type="button"
@@ -8346,6 +8503,17 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       )}
 
       <main className="app-main">
+        {activePage === "instructions" && (
+          <section
+            className="instructions-page"
+            aria-label="Com jugar a Vesalaporra"
+          >
+            <div
+              dangerouslySetInnerHTML={{ __html: instructionsHtml }}
+            />
+          </section>
+        )}
+
         {activePage === "play" && (
           <section
             className={[
@@ -11434,7 +11602,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                                 <RankingAchievementIcons
                                   achievements={getRankingAchievements(user)}
-                                  className="ranking-desktop-medals"
+                                  className="ranking-row-medals"
                                 />
 
                                 {user.isCurrentUser && (
@@ -11449,10 +11617,6 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                 </small>
                               )}
 
-                              <RankingAchievementIcons
-                                achievements={getRankingAchievements(user)}
-                                className="ranking-mobile-medals"
-                              />
                             </span>
                           </button>
 
