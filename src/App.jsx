@@ -6,6 +6,108 @@ import instructionsHtml from "./content/instruccions.html?raw";
 import "./App.css";
 import "./VesalaporraLeagues_PRO_V2.css";
 
+const buildVesalaporraInstructionsHtml = (sourceHtml) => {
+  let html = String(sourceHtml || "");
+
+  // Portada: mantenim els dos botons existents però centrats.
+  const centeredHeroActionsStyle = `
+    <style>
+      .instructions-page .vlp-actions {
+        justify-content: center !important;
+        width: 100% !important;
+      }
+    </style>
+  `;
+
+  if (!html.includes("vlp-actions-centered-by-vesalaporra")) {
+    html =
+      centeredHeroActionsStyle.replace(
+        "<style>",
+        '<style id="vlp-actions-centered-by-vesalaporra">',
+      ) + html;
+  }
+
+  // La frase de portada també posa al dia les funcions actuals.
+  html = html.replace(
+    "Resultat, Lotto Flick, protagonista, rànquing, medalles i notes:",
+    "Resultat, Lotto Flick, protagonista, rànquing, lligues privades, medalles i notes:",
+  );
+
+  // Índex: afegim Lligues sense alterar la resta.
+  if (!html.includes('href="#lligues"')) {
+    html = html.replace(
+      /(<a href="#ranquing">Rànquing<\/a>)(\s*)(<a href="#perfil">Perfil<\/a>)/,
+      `$1$2<a href="#lligues">Lligues</a>$2$3`,
+    );
+  }
+
+  // Secció nova: entra entre Rànquing i Perfil.
+  if (!html.includes('id="lligues"')) {
+    const privateLeaguesSection = `
+      <section class="vlp-section" id="lligues">
+        <div class="vlp-section-head">
+          <span class="vlp-number">05</span>
+          <div>
+            <h2>Lligues privades: la mateixa porra, la vostra guerra</h2>
+            <p>Vols picar-te només amb els amics, la família, la penya o el grup de WhatsApp? Ves a <strong>Perfil → Lligues</strong> i crea la vostra classificació privada.</p>
+          </div>
+        </div>
+
+        <div class="vlp-grid-3">
+          <div class="vlp-card">
+            <span class="vlp-mini-label">Zero feina extra</span>
+            <h3>Una sola porra</h3>
+            <p class="vlp-muted">La porra es continua fent sempre des de <strong>LA PORRA</strong>. No existeix una aposta diferent per cada lliga.</p>
+          </div>
+
+          <div class="vlp-card">
+            <span class="vlp-mini-label">Munta la colla</span>
+            <h3>Crea o entra amb codi</h3>
+            <p class="vlp-muted">El creador posa el nom de la lliga i comparteix un codi o un enllaç. Els altres només l’han d’obrir o introduir el codi.</p>
+          </div>
+
+          <div class="vlp-card">
+            <span class="vlp-mini-label">Doble batalla</span>
+            <h3>General i Jornada</h3>
+            <p class="vlp-muted">Cada lliga té classificació <strong>GENERAL</strong> i de <strong>JORNADA</strong>, igual que el rànquing públic, però només amb els membres del vostre grup.</p>
+          </div>
+        </div>
+
+        <div class="vlp-callout">
+          <p><strong>Els punts no es dupliquen ni canvien.</strong> El mateix resultat, Lotto Flick i protagonista que envies a Vesalaporra compten al rànquing general, al de jornada i a totes les lligues privades on participis. El creador és el <strong>capità</strong> de la lliga, apareix amb el braçalet de la senyera i pot gestionar-ne els membres.</p>
+        </div>
+      </section>
+`;
+
+    html = html.replace(
+      /(\s*<section class="vlp-section" id="perfil">)/,
+      `${privateLeaguesSection}$1`,
+    );
+  }
+
+  // En afegir la secció 05, Perfil i Les Notes passen a 06 i 07.
+  html = html.replace(
+    /(<section class="vlp-section" id="perfil">[\s\S]*?<span class="vlp-number">)05(<\/span>)/,
+    "$106$2",
+  );
+
+  html = html.replace(
+    /(<section class="vlp-section" id="notes">[\s\S]*?<span class="vlp-number">)06(<\/span>)/,
+    "$107$2",
+  );
+
+  // El text del Perfil també explica on viuen les lligues.
+  html = html.replace(
+    "Pots entrar al teu perfil des del menú. Per tafanejar el d’un altre porrero, clica directament el seu avatar.",
+    "Pots entrar al teu perfil des del menú. Allà també trobaràs les teves lligues privades. Per tafanejar el perfil d’un altre porrero, clica directament el seu avatar.",
+  );
+
+  return html;
+};
+
+const enhancedInstructionsHtml =
+  buildVesalaporraInstructionsHtml(instructionsHtml);
+
 // FONT REAL: la plantilla pública no viu al codi.
 // Tots els jugadors visibles venen del roster real del partit.
 
@@ -9422,7 +9524,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             aria-label="Com jugar a Vesalaporra"
           >
             <div
-              dangerouslySetInnerHTML={{ __html: instructionsHtml }}
+              dangerouslySetInnerHTML={{ __html: enhancedInstructionsHtml }}
             />
           </section>
         )}
