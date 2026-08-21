@@ -4,6 +4,7 @@ import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLau
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
 import instructionsHtml from "./content/instruccions.html?raw";
 import "./App.css";
+import "./VesalaporraLeagues.css";
 
 // FONT REAL: la plantilla pública no viu al codi.
 // Tots els jugadors visibles venen del roster real del partit.
@@ -611,12 +612,14 @@ const VESALAPORRA_PROFILE_TAB_BY_PATH = {
   resum: "overview",
   medalles: "achievements",
   historial: "history",
+  lligues: "leagues",
 };
 
 const VESALAPORRA_PROFILE_PATH_BY_TAB = {
   overview: "resum",
   achievements: "medalles",
   history: "historial",
+  leagues: "lligues",
 };
 
 const decodeRouteSegment = (value) => {
@@ -773,6 +776,109 @@ const PROFILE_AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 
 const PROFILE_NAME_MIN_LENGTH = 2;
 const PROFILE_NAME_MAX_LENGTH = 32;
+
+const VESALAPORRA_PRIVATE_LEAGUES_RPC = {
+  list: "vesalaporra_my_private_leagues",
+  create: "vesalaporra_create_private_league",
+  join: "vesalaporra_join_private_league",
+  members: "vesalaporra_private_league_members",
+  leave: "vesalaporra_leave_private_league",
+  removeMember: "vesalaporra_remove_private_league_member",
+  deleteLeague: "vesalaporra_delete_private_league",
+};
+
+const PRIVATE_LEAGUE_NAME_MIN_LENGTH = 3;
+const PRIVATE_LEAGUE_NAME_MAX_LENGTH = 40;
+
+const normalizePrivateLeagueCode = (value) =>
+  String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "")
+    .replace(/_/g, "-")
+    .slice(0, 16);
+
+const normalizePrivateLeague = (row) => {
+  const leagueId = firstNonEmptyText(
+    row?.league_id,
+    row?.id,
+  );
+
+  if (!leagueId) {
+    return null;
+  }
+
+  return {
+    id: leagueId,
+    name: firstNonEmptyText(
+      row?.league_name,
+      row?.name,
+      "Lliga privada",
+    ),
+    inviteCode: normalizePrivateLeagueCode(
+      row?.invite_code,
+    ),
+    ownerUserId: firstNonEmptyText(
+      row?.owner_user_id,
+    ),
+    memberRole: firstNonEmptyText(
+      row?.member_role,
+      row?.role,
+      "member",
+    ).toLowerCase(),
+    memberCount: toFiniteNumber(
+      row?.member_count,
+      row?.members_count,
+      1,
+    ),
+    createdAt:
+      firstNonEmptyText(
+        row?.created_at,
+      ) || null,
+  };
+};
+
+const normalizePrivateLeagueMember = (row) => {
+  const userId = firstNonEmptyText(
+    row?.user_id,
+    row?.profile_id,
+    row?.id,
+  );
+
+  if (!userId) {
+    return null;
+  }
+
+  return {
+    userId,
+    displayName: firstNonEmptyText(
+      row?.display_name,
+      row?.public_name,
+      row?.name,
+      "Culer",
+    ),
+    avatarUrl:
+      firstNonEmptyText(
+        row?.avatar_url,
+        row?.profile_avatar_url,
+      ) || null,
+    xHandle: firstNonEmptyText(
+      row?.x_handle,
+      row?.twitter_handle,
+      row?.handle,
+    ).replace(/^@/, ""),
+    role: firstNonEmptyText(
+      row?.member_role,
+      row?.role,
+      "member",
+    ).toLowerCase(),
+    joinedAt:
+      firstNonEmptyText(
+        row?.joined_at,
+        row?.created_at,
+      ) || null,
+  };
+};
 
 const RANKING_PAGE_SIZE = 20;
 
@@ -3117,6 +3223,30 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
   const [profileDataLoading, setProfileDataLoading] = useState(false);
   const [profileDataError, setProfileDataError] = useState("");
 
+  const [privateLeagues, setPrivateLeagues] = useState([]);
+  const [privateLeaguesLoading, setPrivateLeaguesLoading] = useState(false);
+  const [privateLeaguesError, setPrivateLeaguesError] = useState("");
+  const [privateLeagueActionLoading, setPrivateLeagueActionLoading] =
+    useState(false);
+  const [privateLeagueFeedback, setPrivateLeagueFeedback] =
+    useState(null);
+  const [privateLeagueCreateOpen, setPrivateLeagueCreateOpen] =
+    useState(false);
+  const [privateLeagueJoinOpen, setPrivateLeagueJoinOpen] =
+    useState(false);
+  const [privateLeagueInfoOpen, setPrivateLeagueInfoOpen] =
+    useState(false);
+  const [privateLeagueDraftName, setPrivateLeagueDraftName] =
+    useState("");
+  const [privateLeagueJoinCode, setPrivateLeagueJoinCode] =
+    useState("");
+  const [selectedPrivateLeagueId, setSelectedPrivateLeagueId] =
+    useState(null);
+  const [privateLeagueMembers, setPrivateLeagueMembers] =
+    useState([]);
+  const [privateLeagueMembersLoading, setPrivateLeagueMembersLoading] =
+    useState(false);
+
   const [officialMatchState, setOfficialMatchState] = useState(() =>
     createEmptyOfficialMatchState(null),
   );
@@ -3653,6 +3783,75 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
   const isOwnAuthenticatedProfile = Boolean(
     authUser && selectedProfileUser?.id === String(authUser.id),
   );
+
+  const selectedPrivateLeague =
+    privateLeagues.find(
+      (league) => league.id === selectedPrivateLeagueId,
+    ) || null;
+
+  const selectedPrivateLeagueRankingRows = privateLeagueMembers
+    .map((member) => {
+      const rankingUser = rankingUsersWithAuth.find(
+        (user) => user.id === member.userId,
+      );
+
+      if (rankingUser) {
+        return {
+          ...rankingUser,
+          privateLeagueRole: member.role,
+        };
+      }
+
+      return {
+        id: member.userId,
+        authUserId: member.userId,
+        displayName: member.displayName,
+        handle: member.xHandle ? `@${member.xHandle}` : "",
+        handleSlug: member.xHandle,
+        twitterAvatarUrl: member.avatarUrl,
+        twitterUrl: member.xHandle
+          ? `https://x.com/${member.xHandle}`
+          : null,
+        hasXIdentity: Boolean(member.xHandle),
+        isCurrentUser: Boolean(
+          authUser?.id &&
+            String(authUser.id) === member.userId,
+        ),
+        generalPosition: null,
+        generalPreviousPosition: null,
+        generalMovement: null,
+        general: {
+          resultPoints: 0,
+          xiPoints: 0,
+          protagonistPoints: 0,
+          totalPoints: 0,
+        },
+        jornada: {
+          resultPoints: 0,
+          xiPoints: 0,
+          protagonistPoints: 0,
+          totalPoints: 0,
+        },
+        achievementIds: [],
+        privateLeagueRole: member.role,
+      };
+    })
+    .sort((firstUser, secondUser) =>
+      compareRankingUsers(firstUser, secondUser, "general"),
+    );
+
+  const getPrivateLeaguePosition = (leagueId) => {
+    if (leagueId !== selectedPrivateLeagueId) {
+      return null;
+    }
+
+    const position =
+      selectedPrivateLeagueRankingRows.findIndex(
+        (user) => user.isCurrentUser,
+      ) + 1;
+
+    return position > 0 ? position : null;
+  };
 
     const notesMatchLiveRows = notesRows
     .filter((row) => row.player.eligibleForRatings !== false)
@@ -6666,6 +6865,541 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     }
   };
 
+  const loadPrivateLeagues = async ({
+    quiet = false,
+  } = {}) => {
+    if (!authUser) {
+      setPrivateLeagues([]);
+      setSelectedPrivateLeagueId(null);
+      setPrivateLeagueMembers([]);
+      setPrivateLeaguesError("");
+      return;
+    }
+
+    if (!quiet) {
+      setPrivateLeaguesLoading(true);
+    }
+
+    setPrivateLeaguesError("");
+
+    try {
+      const { data, error } = await supabase.rpc(
+        VESALAPORRA_PRIVATE_LEAGUES_RPC.list,
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const leagues = unwrapRpcRows(
+        data,
+        ["leagues", "rows", "items"],
+      )
+        .map(normalizePrivateLeague)
+        .filter(Boolean)
+        .sort((firstLeague, secondLeague) =>
+          firstLeague.name.localeCompare(
+            secondLeague.name,
+            "ca",
+          ),
+        );
+
+      setPrivateLeagues(leagues);
+
+      setSelectedPrivateLeagueId((currentLeagueId) => {
+        if (
+          currentLeagueId &&
+          leagues.some(
+            (league) => league.id === currentLeagueId,
+          )
+        ) {
+          return currentLeagueId;
+        }
+
+        return leagues[0]?.id || null;
+      });
+    } catch (error) {
+      if (quiet) {
+        console.warn(
+          "No s’han pogut actualitzar les lligues privades:",
+          error,
+        );
+      } else {
+        setPrivateLeagues([]);
+        setSelectedPrivateLeagueId(null);
+        setPrivateLeagueMembers([]);
+        setPrivateLeaguesError(
+          error?.message ||
+            "No s’han pogut carregar les teves lligues.",
+        );
+      }
+    } finally {
+      if (!quiet) {
+        setPrivateLeaguesLoading(false);
+      }
+    }
+  };
+
+  const loadPrivateLeagueMembers = async (
+    leagueId,
+    { quiet = false } = {},
+  ) => {
+    if (!authUser || !leagueId) {
+      setPrivateLeagueMembers([]);
+      return;
+    }
+
+    if (!quiet) {
+      setPrivateLeagueMembersLoading(true);
+    }
+
+    try {
+      const { data, error } = await supabase.rpc(
+        VESALAPORRA_PRIVATE_LEAGUES_RPC.members,
+        {
+          p_league_id: leagueId,
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const members = unwrapRpcRows(
+        data,
+        ["members", "rows", "items"],
+      )
+        .map(normalizePrivateLeagueMember)
+        .filter(Boolean);
+
+      setPrivateLeagueMembers(members);
+    } catch (error) {
+      if (quiet) {
+        console.warn(
+          "No s’han pogut actualitzar els membres de la lliga:",
+          error,
+        );
+      } else {
+        setPrivateLeagueMembers([]);
+        setPrivateLeagueFeedback({
+          type: "error",
+          message:
+            error?.message ||
+            "No s’ha pogut carregar la classificació de la lliga.",
+        });
+      }
+    } finally {
+      if (!quiet) {
+        setPrivateLeagueMembersLoading(false);
+      }
+    }
+  };
+
+  const handleCreatePrivateLeague = async (event) => {
+    event?.preventDefault();
+
+    if (!authUser || privateLeagueActionLoading) {
+      return;
+    }
+
+    const leagueName = privateLeagueDraftName
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (
+      leagueName.length < PRIVATE_LEAGUE_NAME_MIN_LENGTH ||
+      leagueName.length > PRIVATE_LEAGUE_NAME_MAX_LENGTH
+    ) {
+      setPrivateLeagueFeedback({
+        type: "error",
+        message: `El nom ha de tenir entre ${PRIVATE_LEAGUE_NAME_MIN_LENGTH} i ${PRIVATE_LEAGUE_NAME_MAX_LENGTH} caràcters.`,
+      });
+      return;
+    }
+
+    setPrivateLeagueActionLoading(true);
+    setPrivateLeagueFeedback(null);
+
+    try {
+      const { data, error } = await supabase.rpc(
+        VESALAPORRA_PRIVATE_LEAGUES_RPC.create,
+        {
+          p_name: leagueName,
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const createdLeague =
+        unwrapRpcRows(
+          data,
+          ["league", "rows", "items"],
+        )
+          .map(normalizePrivateLeague)
+          .filter(Boolean)[0] || null;
+
+      setPrivateLeagueDraftName("");
+      setPrivateLeagueCreateOpen(false);
+
+      await loadPrivateLeagues({ quiet: true });
+
+      if (createdLeague?.id) {
+        setSelectedPrivateLeagueId(createdLeague.id);
+        await loadPrivateLeagueMembers(createdLeague.id);
+      }
+
+      setPrivateLeagueFeedback({
+        type: "success",
+        message: createdLeague?.inviteCode
+          ? `Lliga creada. Codi d’invitació: ${createdLeague.inviteCode}`
+          : "Lliga creada correctament.",
+      });
+    } catch (error) {
+      setPrivateLeagueFeedback({
+        type: "error",
+        message:
+          error?.message ||
+          "No s’ha pogut crear la lliga.",
+      });
+    } finally {
+      setPrivateLeagueActionLoading(false);
+    }
+  };
+
+  const handleJoinPrivateLeague = async (event) => {
+    event?.preventDefault();
+
+    if (!authUser || privateLeagueActionLoading) {
+      return;
+    }
+
+    const inviteCode = normalizePrivateLeagueCode(
+      privateLeagueJoinCode,
+    );
+
+    if (inviteCode.length < 4) {
+      setPrivateLeagueFeedback({
+        type: "error",
+        message: "Escriu un codi d’invitació vàlid.",
+      });
+      return;
+    }
+
+    setPrivateLeagueActionLoading(true);
+    setPrivateLeagueFeedback(null);
+
+    try {
+      const { data, error } = await supabase.rpc(
+        VESALAPORRA_PRIVATE_LEAGUES_RPC.join,
+        {
+          p_code: inviteCode,
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const joinedLeague =
+        unwrapRpcRows(
+          data,
+          ["league", "rows", "items"],
+        )
+          .map(normalizePrivateLeague)
+          .filter(Boolean)[0] || null;
+
+      setPrivateLeagueJoinCode("");
+      setPrivateLeagueJoinOpen(false);
+
+      await loadPrivateLeagues({ quiet: true });
+
+      if (joinedLeague?.id) {
+        setSelectedPrivateLeagueId(joinedLeague.id);
+        await loadPrivateLeagueMembers(joinedLeague.id);
+      }
+
+      if (
+        window.location.search.includes("join=")
+      ) {
+        window.history.replaceState(
+          { vesalaporra: true },
+          document.title,
+          "/perfil/lligues",
+        );
+      }
+
+      setPrivateLeagueFeedback({
+        type: "success",
+        message: joinedLeague?.name
+          ? `Ja formes part de “${joinedLeague.name}”.`
+          : "Has entrat a la lliga.",
+      });
+    } catch (error) {
+      const message = String(
+        error?.message || "",
+      );
+
+      setPrivateLeagueFeedback({
+        type: "error",
+        message:
+          message.includes("PRIVATE_LEAGUE_INVALID_CODE")
+            ? "Aquest codi no existeix o la lliga ja no està activa."
+            : message.includes("PRIVATE_LEAGUE_FULL")
+              ? "Aquesta lliga ha arribat al límit de participants."
+              : message ||
+                "No s’ha pogut entrar a la lliga.",
+      });
+    } finally {
+      setPrivateLeagueActionLoading(false);
+    }
+  };
+
+  const handleOpenPrivateLeague = async (leagueId) => {
+    if (!leagueId) {
+      return;
+    }
+
+    setSelectedPrivateLeagueId(leagueId);
+    setPrivateLeagueFeedback(null);
+
+    await loadPrivateLeagueMembers(leagueId);
+
+    window.requestAnimationFrame(() => {
+      document
+        .getElementById("private-league-ranking")
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+    });
+  };
+
+  const buildPrivateLeagueInviteUrl = (league) =>
+    `${window.location.origin}/perfil/lligues?join=${encodeURIComponent(
+      league?.inviteCode || "",
+    )}`;
+
+  const copyPrivateLeagueInvite = async (league) => {
+    if (!league?.inviteCode) {
+      return;
+    }
+
+    const inviteUrl = buildPrivateLeagueInviteUrl(league);
+
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+
+      setPrivateLeagueFeedback({
+        type: "success",
+        message: "Enllaç d’invitació copiat.",
+      });
+    } catch {
+      setPrivateLeagueFeedback({
+        type: "success",
+        message: `Codi d’invitació: ${league.inviteCode}`,
+      });
+    }
+  };
+
+  const sharePrivateLeague = (league, channel) => {
+    if (!league?.inviteCode) {
+      return;
+    }
+
+    const inviteUrl = buildPrivateLeagueInviteUrl(league);
+    const shareText =
+      `T’he convidat a “${league.name}”, la nostra lliga privada de Vesalaporra. ` +
+      `Fas la porra una sola vegada i els mateixos punts compten aquí i al rànquing general. ` +
+      `Codi: ${league.inviteCode}`;
+
+    const shareUrl =
+      channel === "whatsapp"
+        ? `https://wa.me/?text=${encodeURIComponent(
+            `${shareText}\n${inviteUrl}`,
+          )}`
+        : `https://x.com/intent/post?text=${encodeURIComponent(
+            `${shareText}\n${inviteUrl}`,
+          )}`;
+
+    window.open(
+      shareUrl,
+      "_blank",
+      "noopener,noreferrer",
+    );
+  };
+
+  const handleLeavePrivateLeague = async (league) => {
+    if (
+      !authUser ||
+      !league?.id ||
+      league.memberRole === "owner" ||
+      privateLeagueActionLoading
+    ) {
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `Vols sortir de “${league.name}”?`,
+      )
+    ) {
+      return;
+    }
+
+    setPrivateLeagueActionLoading(true);
+    setPrivateLeagueFeedback(null);
+
+    try {
+      const { error } = await supabase.rpc(
+        VESALAPORRA_PRIVATE_LEAGUES_RPC.leave,
+        {
+          p_league_id: league.id,
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      setSelectedPrivateLeagueId(null);
+      setPrivateLeagueMembers([]);
+
+      await loadPrivateLeagues({ quiet: true });
+
+      setPrivateLeagueFeedback({
+        type: "success",
+        message: `Has sortit de “${league.name}”.`,
+      });
+    } catch (error) {
+      setPrivateLeagueFeedback({
+        type: "error",
+        message:
+          error?.message ||
+          "No s’ha pogut sortir de la lliga.",
+      });
+    } finally {
+      setPrivateLeagueActionLoading(false);
+    }
+  };
+
+  const handleDeletePrivateLeague = async (league) => {
+    if (
+      !authUser ||
+      !league?.id ||
+      league.memberRole !== "owner" ||
+      privateLeagueActionLoading
+    ) {
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `Eliminar definitivament “${league.name}”? Els membres deixaran de veure aquesta lliga, però no es perdrà cap punt ni cap porra.`,
+      )
+    ) {
+      return;
+    }
+
+    setPrivateLeagueActionLoading(true);
+    setPrivateLeagueFeedback(null);
+
+    try {
+      const { error } = await supabase.rpc(
+        VESALAPORRA_PRIVATE_LEAGUES_RPC.deleteLeague,
+        {
+          p_league_id: league.id,
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      setSelectedPrivateLeagueId(null);
+      setPrivateLeagueMembers([]);
+
+      await loadPrivateLeagues({ quiet: true });
+
+      setPrivateLeagueFeedback({
+        type: "success",
+        message: `“${league.name}” s’ha eliminat.`,
+      });
+    } catch (error) {
+      setPrivateLeagueFeedback({
+        type: "error",
+        message:
+          error?.message ||
+          "No s’ha pogut eliminar la lliga.",
+      });
+    } finally {
+      setPrivateLeagueActionLoading(false);
+    }
+  };
+
+  const handleRemovePrivateLeagueMember = async (
+    league,
+    member,
+  ) => {
+    if (
+      !authUser ||
+      !league?.id ||
+      league.memberRole !== "owner" ||
+      !member?.userId ||
+      member.userId === String(authUser.id) ||
+      privateLeagueActionLoading
+    ) {
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `Expulsar ${member.displayName} de “${league.name}”?`,
+      )
+    ) {
+      return;
+    }
+
+    setPrivateLeagueActionLoading(true);
+    setPrivateLeagueFeedback(null);
+
+    try {
+      const { error } = await supabase.rpc(
+        VESALAPORRA_PRIVATE_LEAGUES_RPC.removeMember,
+        {
+          p_league_id: league.id,
+          p_user_id: member.userId,
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      await Promise.all([
+        loadPrivateLeagues({ quiet: true }),
+        loadPrivateLeagueMembers(league.id, {
+          quiet: true,
+        }),
+      ]);
+
+      setPrivateLeagueFeedback({
+        type: "success",
+        message: `${member.displayName} ja no forma part de la lliga.`,
+      });
+    } catch (error) {
+      setPrivateLeagueFeedback({
+        type: "error",
+        message:
+          error?.message ||
+          "No s’ha pogut expulsar aquest membre.",
+      });
+    } finally {
+      setPrivateLeagueActionLoading(false);
+    }
+  };
+
   const handleToggleProfilePrediction = async (match) => {
     const userId = selectedProfileUser?.id;
     const matchId = match?.matchId;
@@ -7084,6 +7818,15 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         setProfileDraftName("");
         setProfileNameEditorOpen(false);
         setProfileFeedback(null);
+        setPrivateLeagues([]);
+        setSelectedPrivateLeagueId(null);
+        setPrivateLeagueMembers([]);
+        setPrivateLeagueFeedback(null);
+        setPrivateLeagueDraftName("");
+        setPrivateLeagueJoinCode("");
+        setPrivateLeagueCreateOpen(false);
+        setPrivateLeagueJoinOpen(false);
+        setPrivateLeagueInfoOpen(false);
       }
     });
 
@@ -7506,6 +8249,52 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       loadRealProfileData(selectedProfileUser.id);
     }
   }, [activePage, selectedProfileUser?.id]);
+
+  useEffect(() => {
+    if (
+      activePage !== "profile" ||
+      profileTab !== "leagues" ||
+      !isOwnAuthenticatedProfile
+    ) {
+      return;
+    }
+
+    const inviteCodeFromUrl = normalizePrivateLeagueCode(
+      new URLSearchParams(window.location.search).get("join"),
+    );
+
+    if (inviteCodeFromUrl) {
+      setPrivateLeagueJoinCode(inviteCodeFromUrl);
+      setPrivateLeagueJoinOpen(true);
+      setPrivateLeagueCreateOpen(false);
+    }
+
+    loadPrivateLeagues();
+  }, [
+    activePage,
+    profileTab,
+    isOwnAuthenticatedProfile,
+    authUser?.id,
+  ]);
+
+  useEffect(() => {
+    if (
+      activePage === "profile" &&
+      profileTab === "leagues" &&
+      selectedPrivateLeagueId &&
+      isOwnAuthenticatedProfile
+    ) {
+      loadPrivateLeagueMembers(
+        selectedPrivateLeagueId,
+        { quiet: true },
+      );
+    }
+  }, [
+    activePage,
+    profileTab,
+    selectedPrivateLeagueId,
+    isOwnAuthenticatedProfile,
+  ]);
 
   useEffect(() => {
     if (matchData.id && officialMatchState.matchId !== matchData.id) {
@@ -11961,7 +12750,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   <NotificationPreferencesCard />
                 )}
 
-                <nav className="profile-tabs" aria-label="Seccions del perfil">
+                <nav
+                  className={
+                    isOwnAuthenticatedProfile
+                      ? "profile-tabs has-leagues"
+                      : "profile-tabs"
+                  }
+                  aria-label="Seccions del perfil"
+                >
                   <button
                     type="button"
                     className={
@@ -11995,6 +12791,23 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   >
                     HISTORIAL
                   </button>
+
+                  {isOwnAuthenticatedProfile && (
+                    <button
+                      type="button"
+                      className={
+                        profileTab === "leagues"
+                          ? "profile-tab active"
+                          : "profile-tab"
+                      }
+                      onClick={() => {
+                        setProfileTab("leagues");
+                        setPrivateLeagueFeedback(null);
+                      }}
+                    >
+                      LLIGUES
+                    </button>
+                  )}
                 </nav>
 
                 {profileDataError && (
@@ -12448,6 +13261,652 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     )}
                   </section>
                 )}
+
+                {profileTab === "leagues" &&
+                  isOwnAuthenticatedProfile && (
+                    <section className="private-leagues-page">
+                      <header className="private-leagues-hero">
+                        <div className="private-leagues-hero-copy">
+                          <span className="private-leagues-kicker">
+                            🏆 LLIGUES PRIVADES
+                          </span>
+
+                          <div className="private-leagues-title-line">
+                            <h2>LA MATEIXA PORRA. LA VOSTRA BATALLA.</h2>
+
+                            <button
+                              type="button"
+                              className="section-info-button private-leagues-info-button"
+                              onClick={() =>
+                                setPrivateLeagueInfoOpen(
+                                  (currentValue) => !currentValue,
+                                )
+                              }
+                              aria-label="Què són les lligues privades?"
+                              aria-expanded={privateLeagueInfoOpen}
+                              title="Què són les lligues privades?"
+                            >
+                              i
+                            </button>
+                          </div>
+
+                          <p>
+                            Crea una classificació només per als teus amics,
+                            família, penya o comunitat. Fas la porra una sola
+                            vegada: els mateixos punts compten al rànquing
+                            general i a totes les teves lligues.
+                          </p>
+                        </div>
+
+                        <div className="private-leagues-hero-mark" aria-hidden="true">
+                          <span>V</span>
+                          <strong>VS</strong>
+                          <span>V</span>
+                        </div>
+                      </header>
+
+                      {privateLeagueInfoOpen && (
+                        <div
+                          className="section-info-panel private-leagues-info-panel"
+                          role="note"
+                        >
+                          <strong className="section-info-title">
+                            COM FUNCIONEN LES LLIGUES PRIVADES?
+                          </strong>
+
+                          <div className="section-info-points-list">
+                            <div className="section-info-points-row featured">
+                              <span>1. Fas una única porra a Vesalaporra</span>
+                              <strong>1×</strong>
+                            </div>
+
+                            <div className="section-info-points-row">
+                              <span>
+                                2. Els teus punts compten al rànquing general
+                              </span>
+                              <strong>🌍</strong>
+                            </div>
+
+                            <div className="section-info-points-row">
+                              <span>
+                                3. També compten a cada lliga on participes
+                              </span>
+                              <strong>🏆</strong>
+                            </div>
+
+                            <div className="section-info-points-row">
+                              <span>
+                                4. Convida qui vulguis amb un codi o enllaç
+                              </span>
+                              <strong>🔑</strong>
+                            </div>
+
+                            <div className="section-info-points-row">
+                              <span>
+                                5. La lliga no modifica punts, medalles ni la
+                                classificació general
+                              </span>
+                              <strong>✓</strong>
+                            </div>
+                          </div>
+
+                          <small className="section-info-note">
+                            No hi ha una porra diferent per cada lliga. És la
+                            mateixa competició de Vesalaporra vista entre el
+                            teu grup: zero feina extra, molta més rivalitat.
+                          </small>
+                        </div>
+                      )}
+
+                      {privateLeagueFeedback?.message && (
+                        <div
+                          className={`private-league-feedback ${privateLeagueFeedback.type}`}
+                          role={
+                            privateLeagueFeedback.type === "error"
+                              ? "alert"
+                              : "status"
+                          }
+                        >
+                          <span>{privateLeagueFeedback.message}</span>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setPrivateLeagueFeedback(null)
+                            }
+                            aria-label="Tanca el missatge"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="private-league-primary-actions">
+                        <button
+                          type="button"
+                          className={
+                            privateLeagueCreateOpen
+                              ? "private-league-primary-action create active"
+                              : "private-league-primary-action create"
+                          }
+                          onClick={() => {
+                            setPrivateLeagueCreateOpen(
+                              (currentValue) => !currentValue,
+                            );
+                            setPrivateLeagueJoinOpen(false);
+                            setPrivateLeagueFeedback(null);
+                          }}
+                        >
+                          <span aria-hidden="true">＋</span>
+                          <div>
+                            <small>NOVA COMPETICIÓ</small>
+                            <strong>CREA UNA LLIGA</strong>
+                          </div>
+                          <b aria-hidden="true">→</b>
+                        </button>
+
+                        <button
+                          type="button"
+                          className={
+                            privateLeagueJoinOpen
+                              ? "private-league-primary-action join active"
+                              : "private-league-primary-action join"
+                          }
+                          onClick={() => {
+                            setPrivateLeagueJoinOpen(
+                              (currentValue) => !currentValue,
+                            );
+                            setPrivateLeagueCreateOpen(false);
+                            setPrivateLeagueFeedback(null);
+                          }}
+                        >
+                          <span aria-hidden="true">⌁</span>
+                          <div>
+                            <small>T'HAN CONVIDAT?</small>
+                            <strong>ENTRA AMB CODI</strong>
+                          </div>
+                          <b aria-hidden="true">→</b>
+                        </button>
+                      </div>
+
+                      {privateLeagueCreateOpen && (
+                        <form
+                          className="private-league-form create"
+                          onSubmit={handleCreatePrivateLeague}
+                        >
+                          <div>
+                            <span>CREA LA TEVA LLIGA</span>
+                            <strong>
+                              Posa-li un nom que faci venir ganes de guanyar-la.
+                            </strong>
+                          </div>
+
+                          <label>
+                            <span>NOM DE LA LLIGA</span>
+                            <input
+                              type="text"
+                              value={privateLeagueDraftName}
+                              minLength={PRIVATE_LEAGUE_NAME_MIN_LENGTH}
+                              maxLength={PRIVATE_LEAGUE_NAME_MAX_LENGTH}
+                              placeholder="Ex. Penya dels Diumenges"
+                              disabled={privateLeagueActionLoading}
+                              onChange={(event) =>
+                                setPrivateLeagueDraftName(
+                                  event.target.value,
+                                )
+                              }
+                              autoFocus
+                            />
+                          </label>
+
+                          <button
+                            type="submit"
+                            disabled={
+                              privateLeagueActionLoading ||
+                              privateLeagueDraftName.trim().length <
+                                PRIVATE_LEAGUE_NAME_MIN_LENGTH
+                            }
+                          >
+                            {privateLeagueActionLoading
+                              ? "CREANT..."
+                              : "CREA LA LLIGA"}
+                          </button>
+                        </form>
+                      )}
+
+                      {privateLeagueJoinOpen && (
+                        <form
+                          className="private-league-form join"
+                          onSubmit={handleJoinPrivateLeague}
+                        >
+                          <div>
+                            <span>ENTRA A UNA LLIGA</span>
+                            <strong>
+                              Escriu el codi que t'ha passat el creador.
+                            </strong>
+                          </div>
+
+                          <label>
+                            <span>CODI D'INVITACIÓ</span>
+                            <input
+                              type="text"
+                              value={privateLeagueJoinCode}
+                              maxLength={16}
+                              placeholder="Ex. 4F8A91C2"
+                              disabled={privateLeagueActionLoading}
+                              onChange={(event) =>
+                                setPrivateLeagueJoinCode(
+                                  normalizePrivateLeagueCode(
+                                    event.target.value,
+                                  ),
+                                )
+                              }
+                              autoCapitalize="characters"
+                              autoComplete="off"
+                              spellCheck={false}
+                              autoFocus
+                            />
+                          </label>
+
+                          <button
+                            type="submit"
+                            disabled={
+                              privateLeagueActionLoading ||
+                              normalizePrivateLeagueCode(
+                                privateLeagueJoinCode,
+                              ).length < 4
+                            }
+                          >
+                            {privateLeagueActionLoading
+                              ? "ENTRANT..."
+                              : "ENTRA A LA LLIGA"}
+                          </button>
+                        </form>
+                      )}
+
+                      <section className="private-leagues-list-section">
+                        <header className="private-leagues-section-heading">
+                          <div>
+                            <span>LES MEVES LLIGUES</span>
+                            <strong>
+                              {privateLeaguesLoading
+                                ? "Carregant..."
+                                : privateLeagues.length === 1
+                                  ? "1 lliga"
+                                  : `${privateLeagues.length} lligues`}
+                            </strong>
+                          </div>
+                        </header>
+
+                        {privateLeaguesError && (
+                          <div
+                            className="real-data-state error"
+                            role="alert"
+                          >
+                            <strong>
+                              No s'han pogut carregar les lligues
+                            </strong>
+                            <span>{privateLeaguesError}</span>
+                          </div>
+                        )}
+
+                        {!privateLeaguesLoading &&
+                          !privateLeaguesError &&
+                          privateLeagues.length === 0 && (
+                            <div className="private-leagues-empty">
+                              <span aria-hidden="true">🏁</span>
+                              <strong>
+                                ENCARA NO TENS CAP LLIGA PRIVADA
+                              </strong>
+                              <p>
+                                Crea'n una i passa l'enllaç al grup. O entra
+                                amb el codi d'algú que ja hagi començat la
+                                guerra.
+                              </p>
+                            </div>
+                          )}
+
+                        {privateLeagues.length > 0 && (
+                          <div className="private-leagues-grid">
+                            {privateLeagues.map((league) => {
+                              const isSelected =
+                                selectedPrivateLeagueId === league.id;
+                              const leaguePosition =
+                                getPrivateLeaguePosition(league.id);
+
+                              return (
+                                <article
+                                  key={league.id}
+                                  className={
+                                    isSelected
+                                      ? "private-league-card selected"
+                                      : "private-league-card"
+                                  }
+                                >
+                                  <div className="private-league-card-top">
+                                    <span className="private-league-card-icon">
+                                      🏆
+                                    </span>
+
+                                    <div className="private-league-card-copy">
+                                      <div className="private-league-card-badges">
+                                        <span>
+                                          {league.memberCount}{" "}
+                                          {league.memberCount === 1
+                                            ? "CULER"
+                                            : "CULERS"}
+                                        </span>
+
+                                        {league.memberRole === "owner" && (
+                                          <span className="owner">
+                                            CAPITÀ
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      <h3>{league.name}</h3>
+                                    </div>
+                                  </div>
+
+                                  <div className="private-league-card-stats">
+                                    <div>
+                                      <span>LA TEVA POSICIÓ</span>
+                                      <strong>
+                                        {leaguePosition
+                                          ? `#${leaguePosition}`
+                                          : "—"}
+                                      </strong>
+                                    </div>
+
+                                    <div>
+                                      <span>PUNTS</span>
+                                      <strong>
+                                        {currentRankingUser?.general
+                                          ?.totalPoints ??
+                                          authenticatedProfileUser?.general
+                                            ?.totalPoints ??
+                                          0}
+                                      </strong>
+                                    </div>
+                                  </div>
+
+                                  <div className="private-league-invite">
+                                    <span>CODI</span>
+                                    <strong>{league.inviteCode}</strong>
+
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        copyPrivateLeagueInvite(league)
+                                      }
+                                    >
+                                      COPIA ENLLAÇ
+                                    </button>
+                                  </div>
+
+                                  <div className="private-league-share-row">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        sharePrivateLeague(
+                                          league,
+                                          "whatsapp",
+                                        )
+                                      }
+                                    >
+                                      WhatsApp
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        sharePrivateLeague(league, "x")
+                                      }
+                                    >
+                                      𝕏
+                                    </button>
+                                  </div>
+
+                                  <button
+                                    type="button"
+                                    className="private-league-open-button"
+                                    onClick={() =>
+                                      handleOpenPrivateLeague(league.id)
+                                    }
+                                    disabled={
+                                      privateLeagueMembersLoading &&
+                                      isSelected
+                                    }
+                                  >
+                                    {privateLeagueMembersLoading &&
+                                    isSelected
+                                      ? "CARREGANT..."
+                                      : "VEURE CLASSIFICACIÓ"}
+                                    <span aria-hidden="true">→</span>
+                                  </button>
+                                </article>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </section>
+
+                      {selectedPrivateLeague && (
+                        <section
+                          id="private-league-ranking"
+                          className="private-league-ranking-section"
+                        >
+                          <header className="private-league-ranking-title">
+                            <div>
+                              <span>CLASSIFICACIÓ PRIVADA</span>
+                              <h3>{selectedPrivateLeague.name}</h3>
+                            </div>
+
+                            <div className="private-league-ranking-meta">
+                              <span>
+                                {selectedPrivateLeague.memberCount} CULERS
+                              </span>
+                              <strong>
+                                {selectedPrivateLeague.inviteCode}
+                              </strong>
+                            </div>
+                          </header>
+
+                          {privateLeagueMembersLoading ? (
+                            <div
+                              className="real-data-state empty"
+                              role="status"
+                            >
+                              <strong>
+                                Carregant la classificació...
+                              </strong>
+                              <span>
+                                Només es consulta quan obres aquesta lliga.
+                              </span>
+                            </div>
+                          ) : (
+                            <>
+                              <div
+                                className="ranking-table-head private-league-ranking-head"
+                                aria-hidden="true"
+                              >
+                                <span>POS</span>
+                                <span>CULER</span>
+                                <span>RESULTAT</span>
+                                <span>XI</span>
+                                <span>PROTAGONISTA</span>
+                                <span>PTS</span>
+                              </div>
+
+                              <div className="ranking-list">
+                                {selectedPrivateLeagueRankingRows.map(
+                                  (user, index) => {
+                                    const position = index + 1;
+                                    const points = user.general;
+                                    const medal =
+                                      position === 1
+                                        ? "🥇"
+                                        : position === 2
+                                          ? "🥈"
+                                          : position === 3
+                                            ? "🥉"
+                                            : null;
+
+                                    const member =
+                                      privateLeagueMembers.find(
+                                        (candidate) =>
+                                          candidate.userId === user.id,
+                                      );
+
+                                    return (
+                                      <article
+                                        key={`${selectedPrivateLeague.id}-${user.id}`}
+                                        className={[
+                                          "ranking-row",
+                                          user.isCurrentUser
+                                            ? "current-user"
+                                            : "",
+                                          position <= 3
+                                            ? "podium"
+                                            : "",
+                                        ]
+                                          .filter(Boolean)
+                                          .join(" ")}
+                                      >
+                                        <span className="ranking-position">
+                                          {medal ? (
+                                            <span aria-hidden="true">
+                                              {medal}
+                                            </span>
+                                          ) : (
+                                            `#${position}`
+                                          )}
+                                        </span>
+
+                                        <span className="ranking-identity">
+                                          <button
+                                            type="button"
+                                            className="ranking-user-link"
+                                            onClick={() =>
+                                              openRankingProfile(user.id)
+                                            }
+                                          >
+                                            <RankingAvatar
+                                              user={user}
+                                              size="medium"
+                                            />
+
+                                            <span className="ranking-user-copy">
+                                              <strong>
+                                                {user.displayName}
+                                              </strong>
+
+                                              {user.privateLeagueRole ===
+                                                "owner" && (
+                                                <small>
+                                                  CAPITÀ DE LA LLIGA
+                                                </small>
+                                              )}
+                                            </span>
+                                          </button>
+
+                                          {selectedPrivateLeague.memberRole ===
+                                            "owner" &&
+                                            !user.isCurrentUser && (
+                                              <button
+                                                type="button"
+                                                className="private-league-kick-button"
+                                                onClick={() =>
+                                                  handleRemovePrivateLeagueMember(
+                                                    selectedPrivateLeague,
+                                                    member,
+                                                  )
+                                                }
+                                                disabled={
+                                                  privateLeagueActionLoading
+                                                }
+                                              >
+                                                EXPULSA
+                                              </button>
+                                            )}
+                                        </span>
+
+                                        <span
+                                          className="ranking-breakdown result"
+                                          data-label="RESULTAT"
+                                        >
+                                          {points.resultPoints}
+                                        </span>
+
+                                        <span
+                                          className="ranking-breakdown xi"
+                                          data-label="XI"
+                                        >
+                                          {points.xiPoints}
+                                        </span>
+
+                                        <span
+                                          className="ranking-breakdown protagonist"
+                                          data-label="PROTAGONISTA"
+                                        >
+                                          {points.protagonistPoints}
+                                        </span>
+
+                                        <strong
+                                          className="ranking-total"
+                                          data-label="PTS"
+                                        >
+                                          {points.totalPoints}
+                                        </strong>
+                                      </article>
+                                    );
+                                  },
+                                )}
+                              </div>
+                            </>
+                          )}
+
+                          <footer className="private-league-ranking-footer">
+                            <div>
+                              <span>
+                                Una porra. Una puntuació. Tantes rivalitats
+                                com vulguis.
+                              </span>
+                            </div>
+
+                            {selectedPrivateLeague.memberRole ===
+                            "owner" ? (
+                              <button
+                                type="button"
+                                className="danger"
+                                onClick={() =>
+                                  handleDeletePrivateLeague(
+                                    selectedPrivateLeague,
+                                  )
+                                }
+                                disabled={privateLeagueActionLoading}
+                              >
+                                ELIMINA LLIGA
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                className="danger"
+                                onClick={() =>
+                                  handleLeavePrivateLeague(
+                                    selectedPrivateLeague,
+                                  )
+                                }
+                                disabled={privateLeagueActionLoading}
+                              >
+                                SURT DE LA LLIGA
+                              </button>
+                            )}
+                          </footer>
+                        </section>
+                      )}
+                    </section>
+                  )}
 
                 {isOwnAuthenticatedProfile && (
                   <div className="profile-inline-actions">
