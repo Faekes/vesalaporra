@@ -983,6 +983,9 @@ const VESALAPORRA_PUBLIC_RANKING_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_RANKING_RPC ||
   "vesalaporra_public_ranking";
 
+const VESALAPORRA_PUBLIC_PRESEASON_FINAL_ORDER_RPC =
+  "vesalaporra_public_preseason_final_order_2026";
+
 const VESALAPORRA_PUBLIC_MATCH_NOTES_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_MATCH_NOTES_RPC ||
   "vesalaporra_public_match_notes";
@@ -3527,8 +3530,49 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     (user) => Number(user?.general?.totalPoints || 0) !== 0,
   );
 
+  const generalRankingHasPreseasonFinalOrder = rankingUsersWithAuth.some(
+    (user) =>
+      Number.isFinite(Number(user?.preseasonFinalPosition)) &&
+      Number(user.preseasonFinalPosition) > 0,
+  );
+
   const compareRankingUsers = (firstUser, secondUser, scope) => {
     if (scope === "general" && !generalRankingHasOfficialPoints) {
+      if (generalRankingHasPreseasonFinalOrder) {
+        const firstPreseasonPosition = Number(
+          firstUser?.preseasonFinalPosition,
+        );
+        const secondPreseasonPosition = Number(
+          secondUser?.preseasonFinalPosition,
+        );
+        const firstWasInPreseason =
+          Number.isFinite(firstPreseasonPosition) &&
+          firstPreseasonPosition > 0;
+        const secondWasInPreseason =
+          Number.isFinite(secondPreseasonPosition) &&
+          secondPreseasonPosition > 0;
+
+        if (firstWasInPreseason !== secondWasInPreseason) {
+          return firstWasInPreseason ? -1 : 1;
+        }
+
+        if (firstWasInPreseason && secondWasInPreseason) {
+          return (
+            firstPreseasonPosition - secondPreseasonPosition ||
+            String(firstUser.id).localeCompare(String(secondUser.id))
+          );
+        }
+
+        const firstSignupAt = getRankingSignupTimestamp(firstUser);
+        const secondSignupAt = getRankingSignupTimestamp(secondUser);
+
+        return (
+          (firstSignupAt ?? Number.MAX_SAFE_INTEGER) -
+            (secondSignupAt ?? Number.MAX_SAFE_INTEGER) ||
+          String(firstUser.id).localeCompare(String(secondUser.id))
+        );
+      }
+
       const firstSignupAt = getRankingSignupTimestamp(firstUser);
       const secondSignupAt = getRankingSignupTimestamp(secondUser);
       const firstIsNew =
@@ -6053,6 +6097,33 @@ const fetchRankingProfileCreatedAtMap = async (userIds) => {
   );
 };
 
+const fetchPreseasonFinalPositionMap = async () => {
+  const { data: payload, error } = await supabase.rpc(
+    VESALAPORRA_PUBLIC_PRESEASON_FINAL_ORDER_RPC,
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return Object.fromEntries(
+    unwrapRpcRows(payload, ["ranking", "rows", "items", "users"])
+      .map((row) => {
+        const userId = firstNonEmptyText(row?.user_id, row?.id);
+        const position = toFiniteNumber(
+          row?.preseason_position,
+          row?.ranking_position,
+          row?.position,
+        );
+
+        return userId && position > 0
+          ? [String(userId), position]
+          : null;
+      })
+      .filter(Boolean),
+  );
+};
+
 const fetchLatestScoredJornadaNumber = async () => {
   const { data: payload, error } = await supabase.rpc(
     VESALAPORRA_PUBLIC_LATEST_SCORED_JORNADA_NUMBER_RPC,
@@ -6081,7 +6152,12 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   setRankingError("");
 
   try {
-    const [generalRows, jornadaRows, jornadaNumber] =
+    const [
+      generalRows,
+      jornadaRows,
+      jornadaNumber,
+      preseasonFinalPositionById,
+    ] =
       await Promise.all([
         fetchRankingScope("general"),
         fetchRankingScope("jornada"),
@@ -6092,6 +6168,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
           );
 
           return null;
+        }),
+        fetchPreseasonFinalPositionMap().catch((error) => {
+          console.warn(
+            "No s’ha pogut carregar l’ordre final de pretemporada:",
+            error,
+          );
+
+          return {};
         }),
       ]);
 
@@ -6107,6 +6191,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
     const mergedRowsWithSignupDates = mergedRows.map((user) => ({
       ...user,
+      preseasonFinalPosition:
+        preseasonFinalPositionById[user.id] || null,
       createdAt:
         profileCreatedAtById[user.id] ||
         user.createdAt ||
