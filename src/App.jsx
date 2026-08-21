@@ -4,7 +4,7 @@ import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLau
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
 import instructionsHtml from "./content/instruccions.html?raw";
 import "./App.css";
-import "./VesalaporraLeagues.css";
+import "./VesalaporraLeagues_PRO_V2.css";
 
 // FONT REAL: la plantilla pública no viu al codi.
 // Tots els jugadors visibles venen del roster real del partit.
