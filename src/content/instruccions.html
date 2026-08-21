@@ -1,0 +1,691 @@
+<!-- wp:html -->
+<style>
+  .vlp-guide {
+    --vlp-ink: #f7f7fb;
+    --vlp-muted: #b9bbca;
+    --vlp-night: #070913;
+    --vlp-panel: #111424;
+    --vlp-panel-2: #171b2f;
+    --vlp-line: rgba(255, 255, 255, 0.1);
+    --vlp-gold: #ffd21c;
+    --vlp-gold-soft: #fff2a6;
+    --vlp-blue: #2458d3;
+    --vlp-red: #9f1537;
+    --vlp-radius: 24px;
+    color: var(--vlp-ink);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 17px;
+    line-height: 1.72;
+    margin: 0 auto;
+    max-width: 1180px;
+  }
+
+  .vlp-guide,
+  .vlp-guide * {
+    box-sizing: border-box;
+  }
+
+  .vlp-guide a {
+    color: inherit;
+  }
+
+  .vlp-guide img {
+    display: block;
+    height: auto;
+    max-width: 100%;
+  }
+
+  .vlp-shell {
+    background:
+      radial-gradient(circle at 8% 4%, rgba(36, 88, 211, 0.22), transparent 25rem),
+      radial-gradient(circle at 92% 20%, rgba(159, 21, 55, 0.22), transparent 27rem),
+      var(--vlp-night);
+    border: 1px solid var(--vlp-line);
+    border-radius: 30px;
+    box-shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
+    overflow: hidden;
+  }
+
+  .vlp-hero {
+    padding: clamp(42px, 8vw, 92px) clamp(22px, 7vw, 82px) clamp(36px, 6vw, 70px);
+    position: relative;
+  }
+
+  .vlp-hero::after {
+    background: linear-gradient(90deg, var(--vlp-blue) 0 38%, var(--vlp-gold) 38% 62%, var(--vlp-red) 62% 100%);
+    bottom: 0;
+    content: "";
+    height: 5px;
+    left: 0;
+    position: absolute;
+    right: 0;
+  }
+
+  .vlp-kicker {
+    color: var(--vlp-gold);
+    font-size: 0.78rem;
+    font-weight: 850;
+    letter-spacing: 0.14em;
+    margin: 0 0 18px;
+    text-transform: uppercase;
+  }
+
+  .vlp-guide h1,
+  .vlp-guide h2,
+  .vlp-guide h3 {
+    color: var(--vlp-ink);
+    font-family: inherit;
+    letter-spacing: -0.035em;
+  }
+
+  .vlp-guide h1 {
+    font-size: clamp(2.55rem, 7vw, 5.8rem);
+    font-weight: 900;
+    line-height: 0.98;
+    margin: 0;
+    max-width: 940px;
+  }
+
+  .vlp-guide h1 span {
+    color: var(--vlp-gold);
+  }
+
+  .vlp-lead {
+    color: #e7e8ef;
+    font-size: clamp(1.08rem, 2.3vw, 1.42rem);
+    line-height: 1.55;
+    margin: 26px 0 0;
+    max-width: 760px;
+  }
+
+  .vlp-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .vlp-button {
+    align-items: center;
+    border: 1px solid var(--vlp-line);
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: 0.9rem;
+    font-weight: 800;
+    justify-content: center;
+    padding: 12px 18px;
+    text-decoration: none;
+    transition: transform 160ms ease, border-color 160ms ease;
+  }
+
+  .vlp-button:hover {
+    border-color: rgba(255, 210, 28, 0.6);
+    transform: translateY(-2px);
+  }
+
+  .vlp-button--primary {
+    background: var(--vlp-gold);
+    border-color: var(--vlp-gold);
+    color: #151000 !important;
+  }
+
+  .vlp-nav {
+    align-items: center;
+    background: rgba(7, 9, 19, 0.92);
+    border-bottom: 1px solid var(--vlp-line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    padding: 17px clamp(18px, 5vw, 64px);
+    position: sticky;
+    top: 0;
+    z-index: 4;
+  }
+
+  .vlp-nav strong {
+    color: var(--vlp-muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    margin-right: 5px;
+    text-transform: uppercase;
+  }
+
+  .vlp-nav a {
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid var(--vlp-line);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 750;
+    padding: 7px 11px;
+    text-decoration: none;
+  }
+
+  .vlp-content {
+    padding: clamp(34px, 7vw, 82px) clamp(18px, 7vw, 82px) clamp(50px, 8vw, 92px);
+  }
+
+  .vlp-intro {
+    border-left: 4px solid var(--vlp-gold);
+    color: #ececf3;
+    font-size: clamp(1.08rem, 2vw, 1.3rem);
+    margin: 0 auto clamp(56px, 9vw, 100px);
+    max-width: 850px;
+    padding: 4px 0 4px clamp(18px, 3vw, 30px);
+  }
+
+  .vlp-intro p {
+    margin: 0 0 16px;
+  }
+
+  .vlp-intro p:last-child {
+    margin-bottom: 0;
+  }
+
+  .vlp-section {
+    margin: 0 auto clamp(70px, 11vw, 126px);
+    max-width: 980px;
+    scroll-margin-top: 88px;
+  }
+
+  .vlp-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .vlp-section-head {
+    align-items: flex-start;
+    display: grid;
+    gap: 18px;
+    grid-template-columns: auto minmax(0, 1fr);
+    margin-bottom: 30px;
+  }
+
+  .vlp-number {
+    align-items: center;
+    background: var(--vlp-gold);
+    border-radius: 14px;
+    color: #151000;
+    display: inline-flex;
+    font-size: 0.9rem;
+    font-weight: 900;
+    height: 46px;
+    justify-content: center;
+    margin-top: 5px;
+    width: 46px;
+  }
+
+  .vlp-guide h2 {
+    font-size: clamp(2rem, 5vw, 3.65rem);
+    font-weight: 900;
+    line-height: 1.05;
+    margin: 0;
+  }
+
+  .vlp-section-head p {
+    color: var(--vlp-muted);
+    margin: 10px 0 0;
+    max-width: 760px;
+  }
+
+  .vlp-card,
+  .vlp-figure {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
+    border: 1px solid var(--vlp-line);
+    border-radius: var(--vlp-radius);
+  }
+
+  .vlp-card {
+    padding: clamp(21px, 4vw, 34px);
+  }
+
+  .vlp-card p:first-child,
+  .vlp-card h3:first-child {
+    margin-top: 0;
+  }
+
+  .vlp-card p:last-child {
+    margin-bottom: 0;
+  }
+
+  .vlp-card h3 {
+    font-size: 1.28rem;
+    font-weight: 850;
+    line-height: 1.18;
+    margin: 0 0 10px;
+  }
+
+  .vlp-muted {
+    color: var(--vlp-muted);
+  }
+
+  .vlp-grid-2,
+  .vlp-grid-3 {
+    display: grid;
+    gap: 16px;
+  }
+
+  .vlp-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vlp-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .vlp-mini-label {
+    color: var(--vlp-gold);
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 850;
+    letter-spacing: 0.11em;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+
+  .vlp-callout {
+    background: linear-gradient(115deg, rgba(36, 88, 211, 0.22), rgba(159, 21, 55, 0.22));
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--vlp-radius);
+    margin-top: 18px;
+    padding: clamp(22px, 4vw, 34px);
+  }
+
+  .vlp-callout strong {
+    color: var(--vlp-gold-soft);
+  }
+
+  .vlp-callout p {
+    margin: 0;
+  }
+
+  .vlp-figure {
+    margin: 22px 0 0;
+    overflow: hidden;
+    padding: clamp(9px, 1.7vw, 16px);
+  }
+
+  .vlp-figure img {
+    background: #fff;
+    border-radius: calc(var(--vlp-radius) - 9px);
+    margin: 0 auto;
+    width: auto;
+  }
+
+  .vlp-figure figcaption {
+    color: var(--vlp-muted);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    padding: 12px 8px 3px;
+  }
+
+  .vlp-access-figure img,
+  .vlp-info-figure img {
+    background: transparent;
+  }
+
+  .vlp-access-figure {
+    align-items: center;
+    display: grid;
+    gap: 24px;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .vlp-access-figure .vlp-figure {
+    margin: 0;
+    min-width: 230px;
+  }
+
+  .vlp-stack {
+    display: grid;
+    gap: 18px;
+  }
+
+  .vlp-ranking-card {
+    overflow: hidden;
+  }
+
+  .vlp-ranking-copy {
+    padding: clamp(21px, 4vw, 32px);
+  }
+
+  .vlp-ranking-copy p {
+    margin-bottom: 0;
+  }
+
+  .vlp-ranking-card .vlp-figure {
+    border: 0;
+    border-radius: 0;
+    border-top: 1px solid var(--vlp-line);
+    margin: 0;
+  }
+
+  .vlp-quote {
+    color: var(--vlp-gold-soft);
+    font-size: clamp(1.35rem, 3vw, 2rem);
+    font-weight: 850;
+    letter-spacing: -0.025em;
+    line-height: 1.25;
+    margin: 34px 0 0;
+    text-align: center;
+  }
+
+  .vlp-checks {
+    list-style: none;
+    margin: 18px 0 0;
+    padding: 0;
+  }
+
+  .vlp-checks li {
+    border-top: 1px solid var(--vlp-line);
+    padding: 12px 0 12px 28px;
+    position: relative;
+  }
+
+  .vlp-checks li::before {
+    color: var(--vlp-gold);
+    content: "✓";
+    font-weight: 900;
+    left: 2px;
+    position: absolute;
+  }
+
+  .vlp-closing {
+    background:
+      radial-gradient(circle at 90% 10%, rgba(255, 210, 28, 0.17), transparent 18rem),
+      linear-gradient(135deg, #161b33, #0e1020);
+    border: 1px solid rgba(255, 210, 28, 0.25);
+    border-radius: 28px;
+    padding: clamp(32px, 7vw, 68px);
+    text-align: center;
+  }
+
+  .vlp-closing h2 {
+    font-size: clamp(2.15rem, 6vw, 4.5rem);
+  }
+
+  .vlp-closing p {
+    color: #dedfea;
+    margin: 18px auto 0;
+    max-width: 720px;
+  }
+
+  .vlp-fineprint {
+    color: #858899;
+    font-size: 0.76rem;
+    margin: 18px auto 0;
+    max-width: 720px;
+  }
+
+  @media (max-width: 820px) {
+    .vlp-grid-2,
+    .vlp-grid-3,
+    .vlp-access-figure {
+      grid-template-columns: 1fr;
+    }
+
+    .vlp-access-figure .vlp-figure {
+      min-width: 0;
+    }
+
+    .vlp-nav {
+      position: static;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .vlp-shell {
+      border-radius: 20px;
+    }
+
+    .vlp-section-head {
+      grid-template-columns: 1fr;
+    }
+
+    .vlp-number {
+      height: 38px;
+      width: 38px;
+    }
+
+    .vlp-nav strong {
+      flex-basis: 100%;
+    }
+  }
+</style>
+
+<article class="vlp-guide">
+  <div class="vlp-shell">
+    <header class="vlp-hero">
+      <p class="vlp-kicker">Guia ràpida · Vesalaporra.cat</p>
+      <h1>La porra dels culers, <span>explicada sense patir</span></h1>
+      <p class="vlp-lead">Resultat, Lotto Flick, protagonista, rànquing, medalles i notes: tot el que necessites per entrar, jugar i començar la temporada amb bon peu.</p>
+      <div class="vlp-actions">
+        <a class="vlp-button vlp-button--primary" href="https://vesalaporra.cat" target="_blank" rel="noopener">Entrar a Vesalaporra</a>
+        <a class="vlp-button" href="#com-jugar">Veure com funciona</a>
+      </div>
+    </header>
+
+    <nav class="vlp-nav" aria-label="Índex de la guia">
+      <strong>Ves-hi directe</strong>
+      <a href="#acces">Accés</a>
+      <a href="#com-jugar">Com jugar</a>
+      <a href="#puntuacions">Puntuacions</a>
+      <a href="#ranquing">Rànquing</a>
+      <a href="#perfil">Perfil</a>
+      <a href="#notes">Les notes</a>
+    </nav>
+
+    <div class="vlp-content">
+      <div class="vlp-intro">
+        <p><strong>Hola, amics porrerros.</strong> Feia anys que no deia això. L’última vegada devia ser en algun parc random del Maresme, circa segle passat.</p>
+        <p>Benvinguts a la porra dels culers, de nom comercial <strong>Vesalaporra.cat</strong>. És digital, interactiva i intuïtiva. Bàsicament, un canyunacu de porra. Però, com tot artefacte punter, té més tecles del que sembla. Aquí tens la guia definitiva.</p>
+      </div>
+
+      <section class="vlp-section" id="acces">
+        <div class="vlp-section-head">
+          <span class="vlp-number">01</span>
+          <div>
+            <h2>Entra-hi en un moment</h2>
+            <p>Tens tres portes d’entrada: X (Twitter), Google i Disqus.</p>
+          </div>
+        </div>
+
+        <div class="vlp-card vlp-access-figure">
+          <div>
+            <span class="vlp-mini-label">Primer pas</span>
+            <h3>Tria el compte que et vagi millor</h3>
+            <p class="vlp-muted">A la part superior dreta de la portada hi trobaràs les tres icones. Clica’n una i accepta els permisos d’accés. Tranquil: no soc cap hacker indi.</p>
+          </div>
+          <figure class="vlp-figure">
+            <img src="/instruccions/imatges/01-acces.png" alt="Opcions d’accés a Vesalaporra amb X, Google i Disqus">
+          </figure>
+        </div>
+      </section>
+
+      <section class="vlp-section" id="com-jugar">
+        <div class="vlp-section-head">
+          <span class="vlp-number">02</span>
+          <div>
+            <h2>Tres maneres de jugar</h2>
+            <p>Quan siguis dins, trobaràs tres blocs de pronòstic. Pots jugar només el resultat o anar a totes.</p>
+          </div>
+        </div>
+
+        <div class="vlp-grid-3">
+          <div class="vlp-card">
+            <span class="vlp-mini-label">El clàssic</span>
+            <h3>Pronostica el resultat</h3>
+            <p class="vlp-muted">Intenta encertar el marcador exacte del partit del Barça.</p>
+          </div>
+          <div class="vlp-card">
+            <span class="vlp-mini-label">La pissarra</span>
+            <h3>Lotto Flick</h3>
+            <p class="vlp-muted">Construeix l’onze titular que creus que posarà Flick.</p>
+          </div>
+          <div class="vlp-card">
+            <span class="vlp-mini-label">L’heroi del dia</span>
+            <h3>El protagonista</h3>
+            <p class="vlp-muted">Tria quin jugador marcarà o farà una assistència. Qualsevol de les dues accions és bona.</p>
+          </div>
+        </div>
+
+        <div class="vlp-callout">
+          <p><strong>Només el resultat és obligatori.</strong> Si no vols completar la resta, prem «Només vull pronosticar el resultat». Si també jugues la Lotto Flick i/o el protagonista, no enviïs res fins al final i prem «Confirma els teus pronòstics».</p>
+        </div>
+      </section>
+
+      <section class="vlp-section" id="puntuacions">
+        <div class="vlp-section-head">
+          <span class="vlp-number">03</span>
+          <div>
+            <h2>Com es reparteixen els punts?</h2>
+            <p>Al costat del títol de cada secció hi ha una icona d’informació. En clicar-la, s’obre el detall complet de puntuacions.</p>
+          </div>
+        </div>
+
+        <div class="vlp-card vlp-access-figure">
+          <div>
+            <span class="vlp-mini-label">Pista visual</span>
+            <h3>Busca aquesta «i»</h3>
+            <p class="vlp-muted">És el teu accés ràpid a les regles de cada modalitat.</p>
+          </div>
+          <figure class="vlp-figure vlp-info-figure">
+            <img src="/instruccions/imatges/02-informacio.png" alt="Icona d’informació de les puntuacions">
+          </figure>
+        </div>
+
+        <div class="vlp-stack">
+          <figure class="vlp-figure">
+            <img src="/instruccions/imatges/03-punts-resultat.png" alt="Taula de puntuació del pronòstic del resultat">
+            <figcaption>1. Puntuació del resultat.</figcaption>
+          </figure>
+          <figure class="vlp-figure">
+            <img src="/instruccions/imatges/04-punts-lotto-flick.png" alt="Taula de puntuació de la Lotto Flick">
+            <figcaption>2. Puntuació de la Lotto Flick.</figcaption>
+          </figure>
+          <figure class="vlp-figure">
+            <img src="/instruccions/imatges/05-punts-protagonista.png" alt="Taula de puntuació del protagonista">
+            <figcaption>3. Puntuació del protagonista. La cotització d’un gol o una assistència no és fixa: pot variar segons l’estat de forma i el rol del jugador.</figcaption>
+          </figure>
+        </div>
+
+        <p class="vlp-quote">Pim, pam, pum. Bocadillo de atún.</p>
+      </section>
+
+      <section class="vlp-section" id="ranquing">
+        <div class="vlp-section-head">
+          <span class="vlp-number">04</span>
+          <div>
+            <h2>Del partit a la classificació general</h2>
+            <p>El rànquing té dues lectures: què ha passat en una jornada concreta i com va la batalla acumulada.</p>
+          </div>
+        </div>
+
+        <div class="vlp-stack">
+          <div class="vlp-card vlp-ranking-card">
+            <div class="vlp-ranking-copy">
+              <span class="vlp-mini-label">Pestanya 1</span>
+              <h3>Jornada</h3>
+              <p class="vlp-muted">Mostra la classificació del partit seleccionat. Les columnes separen els punts del resultat, de l’onze i del protagonista; a la dreta hi tens el total.</p>
+            </div>
+            <figure class="vlp-figure">
+              <img src="/instruccions/imatges/06-ranking-jornada.png" alt="Classificació de la jornada a Vesalaporra">
+            </figure>
+          </div>
+
+          <div class="vlp-card vlp-ranking-card">
+            <div class="vlp-ranking-copy">
+              <span class="vlp-mini-label">Pestanya 2</span>
+              <h3>General</h3>
+              <p class="vlp-muted">I, per sorpresa de nadie, és la classificació general: la suma de totes les jornades jugades. Manté el mateix criteri de columnes i incorpora fletxes per indicar qui puja i qui baixa posicions.</p>
+            </div>
+            <figure class="vlp-figure">
+              <img src="/instruccions/imatges/07-ranking-general.png" alt="Classificació general de Vesalaporra">
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="vlp-section" id="perfil">
+        <div class="vlp-section-head">
+          <span class="vlp-number">05</span>
+          <div>
+            <h2>El perfil: rendiment, glòria i memòria</h2>
+            <p>Pots entrar al teu perfil des del menú. Per tafanejar el d’un altre porrero, clica directament el seu avatar.</p>
+          </div>
+        </div>
+
+        <div class="vlp-stack">
+          <div class="vlp-card">
+            <span class="vlp-mini-label">Resum</span>
+            <h3>La teva radiografia porraire</h3>
+            <p class="vlp-muted">Hi trobaràs el rendiment de l’usuari: jornades guanyades, millor puntuació i altres dades clau.</p>
+            <figure class="vlp-figure">
+              <img src="/instruccions/imatges/08-perfil-resum.png" alt="Resum de rendiment d’un perfil de Vesalaporra">
+            </figure>
+          </div>
+
+          <div class="vlp-card">
+            <span class="vlp-mini-label">Medalles</span>
+            <h3>Reptes difícils, moments de glòria</h3>
+            <p class="vlp-muted">Aquesta pestanya té molt de suc. Si completes determinats reptes, guanyes medalles que queden associades al teu avatar durant la temporada.</p>
+            <figure class="vlp-figure">
+              <img src="/instruccions/imatges/09-medalles.png" alt="Reptes i medalles disponibles a Vesalaporra">
+            </figure>
+          </div>
+
+          <div class="vlp-card">
+            <span class="vlp-mini-label">Historial</span>
+            <h3>Totes les teves porres, partit a partit</h3>
+            <p class="vlp-muted">Consulta els pronòstics anteriors. Si prems «Veure aposta», s’obre el detall de l’onze i del protagonista que vas triar en aquella jornada.</p>
+            <figure class="vlp-figure">
+              <img src="/instruccions/imatges/10-historial.png" alt="Historial de pronòstics d’un perfil de Vesalaporra">
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="vlp-section" id="notes">
+        <div class="vlp-section-head">
+          <span class="vlp-number">06</span>
+          <div>
+            <h2>Les notes: jutge per un dia</h2>
+            <p>Aquesta secció no puntua. És pur divertimento i una manera de seguir de prop els nostres gladiadors.</p>
+          </div>
+        </div>
+
+        <div class="vlp-callout" style="margin:0 0 20px;">
+          <p>Puntua cada jugador <strong>d’1 a 6 estrelles</strong> segons el partit que, per a tu, hagi fet.</p>
+        </div>
+
+        <div class="vlp-grid-2">
+          <div class="vlp-card">
+            <span class="vlp-mini-label">Jornada</span>
+            <h3>La nota del partit</h3>
+            <p class="vlp-muted">Valora l’actuació de cada jugador en la jornada concreta.</p>
+            <figure class="vlp-figure">
+              <img src="/instruccions/imatges/11-notes-jornada.png" alt="Pantalla per puntuar els jugadors després d’una jornada">
+            </figure>
+          </div>
+          <div class="vlp-card">
+            <span class="vlp-mini-label">Temporada</span>
+            <h3>La pel·lícula completa</h3>
+            <p class="vlp-muted">Acumula les valoracions de totes les jornades i permet consultar notes, titularitats, gols i assistències.</p>
+            <figure class="vlp-figure">
+              <img src="/instruccions/imatges/12-notes-temporada.png" alt="Resum de notes i estadístiques de la temporada">
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="vlp-section vlp-closing">
+        <p class="vlp-kicker">Tot a punt</p>
+        <h2>Ara comença la temporada</h2>
+        <p>Reset. Marcadors a zero per a jugadors i porrerros. Ja saps entrar, fer la porra, enviar-la i seguir-ne tots els detalls.</p>
+        <div class="vlp-actions" style="justify-content:center;">
+          <a class="vlp-button vlp-button--primary" href="https://vesalaporra.cat" target="_blank" rel="noopener">Fer la meva porra</a>
+        </div>
+        <p class="vlp-fineprint">Sort i encerts per a tothom.</p>
+      </section>
+    </div>
+  </div>
+</article>
+<!-- /wp:html -->
