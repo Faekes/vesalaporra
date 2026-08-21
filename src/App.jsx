@@ -8278,6 +8278,20 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   }
 }
 
+.nav-guest-mobile-label {
+  display: none;
+}
+
+@media (max-width: 680px) {
+  .app-header.guest .nav-full-label {
+    display: none;
+  }
+
+  .app-header.guest .nav-guest-mobile-label {
+    display: inline;
+  }
+}
+
 .nav-help-button {
   display: inline-flex;
   align-items: center;
@@ -8421,7 +8435,9 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 }
       `}</style>
 
-      <header className="app-header">
+      <header
+        className={authUser ? "app-header" : "app-header guest"}
+      >
         <div className="brand">
           <span className="brand-mark">V</span>
 
@@ -8441,7 +8457,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               }
               onClick={() => setActivePage("play")}
             >
-              LA PORRA
+              <span className="nav-full-label">LA PORRA</span>
+              <span className="nav-guest-mobile-label">PORRA</span>
             </button>
 
             <button
@@ -8451,7 +8468,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               }
               onClick={() => setActivePage("ranking")}
             >
-              RÀNQUING
+              <span className="nav-full-label">RÀNQUING</span>
+              <span className="nav-guest-mobile-label">RANK</span>
             </button>
 
             <button
@@ -8475,7 +8493,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               }
               onClick={() => setActivePage("notes")}
             >
-              LES NOTES
+              <span className="nav-full-label">LES NOTES</span>
+              <span className="nav-guest-mobile-label">NOTES</span>
             </button>
 
             <button
@@ -12682,6 +12701,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       )}
     </div>
   );
-}
+}  
 
 export default App;
+ 
