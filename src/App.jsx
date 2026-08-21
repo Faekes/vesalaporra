@@ -3246,6 +3246,8 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     useState([]);
   const [privateLeagueMembersLoading, setPrivateLeagueMembersLoading] =
     useState(false);
+  const [privateLeagueRankingTab, setPrivateLeagueRankingTab] =
+    useState("general");
 
   const [officialMatchState, setOfficialMatchState] = useState(() =>
     createEmptyOfficialMatchState(null),
@@ -3789,56 +3791,69 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       (league) => league.id === selectedPrivateLeagueId,
     ) || null;
 
-  const selectedPrivateLeagueRankingRows = privateLeagueMembers
-    .map((member) => {
-      const rankingUser = rankingUsersWithAuth.find(
-        (user) => user.id === member.userId,
-      );
+  const privateLeagueRankingUsers = privateLeagueMembers.map((member) => {
+    const rankingUser = rankingUsersWithAuth.find(
+      (user) => user.id === member.userId,
+    );
 
-      if (rankingUser) {
-        return {
-          ...rankingUser,
-          privateLeagueRole: member.role,
-        };
-      }
-
+    if (rankingUser) {
       return {
-        id: member.userId,
-        authUserId: member.userId,
-        displayName: member.displayName,
-        handle: member.xHandle ? `@${member.xHandle}` : "",
-        handleSlug: member.xHandle,
-        twitterAvatarUrl: member.avatarUrl,
-        twitterUrl: member.xHandle
-          ? `https://x.com/${member.xHandle}`
-          : null,
-        hasXIdentity: Boolean(member.xHandle),
-        isCurrentUser: Boolean(
-          authUser?.id &&
-            String(authUser.id) === member.userId,
-        ),
-        generalPosition: null,
-        generalPreviousPosition: null,
-        generalMovement: null,
-        general: {
-          resultPoints: 0,
-          xiPoints: 0,
-          protagonistPoints: 0,
-          totalPoints: 0,
-        },
-        jornada: {
-          resultPoints: 0,
-          xiPoints: 0,
-          protagonistPoints: 0,
-          totalPoints: 0,
-        },
-        achievementIds: [],
+        ...rankingUser,
         privateLeagueRole: member.role,
       };
-    })
-    .sort((firstUser, secondUser) =>
-      compareRankingUsers(firstUser, secondUser, "general"),
-    );
+    }
+
+    return {
+      id: member.userId,
+      authUserId: member.userId,
+      displayName: member.displayName,
+      handle: member.xHandle ? `@${member.xHandle}` : "",
+      handleSlug: member.xHandle,
+      twitterAvatarUrl: member.avatarUrl,
+      twitterUrl: member.xHandle
+        ? `https://x.com/${member.xHandle}`
+        : null,
+      hasXIdentity: Boolean(member.xHandle),
+      isCurrentUser: Boolean(
+        authUser?.id &&
+          String(authUser.id) === member.userId,
+      ),
+      generalPosition: null,
+      jornadaPosition: null,
+      generalPreviousPosition: null,
+      generalMovement: null,
+      general: {
+        resultPoints: 0,
+        xiPoints: 0,
+        protagonistPoints: 0,
+        totalPoints: 0,
+      },
+      jornada: {
+        resultPoints: 0,
+        xiPoints: 0,
+        protagonistPoints: 0,
+        totalPoints: 0,
+      },
+      achievementIds: [],
+      privateLeagueRole: member.role,
+    };
+  });
+
+  const selectedPrivateLeagueGeneralRankingRows = [
+    ...privateLeagueRankingUsers,
+  ].sort((firstUser, secondUser) =>
+    compareRankingUsers(firstUser, secondUser, "general"),
+  );
+
+  const selectedPrivateLeagueRankingRows = [
+    ...privateLeagueRankingUsers,
+  ].sort((firstUser, secondUser) =>
+    compareRankingUsers(
+      firstUser,
+      secondUser,
+      privateLeagueRankingTab,
+    ),
+  );
 
   const getPrivateLeaguePosition = (leagueId) => {
     if (leagueId !== selectedPrivateLeagueId) {
@@ -3846,7 +3861,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     }
 
     const position =
-      selectedPrivateLeagueRankingRows.findIndex(
+      selectedPrivateLeagueGeneralRankingRows.findIndex(
         (user) => user.isCurrentUser,
       ) + 1;
 
@@ -7046,6 +7061,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       await loadPrivateLeagues({ quiet: true });
 
       if (createdLeague?.id) {
+        setPrivateLeagueRankingTab("general");
         setSelectedPrivateLeagueId(createdLeague.id);
         await loadPrivateLeagueMembers(createdLeague.id);
       }
@@ -7116,6 +7132,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       await loadPrivateLeagues({ quiet: true });
 
       if (joinedLeague?.id) {
+        setPrivateLeagueRankingTab("general");
         setSelectedPrivateLeagueId(joinedLeague.id);
         await loadPrivateLeagueMembers(joinedLeague.id);
       }
@@ -7162,6 +7179,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     }
 
     setSelectedPrivateLeagueId(leagueId);
+    setPrivateLeagueRankingTab("general");
     setPrivateLeagueFeedback(null);
 
     await loadPrivateLeagueMembers(leagueId);
@@ -7827,6 +7845,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         setPrivateLeagueCreateOpen(false);
         setPrivateLeagueJoinOpen(false);
         setPrivateLeagueInfoOpen(false);
+        setPrivateLeagueRankingTab("general");
       }
     });
 
@@ -13696,119 +13715,230 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                           id="private-league-ranking"
                           className="private-league-ranking-section"
                         >
-                          <header className="private-league-ranking-title">
-                            <div>
-                              <span>CLASSIFICACIÓ PRIVADA</span>
-                              <h3>{selectedPrivateLeague.name}</h3>
-                            </div>
-
-                            <div className="private-league-ranking-meta">
-                              <span>
-                                {selectedPrivateLeague.memberCount} CULERS
-                              </span>
-                              <strong>
-                                {selectedPrivateLeague.inviteCode}
-                              </strong>
-                            </div>
-                          </header>
-
-                          {privateLeagueMembersLoading ? (
-                            <div
-                              className="real-data-state empty"
-                              role="status"
+                          <div
+                            className="ranking-tabs private-league-ranking-tabs"
+                            role="tablist"
+                            aria-label={`Classificació de ${selectedPrivateLeague.name}`}
+                          >
+                            <button
+                              type="button"
+                              role="tab"
+                              aria-selected={
+                                privateLeagueRankingTab === "general"
+                              }
+                              className={
+                                privateLeagueRankingTab === "general"
+                                  ? "ranking-tab active"
+                                  : "ranking-tab"
+                              }
+                              onClick={() =>
+                                setPrivateLeagueRankingTab("general")
+                              }
                             >
-                              <strong>
-                                Carregant la classificació...
-                              </strong>
-                              <span>
-                                Només es consulta quan obres aquesta lliga.
-                              </span>
-                            </div>
-                          ) : (
-                            <>
-                              <div
-                                className="ranking-table-head private-league-ranking-head"
-                                aria-hidden="true"
-                              >
-                                <span>POS</span>
-                                <span>CULER</span>
-                                <span>RESULTAT</span>
-                                <span>XI</span>
-                                <span>PROTAGONISTA</span>
-                                <span>PTS</span>
+                              GENERAL
+                            </button>
+
+                            <button
+                              type="button"
+                              role="tab"
+                              aria-selected={
+                                privateLeagueRankingTab === "jornada"
+                              }
+                              className={
+                                privateLeagueRankingTab === "jornada"
+                                  ? "ranking-tab active"
+                                  : "ranking-tab"
+                              }
+                              onClick={() =>
+                                setPrivateLeagueRankingTab("jornada")
+                              }
+                            >
+                              JORNADA
+                            </button>
+                          </div>
+
+                          <section className="ranking-board private-league-ranking-board">
+                            <header className="ranking-board-heading">
+                              <div>
+                                <span>
+                                  {privateLeagueRankingTab === "general"
+                                    ? "CLASSIFICACIÓ GENERAL"
+                                    : rankingJornadaNumber
+                                      ? `JORNADA ${rankingJornadaNumber}`
+                                      : "JORNADA"}
+                                </span>
+                                <strong>{selectedPrivateLeague.name}</strong>
                               </div>
 
-                              <div className="ranking-list">
-                                {selectedPrivateLeagueRankingRows.map(
-                                  (user, index) => {
-                                    const position = index + 1;
-                                    const points = user.general;
-                                    const medal =
-                                      position === 1
-                                        ? "🥇"
-                                        : position === 2
-                                          ? "🥈"
-                                          : position === 3
-                                            ? "🥉"
-                                            : null;
+                              <small className="private-league-board-meta">
+                                {selectedPrivateLeague.memberCount} CULERS
+                                <span aria-hidden="true"> · </span>
+                                CODI {selectedPrivateLeague.inviteCode}
+                              </small>
+                            </header>
 
-                                    const member =
-                                      privateLeagueMembers.find(
-                                        (candidate) =>
-                                          candidate.userId === user.id,
-                                      );
+                            {privateLeagueMembersLoading ? (
+                              <div
+                                className="real-data-state empty"
+                                role="status"
+                              >
+                                <strong>
+                                  Carregant la classificació...
+                                </strong>
+                                <span>
+                                  Només es consulta quan obres aquesta lliga.
+                                </span>
+                              </div>
+                            ) : selectedPrivateLeagueRankingRows.length === 0 ? (
+                              <div className="real-data-state empty">
+                                <strong>
+                                  Encara no hi ha culers en aquesta lliga
+                                </strong>
+                                <span>
+                                  Comparteix el codi d’invitació perquè s’hi
+                                  afegeixin.
+                                </span>
+                              </div>
+                            ) : (
+                              <>
+                                <div
+                                  className="ranking-table-head"
+                                  aria-hidden="true"
+                                >
+                                  <span>POS</span>
+                                  <span>CULER</span>
+                                  <span>RESULTAT</span>
+                                  <span>XI</span>
+                                  <span>PROTAGONISTA</span>
+                                  <span>PTS</span>
+                                </div>
 
-                                    return (
-                                      <article
-                                        key={`${selectedPrivateLeague.id}-${user.id}`}
-                                        className={[
-                                          "ranking-row",
-                                          user.isCurrentUser
-                                            ? "current-user"
-                                            : "",
-                                          position <= 3
-                                            ? "podium"
-                                            : "",
-                                        ]
-                                          .filter(Boolean)
-                                          .join(" ")}
-                                      >
-                                        <span className="ranking-position">
-                                          {medal ? (
-                                            <span aria-hidden="true">
-                                              {medal}
-                                            </span>
-                                          ) : (
-                                            `#${position}`
-                                          )}
-                                        </span>
+                                <div className="ranking-list">
+                                  {selectedPrivateLeagueRankingRows.map(
+                                    (user, index) => {
+                                      const position = index + 1;
+                                      const points =
+                                        user[privateLeagueRankingTab];
+                                      const medal =
+                                        position === 1
+                                          ? "🥇"
+                                          : position === 2
+                                            ? "🥈"
+                                            : position === 3
+                                              ? "🥉"
+                                              : null;
 
-                                        <span className="ranking-identity">
+                                      const member =
+                                        privateLeagueMembers.find(
+                                          (candidate) =>
+                                            candidate.userId === user.id,
+                                        );
+
+                                      return (
+                                        <article
+                                          key={`${selectedPrivateLeague.id}-${privateLeagueRankingTab}-${user.id}`}
+                                          className={[
+                                            "ranking-row",
+                                            "private-league-ranking-row",
+                                            user.isCurrentUser
+                                              ? "current-user"
+                                              : "",
+                                            position <= 3
+                                              ? "podium"
+                                              : "",
+                                          ]
+                                            .filter(Boolean)
+                                            .join(" ")}
+                                        >
+                                          <span className="ranking-position">
+                                            {medal ? (
+                                              <span className="ranking-medal">
+                                                {medal}
+                                              </span>
+                                            ) : (
+                                              position
+                                            )}
+                                          </span>
+
                                           <button
                                             type="button"
-                                            className="ranking-user-link"
+                                            className="ranking-identity"
                                             onClick={() =>
                                               openRankingProfile(user.id)
                                             }
                                           >
-                                            <RankingAvatar
-                                              user={user}
-                                              size="medium"
-                                            />
+                                            <RankingAvatar user={user} />
 
-                                            <span className="ranking-user-copy">
+                                            <span className="ranking-identity-copy">
                                               <strong>
-                                                {user.displayName}
+                                                <span className="ranking-name-text">
+                                                  {user.displayName}
+                                                </span>
+
+                                                {user.privateLeagueRole ===
+                                                  "owner" && (
+                                                  <span
+                                                    className="private-league-captain-armband"
+                                                    aria-label="Capità de la lliga"
+                                                    title="Capità de la lliga"
+                                                  >
+                                                    <span>C</span>
+                                                  </span>
+                                                )}
+
+                                                <RankingAchievementIcons
+                                                  achievements={getRankingAchievements(
+                                                    user,
+                                                  )}
+                                                  className="ranking-row-medals"
+                                                />
+
+                                                {user.isCurrentUser && (
+                                                  <span className="ranking-you-badge">
+                                                    TU
+                                                  </span>
+                                                )}
                                               </strong>
 
-                                              {user.privateLeagueRole ===
-                                                "owner" && (
-                                                <small>
-                                                  CAPITÀ DE LA LLIGA
-                                                </small>
-                                              )}
+                                              {user.hasXIdentity &&
+                                                user.handle && (
+                                                  <small>
+                                                    <span aria-hidden="true">
+                                                      𝕏
+                                                    </span>
+                                                    {user.handle}
+                                                  </small>
+                                                )}
                                             </span>
                                           </button>
+
+                                          <span
+                                            className="ranking-breakdown result"
+                                            data-label="RESULTAT"
+                                          >
+                                            {points.resultPoints}
+                                          </span>
+
+                                          <span
+                                            className="ranking-breakdown xi"
+                                            data-label="XI"
+                                          >
+                                            {points.xiPoints}
+                                          </span>
+
+                                          <span
+                                            className="ranking-breakdown protagonist"
+                                            data-label="PROTAGONISTA"
+                                          >
+                                            {points.protagonistPoints}
+                                          </span>
+
+                                          <strong
+                                            className="ranking-total"
+                                            data-label="PTS"
+                                          >
+                                            {points.totalPoints}
+                                          </strong>
 
                                           {selectedPrivateLeague.memberRole ===
                                             "owner" &&
@@ -13825,57 +13955,28 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                                 disabled={
                                                   privateLeagueActionLoading
                                                 }
+                                                aria-label={`Expulsa ${user.displayName} de la lliga`}
+                                                title={`Expulsa ${user.displayName}`}
                                               >
-                                                EXPULSA
+                                                ×
                                               </button>
                                             )}
-                                        </span>
-
-                                        <span
-                                          className="ranking-breakdown result"
-                                          data-label="RESULTAT"
-                                        >
-                                          {points.resultPoints}
-                                        </span>
-
-                                        <span
-                                          className="ranking-breakdown xi"
-                                          data-label="XI"
-                                        >
-                                          {points.xiPoints}
-                                        </span>
-
-                                        <span
-                                          className="ranking-breakdown protagonist"
-                                          data-label="PROTAGONISTA"
-                                        >
-                                          {points.protagonistPoints}
-                                        </span>
-
-                                        <strong
-                                          className="ranking-total"
-                                          data-label="PTS"
-                                        >
-                                          {points.totalPoints}
-                                        </strong>
-                                      </article>
-                                    );
-                                  },
-                                )}
-                              </div>
-                            </>
-                          )}
+                                        </article>
+                                      );
+                                    },
+                                  )}
+                                </div>
+                              </>
+                            )}
+                          </section>
 
                           <footer className="private-league-ranking-footer">
-                            <div>
-                              <span>
-                                Una porra. Una puntuació. Tantes rivalitats
-                                com vulguis.
-                              </span>
-                            </div>
+                            <span>
+                              La porra es fa sempre des de LA PORRA. Aquí només
+                              canvia contra qui competeixes.
+                            </span>
 
-                            {selectedPrivateLeague.memberRole ===
-                            "owner" ? (
+                            {selectedPrivateLeague.memberRole === "owner" ? (
                               <button
                                 type="button"
                                 className="danger"
