@@ -9210,7 +9210,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   display: none;
 }
 
-@media (max-width: 680px) {
+@media (max-width: 980px) {
   .app-header .nav-full-label {
     display: none;
   }
@@ -9220,7 +9220,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   }
 
   .app-header .main-nav {
-    transform: translateX(14px) !important;
+    transform: none !important;
+    margin-left: 14px !important;
   }
 
   .desktop-only-disqus {
