@@ -9193,11 +9193,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 }
 
 @media (max-width: 680px) {
-  .app-header.guest .nav-full-label {
+  .app-header .nav-full-label {
     display: none;
   }
 
-  .app-header.guest .nav-guest-mobile-label {
+  .app-header .nav-guest-mobile-label {
     display: inline;
   }
 }
