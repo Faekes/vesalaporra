@@ -4007,7 +4007,11 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
   );
 
   const notesSeasonRows = [...seasonNotesRows]
-    .filter((row) => row.player.eligibleForRatings !== false)
+  .filter(
+    (row) =>
+      row?.player &&
+      row.player.eligibleForRatings !== false,
+  )
     .sort(
       (firstRow, secondRow) =>
         secondRow.average - firstRow.average ||
