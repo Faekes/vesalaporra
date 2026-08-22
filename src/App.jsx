@@ -1737,7 +1737,10 @@ const compareMatchNotesRows = (firstRow, secondRow) => {
   return (
     secondRow.average - firstRow.average ||
     secondRow.voteCount - firstRow.voteCount ||
-    firstRow.player.name.localeCompare(secondRow.player.name, "ca")
+    String(firstRow?.player?.name || "").localeCompare(
+  String(secondRow?.player?.name || ""),
+  "ca",
+)
   );
 };
 
@@ -3971,7 +3974,11 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
   };
 
     const notesMatchLiveRows = notesRows
-    .filter((row) => row.player.eligibleForRatings !== false)
+    .filter(
+  (row) =>
+    row?.player &&
+    row.player.eligibleForRatings !== false,
+)
     .map((row) => ({
       ...row,
       ownStars: notesRatingsByPlayerId[row.player.id] ?? row.ownStars,
@@ -4005,7 +4012,10 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       (firstRow, secondRow) =>
         secondRow.average - firstRow.average ||
         secondRow.voteCount - firstRow.voteCount ||
-        firstRow.player.name.localeCompare(secondRow.player.name, "ca"),
+        String(firstRow?.player?.name || "").localeCompare(
+  String(secondRow?.player?.name || ""),
+  "ca",
+),
     );
 
   const visibleNotesRows =
@@ -6805,7 +6815,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         return {
           matchId: normalizedMatch.id,
           playerIds: [...normalizedRows]
-            .filter((row) => row.player.eligibleForRatings !== false)
+            .filter(
+  (row) =>
+    row?.player &&
+    row.player.eligibleForRatings !== false,
+)
             .sort(compareMatchNotesRows)
             .map((row) => row.player.id),
         };
