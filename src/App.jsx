@@ -9423,14 +9423,6 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               </span>
               <span className="nav-help-label">COM JUGAR</span>
             </button>
-                        <a
-              className="nav-button nav-blog-link"
-              href="https://www.elyoya.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              BLOG
-            </a>
 
             {isAdmin && (
               <button
