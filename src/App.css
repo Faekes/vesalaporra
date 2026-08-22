@@ -10180,3 +10180,117 @@ border-color: #f5c542 !important;
 .score-separator {
   color: #f5d34b;
 }
+
+/* =========================================================
+   HEADER · BLOG DIARIOYOYA + NAV MÒBIL COMPACTA
+   ========================================================= */
+
+.nav-blog-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.nav-blog-button:hover,
+.nav-blog-button:focus-visible {
+  text-decoration: none;
+}
+
+/* A l'app instal·lada/PWA, BLOG no forma part de la navegació. */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  .nav-blog-button {
+    display: none !important;
+  }
+}
+
+@media (max-width: 680px) {
+  /* Mateixa navegació compacta tant loguejat com desloguejat. */
+  .app-header .nav-full-label {
+    display: none !important;
+  }
+
+  .app-header .nav-guest-mobile-label {
+    display: inline !important;
+  }
+
+  /* En mòbil, COM JUGAR queda només com a ?. */
+  .app-header .nav-help-button {
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 !important;
+  }
+
+  .app-header .nav-help-label {
+    display: none !important;
+  }
+
+  .app-header .nav-blog-button {
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+}
+
+/* Ajust només per a mòbils estrets sense sessió: hi han de cabre
+   PORRA · NOTES · RANK · ? · BLOG + els tres accessos d'entrada. */
+@media (max-width: 430px) {
+  .app-header.guest {
+    gap: 4px;
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+
+  .app-header.guest .brand-mark {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+    font-size: 15px;
+  }
+
+  .app-header.guest .header-actions {
+    gap: 1px;
+  }
+
+  .app-header.guest .main-nav {
+    gap: 0;
+  }
+
+  .app-header.guest .main-nav .nav-button {
+    padding-right: 3px;
+    padding-left: 3px;
+    font-size: 7.5px;
+    letter-spacing: 0.015em;
+  }
+
+  .app-header.guest .nav-help-button {
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+  }
+
+  .app-header.guest .auth-provider-buttons {
+    gap: 2px;
+  }
+
+  .app-header.guest .auth-provider-button {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    min-height: 30px;
+    padding: 2px;
+  }
+
+  .app-header.guest .auth-provider-button.x {
+    font-size: 15px;
+  }
+
+  .app-header.guest .auth-google-mark,
+  .app-header.guest .auth-avatar {
+    width: 24px;
+    height: 24px;
+    flex-basis: 24px;
+  }
+}
+
