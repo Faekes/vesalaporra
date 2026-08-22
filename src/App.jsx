@@ -9227,7 +9227,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     display: none !important;
   }
 }
-
+@media (max-width: 980px) {
+  .auth-provider-button.disqus {
+    display: none !important;
+  }
+}
 .nav-help-button {
   display: inline-flex;
   align-items: center;
