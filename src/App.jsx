@@ -9220,15 +9220,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   }
 
   .app-header .main-nav {
-    transform: translateX(0);
+    transform: translateX(14px) !important;
   }
 
-  .auth-provider-button.disqus {
-    display: none !important;
-  }
-}
-@media (max-width: 980px) {
-  .auth-provider-button.disqus {
+  .desktop-only-disqus {
     display: none !important;
   }
 }
@@ -9520,15 +9515,15 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 </button>
 
                 <button
-                  type="button"
-                  className="auth-provider-button disqus"
-                  disabled={authLoading || authActionLoading}
-                  onClick={handleDisqusSignIn}
-                  aria-label="Entra amb Disqus"
-                  title="Entra amb Disqus"
-                >
-                  <DisqusMark className="auth-disqus-mark" />
-                </button>
+  type="button"
+  className="auth-provider-button disqus desktop-only-disqus"
+  disabled={authLoading || authActionLoading}
+  onClick={handleDisqusSignIn}
+  aria-label="Entra amb Disqus"
+  title="Entra amb Disqus"
+>
+  <DisqusMark className="auth-disqus-mark" />
+</button>
               </div>
             )}
           </div>
