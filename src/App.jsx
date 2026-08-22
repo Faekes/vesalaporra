@@ -9193,12 +9193,26 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 }
 
 @media (max-width: 680px) {
-  .app-header.guest .nav-full-label {
+  .app-header .nav-full-label {
     display: none;
   }
 
-  .app-header.guest .nav-guest-mobile-label {
+  .app-header .nav-guest-mobile-label {
     display: inline;
+  }
+}
+
+.nav-blog-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  .nav-blog-link {
+    display: none !important;
   }
 }
 
@@ -9423,6 +9437,17 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               </span>
               <span className="nav-help-label">COM JUGAR</span>
             </button>
+
+            <a
+              className="nav-button nav-blog-link"
+              href="https://www.elyoya.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Obre DiarioYoya en una pestanya nova"
+              title="DiarioYoya"
+            >
+              BLOG
+            </a>
 
             {isAdmin && (
               <button
