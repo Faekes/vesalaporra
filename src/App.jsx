@@ -710,6 +710,33 @@ const X_AUTO_LOGIN_COOLDOWN_MS = 15000;
 const VESALAPORRA_ACTIVE_PAGE_STORAGE_KEY =
   "vesalaporra_active_page";
 
+const isVesalaporraInstalledAppContext = () => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const isStandalone = Boolean(
+    window.matchMedia?.("(display-mode: standalone)")?.matches,
+  );
+
+  const isFullscreenApp = Boolean(
+    window.matchMedia?.("(display-mode: fullscreen)")?.matches,
+  );
+
+  const isIosStandalone = window.navigator?.standalone === true;
+
+  const isTrustedWebActivity =
+    typeof document !== "undefined" &&
+    String(document.referrer || "").startsWith("android-app://");
+
+  return Boolean(
+    isStandalone ||
+      isFullscreenApp ||
+      isIosStandalone ||
+      isTrustedWebActivity,
+  );
+};
+
 const VESALAPORRA_PROFILE_TAB_BY_PATH = {
   resum: "overview",
   medalles: "achievements",
@@ -3179,6 +3206,10 @@ function App() {
   ).current;
 
   const routeHistoryReadyRef = useRef(false);
+
+  const [isInstalledAppContext] = useState(() =>
+    isVesalaporraInstalledAppContext(),
+  );
 
   const [activePage, setActivePage] = useState(
     initialRouteState.activePage,
@@ -9374,37 +9405,23 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             <button
               type="button"
               className={
-                activePage === "ranking" ? "nav-button active" : "nav-button"
-              }
-              onClick={() => setActivePage("ranking")}
-            >
-              <span className="nav-full-label">RÀNQUING</span>
-              <span className="nav-guest-mobile-label">RANK</span>
-            </button>
-
-            <button
-              type="button"
-              className={
-                activePage === "profile" ? "nav-button active" : "nav-button"
-              }
-              onClick={() => {
-                setSelectedProfileUserId(authUser?.id ? String(authUser.id) : null);
-                setProfileTab("overview");
-                setActivePage("profile");
-              }}
-            >
-              PERFIL
-            </button>
-
-            <button
-              type="button"
-              className={
                 activePage === "notes" ? "nav-button active" : "nav-button"
               }
               onClick={() => setActivePage("notes")}
             >
               <span className="nav-full-label">LES NOTES</span>
               <span className="nav-guest-mobile-label">NOTES</span>
+            </button>
+
+            <button
+              type="button"
+              className={
+                activePage === "ranking" ? "nav-button active" : "nav-button"
+              }
+              onClick={() => setActivePage("ranking")}
+            >
+              <span className="nav-full-label">RÀNQUING</span>
+              <span className="nav-guest-mobile-label">RANK</span>
             </button>
 
             <button
@@ -9423,6 +9440,19 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               </span>
               <span className="nav-help-label">COM JUGAR</span>
             </button>
+
+            {!isInstalledAppContext && (
+              <a
+                className="nav-button nav-blog-button"
+                href="https://www.diarioyoya.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Obre DiarioYoya en una pestanya nova"
+                title="DiarioYoya"
+              >
+                BLOG
+              </a>
+            )}
 
             {isAdmin && (
               <button
