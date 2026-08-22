@@ -9220,7 +9220,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   }
 
   .app-header .main-nav {
-    transform: translateX(-10px);
+    transform: translateX(0);
+  }
+
+  .auth-provider-button.disqus {
+    display: none !important;
   }
 }
 
