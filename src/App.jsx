@@ -9220,9 +9220,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   }
 
   .app-header .main-nav {
-    transform: none !important;
-    margin-left: 14px !important;
-  }
+  transform: none !important;
+  margin-left: 0 !important;
+  padding-left: 18px !important;
+}
 
   .desktop-only-disqus {
     display: none !important;
@@ -9515,16 +9516,18 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   <GoogleMark className="auth-google-mark" />
                 </button>
 
-                <button
-  type="button"
-  className="auth-provider-button disqus desktop-only-disqus"
-  disabled={authLoading || authActionLoading}
-  onClick={handleDisqusSignIn}
-  aria-label="Entra amb Disqus"
-  title="Entra amb Disqus"
->
-  <DisqusMark className="auth-disqus-mark" />
-</button>
+                {window.matchMedia("(min-width: 981px)").matches && (
+  <button
+    type="button"
+    className="auth-provider-button disqus"
+    disabled={authLoading || authActionLoading}
+    onClick={handleDisqusSignIn}
+    aria-label="Entra amb Disqus"
+    title="Entra amb Disqus"
+  >
+    <DisqusMark className="auth-disqus-mark" />
+  </button>
+)}
               </div>
             )}
           </div>
