@@ -9200,6 +9200,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   .app-header .nav-guest-mobile-label {
     display: inline;
   }
+
+  .app-header .main-nav {
+    transform: translateX(-10px);
+  }
 }
 
 .nav-help-button {
@@ -9422,6 +9426,12 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 ?
               </span>
               <span className="nav-help-label">COM JUGAR</span>
+            </button>
+                        <button
+              type="button"
+              className="nav-button nav-blog-placeholder"
+            >
+              BLOG
             </button>
 
             {isAdmin && (
