@@ -9193,11 +9193,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 }
 
 @media (max-width: 680px) {
-  .app-header.guest .nav-full-label {
+  .app-header .nav-full-label {
     display: none;
   }
 
-  .app-header.guest .nav-guest-mobile-label {
+  .app-header .nav-guest-mobile-label {
     display: inline;
   }
 }
@@ -9423,6 +9423,25 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               </span>
               <span className="nav-help-label">COM JUGAR</span>
             </button>
+
+            {!(
+              typeof window !== "undefined" &&
+              (
+                window.matchMedia?.("(display-mode: standalone)")?.matches ||
+                window.navigator?.standalone === true ||
+                String(document.referrer || "").startsWith("android-app://")
+              )
+            ) && (
+              <a
+                className="nav-button"
+                href="https://www.diarioyoya.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: "none" }}
+              >
+                BLOG
+              </a>
+            )}
 
             {isAdmin && (
               <button
