@@ -182,33 +182,16 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-const criticalStaticDestinations = new Set([
+const staticDestinations = new Set([
   'script',
   'style',
-])
-
-if (
-  criticalStaticDestinations.has(
-    request.destination,
-  )
-) {
-  event.respondWith(
-    networkFirstCriticalAsset(request),
-  )
-
-  return
-}
-
-const cacheFirstStaticDestinations = new Set([
   'image',
   'font',
   'manifest',
 ])
 
 if (
-  cacheFirstStaticDestinations.has(
-    request.destination,
-  )
+  staticDestinations.has(request.destination)
 ) {
   event.respondWith(
     cacheFirstStaticAsset(request),
