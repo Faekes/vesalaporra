@@ -1,5 +1,5 @@
 const VLP_SW_VERSION =
-  'VLP_PWA_PUSH_SERVICE_WORKER_20260716_002'
+  'VLP_PWA_PUSH_SERVICE_WORKER_20260823_003'
 
 const VLP_CACHE_NAME =
   `vesalaporra-pwa-${VLP_SW_VERSION}`
@@ -76,7 +76,9 @@ self.addEventListener('activate', (event) => {
 
 const networkFirstNavigation = async (request) => {
   try {
-    const response = await fetch(request)
+    const response = await fetch(request, {
+  cache: 'no-store',
+})
 
     if (response?.ok) {
       const cache = await caches.open(
@@ -102,6 +104,33 @@ const networkFirstNavigation = async (request) => {
 
     if (cachedRoot) {
       return cachedRoot
+    }
+
+    throw error
+  }
+}
+const networkFirstCriticalAsset = async (request) => {
+  try {
+    const networkResponse = await fetch(request, {
+      cache: 'no-store',
+    })
+
+    if (networkResponse?.ok) {
+      const cache = await caches.open(VLP_CACHE_NAME)
+
+      await cache.put(
+        request,
+        networkResponse.clone(),
+      )
+    }
+
+    return networkResponse
+  } catch (error) {
+    const cachedResponse =
+      await caches.match(request)
+
+    if (cachedResponse) {
+      return cachedResponse
     }
 
     throw error
@@ -153,21 +182,38 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  const staticDestinations = new Set([
-    'script',
-    'style',
-    'image',
-    'font',
-    'manifest',
-  ])
+const criticalStaticDestinations = new Set([
+  'script',
+  'style',
+])
 
-  if (
-    staticDestinations.has(request.destination)
-  ) {
-    event.respondWith(
-      cacheFirstStaticAsset(request),
-    )
-  }
+if (
+  criticalStaticDestinations.has(
+    request.destination,
+  )
+) {
+  event.respondWith(
+    networkFirstCriticalAsset(request),
+  )
+
+  return
+}
+
+const cacheFirstStaticDestinations = new Set([
+  'image',
+  'font',
+  'manifest',
+])
+
+if (
+  cacheFirstStaticDestinations.has(
+    request.destination,
+  )
+) {
+  event.respondWith(
+    cacheFirstStaticAsset(request),
+  )
+}
 })
 
 const parsePushPayload = (event) => {
