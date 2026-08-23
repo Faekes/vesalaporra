@@ -3671,7 +3671,9 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     confirmedPrediction?.lineup?.filter(Boolean).length === 11;
 
   const protagonistIsConfirmed = Boolean(
-    confirmedPrediction?.protagonistId,
+    confirmedPrediction?.protagonistId &&
+      protagonist &&
+      protagonistScoring,
   );
 
   const predictionScoreIsLocked =
@@ -8348,7 +8350,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   }, [activePage, rankingHasMore, rankingRows.length]);
 
   useEffect(() => {
-    if (!protagonistId) {
+    if (!protagonistId || publicMatchPlayers.length === 0) {
       return;
     }
 
@@ -10523,7 +10525,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   }
                   aria-label={
                     protagonistIsConfirmed
-                      ? `${protagonist.name}, protagonista enviat`
+                      ? `${protagonist?.name || "Protagonista"}, protagonista enviat`
                       : protagonistIsComplete
                         ? `Treu ${protagonist.name} com a protagonista`
                         : protagonistSelectionActive
@@ -14410,4 +14412,3 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 }  
 
 export default App;
- 
