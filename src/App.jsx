@@ -9451,11 +9451,20 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               <span className="nav-help-label">COM JUGAR</span>
             </button>
                         <button
-              type="button"
-              className="nav-button nav-blog-placeholder"
-            >
-              BLOG
-            </button>
+  type="button"
+  className="nav-button nav-blog-placeholder"
+  onClick={() =>
+    window.open(
+      "https://www.elyoya.com/",
+      "_blank",
+      "noopener,noreferrer",
+    )
+  }
+  aria-label="Obre el blog El Yoya"
+  title="Blog"
+>
+  BLOG
+</button>
 
             {isAdmin && (
               <button
