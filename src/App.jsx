@@ -3271,6 +3271,8 @@ function App() {
 
   const [confirmedPrediction, setConfirmedPrediction] = useState(null);
 
+  const [predictionEditing, setPredictionEditing] = useState(false);
+
   const [confirmationAnimationActive, setConfirmationAnimationActive] =
     useState(false);
 
@@ -3281,6 +3283,8 @@ function App() {
     });
 
   const confirmationAnimationTimerRef = useRef(null);
+
+  const predictionRevisionBaselineRef = useRef(null);
 
   const protagonistSelectionAreaRef = useRef(null);
 
@@ -3684,14 +3688,28 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       protagonistScoring,
   );
 
+  const predictionCanBeRevised = Boolean(
+    authUser &&
+      resultIsConfirmed &&
+      !countdown.isClosed &&
+      !hasOfficialResult &&
+      matchData.homeMode === "PREDICTIONS_OPEN",
+  );
+
   const predictionScoreIsLocked =
-    resultIsConfirmed || countdown.isClosed || hasOfficialResult;
+    (resultIsConfirmed && !predictionEditing) ||
+    countdown.isClosed ||
+    hasOfficialResult;
 
   const lineupEditingIsLocked =
-    lineupIsConfirmed || countdown.isClosed || hasOfficialResult;
+    (lineupIsConfirmed && !predictionEditing) ||
+    countdown.isClosed ||
+    hasOfficialResult;
 
   const protagonistEditingIsLocked =
-    protagonistIsConfirmed || countdown.isClosed || hasOfficialResult;
+    (protagonistIsConfirmed && !predictionEditing) ||
+    countdown.isClosed ||
+    hasOfficialResult;
 
   const predictionIsComplete =
     resultIsConfirmed && lineupIsConfirmed && protagonistIsConfirmed;
@@ -3700,14 +3718,18 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     (!lineupIsConfirmed && lineupIsComplete) ||
     (!protagonistIsConfirmed && protagonistIsComplete);
 
-  const confirmButtonLabel = predictionIsComplete
-    ? "PRONÒSTIC CONFIRMAT"
-    : matchLoading || predictionLoading
+  const confirmButtonLabel = matchLoading || predictionLoading
       ? "CARREGANT PORRA..."
       : predictionSubmitting
-        ? "CONFIRMANT..."
+        ? predictionEditing
+          ? "GUARDANT CANVIS..."
+          : "CONFIRMANT..."
         : countdown.isClosed
           ? "PORRA TANCADA"
+          : predictionEditing
+            ? "GUARDA ELS CANVIS"
+            : predictionIsComplete
+              ? "PRONÒSTIC CONFIRMAT"
           : !authLoading && !authUser
             ? "ENTRA PER CONFIRMAR"
             : resultIsConfirmed
@@ -6070,6 +6092,61 @@ const saveAdminMatchPlayer = async (player, patch) => {
     });
   };
 
+  const restorePredictionRevisionBaseline = () => {
+    const baseline = predictionRevisionBaselineRef.current;
+
+    if (!baseline) {
+      return;
+    }
+
+    setBarcaScore(baseline.barcaScore);
+    setRivalScore(baseline.rivalScore);
+    setScoreTouched(baseline.scoreTouched);
+    setLineup([...baseline.lineup]);
+    setProtagonistId(baseline.protagonistId);
+    setProtagonistSelectionActive(false);
+    setProtagonistPreviewId(null);
+    protagonistInputTypeRef.current = "mouse";
+    protagonistTouchPreviewIdRef.current = null;
+    setSelectedSlotIndex(null);
+    setSelectedPlayerId(null);
+    setConfirmationMode("prediction");
+    setConfirmationDialogOpen(false);
+    predictionRevisionBaselineRef.current = null;
+  };
+
+  const handleTogglePredictionRevision = () => {
+    if (predictionSubmitting || predictionLoading || matchLoading) {
+      return;
+    }
+
+    if (predictionEditing) {
+      restorePredictionRevisionBaseline();
+      setPredictionEditing(false);
+      return;
+    }
+
+    if (!predictionCanBeRevised) {
+      return;
+    }
+
+    predictionRevisionBaselineRef.current = {
+      barcaScore,
+      rivalScore,
+      scoreTouched,
+      lineup: [...lineup],
+      protagonistId,
+    };
+
+    setPredictionEditing(true);
+    setConfirmationMode("revision");
+    setConfirmationDialogOpen(false);
+    setConfirmationAnimationActive(false);
+    setSelectedSlotIndex(null);
+    setSelectedPlayerId(null);
+    clearProtagonistSelectionMode();
+  };
+
   const handleConfirmResultOnly = (event) => {
     if (
       resultIsConfirmed ||
@@ -6097,7 +6174,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
   const handleConfirmPrediction = (event) => {
     if (
-      predictionIsComplete ||
+      (predictionIsComplete && !predictionEditing) ||
       predictionLoading ||
       predictionSubmitting ||
       matchLoading ||
@@ -6106,7 +6183,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
       !scoreTouched ||
       authLoading ||
       authActionLoading ||
-      (resultIsConfirmed && !hasNewSectionToSubmit)
+      (resultIsConfirmed &&
+        !predictionEditing &&
+        !hasNewSectionToSubmit)
     ) {
       return;
     }
@@ -6117,7 +6196,9 @@ const saveAdminMatchPlayer = async (player, patch) => {
     }
 
     rememberPredictionCelebrationOrigin(event?.currentTarget);
-    setConfirmationMode("prediction");
+    setConfirmationMode(
+      predictionEditing ? "revision" : "prediction",
+    );
     setConfirmationDialogOpen(true);
   };
 
@@ -6126,19 +6207,26 @@ const saveAdminMatchPlayer = async (player, patch) => {
       return;
     }
 
-    setConfirmationMode("prediction");
+    setConfirmationMode(
+      predictionEditing ? "revision" : "prediction",
+    );
     setConfirmationDialogOpen(false);
   };
 
   const handleFinalizePrediction = async () => {
+    const isRevisionSubmission =
+      predictionEditing && confirmationMode === "revision";
+
     if (
       !authUser ||
       !matchData.id ||
       predictionSubmitting ||
       countdown.isClosed ||
       !scoreTouched ||
-      predictionIsComplete ||
-      (resultIsConfirmed &&
+      (predictionIsComplete && !isRevisionSubmission) ||
+      (isRevisionSubmission && !predictionCanBeRevised) ||
+      (!isRevisionSubmission &&
+        resultIsConfirmed &&
         !hasNewSectionToSubmit &&
         confirmationMode !== "result-only")
     ) {
@@ -6162,17 +6250,24 @@ const saveAdminMatchPlayer = async (player, patch) => {
           ? protagonistId || null
           : null;
 
+      const submissionRpc = isRevisionSubmission
+        ? "vesalaporra_revise_prediction"
+        : "vesalaporra_submit_prediction";
+
+      const submissionAuditId = isRevisionSubmission
+        ? `VLP_UI_PREDICTION_REVISION_20260824_001_${crypto.randomUUID()}`
+        : `VLP_UI_INCREMENTAL_PREDICTION_20260725_061_${crypto.randomUUID()}`;
+
       const { data: submitPayload, error: submitError } =
         await supabase.rpc(
-          "vesalaporra_submit_prediction",
+          submissionRpc,
           {
             p_match_id: matchData.id,
             p_barcelona_goals: barcaScore,
             p_opponent_goals: rivalScore,
             p_lineup_player_ids: submittedLineup,
             p_protagonist_player_id: submittedProtagonistId,
-            p_audit_id:
-              `VLP_UI_INCREMENTAL_PREDICTION_20260725_061_${crypto.randomUUID()}`,
+            p_audit_id: submissionAuditId,
           },
         );
 
@@ -6182,33 +6277,66 @@ const saveAdminMatchPlayer = async (player, patch) => {
 
       const submitStatus = submitPayload?.status;
 
-      if (
-        submitStatus !== "PREDICTION_CONFIRMED" &&
-        submitStatus !== "PREDICTION_COMPLETED" &&
-        submitStatus !== "PREDICTION_ALREADY_CONFIRMED"
-      ) {
+      const acceptedStatuses = isRevisionSubmission
+        ? ["PREDICTION_REVISED", "PREDICTION_UNCHANGED"]
+        : [
+            "PREDICTION_CONFIRMED",
+            "PREDICTION_COMPLETED",
+            "PREDICTION_ALREADY_CONFIRMED",
+          ];
+
+      if (!acceptedStatuses.includes(submitStatus)) {
         throw new Error(
-          `Resposta inesperada confirmant la porra: ${
+          `Resposta inesperada guardant la porra: ${
             submitStatus || "sense estat"
           }.`,
         );
       }
 
-      const { data: predictionRows, error: readError } =
-        await supabase.rpc(
-          "vesalaporra_my_prediction",
-          {
-            p_match_id: matchData.id,
-          },
-        );
+      let savedPrediction;
 
-      if (readError) {
-        throw readError;
+      if (isRevisionSubmission) {
+        savedPrediction = {
+          prediction_id: submitPayload.prediction_id,
+          match_id: submitPayload.match_id || matchData.id,
+          confirmed_at:
+            submitPayload.confirmed_at ||
+            confirmedPrediction?.confirmedAt ||
+            null,
+          predicted_barcelona_goals:
+            submitStatus === "PREDICTION_UNCHANGED"
+              ? barcaScore
+              : submitPayload.predicted_barcelona_goals,
+          predicted_opponent_goals:
+            submitStatus === "PREDICTION_UNCHANGED"
+              ? rivalScore
+              : submitPayload.predicted_opponent_goals,
+          lineup_player_ids:
+            submitStatus === "PREDICTION_UNCHANGED"
+              ? submittedLineup
+              : submitPayload.lineup_player_ids || [],
+          protagonist_player_id:
+            submitStatus === "PREDICTION_UNCHANGED"
+              ? submittedProtagonistId
+              : submitPayload.protagonist_player_id || null,
+        };
+      } else {
+        const { data: predictionRows, error: readError } =
+          await supabase.rpc(
+            "vesalaporra_my_prediction",
+            {
+              p_match_id: matchData.id,
+            },
+          );
+
+        if (readError) {
+          throw readError;
+        }
+
+        savedPrediction = Array.isArray(predictionRows)
+          ? predictionRows[0]
+          : predictionRows;
       }
-
-      const savedPrediction = Array.isArray(predictionRows)
-        ? predictionRows[0]
-        : predictionRows;
 
       if (!savedPrediction?.prediction_id) {
         throw new Error(
@@ -6234,21 +6362,27 @@ const saveAdminMatchPlayer = async (player, patch) => {
         lineup: restoredLineup,
         protagonistId:
           savedPrediction.protagonist_player_id || null,
-        submissionMode: confirmationMode,
+        submissionMode: isRevisionSubmission
+          ? "revision"
+          : confirmationMode,
       };
 
       setBarcaScore(predictionSnapshot.barcaScore);
       setRivalScore(predictionSnapshot.rivalScore);
       setScoreTouched(true);
       setLineup(
-        restoredLineup.filter(Boolean).length === 11
+        isRevisionSubmission
+          ? restoredLineup
+          : restoredLineup.filter(Boolean).length === 11
           ? restoredLineup
           : lineupDraftBeforeSubmit,
       );
       setProtagonistId(
-        predictionSnapshot.protagonistId ||
-          protagonistDraftBeforeSubmit ||
-          null,
+        isRevisionSubmission
+          ? predictionSnapshot.protagonistId
+          : predictionSnapshot.protagonistId ||
+              protagonistDraftBeforeSubmit ||
+              null,
       );
       setProtagonistSelectionActive(false);
       setProtagonistPreviewId(null);
@@ -6256,36 +6390,40 @@ const saveAdminMatchPlayer = async (player, patch) => {
       protagonistTouchPreviewIdRef.current = null;
       setConfirmedPrediction(predictionSnapshot);
       setPredictionConfirmed(true);
+      setPredictionEditing(false);
+      predictionRevisionBaselineRef.current = null;
       setConfirmationMode("prediction");
       setConfirmationDialogOpen(false);
       setSelectedSlotIndex(null);
       setSelectedPlayerId(null);
       setConfirmationAnimationActive(false);
 
-      window.requestAnimationFrame(() => {
-        setConfirmationAnimationActive(true);
-      });
+      if (!isRevisionSubmission) {
+        window.requestAnimationFrame(() => {
+          setConfirmationAnimationActive(true);
+        });
 
-      if (confirmationAnimationTimerRef.current) {
-        window.clearTimeout(
-          confirmationAnimationTimerRef.current,
-        );
+        if (confirmationAnimationTimerRef.current) {
+          window.clearTimeout(
+            confirmationAnimationTimerRef.current,
+          );
+        }
+
+        confirmationAnimationTimerRef.current =
+          window.setTimeout(() => {
+            setConfirmationAnimationActive(false);
+            confirmationAnimationTimerRef.current = null;
+          }, PREDICTION_CELEBRATION_MS);
       }
-
-      confirmationAnimationTimerRef.current =
-        window.setTimeout(() => {
-          setConfirmationAnimationActive(false);
-          confirmationAnimationTimerRef.current = null;
-        }, PREDICTION_CELEBRATION_MS);
     } catch (error) {
       console.warn(
-        "No s’ha pogut confirmar el pronòstic real:",
+        "No s’ha pogut guardar el pronòstic real:",
         error,
       );
 
       setAuthError(
         error?.message ||
-          "No s’ha pogut confirmar la porra. Torna-ho a provar.",
+          "No s’ha pogut guardar la porra. Torna-ho a provar.",
       );
     } finally {
       setPredictionSubmitting(false);
@@ -8018,6 +8156,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       setSelectedPlayerId(null);
       setPredictionConfirmed(false);
       setConfirmedPrediction(null);
+      setPredictionEditing(false);
+      predictionRevisionBaselineRef.current = null;
       setConfirmationMode("prediction");
       setConfirmationDialogOpen(false);
       setConfirmationAnimationActive(false);
@@ -8097,6 +8237,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         protagonistTouchPreviewIdRef.current = null;
         setConfirmedPrediction(predictionSnapshot);
         setPredictionConfirmed(true);
+        setPredictionEditing(false);
+        predictionRevisionBaselineRef.current = null;
       } catch (error) {
         console.warn(
           "No s’ha pogut recuperar el pronòstic real:",
@@ -8165,6 +8307,25 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   }, [
     matchData.predictionsCloseAt,
     matchData.serverClockOffsetMs,
+  ]);
+
+  useEffect(() => {
+    if (
+      !predictionEditing ||
+      (!countdown.isClosed &&
+        !hasOfficialResult &&
+        matchData.homeMode === "PREDICTIONS_OPEN")
+    ) {
+      return;
+    }
+
+    restorePredictionRevisionBaseline();
+    setPredictionEditing(false);
+  }, [
+    predictionEditing,
+    countdown.isClosed,
+    hasOfficialResult,
+    matchData.homeMode,
   ]);
 
   useEffect(() => {
@@ -9556,11 +9717,13 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     ? "TANCADA"
                     : hasOfficialResult
                       ? "FINAL"
-                      : resultIsConfirmed
-                      ? "ENVIAT"
-                      : scoreTouched
-                        ? "FET"
-                        : "PENDENT"}
+                      : predictionEditing
+                        ? "EDITANT"
+                        : resultIsConfirmed
+                          ? "ENVIAT"
+                          : scoreTouched
+                            ? "FET"
+                            : "PENDENT"}
                 </span>
               </div>
 
@@ -9889,19 +10052,26 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       : "result-only-button"
                   }
                   disabled={
-                    !scoreTouched ||
                     matchLoading ||
                     predictionLoading ||
                     predictionSubmitting ||
                     countdown.isClosed ||
                     authLoading ||
                     authActionLoading ||
-                    resultIsConfirmed
+                    (resultIsConfirmed
+                      ? !predictionCanBeRevised
+                      : !scoreTouched)
                   }
-                  onClick={handleConfirmResultOnly}
+                  onClick={
+                    resultIsConfirmed
+                      ? handleTogglePredictionRevision
+                      : handleConfirmResultOnly
+                  }
                 >
-                  {resultIsConfirmed
-                    ? "✓ RESULTAT ENVIAT"
+                  {predictionEditing
+                    ? "CANCEL·LA LA RECTIFICACIÓ"
+                    : resultIsConfirmed
+                    ? "✓ PORRA ENVIADA · ✎ RECTIFICA"
                     : "NOMÉS VULL PRONOSTICAR EL RESULTAT"}
                 </button>
               </div>
@@ -9945,12 +10115,16 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                 <span
                   className={
-                    lineupIsConfirmed || lineupIsComplete
+                    (predictionEditing
+                      ? lineupIsComplete
+                      : lineupIsConfirmed || lineupIsComplete)
                       ? "lineup-counter completed"
                       : "lineup-counter"
                   }
                 >
-                  {lineupIsConfirmed
+                  {predictionEditing
+                    ? `EDITANT · ${lineupCount} / 11`
+                    : lineupIsConfirmed
                     ? "ENVIADA · 11 / 11"
                     : lineupIsComplete
                       ? "FET · 11 / 11"
@@ -10365,12 +10539,18 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                 <span
                   className={
-                    protagonistIsConfirmed || protagonistIsComplete
+                    (predictionEditing
+                      ? protagonistIsComplete
+                      : protagonistIsConfirmed || protagonistIsComplete)
                       ? "status-pill completed"
                       : "status-pill"
                   }
                 >
-                  {protagonistIsConfirmed
+                  {predictionEditing
+                    ? protagonistIsComplete
+                      ? "EDITANT"
+                      : "OPCIONAL"
+                    : protagonistIsConfirmed
                     ? "ENVIAT"
                     : protagonistIsComplete
                       ? "FET"
@@ -10436,7 +10616,9 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   "protagonist-combined-rule",
                   protagonistSelectionActive ? "selector-active" : "",
                   protagonistIsComplete ? "selector-selected" : "",
-                  protagonistIsConfirmed ? "selector-confirmed" : "",
+                  protagonistIsConfirmed && !predictionEditing
+                    ? "selector-confirmed"
+                    : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
@@ -10447,21 +10629,22 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     "protagonist-selector-button",
                     protagonistSelectionActive ? "active" : "",
                     protagonistIsComplete ? "selected" : "",
-                    protagonistIsConfirmed ? "confirmed" : "",
+                    protagonistIsConfirmed && !predictionEditing
+                      ? "confirmed"
+                      : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
                   disabled={
-                    protagonistIsConfirmed ||
-                    predictionSubmitting ||
-                    countdown.isClosed
+                    protagonistEditingIsLocked ||
+                    predictionSubmitting
                   }
                   onClick={handleProtagonistSelectorClick}
                   aria-pressed={
                     protagonistSelectionActive || protagonistIsComplete
                   }
                   aria-label={
-                    protagonistIsConfirmed
+                    protagonistIsConfirmed && !predictionEditing
                       ? `${protagonist?.name || "Protagonista"}, protagonista enviat`
                       : protagonistIsComplete
                         ? `Treu ${protagonist.name} com a protagonista`
@@ -10493,7 +10676,13 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                 <div className="protagonist-combined-copy">
                   <span>
-                    {protagonistIsConfirmed
+                    {predictionEditing
+                      ? protagonistIsComplete
+                        ? "EDITANT APOSTA"
+                        : protagonistSelectionActive
+                          ? "MODE PROTAGONISTA ACTIU"
+                          : ""
+                      : protagonistIsConfirmed
                       ? "APOSTA ENVIADA"
                       : protagonistIsComplete
                         ? "PROTAGONISTA ESCOLLIT"
@@ -10507,7 +10696,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   <small>
                     {protagonistIsComplete
                       ? `${protagonist.name} · +${protagonistScoring.hitPoints} si marca o assisteix · ${protagonistScoring.missPoints} si no participa en cap gol.${
-                          protagonistIsConfirmed
+                          protagonistIsConfirmed && !predictionEditing
                             ? " Ja no es pot canviar."
                             : " Clica el cromo amb estrella per desfer."
                         }`
@@ -10526,7 +10715,13 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     .filter(Boolean)
                     .join(" ")}
                 >
-                  {protagonistIsConfirmed
+                  {predictionEditing
+                    ? protagonistIsComplete
+                      ? "EDITANT"
+                      : protagonistSelectionActive
+                        ? "TRIA UNA XAPA"
+                        : "OPCIONAL"
+                    : protagonistIsConfirmed
                     ? "ENVIAT"
                     : protagonistIsComplete
                       ? "ESCOLLIT"
@@ -10541,8 +10736,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               className={[
                 "confirm-section",
                 confirmationDialogOpen ? "confirming" : "",
-                predictionIsComplete ? "confirmed" : "",
-                resultIsConfirmed && !predictionIsComplete ? "partial" : "",
+                predictionIsComplete && !predictionEditing
+                  ? "confirmed"
+                  : "",
+                resultIsConfirmed &&
+                !predictionIsComplete &&
+                !predictionEditing
+                  ? "partial"
+                  : "",
               ]
                 .filter(Boolean)
                 .join(" ")}
@@ -10631,8 +10832,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   countdown.isClosed ||
                   authLoading ||
                   authActionLoading ||
-                  predictionIsComplete ||
-                  (resultIsConfirmed && !hasNewSectionToSubmit)
+                  (predictionIsComplete && !predictionEditing) ||
+                  (resultIsConfirmed &&
+                    !predictionEditing &&
+                    !hasNewSectionToSubmit)
                 }
                 onClick={handleConfirmPrediction}
               >
@@ -14122,14 +14325,22 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             aria-describedby="prediction-confirm-dialog-description"
           >
             <span className="prediction-confirm-dialog-kicker">
-              CONFIRMACIÓ DEFINITIVA
+              {confirmationMode === "revision"
+                ? "RECTIFICACIÓ DE LA PORRA"
+                : "CONFIRMACIÓ DEFINITIVA"}
             </span>
 
-            <h2 id="prediction-confirm-dialog-title">N’ESTÀS SEGUR?</h2>
+            <h2 id="prediction-confirm-dialog-title">
+              {confirmationMode === "revision"
+                ? "GUARDAR ELS CANVIS?"
+                : "N’ESTÀS SEGUR?"}
+            </h2>
 
             <p id="prediction-confirm-dialog-description">
               {confirmationMode === "result-only"
                 ? "El resultat quedarà bloquejat. Podràs tornar abans del tancament per afegir la Lotto Flick i el protagonista."
+                : confirmationMode === "revision"
+                  ? "Aquests canvis substituiran la porra enviada. La versió anterior quedarà registrada i no es podrà guardar res quan s’esgoti el termini."
                 : resultIsConfirmed
                   ? "Només s’afegiran els apartats nous. Tot el que ja havies enviat continuarà bloquejat."
                   : "Cada apartat que enviïs quedarà bloquejat. Els que deixis buits els podràs afegir abans del tancament."}
@@ -14145,16 +14356,24 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               ) : (
                 <>
                   <span>
-                    {lineupIsConfirmed
-                      ? "XI JA ENVIADA"
+                    {confirmationMode === "revision"
+                      ? lineupIsComplete
+                        ? "XI 11/11"
+                        : "SENSE XI"
+                      : lineupIsConfirmed
+                        ? "XI JA ENVIADA"
                       : lineupIsComplete
                         ? "XI 11/11"
                         : "SENSE XI"}
                   </span>
 
                   <span>
-                    {protagonistIsConfirmed
-                      ? `PROTAGONISTA JA ENVIAT`
+                    {confirmationMode === "revision"
+                      ? protagonistIsComplete
+                        ? `PROTAGONISTA ${protagonist.shortName.toUpperCase()}`
+                        : "SENSE PROTAGONISTA"
+                      : protagonistIsConfirmed
+                        ? `PROTAGONISTA JA ENVIAT`
                       : protagonistIsComplete
                         ? `PROTAGONISTA ${protagonist.shortName.toUpperCase()}`
                         : "SENSE PROTAGONISTA"}
@@ -14171,9 +14390,13 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 disabled={predictionSubmitting}
               >
                 {predictionSubmitting
-                  ? "CONFIRMANT..."
+                  ? confirmationMode === "revision"
+                    ? "GUARDANT..."
+                    : "CONFIRMANT..."
                   : confirmationMode === "result-only"
                     ? "SÍ, ENVIA EL RESULTAT"
+                    : confirmationMode === "revision"
+                      ? "SÍ, GUARDA ELS CANVIS"
                     : "SÍ, CONFIRMA’L"}
               </button>
 
