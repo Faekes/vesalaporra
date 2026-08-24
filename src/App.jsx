@@ -331,10 +331,6 @@ function TeamColorBadge({
 
 const EMPTY_MATCH_DATA = {
   id: null,
-  homeMode: "EMPTY",
-  serverNow: null,
-  serverClockOffsetMs: 0,
-  decisionReason: "",
   homeTeamId: "barcelona",
   homeName: "Barça",
   homeLocation: "",
@@ -351,7 +347,6 @@ const EMPTY_MATCH_DATA = {
   predictionsCloseAt: null,
   predictionsAreOpen: false,
   isUpcomingPreview: false,
-  officialHandoffAt: null,
   pointsMultiplier: 1,
 };
 
@@ -673,10 +668,7 @@ const normalizeCurrentMatch = (row) => {
   };
 };
 
-const getCountdown = (
-  predictionsCloseAt,
-  currentTimeMs = Date.now(),
-) => {
+const getCountdown = (predictionsCloseAt) => {
   if (!predictionsCloseAt) {
     return {
       days: 0,
@@ -689,7 +681,7 @@ const getCountdown = (
 
   const remainingMilliseconds = Math.max(
     0,
-    new Date(predictionsCloseAt).getTime() - currentTimeMs,
+    new Date(predictionsCloseAt).getTime() - Date.now(),
   );
 
   const totalSeconds = Math.floor(remainingMilliseconds / 1000);
@@ -2588,8 +2580,11 @@ function RatingStars({ value, onRate, readOnly = false }) {
 const VESALAPORRA_CURRENT_MATCH_ID =
   import.meta.env.VITE_VESALAPORRA_CURRENT_MATCH_ID || null;
 
-const VESALAPORRA_PUBLIC_HOME_STATE_RPC =
-  "vesalaporra_public_home_state_v1";
+const VESALAPORRA_PUBLIC_CURRENT_MATCH_RPC =
+  "vesalaporra_public_current_match_v2";
+
+const VESALAPORRA_PUBLIC_NEXT_MATCH_RPC =
+  "vesalaporra_public_next_match_v1";
 
 const VESALAPORRA_ADMIN_MATCH_LIST_RPC =
   "vesalaporra_admin_list_matches_v3";
@@ -4427,81 +4422,179 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     setPublicMatchPlayers(normalizedRows);
   };
 
-  const refreshPublicCurrentMatch = async ({ quiet = false } = {}) => {
+      const refreshPublicCurrentMatch = async ({ quiet = false } = {}) => {
     if (!quiet) {
       setMatchLoading(true);
     }
 
     try {
-      const { data, error } = await supabase.rpc(
-        VESALAPORRA_PUBLIC_HOME_STATE_RPC,
-      );
+      const { data: currentData, error: currentError } =
+        await supabase.rpc(
+          VESALAPORRA_PUBLIC_CURRENT_MATCH_RPC,
+        );
 
-      if (error) {
-        throw error;
+      if (currentError) {
+        throw currentError;
       }
 
-      const homeStateRow = Array.isArray(data) ? data[0] : data;
+      const currentMatchRow = Array.isArray(currentData)
+        ? currentData[0]
+        : currentData;
 
-      const homeMode = firstNonEmptyText(
-        homeStateRow?.home_mode,
-        "EMPTY",
-      ).toUpperCase();
+      let displayedMatchRow = currentMatchRow;
+      let officialHandoffAt = null;
+      let isHoldingScoredMatch = false;
 
-      const serverNow = homeStateRow?.server_now || null;
-      const serverNowTimestamp = serverNow
-        ? new Date(serverNow).getTime()
-        : Number.NaN;
+      try {
+        const { data: latestScoredData, error: latestScoredError } =
+          await supabase.rpc(
+            VESALAPORRA_PUBLIC_LATEST_SCORED_MATCH_RPC,
+          );
 
-      const serverClockOffsetMs = Number.isFinite(serverNowTimestamp)
-        ? serverNowTimestamp - Date.now()
-        : 0;
+        if (latestScoredError) {
+          throw latestScoredError;
+        }
 
-      const displayedMatchRow = homeStateRow?.focus_match || null;
+        const latestScoredMatchId = Array.isArray(latestScoredData)
+          ? firstNonEmptyText(
+              latestScoredData[0]?.match_id,
+              latestScoredData[0]?.id,
+              latestScoredData[0],
+            )
+          : firstNonEmptyText(
+              latestScoredData?.match_id,
+              latestScoredData?.id,
+              latestScoredData,
+            );
+
+        if (latestScoredMatchId) {
+          const [
+            { data: scoredMatchCardData, error: scoredMatchCardError },
+            ratingsStatePayload,
+          ] = await Promise.all([
+            supabase.rpc(
+              VESALAPORRA_PUBLIC_SCORED_MATCH_CARD_RPC,
+              {
+                p_match_id: latestScoredMatchId,
+              },
+            ),
+            callRpcWithPayloadFallbacks(
+              VESALAPORRA_PUBLIC_MATCH_RATINGS_STATE_RPC,
+              [
+                { p_match_id: latestScoredMatchId },
+                { match_id: latestScoredMatchId },
+              ],
+            ),
+          ]);
+
+          if (scoredMatchCardError) {
+            throw scoredMatchCardError;
+          }
+
+          const scoredMatchRow =
+            unwrapRpcRows(
+              scoredMatchCardData,
+              ["match", "card", "rows"],
+            )[0] || null;
+
+          const ratingsStateRow =
+            unwrapRpcRows(
+              ratingsStatePayload,
+              ["state", "match", "rows"],
+            )[0] || {};
+
+          const scoredMatchId = firstNonEmptyText(
+            scoredMatchRow?.match_id,
+            latestScoredMatchId,
+          );
+
+          const ratingsStatus = firstNonEmptyText(
+            ratingsStateRow?.ratings_status,
+            scoredMatchRow?.ratings_status,
+          ).toLowerCase();
+
+          const ratingsCloseAt = firstNonEmptyText(
+            ratingsStateRow?.ratings_close_at,
+            scoredMatchRow?.ratings_close_at,
+          );
+
+          const ratingsCloseTimestamp = ratingsCloseAt
+            ? new Date(ratingsCloseAt).getTime()
+            : Number.NaN;
+
+          const ratingsAreClosed =
+            ratingsStatus === "closed" ||
+            (Number.isFinite(ratingsCloseTimestamp) &&
+              Date.now() >= ratingsCloseTimestamp);
+
+          if (scoredMatchId && !ratingsAreClosed) {
+            displayedMatchRow = {
+              ...scoredMatchRow,
+              ...ratingsStateRow,
+              match_id: scoredMatchId,
+              ratings_close_at: ratingsCloseAt || null,
+              ratings_status: ratingsStatus || null,
+            };
+
+            officialHandoffAt = ratingsCloseAt || null;
+            isHoldingScoredMatch = true;
+          }
+        }
+      } catch (handoffError) {
+        console.warn(
+          "No s’ha pogut comprovar el relleu oficial segons Les Notes:",
+          handoffError,
+        );
+      }
+
+      let isUpcomingPreview = Boolean(
+        !isHoldingScoredMatch &&
+          displayedMatchRow?.match_id &&
+          !displayedMatchRow?.predictions_are_open &&
+          displayedMatchRow?.predictions_open_at &&
+          new Date(displayedMatchRow.predictions_open_at).getTime() >
+            Date.now(),
+      );
 
       if (!displayedMatchRow?.match_id) {
-        const emptyMatch = {
-          ...EMPTY_MATCH_DATA,
-          homeMode,
-          serverNow,
-          serverClockOffsetMs,
-          decisionReason: firstNonEmptyText(
-            homeStateRow?.decision_reason,
-          ),
-        };
+        const { data: nextData, error: nextError } =
+          await supabase.rpc(
+            VESALAPORRA_PUBLIC_NEXT_MATCH_RPC,
+          );
 
-        setMatchData(emptyMatch);
-        setCountdown(getCountdown(null));
+        if (nextError) {
+          throw nextError;
+        }
 
-        return emptyMatch;
+        displayedMatchRow = Array.isArray(nextData)
+          ? nextData[0]
+          : nextData;
+
+        isUpcomingPreview = Boolean(
+          displayedMatchRow?.match_id &&
+            !displayedMatchRow?.predictions_are_open,
+        );
+      }
+
+      if (!displayedMatchRow?.match_id) {
+        throw new Error("No hi ha cap proper partit programat.");
       }
 
       const baseMatch = normalizeCurrentMatch(displayedMatchRow);
-      const isUpcomingPreview = homeMode === "UPCOMING";
-      const isScoredMatch = homeMode === "MATCH_SCORED";
-
       const pointsMultipliers = await loadMatchPointsMultipliers(
         baseMatch.id,
       );
 
       const normalizedMatch = {
         ...baseMatch,
-        homeMode,
-        serverNow,
-        serverClockOffsetMs,
-        decisionReason: firstNonEmptyText(
-          homeStateRow?.decision_reason,
-        ),
-        predictionsAreOpen:
-          homeMode === "PREDICTIONS_OPEN" &&
-          baseMatch.predictionsAreOpen,
+        predictionsAreOpen: isUpcomingPreview
+          ? false
+          : baseMatch.predictionsAreOpen,
         predictionsCloseAt: isUpcomingPreview
           ? null
           : baseMatch.predictionsCloseAt,
         isUpcomingPreview,
-        officialHandoffAt: isScoredMatch
-          ? baseMatch.ratingsCloseAt
-          : null,
+        officialHandoffAt,
         pointsMultiplier: normalizePointsMultiplier(
           pointsMultipliers[baseMatch.id],
         ),
@@ -4509,10 +4602,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
 
       setMatchData(normalizedMatch);
       setCountdown(
-        getCountdown(
-          normalizedMatch.predictionsCloseAt,
-          Date.now() + serverClockOffsetMs,
-        ),
+        getCountdown(normalizedMatch.predictionsCloseAt),
       );
 
       return normalizedMatch;
@@ -8020,11 +8110,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       setConfirmationAnimationActive(false);
     };
 
-    if (
-      !authUser ||
-      !matchData.id ||
-      matchData.homeMode === "MATCH_SCORED"
-    ) {
+    if (!authUser || !matchData.id) {
       resetPredictionDraft();
       setPredictionLoading(false);
 
@@ -8119,7 +8205,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     return () => {
       isCurrent = false;
     };
-  }, [authUser?.id, matchData.id, matchData.homeMode]);
+  }, [authUser?.id, matchData.id]);
 
   useEffect(
     () => () => {
@@ -8132,10 +8218,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
      useEffect(() => {
     setCountdown(
-      getCountdown(
-        matchData.predictionsCloseAt,
-        Date.now() + matchData.serverClockOffsetMs,
-      ),
+      getCountdown(matchData.predictionsCloseAt),
     );
 
     if (!matchData.predictionsCloseAt) {
@@ -8144,19 +8227,13 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
     const countdownInterval = window.setInterval(() => {
       setCountdown(
-        getCountdown(
-          matchData.predictionsCloseAt,
-          Date.now() + matchData.serverClockOffsetMs,
-        ),
+        getCountdown(matchData.predictionsCloseAt),
       );
     }, 1000);
 
     return () =>
       window.clearInterval(countdownInterval);
-  }, [
-    matchData.predictionsCloseAt,
-    matchData.serverClockOffsetMs,
-  ]);
+  }, [matchData.predictionsCloseAt]);
 
   useEffect(() => {
     if (
@@ -8172,7 +8249,6 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     const updateOpeningCountdown = () => {
       const nextCountdown = getCountdown(
         matchData.predictionsOpenAt,
-        Date.now() + matchData.serverClockOffsetMs,
       );
 
       setOpeningCountdown(nextCountdown);
@@ -8205,7 +8281,6 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   }, [
     isWaitingForOpening,
     matchData.predictionsOpenAt,
-    matchData.serverClockOffsetMs,
   ]);
 
   useEffect(() => {
@@ -8229,9 +8304,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
     const delayUntilHandoff = Math.max(
       0,
-      handoffTimestamp -
-        (Date.now() + matchData.serverClockOffsetMs) +
-        1000,
+      handoffTimestamp - Date.now() + 1000,
     );
 
     const handoffTimeout = window.setTimeout(() => {
@@ -8250,7 +8323,6 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     matchData.hasOfficialResult,
     matchData.officialHandoffAt,
     matchData.ratingsCloseAt,
-    matchData.serverClockOffsetMs,
   ]);
 
   useEffect(() => {
@@ -9503,100 +9575,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
           </section>
         )}
 
-        {activePage === "play" &&
-          matchData.homeMode === "MATCH_SCORED" && (
-            <section
-              className="play-page"
-              aria-label="Partit puntuat"
-            >
-              <section
-                className="prediction-card score-card"
-                style={{
-                  display: "grid",
-                  gap: "22px",
-                  padding: "clamp(20px, 5vw, 34px)",
-                }}
-              >
-                <div className="section-heading score-heading">
-                  <div>
-                    <h2>Partit puntuat</h2>
-                  </div>
-
-                  <span className="status-pill completed">
-                    FINAL
-                  </span>
-                </div>
-
-                <OfficialMatchCard
-                  match={matchData}
-                  homeScore={matchData.officialHomeScore}
-                  awayScore={matchData.officialAwayScore}
-                />
-
-                <div
-                  role="status"
-                  style={{
-                    display: "grid",
-                    gap: "7px",
-                    padding: "15px 17px",
-                    border: "1px solid rgba(244, 207, 54, 0.35)",
-                    borderRadius: "14px",
-                    background: "rgba(244, 207, 54, 0.08)",
-                    color: "rgba(255, 255, 255, 0.9)",
-                    lineHeight: 1.45,
-                  }}
-                >
-                  <strong style={{ color: "#f4cf36" }}>
-                    RESULTAT I PUNTS OFICIALS
-                  </strong>
-
-                  <span>
-                    La teva porra ja no es mostra a la portada. La pots
-                    consultar sempre a Perfil → Historial.
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(auto-fit, minmax(180px, 1fr))",
-                    gap: "12px",
-                  }}
-                >
-                  <button
-                    type="button"
-                    className="confirm-button"
-                    style={{ width: "100%" }}
-                    onClick={() => setActivePage("ranking")}
-                  >
-                    VES AL RÀNQUING
-                  </button>
-
-                  <button
-                    type="button"
-                    className="confirm-button"
-                    style={{
-                      width: "100%",
-                      background:
-                        "linear-gradient(135deg, #004d98, #0068b5)",
-                    }}
-                    onClick={() => {
-                      setNotesTab("match");
-                      setActivePage("notes");
-                    }}
-                  >
-                    {matchData.ratingsAreOpen
-                      ? "POSA LES NOTES"
-                      : "VEU LES NOTES"}
-                  </button>
-                </div>
-              </section>
-            </section>
-          )}
-
-        {activePage === "play" &&
-          matchData.homeMode !== "MATCH_SCORED" && (
+        {activePage === "play" && (
           <section
             className={[
               "play-page",
