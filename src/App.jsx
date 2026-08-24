@@ -3582,9 +3582,11 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
         firstPlayer.rosterOrder - secondPlayer.rosterOrder,
     );
 
-  const lineupPlayers = gamePlayers.filter(
-    (player) => player.eligibleForLineup !== false,
-  );
+  const lineupPlayers = hasOfficialResult
+    ? []
+    : gamePlayers.filter(
+        (player) => player.eligibleForLineup !== false,
+      );
 
   const gamePlayersById = Object.fromEntries(
     gamePlayers.map((player) => [player.id, player]),
@@ -8110,7 +8112,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       setConfirmationAnimationActive(false);
     };
 
-    if (!authUser || !matchData.id) {
+    if (!authUser || !matchData.id || hasOfficialResult) {
       resetPredictionDraft();
       setPredictionLoading(false);
 
@@ -8205,7 +8207,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     return () => {
       isCurrent = false;
     };
-  }, [authUser?.id, matchData.id]);
+  }, [authUser?.id, matchData.id, hasOfficialResult]);
 
   useEffect(
     () => () => {
@@ -10451,7 +10453,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     {PROTAGONIST_GROUP_OPTIONS.filter(
                       (group) => !group.excludesProtagonist,
                     ).map((group) => {
-                      const groupPlayers = gamePlayers.filter(
+                      const groupPlayers = lineupPlayers.filter(
                         (player) =>
                           isPlayerEligibleForProtagonist(player) &&
                           normalizeProtagonistGroupKey(
