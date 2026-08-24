@@ -331,6 +331,10 @@ function TeamColorBadge({
 
 const EMPTY_MATCH_DATA = {
   id: null,
+  homeMode: "EMPTY",
+  serverNow: null,
+  serverClockOffsetMs: 0,
+  decisionReason: "",
   homeTeamId: "barcelona",
   homeName: "Barça",
   homeLocation: "",
@@ -347,6 +351,7 @@ const EMPTY_MATCH_DATA = {
   predictionsCloseAt: null,
   predictionsAreOpen: false,
   isUpcomingPreview: false,
+  officialHandoffAt: null,
   pointsMultiplier: 1,
 };
 
@@ -668,7 +673,10 @@ const normalizeCurrentMatch = (row) => {
   };
 };
 
-const getCountdown = (predictionsCloseAt) => {
+const getCountdown = (
+  predictionsCloseAt,
+  currentTimeMs = Date.now(),
+) => {
   if (!predictionsCloseAt) {
     return {
       days: 0,
@@ -681,7 +689,7 @@ const getCountdown = (predictionsCloseAt) => {
 
   const remainingMilliseconds = Math.max(
     0,
-    new Date(predictionsCloseAt).getTime() - Date.now(),
+    new Date(predictionsCloseAt).getTime() - currentTimeMs,
   );
 
   const totalSeconds = Math.floor(remainingMilliseconds / 1000);
@@ -2580,11 +2588,8 @@ function RatingStars({ value, onRate, readOnly = false }) {
 const VESALAPORRA_CURRENT_MATCH_ID =
   import.meta.env.VITE_VESALAPORRA_CURRENT_MATCH_ID || null;
 
-const VESALAPORRA_PUBLIC_CURRENT_MATCH_RPC =
-  "vesalaporra_public_current_match_v2";
-
-const VESALAPORRA_PUBLIC_NEXT_MATCH_RPC =
-  "vesalaporra_public_next_match_v1";
+const VESALAPORRA_PUBLIC_HOME_STATE_RPC =
+  "vesalaporra_public_home_state_v1";
 
 const VESALAPORRA_ADMIN_MATCH_LIST_RPC =
   "vesalaporra_admin_list_matches_v3";
@@ -3582,7 +3587,8 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
         firstPlayer.rosterOrder - secondPlayer.rosterOrder,
     );
 
-  const lineupPlayers = hasOfficialResult
+  const lineupPlayers =
+    hasOfficialResult || matchData.homeMode === "MATCH_SCORED"
     ? []
     : gamePlayers.filter(
         (player) => player.eligibleForLineup !== false,
@@ -4424,179 +4430,81 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     setPublicMatchPlayers(normalizedRows);
   };
 
-      const refreshPublicCurrentMatch = async ({ quiet = false } = {}) => {
+  const refreshPublicCurrentMatch = async ({ quiet = false } = {}) => {
     if (!quiet) {
       setMatchLoading(true);
     }
 
     try {
-      const { data: currentData, error: currentError } =
-        await supabase.rpc(
-          VESALAPORRA_PUBLIC_CURRENT_MATCH_RPC,
-        );
-
-      if (currentError) {
-        throw currentError;
-      }
-
-      const currentMatchRow = Array.isArray(currentData)
-        ? currentData[0]
-        : currentData;
-
-      let displayedMatchRow = currentMatchRow;
-      let officialHandoffAt = null;
-      let isHoldingScoredMatch = false;
-
-      try {
-        const { data: latestScoredData, error: latestScoredError } =
-          await supabase.rpc(
-            VESALAPORRA_PUBLIC_LATEST_SCORED_MATCH_RPC,
-          );
-
-        if (latestScoredError) {
-          throw latestScoredError;
-        }
-
-        const latestScoredMatchId = Array.isArray(latestScoredData)
-          ? firstNonEmptyText(
-              latestScoredData[0]?.match_id,
-              latestScoredData[0]?.id,
-              latestScoredData[0],
-            )
-          : firstNonEmptyText(
-              latestScoredData?.match_id,
-              latestScoredData?.id,
-              latestScoredData,
-            );
-
-        if (latestScoredMatchId) {
-          const [
-            { data: scoredMatchCardData, error: scoredMatchCardError },
-            ratingsStatePayload,
-          ] = await Promise.all([
-            supabase.rpc(
-              VESALAPORRA_PUBLIC_SCORED_MATCH_CARD_RPC,
-              {
-                p_match_id: latestScoredMatchId,
-              },
-            ),
-            callRpcWithPayloadFallbacks(
-              VESALAPORRA_PUBLIC_MATCH_RATINGS_STATE_RPC,
-              [
-                { p_match_id: latestScoredMatchId },
-                { match_id: latestScoredMatchId },
-              ],
-            ),
-          ]);
-
-          if (scoredMatchCardError) {
-            throw scoredMatchCardError;
-          }
-
-          const scoredMatchRow =
-            unwrapRpcRows(
-              scoredMatchCardData,
-              ["match", "card", "rows"],
-            )[0] || null;
-
-          const ratingsStateRow =
-            unwrapRpcRows(
-              ratingsStatePayload,
-              ["state", "match", "rows"],
-            )[0] || {};
-
-          const scoredMatchId = firstNonEmptyText(
-            scoredMatchRow?.match_id,
-            latestScoredMatchId,
-          );
-
-          const ratingsStatus = firstNonEmptyText(
-            ratingsStateRow?.ratings_status,
-            scoredMatchRow?.ratings_status,
-          ).toLowerCase();
-
-          const ratingsCloseAt = firstNonEmptyText(
-            ratingsStateRow?.ratings_close_at,
-            scoredMatchRow?.ratings_close_at,
-          );
-
-          const ratingsCloseTimestamp = ratingsCloseAt
-            ? new Date(ratingsCloseAt).getTime()
-            : Number.NaN;
-
-          const ratingsAreClosed =
-            ratingsStatus === "closed" ||
-            (Number.isFinite(ratingsCloseTimestamp) &&
-              Date.now() >= ratingsCloseTimestamp);
-
-          if (scoredMatchId && !ratingsAreClosed) {
-            displayedMatchRow = {
-              ...scoredMatchRow,
-              ...ratingsStateRow,
-              match_id: scoredMatchId,
-              ratings_close_at: ratingsCloseAt || null,
-              ratings_status: ratingsStatus || null,
-            };
-
-            officialHandoffAt = ratingsCloseAt || null;
-            isHoldingScoredMatch = true;
-          }
-        }
-      } catch (handoffError) {
-        console.warn(
-          "No s’ha pogut comprovar el relleu oficial segons Les Notes:",
-          handoffError,
-        );
-      }
-
-      let isUpcomingPreview = Boolean(
-        !isHoldingScoredMatch &&
-          displayedMatchRow?.match_id &&
-          !displayedMatchRow?.predictions_are_open &&
-          displayedMatchRow?.predictions_open_at &&
-          new Date(displayedMatchRow.predictions_open_at).getTime() >
-            Date.now(),
+      const { data, error } = await supabase.rpc(
+        VESALAPORRA_PUBLIC_HOME_STATE_RPC,
       );
 
-      if (!displayedMatchRow?.match_id) {
-        const { data: nextData, error: nextError } =
-          await supabase.rpc(
-            VESALAPORRA_PUBLIC_NEXT_MATCH_RPC,
-          );
-
-        if (nextError) {
-          throw nextError;
-        }
-
-        displayedMatchRow = Array.isArray(nextData)
-          ? nextData[0]
-          : nextData;
-
-        isUpcomingPreview = Boolean(
-          displayedMatchRow?.match_id &&
-            !displayedMatchRow?.predictions_are_open,
-        );
+      if (error) {
+        throw error;
       }
 
+      const homeStateRow = Array.isArray(data) ? data[0] : data;
+
+      const homeMode = firstNonEmptyText(
+        homeStateRow?.home_mode,
+        "EMPTY",
+      ).toUpperCase();
+
+      const serverNow = homeStateRow?.server_now || null;
+      const serverNowTimestamp = serverNow
+        ? new Date(serverNow).getTime()
+        : Number.NaN;
+
+      const serverClockOffsetMs = Number.isFinite(serverNowTimestamp)
+        ? serverNowTimestamp - Date.now()
+        : 0;
+
+      const displayedMatchRow = homeStateRow?.focus_match || null;
+
       if (!displayedMatchRow?.match_id) {
-        throw new Error("No hi ha cap proper partit programat.");
+        const emptyMatch = {
+          ...EMPTY_MATCH_DATA,
+          homeMode,
+          serverNow,
+          serverClockOffsetMs,
+          decisionReason: firstNonEmptyText(
+            homeStateRow?.decision_reason,
+          ),
+        };
+
+        setMatchData(emptyMatch);
+        setCountdown(getCountdown(null));
+
+        return emptyMatch;
       }
 
       const baseMatch = normalizeCurrentMatch(displayedMatchRow);
+      const isUpcomingPreview = homeMode === "UPCOMING";
+      const isScoredMatch = homeMode === "MATCH_SCORED";
+
       const pointsMultipliers = await loadMatchPointsMultipliers(
         baseMatch.id,
       );
 
       const normalizedMatch = {
         ...baseMatch,
-        predictionsAreOpen: isUpcomingPreview
-          ? false
-          : baseMatch.predictionsAreOpen,
+        homeMode,
+        serverNow,
+        serverClockOffsetMs,
+        decisionReason: firstNonEmptyText(
+          homeStateRow?.decision_reason,
+        ),
+        predictionsAreOpen:
+          homeMode === "PREDICTIONS_OPEN" &&
+          baseMatch.predictionsAreOpen,
         predictionsCloseAt: isUpcomingPreview
           ? null
           : baseMatch.predictionsCloseAt,
         isUpcomingPreview,
-        officialHandoffAt,
+        officialHandoffAt: isScoredMatch
+          ? baseMatch.ratingsCloseAt
+          : null,
         pointsMultiplier: normalizePointsMultiplier(
           pointsMultipliers[baseMatch.id],
         ),
@@ -4604,7 +4512,10 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
 
       setMatchData(normalizedMatch);
       setCountdown(
-        getCountdown(normalizedMatch.predictionsCloseAt),
+        getCountdown(
+          normalizedMatch.predictionsCloseAt,
+          Date.now() + serverClockOffsetMs,
+        ),
       );
 
       return normalizedMatch;
@@ -8112,7 +8023,12 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       setConfirmationAnimationActive(false);
     };
 
-    if (!authUser || !matchData.id || hasOfficialResult) {
+    if (
+      !authUser ||
+      !matchData.id ||
+      hasOfficialResult ||
+      matchData.homeMode === "MATCH_SCORED"
+    ) {
       resetPredictionDraft();
       setPredictionLoading(false);
 
@@ -8207,7 +8123,12 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     return () => {
       isCurrent = false;
     };
-  }, [authUser?.id, matchData.id, hasOfficialResult]);
+  }, [
+    authUser?.id,
+    matchData.id,
+    matchData.homeMode,
+    hasOfficialResult,
+  ]);
 
   useEffect(
     () => () => {
@@ -8220,7 +8141,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
      useEffect(() => {
     setCountdown(
-      getCountdown(matchData.predictionsCloseAt),
+      getCountdown(
+        matchData.predictionsCloseAt,
+        Date.now() + matchData.serverClockOffsetMs,
+      ),
     );
 
     if (!matchData.predictionsCloseAt) {
@@ -8229,13 +8153,19 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
     const countdownInterval = window.setInterval(() => {
       setCountdown(
-        getCountdown(matchData.predictionsCloseAt),
+        getCountdown(
+          matchData.predictionsCloseAt,
+          Date.now() + matchData.serverClockOffsetMs,
+        ),
       );
     }, 1000);
 
     return () =>
       window.clearInterval(countdownInterval);
-  }, [matchData.predictionsCloseAt]);
+  }, [
+    matchData.predictionsCloseAt,
+    matchData.serverClockOffsetMs,
+  ]);
 
   useEffect(() => {
     if (
@@ -8251,6 +8181,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     const updateOpeningCountdown = () => {
       const nextCountdown = getCountdown(
         matchData.predictionsOpenAt,
+        Date.now() + matchData.serverClockOffsetMs,
       );
 
       setOpeningCountdown(nextCountdown);
@@ -8283,6 +8214,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   }, [
     isWaitingForOpening,
     matchData.predictionsOpenAt,
+    matchData.serverClockOffsetMs,
   ]);
 
   useEffect(() => {
@@ -8306,7 +8238,9 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
     const delayUntilHandoff = Math.max(
       0,
-      handoffTimestamp - Date.now() + 1000,
+      handoffTimestamp -
+        (Date.now() + matchData.serverClockOffsetMs) +
+        1000,
     );
 
     const handoffTimeout = window.setTimeout(() => {
@@ -8325,6 +8259,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     matchData.hasOfficialResult,
     matchData.officialHandoffAt,
     matchData.ratingsCloseAt,
+    matchData.serverClockOffsetMs,
   ]);
 
   useEffect(() => {
