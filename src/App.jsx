@@ -9663,17 +9663,30 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 }
         }
 
-        @media (max-width: 430px) {
+     @media (max-width: 430px) {
   .app-shell .score-center-controls {
     align-self: start;
     margin-top: 27.2px;
   }
 
- .app-shell .scoreboard > .score-match-label {
-  top: 12px;
-}
+  .app-shell .scoreboard > .score-match-label {
+    top: 12px;
+  }
+
   .profile-history-lineup-list {
     grid-template-columns: 1fr;
+  }
+}
+
+/* NOTES MOBILE · amaga titularitat i suplència */
+@media (max-width: 680px) {
+  .app-shell
+    .notes-player-stats.match
+    .participation-role-stat,
+  .app-shell
+    .notes-player-stats.season
+    .participation-role-stat {
+    display: none !important;
   }
 }
       `}</style>
