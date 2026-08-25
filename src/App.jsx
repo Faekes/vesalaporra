@@ -9499,12 +9499,13 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 }
 
 .app-shell .protagonist-combined-icon.assist.mvp {
-  background: linear-gradient(145deg, #75143e, #a52256);
-  border-color: rgba(247, 207, 74, 0.58);
+  background: linear-gradient(145deg, #071632, #102a55);
+  border-color: rgba(247, 207, 74, 0.72);
   color: #f7cf4a;
-  font-size: 7px;
+  font-size: 12px;
   font-weight: 950;
-  letter-spacing: -0.06em;
+  line-height: 1;
+  letter-spacing: -0.05em;
 }
 
 .app-shell .protagonist-event-stat.mvp .protagonist-event-count {
