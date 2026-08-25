@@ -11212,39 +11212,6 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       : "MITJANA SOBRE 10"}
                   </small>
 
-                  {notesTab === "match" &&
-                    notesAreClosed &&
-                    visibleNotesRows.length > 0 && (
-                    <button
-                      type="button"
-                      className={
-                        notesRankingRefreshing
-                          ? "notes-ranking-refresh-button refreshing"
-                          : "notes-ranking-refresh-button"
-                      }
-                      disabled={
-                        notesLoading ||
-                        notesRankingRefreshing ||
-                        Boolean(ratingSavingPlayerId)
-                      }
-                      onClick={handleRefreshNotesRanking}
-                      aria-label="Actualitza l’ordre del rànquing de Les Notes"
-                      title="Reordena els jugadors amb les valoracions més recents"
-                    >
-                      <span
-                        className="notes-ranking-refresh-icon"
-                        aria-hidden="true"
-                      >
-                        ↻
-                      </span>
-
-                      <span>
-                        {notesRankingRefreshing
-                          ? "ACTUALITZANT..."
-                          : "ACTUALITZA RÀNQUING"}
-                      </span>
-                    </button>
-                  )}
                 </div>
               </header>
 
