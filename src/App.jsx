@@ -1712,7 +1712,10 @@ const normalizeNotesRow = (row, playersById) => {
       ),
     },
     ownStars,
-    displayStars: ownStars || getStarsFromAverage(matchAverage),
+    displayStars:
+      matchVoteCount > 0
+        ? getMatchStarsFromAverage(matchAverage)
+        : 0,
     average: matchAverage,
     voteCount: matchVoteCount,
     seasonAverage,
@@ -1934,6 +1937,47 @@ const getStarsFromAverage = (average) => {
   }
 
   return Math.max(1, Math.min(6, Math.round(average / 2) + 1));
+};
+
+const getMatchStarsFromAverage = (average) => {
+  if (!Number.isFinite(average)) {
+    return 0;
+  }
+
+  const roundedAverage = Math.round(
+    Math.max(0, Math.min(10, average)) * 10,
+  ) / 10;
+
+  if (roundedAverage >= 10) {
+    return 6;
+  }
+
+  const wholePart = Math.floor(roundedAverage);
+  const baseStars = Math.max(
+    1,
+    Math.min(6, Math.floor(wholePart / 2) + 1),
+  );
+
+  if (wholePart % 2 !== 0) {
+    return Math.min(6, baseStars + 1);
+  }
+
+  const decimalDigit = Math.round(
+    (roundedAverage - wholePart) * 10,
+  );
+
+  const partialStar =
+    decimalDigit <= 1
+      ? 0
+      : decimalDigit <= 3
+        ? 1 / 3
+        : decimalDigit <= 6
+          ? 1 / 2
+          : decimalDigit <= 8
+            ? 3 / 4
+            : 1;
+
+  return Math.min(6, baseStars + partialStar);
 };
 
 const getCombinedRatingSummary = (communitySummary, selectedStars) => {
@@ -2552,7 +2596,38 @@ function RatingStars({ value, onRate, readOnly = false }) {
     >
       {Array.from({ length: 6 }, (_, index) => {
         const starNumber = index + 1;
-        const isActive = starNumber <= value;
+        const starFill = Math.max(
+          0,
+          Math.min(1, Number(value || 0) - index),
+        );
+        const isActive = starFill === 1;
+        const isPartial = starFill > 0 && starFill < 1;
+        const starContent = isPartial ? (
+          <span
+            aria-hidden="true"
+            style={{
+              position: "relative",
+              display: "inline-block",
+            }}
+          >
+            <span>★</span>
+            <span
+              className="notes-star active"
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: `${starFill * 100}%`,
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                pointerEvents: "none",
+              }}
+            >
+              ★
+            </span>
+          </span>
+        ) : (
+          "★"
+        );
 
         if (readOnly) {
           return (
@@ -2561,7 +2636,7 @@ function RatingStars({ value, onRate, readOnly = false }) {
               className={isActive ? "notes-star active" : "notes-star"}
               aria-hidden="true"
             >
-              ★
+              {starContent}
             </span>
           );
         }
@@ -2575,7 +2650,7 @@ function RatingStars({ value, onRate, readOnly = false }) {
             aria-label={`Valora amb ${starNumber} estrelles`}
             aria-pressed={value === starNumber}
           >
-            ★
+            {starContent}
           </button>
         );
       })}
@@ -4015,7 +4090,9 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       ...row,
       ownStars: notesRatingsByPlayerId[row.player.id] ?? row.ownStars,
       displayStars:
-        notesRatingsByPlayerId[row.player.id] ?? row.displayStars,
+        row.voteCount > 0
+          ? getMatchStarsFromAverage(row.average)
+          : 0,
     }));
 
   const notesMatchOrderByPlayerId = new Map(
