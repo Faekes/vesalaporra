@@ -12865,7 +12865,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                       <div className="section-info-points-row">
                         <span>
-                          6. UUID com a últim desempat tècnic
+                          6. Desempat tècnic automàtic
                         </span>
                         <strong>6è</strong>
                       </div>
@@ -12877,7 +12877,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       punts, el desempat segueix exactament aquest
                       ordre: Resultat, XI, Protagonista, hora
                       d’enviament i, només si encara persistís
-                      l’empat, UUID.
+                      l’empat, s’aplica un desempat tècnic automàtic.
                     </small>
                   </>
                 )}
