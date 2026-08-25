@@ -1219,6 +1219,12 @@ const VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC ||
   "vesalaporra_public_active_season_notes";
 
+const VESALAPORRA_PUBLIC_ACTIVE_SEASON_MVP_COUNTS_RPC =
+  "vesalaporra_public_active_season_mvp_counts";
+
+const VESALAPORRA_PUBLIC_MATCH_MVP_RPC =
+  "vesalaporra_public_match_mvp";
+
 const VESALAPORRA_PUBLIC_USER_ACHIEVEMENTS_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_USER_ACHIEVEMENTS_RPC ||
   "vesalaporra_public_user_achievements";
@@ -1705,6 +1711,11 @@ const normalizeNotesRow = (row, playersById) => {
       role,
       goals: toFiniteNumber(row?.goals, row?.goals_scored),
       assists: toFiniteNumber(row?.assists),
+      mvps: toFiniteNumber(
+        row?.mvp_count,
+        row?.season_mvp_count,
+        row?.mvps,
+      ),
       starts: toFiniteNumber(row?.season_starts, row?.starts),
       substituteAppearances: toFiniteNumber(
         row?.season_substitute_appearances,
@@ -2412,7 +2423,12 @@ function ProtagonistEventIcon({
   ariaLabel = null,
 }) {
   const isGoal = type === "goal";
-  const eventLabel = isGoal ? "Gol" : "Assistència";
+  const isMvp = type === "mvp";
+  const eventLabel = isGoal
+    ? "Gol"
+    : isMvp
+      ? "MVP"
+      : "Assistència";
   const Component = onClick ? "button" : "span";
 
   const interactiveProps = onClick
@@ -2445,10 +2461,12 @@ function ProtagonistEventIcon({
       {...interactiveProps}
     >
       <span
-        className={`protagonist-combined-icon ${isGoal ? "goal" : "assist"}`}
+        className={`protagonist-combined-icon ${isGoal ? "goal" : "assist"} ${
+          isMvp ? "mvp" : ""
+        }`.trim()}
         aria-hidden="true"
       >
-        {isGoal ? "⚽" : "A"}
+        {isGoal ? "⚽" : isMvp ? "MVP" : "A"}
       </span>
 
       {count !== null && (
@@ -2516,7 +2534,7 @@ function ParticipationRoleIcon({
   );
 }
 
-function PlayerNotesStats({ stats, mode }) {
+function PlayerNotesStats({ stats, mode, isMvp = false }) {
   if (!stats) {
     return null;
   }
@@ -2527,13 +2545,11 @@ function PlayerNotesStats({ stats, mode }) {
         className="notes-player-stats season"
         aria-label="Estadístiques de temporada"
       >
-        <ParticipationRoleIcon type="starter" count={stats.starts} />
-        <ParticipationRoleIcon
-          type="substitute"
-          count={stats.substituteAppearances}
-        />
         <ProtagonistEventIcon type="goal" count={stats.goals} />
         <ProtagonistEventIcon type="assist" count={stats.assists} />
+        {stats.mvps > 0 && (
+          <ProtagonistEventIcon type="mvp" count={stats.mvps} />
+        )}
       </div>
     );
   }
@@ -2556,6 +2572,8 @@ function PlayerNotesStats({ stats, mode }) {
       {Array.from({ length: stats.assists }, (_, index) => (
         <ProtagonistEventIcon key={`assist-${index}`} type="assist" />
       ))}
+
+      {isMvp && <ProtagonistEventIcon type="mvp" />}
     </div>
   );
 }
@@ -4071,8 +4089,22 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     notesMatchOrder.playerIds.map((playerId, index) => [playerId, index]),
   );
 
+  const notesMatchOrderIsClosed =
+    notesSubmissionClosed ||
+    firstNonEmptyText(
+      notesMatchData?.ratingsStatus,
+    ).toLowerCase() === "closed" ||
+    Boolean(
+      notesMatchData?.ratingsCloseAt &&
+        Date.now() >= new Date(notesMatchData.ratingsCloseAt).getTime(),
+    );
+
   const notesMatchRows = [...notesMatchLiveRows].sort(
     (firstRow, secondRow) => {
+      if (notesMatchOrderIsClosed) {
+        return compareMatchNotesRows(firstRow, secondRow);
+      }
+
       const firstPosition = notesMatchOrderByPlayerId.has(firstRow.player.id)
         ? notesMatchOrderByPlayerId.get(firstRow.player.id)
         : Number.MAX_SAFE_INTEGER;
@@ -4119,6 +4151,21 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     );
 
   const notesAreScheduled = notesRatingsStatus === "scheduled";
+
+  const notesMatchLeaderPlayerId =
+    [...notesMatchLiveRows]
+      .filter((row) => row.voteCount > 0)
+      .sort(compareMatchNotesRows)[0]
+      ?.player?.id || "";
+
+  const notesSeasonLeaderPlayerId =
+    notesSeasonRows.find((row) => row.voteCount > 0)
+      ?.player?.id || "";
+
+  const notesMatchMvpPlayerId =
+    notesMatchLiveRows.find((row) => row.isMvp)
+      ?.player?.id ||
+    (notesAreClosed ? notesMatchLeaderPlayerId : "");
 
   const notesJornadaNumber = toFiniteNumber(
     notesMatchData?.seasonMatchNo,
@@ -6706,6 +6753,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
        seasonPayload,
        matchCardPayload,
        ratingsStatePayload,
+       seasonMvpPayload,
+       matchMvpPayload,
      ] =
   await Promise.all([
     callRpcWithPayloadFallbacks(
@@ -6738,6 +6787,36 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
       throw error;
     }),
+    callRpcWithPayloadFallbacks(
+      VESALAPORRA_PUBLIC_ACTIVE_SEASON_MVP_COUNTS_RPC,
+      [{}],
+    ).catch((error) => {
+      if (isMissingRpcSignatureError(error)) {
+        console.warn(
+          "El recompte d’MVP de temporada encara no està disponible.",
+          error,
+        );
+
+        return [];
+      }
+
+      throw error;
+    }),
+    callRpcWithPayloadFallbacks(
+      VESALAPORRA_PUBLIC_MATCH_MVP_RPC,
+      [{ p_match_id: notesTargetMatchId }],
+    ).catch((error) => {
+      if (isMissingRpcSignatureError(error)) {
+        console.warn(
+          "L’MVP tancat del partit encara no està disponible.",
+          error,
+        );
+
+        return [];
+      }
+
+      throw error;
+    }),
   ]);
 
       const rawRows = unwrapRpcRows(
@@ -6745,13 +6824,44 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         ["notes", "rows", "players"],
       );
 
+      const matchMvpRow =
+        unwrapRpcRows(
+          matchMvpPayload,
+          ["mvp", "rows", "players"],
+        )[0] || {};
+
+      const matchMvpPlayerId = firstNonEmptyText(
+        matchMvpRow?.player_id,
+        matchMvpRow?.id,
+      );
+
       const normalizedRows = rawRows
         .map((row) => normalizeNotesRow(row, gamePlayersById))
-        .filter(Boolean);
+        .filter(Boolean)
+        .map((row) => ({
+          ...row,
+          isMvp:
+            Boolean(matchMvpPlayerId) &&
+            row.player.id === matchMvpPlayerId,
+        }));
 
       const rawSeasonRows = unwrapRpcRows(
         seasonPayload,
         ["notes", "rows", "players"],
+      );
+
+      const seasonMvpCountByPlayerId = new Map(
+        unwrapRpcRows(
+          seasonMvpPayload,
+          ["mvps", "rows", "players"],
+        ).map((row) => [
+          firstNonEmptyText(row?.player_id, row?.id),
+          toFiniteNumber(
+            row?.mvp_count,
+            row?.season_mvp_count,
+            row?.mvps,
+          ),
+        ]),
       );
 
       const normalizedSeasonRows = rawSeasonRows
@@ -6825,6 +6935,12 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 row?.goals_scored,
               ),
               assists: toFiniteNumber(row?.assists),
+              mvps: toFiniteNumber(
+                seasonMvpCountByPlayerId.get(playerId),
+                row?.mvp_count,
+                row?.season_mvp_count,
+                row?.mvps,
+              ),
             },
             ownStars: 0,
             displayStars:
@@ -9355,6 +9471,46 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   }
 }
 
+.app-shell .notes-player-row.notes-leader-row {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(112, 18, 57, 0.44),
+      rgba(65, 12, 39, 0.3)
+    ) !important;
+  box-shadow:
+    inset 5px 0 0 #8f1748,
+    inset 0 0 0 1px rgba(203, 62, 115, 0.38),
+    0 12px 30px rgba(39, 4, 22, 0.2);
+}
+
+.app-shell .notes-player-row.notes-leader-row .notes-average {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(105, 17, 54, 0.58),
+      rgba(42, 13, 31, 0.78)
+    );
+  border-color: rgba(218, 80, 131, 0.5);
+}
+
+.app-shell .notes-player-row.notes-leader-row .notes-season-position {
+  color: #f7cf4a;
+}
+
+.app-shell .protagonist-combined-icon.assist.mvp {
+  background: linear-gradient(145deg, #75143e, #a52256);
+  border-color: rgba(247, 207, 74, 0.58);
+  color: #f7cf4a;
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: -0.06em;
+}
+
+.app-shell .protagonist-event-stat.mvp .protagonist-event-count {
+  color: #f7cf4a;
+}
+
 .nav-guest-mobile-label {
   display: none;
 }
@@ -11085,15 +11241,29 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               )}
 
               <div className="notes-player-list">
-                {visibleNotesRows.map((row, index) => (
-                  <article
-                    key={`${notesTab}-${row.player.id}`}
-                    className={
-                      notesTab === "season"
-                        ? "notes-player-row season-row"
-                        : "notes-player-row"
-                    }
-                  >
+                {visibleNotesRows.map((row, index) => {
+                  const isLeader =
+                    row.player.id ===
+                    (notesTab === "season"
+                      ? notesSeasonLeaderPlayerId
+                      : notesMatchLeaderPlayerId);
+
+                  const isMatchMvp =
+                    notesTab === "match" &&
+                    notesAreClosed &&
+                    row.player.id === notesMatchMvpPlayerId;
+
+                  return (
+                    <article
+                      key={`${notesTab}-${row.player.id}`}
+                      className={[
+                        "notes-player-row",
+                        notesTab === "season" ? "season-row" : "",
+                        isLeader ? "notes-leader-row" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                    >
                     {notesTab === "season" && (
                       <span className="notes-season-position">
                         {index + 1}
@@ -11105,7 +11275,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                       <div>
                         <strong>{row.player.name}</strong>
-                        <PlayerNotesStats stats={row.stats} mode={notesTab} />
+                        <PlayerNotesStats
+                          stats={row.stats}
+                          mode={notesTab}
+                          isMvp={isMatchMvp}
+                        />
                       </div>
                     </div>
 
@@ -11139,8 +11313,9 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                         <small className="real-inline-saving">GUARDANT...</small>
                       )}
                     </div>
-                  </article>
-                ))}
+                    </article>
+                  );
+                })}
               </div>
             </section>
           </section>
