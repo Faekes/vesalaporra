@@ -3875,61 +3875,34 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       Number(user.preseasonFinalPosition) > 0,
   );
 
-  const compareRankingUsers = (firstUser, secondUser, scope) => {
-    if (scope === "general" && !generalRankingHasOfficialPoints) {
-      if (generalRankingHasPreseasonFinalOrder) {
-        const firstPreseasonPosition = Number(
-          firstUser?.preseasonFinalPosition,
-        );
-        const secondPreseasonPosition = Number(
-          secondUser?.preseasonFinalPosition,
-        );
-        const firstWasInPreseason =
-          Number.isFinite(firstPreseasonPosition) &&
-          firstPreseasonPosition > 0;
-        const secondWasInPreseason =
-          Number.isFinite(secondPreseasonPosition) &&
-          secondPreseasonPosition > 0;
+   const compareRankingUsers = (firstUser, secondUser, scope) => {
+    if (
+      scope === "general" &&
+      !generalRankingHasOfficialPoints &&
+      generalRankingHasPreseasonFinalOrder
+    ) {
+      const firstPreseasonPosition = Number(
+        firstUser?.preseasonFinalPosition,
+      );
 
-        if (firstWasInPreseason !== secondWasInPreseason) {
-          return firstWasInPreseason ? -1 : 1;
-        }
+      const secondPreseasonPosition = Number(
+        secondUser?.preseasonFinalPosition,
+      );
 
-        if (firstWasInPreseason && secondWasInPreseason) {
-          return (
-            firstPreseasonPosition - secondPreseasonPosition ||
-            String(firstUser.id).localeCompare(String(secondUser.id))
-          );
-        }
+      const firstWasInPreseason =
+        Number.isFinite(firstPreseasonPosition) &&
+        firstPreseasonPosition > 0;
 
-        const firstSignupAt = getRankingSignupTimestamp(firstUser);
-        const secondSignupAt = getRankingSignupTimestamp(secondUser);
+      const secondWasInPreseason =
+        Number.isFinite(secondPreseasonPosition) &&
+        secondPreseasonPosition > 0;
 
-        return (
-          (firstSignupAt ?? Number.MAX_SAFE_INTEGER) -
-            (secondSignupAt ?? Number.MAX_SAFE_INTEGER) ||
-          String(firstUser.id).localeCompare(String(secondUser.id))
-        );
+      if (firstWasInPreseason !== secondWasInPreseason) {
+        return firstWasInPreseason ? -1 : 1;
       }
 
-      const firstSignupAt = getRankingSignupTimestamp(firstUser);
-      const secondSignupAt = getRankingSignupTimestamp(secondUser);
-      const firstIsNew =
-        firstSignupAt !== null &&
-        firstSignupAt > PRESEASON_2026_ENDED_AT;
-      const secondIsNew =
-        secondSignupAt !== null &&
-        secondSignupAt > PRESEASON_2026_ENDED_AT;
-
-      if (firstIsNew !== secondIsNew) {
-        return firstIsNew ? 1 : -1;
-      }
-
-      if (firstIsNew && secondIsNew) {
-        return (
-          firstSignupAt - secondSignupAt ||
-          String(firstUser.id).localeCompare(String(secondUser.id))
-        );
+      if (firstWasInPreseason && secondWasInPreseason) {
+        return firstPreseasonPosition - secondPreseasonPosition;
       }
     }
 
@@ -12822,6 +12795,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                         </span>
                         <strong>7è</strong>
                       </div>
+                      <div className="section-info-points-row">
+                     <span>8. Compte creat abans a Vesalaporra</span>
+                     <strong>8è</strong>
+                    </div>
+
                     </div>
 
                     <small className="section-info-note">
@@ -12831,6 +12809,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       vàlides. Després de sis partits consecutius
                       sense participar, el compte deixa d’aparèixer
                       fins que torna a confirmar una porra.
+                      Si encara hi ha empat, queda davant qui es va registrar abans a Vesalaporra.
                     </small>
                   </>
                 ) : (
@@ -12865,7 +12844,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                       <div className="section-info-points-row">
                         <span>
-                          6. Desempat tècnic automàtic
+                          6. Compte creat abans a Vesalaporra
                         </span>
                         <strong>6è</strong>
                       </div>
@@ -12877,7 +12856,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       punts, el desempat segueix exactament aquest
                       ordre: Resultat, XI, Protagonista, hora
                       d’enviament i, només si encara persistís
-                      l’empat, s’aplica un desempat tècnic automàtic.
+                      l’empat, queda davant qui es va registrar abans a Vesalaporra.
                     </small>
                   </>
                 )}
