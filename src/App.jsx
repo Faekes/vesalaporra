@@ -1203,8 +1203,7 @@ const VESALAPORRA_PUBLIC_PRESEASON_FINAL_ORDER_RPC =
   "vesalaporra_public_preseason_final_order_2026";
 
 const VESALAPORRA_PUBLIC_MATCH_NOTES_RPC =
-  import.meta.env.VITE_VESALAPORRA_PUBLIC_MATCH_NOTES_RPC ||
-  "vesalaporra_public_match_notes";
+  "vesalaporra_public_match_notes_blind";
 const VESALAPORRA_PUBLIC_LATEST_SCORED_MATCH_RPC =
   "vesalaporra_public_latest_scored_match_id";
 
@@ -1683,6 +1682,11 @@ const normalizeNotesRow = (row, playersById) => {
     row?.user_stars,
     row?.my_rating_stars,
   );
+  const hasMyVote = Boolean(
+    row?.has_my_vote ??
+      row?.hasMyVote ??
+      (ownStars > 0),
+  );
   const matchAverage = toFiniteNumber(
     row?.match_average,
     row?.average_rating,
@@ -1723,6 +1727,7 @@ const normalizeNotesRow = (row, playersById) => {
       ),
     },
     ownStars,
+    hasMyVote,
     displayStars:
       matchVoteCount > 0
         ? getFractionalStarsFromAverage(matchAverage)
@@ -7042,7 +7047,6 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     row?.player &&
     row.player.eligibleForRatings !== false,
 )
-            .sort(compareMatchNotesRows)
             .map((row) => row.player.id),
         };
       });
@@ -9512,6 +9516,48 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   color: #f7cf4a;
 }
 
+.app-shell .notes-blind-vote-saved {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 34px;
+  color: #65e6a7;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.app-shell .notes-blind-vote-saved > span {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(101, 230, 167, 0.55);
+  border-radius: 999px;
+  background: rgba(16, 104, 75, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(101, 230, 167, 0.08);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.app-shell .notes-average.notes-blind-count strong {
+  color: #f7cf4a;
+}
+
+/* NOTES MOBILE · amaga titularitat i suplència */
+@media (max-width: 680px) {
+  .app-shell
+    .notes-player-stats.match
+    .participation-role-stat,
+  .app-shell
+    .notes-player-stats.season
+    .participation-role-stat {
+    display: none !important;
+  }
+}
+
 .nav-guest-mobile-label {
   display: none;
 }
@@ -9663,30 +9709,17 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 }
         }
 
-     @media (max-width: 430px) {
+        @media (max-width: 430px) {
   .app-shell .score-center-controls {
     align-self: start;
     margin-top: 27.2px;
   }
 
-  .app-shell .scoreboard > .score-match-label {
-    top: 12px;
-  }
-
+ .app-shell .scoreboard > .score-match-label {
+  top: 12px;
+}
   .profile-history-lineup-list {
     grid-template-columns: 1fr;
-  }
-}
-
-/* NOTES MOBILE · amaga titularitat i suplència */
-@media (max-width: 680px) {
-  .app-shell
-    .notes-player-stats.match
-    .participation-role-stat,
-  .app-shell
-    .notes-player-stats.season
-    .participation-role-stat {
-    display: none !important;
   }
 }
       `}</style>
@@ -11173,9 +11206,15 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 </div>
 
                 <div className="notes-board-actions">
-                  <small>MITJANA SOBRE 10</small>
+                  <small>
+                    {notesTab === "match" && !notesAreClosed
+                      ? "VOTACIÓ CEGA"
+                      : "MITJANA SOBRE 10"}
+                  </small>
 
-                  {notesTab === "match" && visibleNotesRows.length > 0 && (
+                  {notesTab === "match" &&
+                    notesAreClosed &&
+                    visibleNotesRows.length > 0 && (
                     <button
                       type="button"
                       className={
@@ -11256,11 +11295,23 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
               <div className="notes-player-list">
                 {visibleNotesRows.map((row, index) => {
+                  const isBlindMatchVoting =
+                    notesTab === "match" && !notesAreClosed;
+
+                  const hasMyBlindVote =
+                    isBlindMatchVoting &&
+                    Boolean(
+                      row.hasMyVote ||
+                        Number(
+                          notesRatingsByPlayerId[row.player.id] || 0,
+                        ) > 0,
+                    );
+
                   const isLeader =
-                    row.player.id ===
-                    (notesTab === "season"
-                      ? notesSeasonLeaderPlayerId
-                      : notesMatchLeaderPlayerId);
+                    notesTab === "season"
+                      ? row.player.id === notesSeasonLeaderPlayerId
+                      : notesAreClosed &&
+                        row.player.id === notesMatchLeaderPlayerId;
 
                   const isMatchMvp =
                     notesTab === "match" &&
@@ -11298,30 +11349,57 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     </div>
 
                     <div className="notes-rating-block">
-                      <RatingStars
-                        value={row.displayStars}
-                        readOnly={
-                          notesTab === "season" ||
-                          notesAreClosed ||
-                          notesAreScheduled
-                        }
-                        onRate={(stars) =>
-                          handleRatePlayer(row.player.id, stars)
-                        }
-                      />
+                      {isBlindMatchVoting && hasMyBlindVote ? (
+                        <div
+                          className="notes-blind-vote-saved"
+                          role="status"
+                          aria-label="Vot desat"
+                        >
+                          <span aria-hidden="true">✓</span>
+                          <strong>VOT DESAT</strong>
+                        </div>
+                      ) : (
+                        <RatingStars
+                          value={
+                            isBlindMatchVoting ? 0 : row.displayStars
+                          }
+                          readOnly={
+                            notesTab === "season" ||
+                            notesAreClosed ||
+                            notesAreScheduled
+                          }
+                          onRate={(stars) =>
+                            handleRatePlayer(row.player.id, stars)
+                          }
+                        />
+                      )}
 
-                      <div className="notes-average">
-                        <strong>
-                          {row.voteCount > 0
-                            ? formatRatingAverage(row.average)
-                            : "—"}
-                        </strong>
-                        <span>
-                          {row.voteCount > 0
-                            ? `${row.voteCount} VOTS`
-                            : "SENSE VOTS"}
-                        </span>
-                      </div>
+                      {isBlindMatchVoting ? (
+                        <div
+                          className="notes-average notes-blind-count"
+                          aria-label={`${row.voteCount} ${
+                            row.voteCount === 1 ? "vot" : "vots"
+                          }`}
+                        >
+                          <strong>{row.voteCount}</strong>
+                          <span>
+                            {row.voteCount === 1 ? "VOT" : "VOTS"}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="notes-average">
+                          <strong>
+                            {row.voteCount > 0
+                              ? formatRatingAverage(row.average)
+                              : "—"}
+                          </strong>
+                          <span>
+                            {row.voteCount > 0
+                              ? `${row.voteCount} VOTS`
+                              : "SENSE VOTS"}
+                          </span>
+                        </div>
+                      )}
 
                       {ratingSavingPlayerId === row.player.id && (
                         <small className="real-inline-saving">GUARDANT...</small>
