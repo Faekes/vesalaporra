@@ -1714,7 +1714,7 @@ const normalizeNotesRow = (row, playersById) => {
     ownStars,
     displayStars:
       matchVoteCount > 0
-        ? getMatchStarsFromAverage(matchAverage)
+        ? getFractionalStarsFromAverage(matchAverage)
         : 0,
     average: matchAverage,
     voteCount: matchVoteCount,
@@ -1939,7 +1939,7 @@ const getStarsFromAverage = (average) => {
   return Math.max(1, Math.min(6, Math.round(average / 2) + 1));
 };
 
-const getMatchStarsFromAverage = (average) => {
+const getFractionalStarsFromAverage = (average) => {
   if (!Number.isFinite(average)) {
     return 0;
   }
@@ -1947,28 +1947,15 @@ const getMatchStarsFromAverage = (average) => {
   const roundedAverage = Math.round(
     Math.max(0, Math.min(10, average)) * 10,
   ) / 10;
-
-  if (roundedAverage >= 10) {
-    return 6;
-  }
-
+  const fullStars = getStarsFromAverage(roundedAverage);
   const wholePart = Math.floor(roundedAverage);
-  const baseStars = Math.max(
-    1,
-    Math.min(6, Math.floor(wholePart / 2) + 1),
-  );
-
-  if (wholePart % 2 !== 0) {
-    return Math.min(6, baseStars + 1);
-  }
-
   const decimalDigit = Math.round(
     (roundedAverage - wholePart) * 10,
   );
 
-  const partialStar =
+  const lastStarFill =
     decimalDigit <= 1
-      ? 0
+      ? 1
       : decimalDigit <= 3
         ? 1 / 3
         : decimalDigit <= 6
@@ -1977,7 +1964,10 @@ const getMatchStarsFromAverage = (average) => {
             ? 3 / 4
             : 1;
 
-  return Math.min(6, baseStars + partialStar);
+  return Math.max(
+    0,
+    Math.min(6, fullStars - 1 + lastStarFill),
+  );
 };
 
 const getCombinedRatingSummary = (communitySummary, selectedStars) => {
@@ -4091,7 +4081,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       ownStars: notesRatingsByPlayerId[row.player.id] ?? row.ownStars,
       displayStars:
         row.voteCount > 0
-          ? getMatchStarsFromAverage(row.average)
+          ? getFractionalStarsFromAverage(row.average)
           : 0,
     }));
 
@@ -6857,7 +6847,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             ownStars: 0,
             displayStars:
               voteCount > 0
-                ? getStarsFromAverage(average)
+                ? getFractionalStarsFromAverage(average)
                 : 0,
             average,
             voteCount,
