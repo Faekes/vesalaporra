@@ -1944,29 +1944,11 @@ const getFractionalStarsFromAverage = (average) => {
     return 0;
   }
 
-  const roundedAverage = Math.round(
-    Math.max(0, Math.min(10, average)) * 10,
-  ) / 10;
-  const fullStars = getStarsFromAverage(roundedAverage);
-  const wholePart = Math.floor(roundedAverage);
-  const decimalDigit = Math.round(
-    (roundedAverage - wholePart) * 10,
-  );
-
-  const lastStarFill =
-    decimalDigit <= 1
-      ? 1
-      : decimalDigit <= 3
-        ? 1 / 3
-        : decimalDigit <= 6
-          ? 1 / 2
-          : decimalDigit <= 8
-            ? 3 / 4
-            : 1;
+  const safeAverage = Math.max(0, Math.min(10, average));
 
   return Math.max(
-    0,
-    Math.min(6, fullStars - 1 + lastStarFill),
+    1,
+    Math.min(6, 1 + safeAverage / 2),
   );
 };
 
