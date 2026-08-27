@@ -5,7 +5,8 @@
       "namespace": "android_app",
       "package_name": "cat.vesalaporra.app",
       "sha256_cert_fingerprints": [
-        "8F:D1:47:EC:9A:68:0A:EE:52:20:1D:71:7C:29:29:14:D9:F5:1A:7A:19:92:59:BA:8B:8A:30:16:40:E1:58:27"
+        "8F:D1:47:EC:9A:68:0A:EE:52:20:1D:71:7C:29:29:14:D9:F5:1A:7A:19:92:59:BA:8B:8A:30:16:40:E1:58:27",
+        "8F:D1:47:EC:9A:68:0A:EF:52:20:1D:71:7C:29:29:14:D9:F5:1A:7A:19:92:59:BA:8B:8A:30:16:40:E1:58:27"
       ]
     }
   }
