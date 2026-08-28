@@ -8584,6 +8584,39 @@ button.notes-star:hover {
     font-size: 8px;
   }
 }
+
+@media (max-width: 520px) {
+  .admin-scoring-hero.admin-scoring-hero-compact
+    > .official-match-card.editable
+    .official-match-line {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    row-gap: 12px;
+  }
+
+  .admin-scoring-hero.admin-scoring-hero-compact
+    > .official-match-card.editable
+    .official-match-team.home {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .admin-scoring-hero.admin-scoring-hero-compact
+    > .official-match-card.editable
+    .official-match-team.away {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .admin-scoring-hero.admin-scoring-hero-compact
+    > .official-match-card.editable
+    .official-score-editor {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+  }
+}
+
 /* =========================================================
    PUNTUACIONS Â· JUGADORS I XAPES DINÃ€MIQUES
    VLP_UI_DYNAMIC_PLAYER_ADMIN_20260713_016
