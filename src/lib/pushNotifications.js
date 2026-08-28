@@ -4,6 +4,15 @@ const VAPID_PUBLIC_KEY = String(
   import.meta.env.VITE_VAPID_PUBLIC_KEY || "",
 ).trim();
 
+const PUSH_WELCOME_STORAGE_PREFIX =
+  "vesalaporra_push_welcome_shown";
+
+const PUSH_WELCOME_TITLE =
+  "🔔 Notificacions activades";
+
+const PUSH_WELCOME_BODY =
+  "Ja rebràs els avisos importants de Vesalaporra en aquest dispositiu.";
+
 const createAuditId = (action) => {
   const timestamp = new Date()
     .toISOString()
@@ -120,6 +129,106 @@ const getReadyServiceWorker =
     return navigator
       .serviceWorker
       .ready;
+  };
+
+const getPushWelcomeStorageKey = (
+  subscription,
+  serverState,
+) => {
+  const subscriptionId = String(
+    serverState?.subscription_id ||
+      subscription?.endpoint ||
+      "",
+  ).trim();
+
+  if (!subscriptionId) {
+    return null;
+  }
+
+  return `${PUSH_WELCOME_STORAGE_PREFIX}:${subscriptionId}`;
+};
+
+const hasShownPushWelcome = (
+  storageKey,
+) => {
+  if (!storageKey) {
+    return false;
+  }
+
+  try {
+    return (
+      window.localStorage.getItem(
+        storageKey,
+      ) === "1"
+    );
+  } catch {
+    return false;
+  }
+};
+
+const markPushWelcomeAsShown = (
+  storageKey,
+) => {
+  if (!storageKey) {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(
+      storageKey,
+      "1",
+    );
+  } catch {
+    // La notificació ja s'ha mostrat encara que no es pugui persistir la marca.
+  }
+};
+
+const showPushWelcomeNotification =
+  async ({
+    registration,
+    subscription,
+    serverState,
+  }) => {
+    const storageKey =
+      getPushWelcomeStorageKey(
+        subscription,
+        serverState,
+      );
+
+    if (
+      hasShownPushWelcome(
+        storageKey,
+      )
+    ) {
+      return false;
+    }
+
+    await registration.showNotification(
+      PUSH_WELCOME_TITLE,
+      {
+        body: PUSH_WELCOME_BODY,
+        icon: "/icon-192.png",
+        badge: "/icon-192.png",
+        tag:
+          storageKey ||
+          "vesalaporra:PUSH_WELCOME",
+        renotify: false,
+        data: {
+          url:
+            "/?source=push&notification=PUSH_WELCOME",
+          clickUrl:
+            "/?source=push&notification=PUSH_WELCOME",
+          notificationType:
+            "PUSH_WELCOME",
+        },
+      },
+    );
+
+    markPushWelcomeAsShown(
+      storageKey,
+    );
+
+    return true;
   };
 
 export const isPushSupported =
@@ -340,6 +449,22 @@ export const enablePushNotifications =
       throw error;
     }
 
+    let welcomeShown = false;
+
+    try {
+      welcomeShown =
+        await showPushWelcomeNotification({
+          registration,
+          subscription,
+          serverState: data,
+        });
+    } catch (welcomeError) {
+      console.warn(
+        "[VESALAPORRA_PUSH] La subscripció s'ha activat, però no s'ha pogut mostrar la benvinguda.",
+        welcomeError,
+      );
+    }
+
     return {
       status:
         "PUSH_ENABLED",
@@ -351,6 +476,8 @@ export const enablePushNotifications =
       serverState: data,
 
       auditId,
+
+      welcomeShown,
     };
   };
 
