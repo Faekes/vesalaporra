@@ -1,564 +1,3 @@
-import { useEffect, useState } from "react";
-
-import {
-  disablePushNotifications,
-  enablePushNotifications,
-  getPushErrorMessage,
-  isPushSupported,
-  readMyPushState,
-} from "../lib/pushNotifications";
-
-const SERVER_ENABLED_KEYS = new Set([
-  "push_enabled",
-  "enabled",
-  "is_enabled",
-  "notifications_enabled",
-]);
-
-const PUSH_SETUP_STORAGE_KEY =
-  "vesalaporra_push_setup_completed";
-
-const PUSH_STATE_CHANGED_EVENT =
-  "vesalaporra:push-state-changed";
-
-const getBrowserPermission = () => {
-  if (typeof Notification === "undefined") {
-    return "unsupported";
-  }
-
-  return Notification.permission;
-};
-
-const readSetupCompleted = () => {
-  try {
-    return (
-      window.localStorage.getItem(
-        PUSH_SETUP_STORAGE_KEY,
-      ) === "1"
-    );
-  } catch {
-    return false;
-  }
-};
-
-const markSetupCompleted = () => {
-  try {
-    window.localStorage.setItem(
-      PUSH_SETUP_STORAGE_KEY,
-      "1",
-    );
-  } catch {
-    // La interfície continua funcionant sense persistència local.
-  }
-};
-
-const emitPushStateChanged = () => {
-  window.dispatchEvent(
-    new Event(PUSH_STATE_CHANGED_EVENT),
-  );
-};
-
-const parseBooleanValue = (value) => {
-  if (typeof value === "boolean") {
-    return value;
-  }
-
-  if (value === 1 || value === "1") {
-    return true;
-  }
-
-  if (value === 0 || value === "0") {
-    return false;
-  }
-
-  if (typeof value === "string") {
-    const normalizedValue = value
-      .trim()
-      .toLowerCase();
-
-    if (
-      [
-        "true",
-        "t",
-        "yes",
-        "y",
-        "enabled",
-        "active",
-      ].includes(normalizedValue)
-    ) {
-      return true;
-    }
-
-    if (
-      [
-        "false",
-        "f",
-        "no",
-        "n",
-        "disabled",
-        "inactive",
-      ].includes(normalizedValue)
-    ) {
-      return false;
-    }
-  }
-
-  return null;
-};
-
-const findServerPushEnabled = (
-  value,
-  depth = 0,
-) => {
-  if (
-    value === null ||
-    value === undefined ||
-    depth > 5
-  ) {
-    return null;
-  }
-
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      const result = findServerPushEnabled(
-        item,
-        depth + 1,
-      );
-
-      if (result !== null) {
-        return result;
-      }
-    }
-
-    return null;
-  }
-
-  if (typeof value !== "object") {
-    return null;
-  }
-
-  for (const [key, nestedValue] of Object.entries(
-    value,
-  )) {
-    if (!SERVER_ENABLED_KEYS.has(key)) {
-      continue;
-    }
-
-    const parsedValue =
-      parseBooleanValue(nestedValue);
-
-    if (parsedValue !== null) {
-      return parsedValue;
-    }
-  }
-
-  for (const nestedValue of Object.values(value)) {
-    const result = findServerPushEnabled(
-      nestedValue,
-      depth + 1,
-    );
-
-    if (result !== null) {
-      return result;
-    }
-  }
-
-  return null;
-};
-
-const normalizePushState = (pushState) => {
-  const supported = Boolean(
-    pushState?.supported ?? isPushSupported(),
-  );
-
-  const permission = String(
-    pushState?.permission ||
-      getBrowserPermission(),
-  );
-
-  const browserSubscribed = Boolean(
-    pushState?.browserSubscribed,
-  );
-
-  const serverEnabled =
-    findServerPushEnabled(
-      pushState?.serverState,
-    );
-
-  return {
-    supported,
-    permission,
-    browserSubscribed,
-    enabled:
-      browserSubscribed &&
-      serverEnabled !== false,
-  };
-};
-
-const INITIAL_PUSH_STATE = {
-  supported: isPushSupported(),
-  permission: getBrowserPermission(),
-  browserSubscribed: false,
-  enabled: false,
-};
-
-export default function NotificationPreferencesCard({
-  variant = "profile-card",
-}) {
-  const [pushState, setPushState] = useState(
-    INITIAL_PUSH_STATE,
-  );
-
-  const [setupCompleted, setSetupCompleted] =
-    useState(readSetupCompleted);
-
-  const [loading, setLoading] = useState(true);
-  const [working, setWorking] = useState(false);
-  const [feedback, setFeedback] =
-    useState(null);
-
-  useEffect(() => {
-    let isCurrent = true;
-
-    const loadPushState = async (
-      showLoading = false,
-    ) => {
-      if (showLoading) {
-        setLoading(true);
-      }
-
-      try {
-        const nextState =
-          await readMyPushState();
-
-        if (!isCurrent) {
-          return;
-        }
-
-        const normalizedState =
-          normalizePushState(nextState);
-
-        setPushState(normalizedState);
-
-        if (normalizedState.enabled) {
-          markSetupCompleted();
-          setSetupCompleted(true);
-        } else {
-          setSetupCompleted(
-            readSetupCompleted(),
-          );
-        }
-      } catch (error) {
-        console.warn(
-          "[VESALAPORRA_PUSH] No s’ha pogut llegir l’estat:",
-          error,
-        );
-
-        if (!isCurrent) {
-          return;
-        }
-
-        setPushState((currentState) => ({
-          ...currentState,
-          supported: isPushSupported(),
-          permission:
-            getBrowserPermission(),
-        }));
-
-        setSetupCompleted(
-          readSetupCompleted(),
-        );
-      } finally {
-        if (isCurrent && showLoading) {
-          setLoading(false);
-        }
-      }
-    };
-
-    const handleExternalStateChange = () => {
-      void loadPushState(false);
-    };
-
-    void loadPushState(true);
-
-    window.addEventListener(
-      PUSH_STATE_CHANGED_EVENT,
-      handleExternalStateChange,
-    );
-
-    return () => {
-      isCurrent = false;
-
-      window.removeEventListener(
-        PUSH_STATE_CHANGED_EVENT,
-        handleExternalStateChange,
-      );
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!feedback) {
-      return undefined;
-    }
-
-    const feedbackTimer = window.setTimeout(
-      () => setFeedback(null),
-      feedback.type === "error" ? 3200 : 1800,
-    );
-
-    return () =>
-      window.clearTimeout(feedbackTimer);
-  }, [feedback]);
-
-  const synchronizePushState = async (
-    fallbackEnabled,
-  ) => {
-    try {
-      const nextState =
-        await readMyPushState();
-
-      setPushState(
-        normalizePushState(nextState),
-      );
-    } catch (error) {
-      console.warn(
-        "[VESALAPORRA_PUSH] L’acció ha acabat, però no s’ha pogut rellegir l’estat:",
-        error,
-      );
-
-      setPushState((currentState) => ({
-        ...currentState,
-        supported: isPushSupported(),
-        permission:
-          getBrowserPermission(),
-        browserSubscribed:
-          fallbackEnabled,
-        enabled: fallbackEnabled,
-      }));
-    }
-  };
-
-  const handleTogglePush = async () => {
-    if (
-      loading ||
-      working ||
-      !pushState.supported
-    ) {
-      return;
-    }
-
-    setWorking(true);
-    setFeedback(null);
-
-    try {
-      if (pushState.enabled) {
-        await disablePushNotifications();
-        await synchronizePushState(false);
-
-        markSetupCompleted();
-        setSetupCompleted(true);
-
-        setFeedback({
-          type: "success",
-          message: "DESACTIVADES",
-        });
-
-        emitPushStateChanged();
-        return;
-      }
-
-      await enablePushNotifications();
-      await synchronizePushState(true);
-
-      markSetupCompleted();
-      setSetupCompleted(true);
-
-      setFeedback({
-        type: "success",
-        message: "ACTIVADES",
-      });
-
-      emitPushStateChanged();
-    } catch (error) {
-      console.error(
-        "[VESALAPORRA_PUSH] Error canviant les notificacions:",
-        error,
-      );
-
-      setPushState((currentState) => ({
-        ...currentState,
-        permission:
-          getBrowserPermission(),
-      }));
-
-      setFeedback({
-        type: "error",
-        message: getPushErrorMessage(error),
-      });
-    } finally {
-      setWorking(false);
-    }
-  };
-
-  const permissionBlocked =
-    pushState.permission === "denied";
-
-  const compactStatusLabel = pushState.enabled
-    ? "ACTIVES"
-    : "DESACTIVADES";
-
-  const inlineButtonLabel = working
-    ? "Actualitzant notificacions"
-    : pushState.enabled
-      ? "Desactiva notificacions"
-      : "Activa notificacions";
-
-  const buttonDisabled =
-    loading ||
-    working ||
-    !pushState.supported ||
-    (permissionBlocked && !pushState.enabled);
-
-  if (variant === "desktop-inline") {
-    if (loading || !setupCompleted) {
-      return null;
-    }
-
-    return (
-      <>
-        <style>{`
-          .vlp-push-inline-wrap {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-          }
-
-          .vlp-push-inline-button {
-            position: relative;
-            display: inline-grid;
-            place-items: center;
-            width: 34px;
-            height: 34px;
-            padding: 0;
-            border: 1px solid rgba(250, 204, 21, 0.34);
-            border-radius: 999px;
-            background: rgba(250, 204, 21, 0.08);
-            color: #facc15;
-            font: inherit;
-            cursor: pointer;
-          }
-
-          .vlp-push-inline-button.is-disabled {
-            border-color: rgba(239, 68, 68, 0.36);
-            background: rgba(239, 68, 68, 0.08);
-            color: #fecdd3;
-          }
-
-          .vlp-push-inline-button:disabled {
-            cursor: default;
-            opacity: 0.55;
-          }
-
-          .vlp-push-inline-bell {
-            font-size: 16px;
-            line-height: 1;
-          }
-
-          .vlp-push-inline-cross {
-            position: absolute;
-            right: -3px;
-            bottom: -3px;
-            display: grid;
-            place-items: center;
-            width: 15px;
-            height: 15px;
-            border: 2px solid #0b1020;
-            border-radius: 999px;
-            background: #ef4444;
-            color: #ffffff;
-            font-size: 10px;
-            font-weight: 1000;
-            line-height: 1;
-          }
-
-          .vlp-push-inline-feedback {
-            position: absolute;
-            left: 50%;
-            bottom: calc(100% + 9px);
-            z-index: 20;
-            transform: translateX(-50%);
-            padding: 7px 10px;
-            border: 1px solid rgba(148, 163, 184, 0.24);
-            border-radius: 999px;
-            background: rgba(8, 13, 28, 0.98);
-            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
-            color: #f8fafc;
-            font-size: 8px;
-            font-weight: 950;
-            letter-spacing: 0.09em;
-            white-space: nowrap;
-          }
-
-          .vlp-push-inline-feedback.error {
-            border-color: rgba(239, 68, 68, 0.36);
-            color: #fecdd3;
-          }
-
-          @media (max-width: 700px) {
-            .vlp-push-inline-wrap {
-              display: none;
-            }
-          }
-        `}</style>
-
-        <span className="vlp-push-inline-wrap">
-          <button
-            type="button"
-            className={
-              pushState.enabled
-                ? "vlp-push-inline-button"
-                : "vlp-push-inline-button is-disabled"
-            }
-            disabled={buttonDisabled}
-            onClick={handleTogglePush}
-            aria-label={inlineButtonLabel}
-            title={inlineButtonLabel}
-          >
-            <span
-              className="vlp-push-inline-bell"
-              aria-hidden="true"
-            >
-              🔔
-            </span>
-
-            {!pushState.enabled && (
-              <span
-                className="vlp-push-inline-cross"
-                aria-hidden="true"
-              >
-                ×
-              </span>
-            )}
-          </button>
-
-          {feedback?.message && (
-            <span
-              className={`vlp-push-inline-feedback ${feedback.type}`}
-              role={
-                feedback.type === "error"
-                  ? "alert"
-                  : "status"
-              }
-              aria-live="polite"
-            >
-              {feedback.message}
-            </span>
-          )}
-        </span>
-      </>
-    );
-  }
-
   if (setupCompleted) {
     return (
       <>
@@ -572,12 +11,26 @@ export default function NotificationPreferencesCard({
               display: flex;
               align-items: center;
               gap: 12px;
+              width: 100%;
               margin: 0 0 18px;
               padding: 13px 15px;
               border: 1px solid rgba(250, 204, 21, 0.22);
               border-radius: 17px;
               background: rgba(10, 15, 31, 0.92);
-              box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+              box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+              color: inherit;
+              font: inherit;
+              text-align: left;
+              cursor: pointer;
+              box-sizing: border-box;
+              appearance: none;
+              -webkit-appearance: none;
+            }
+
+            .vlp-push-mobile-compact:disabled {
+              cursor: default;
+              opacity: 0.55;
             }
 
             .vlp-push-mobile-compact-icon {
@@ -624,12 +77,36 @@ export default function NotificationPreferencesCard({
               font-weight: 1000;
               letter-spacing: 0.09em;
             }
+
+            .vlp-push-mobile-feedback {
+              display: block;
+              margin: -8px 0 18px;
+              padding: 9px 12px;
+              border: 1px solid rgba(34, 197, 94, 0.28);
+              border-radius: 13px;
+              background: rgba(34, 197, 94, 0.065);
+              color: #bbf7d0;
+              font-size: 10px;
+              font-weight: 850;
+              text-align: center;
+            }
+
+            .vlp-push-mobile-feedback.error {
+              border-color: rgba(239, 68, 68, 0.28);
+              background: rgba(239, 68, 68, 0.065);
+              color: #fecdd3;
+            }
           }
         `}</style>
 
-        <section
+        <button
+          type="button"
+          role="switch"
+          aria-checked={pushState.enabled}
+          aria-label={inlineButtonLabel}
           className="vlp-push-mobile-compact"
-          aria-label="Estat de les notificacions"
+          disabled={buttonDisabled}
+          onClick={handleTogglePush}
         >
           <span
             className="vlp-push-mobile-compact-icon"
@@ -640,273 +117,23 @@ export default function NotificationPreferencesCard({
 
           <span className="vlp-push-mobile-compact-copy">
             <span>AVISOS DE VESALAPORRA</span>
-            <strong>Notificacions</strong>
+            <strong>
+              {working
+                ? "Actualitzant..."
+                : "Notificacions"}
+            </strong>
           </span>
 
           <strong className="vlp-push-mobile-compact-status">
-            {compactStatusLabel}
+            {working
+              ? "ESPERA"
+              : compactStatusLabel}
           </strong>
-        </section>
-      </>
-    );
-  }
-
-  const statusLabel = loading
-    ? "COMPROVANT"
-    : !pushState.supported
-      ? "NO DISPONIBLE"
-      : permissionBlocked
-        ? "BLOQUEJADES"
-        : "DESACTIVADES";
-
-  const buttonLabel = loading
-    ? "COMPROVANT..."
-    : working
-      ? "ACTIVANT..."
-      : !pushState.supported
-        ? "NO DISPONIBLE EN AQUEST NAVEGADOR"
-        : permissionBlocked
-          ? "BLOQUEJADES AL NAVEGADOR"
-          : "ACTIVA NOTIFICACIONS";
-
-  return (
-    <>
-      <style>{`
-        .vlp-push-card {
-          display: grid;
-          gap: 16px;
-          margin: 0 0 22px;
-          padding: 20px;
-          border: 1px solid rgba(250, 204, 21, 0.22);
-          border-radius: 22px;
-          background:
-            radial-gradient(
-              circle at 0% 0%,
-              rgba(37, 99, 235, 0.17),
-              transparent 46%
-            ),
-            radial-gradient(
-              circle at 100% 100%,
-              rgba(190, 24, 93, 0.13),
-              transparent 48%
-            ),
-            rgba(10, 15, 31, 0.92);
-          box-shadow:
-            0 18px 44px rgba(0, 0, 0, 0.24),
-            inset 0 1px 0 rgba(255, 255, 255, 0.045);
-        }
-
-        .vlp-push-head {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-        }
-
-        .vlp-push-icon {
-          display: grid;
-          place-items: center;
-          width: 48px;
-          height: 48px;
-          flex: 0 0 48px;
-          border: 1px solid rgba(250, 204, 21, 0.34);
-          border-radius: 16px;
-          background: rgba(250, 204, 21, 0.09);
-          font-size: 23px;
-        }
-
-        .vlp-push-copy {
-          min-width: 0;
-          flex: 1 1 auto;
-        }
-
-        .vlp-push-copy span {
-          display: block;
-          margin-bottom: 4px;
-          color: #facc15;
-          font-size: 9px;
-          font-weight: 950;
-          letter-spacing: 0.13em;
-        }
-
-        .vlp-push-copy strong {
-          display: block;
-          color: #f8fafc;
-          font-size: 18px;
-          line-height: 1.16;
-        }
-
-        .vlp-push-copy p {
-          margin: 6px 0 0;
-          color: #929db6;
-          font-size: 12px;
-          line-height: 1.5;
-        }
-
-        .vlp-push-status {
-          flex: 0 0 auto;
-          padding: 8px 11px;
-          border: 1px solid rgba(148, 163, 184, 0.22);
-          border-radius: 999px;
-          background: rgba(15, 23, 42, 0.7);
-          color: #9aa5bd;
-          font-size: 8px;
-          font-weight: 950;
-          letter-spacing: 0.1em;
-        }
-
-        .vlp-push-events {
-          display: grid;
-          grid-template-columns:
-            repeat(5, minmax(0, 1fr));
-          gap: 8px;
-        }
-
-        .vlp-push-events span {
-          display: grid;
-          place-items: center;
-          min-height: 44px;
-          padding: 8px;
-          border: 1px solid rgba(148, 163, 184, 0.13);
-          border-radius: 14px;
-          background: rgba(2, 6, 23, 0.42);
-          color: #cbd5e1;
-          font-size: 9px;
-          font-weight: 850;
-          line-height: 1.3;
-          text-align: center;
-        }
-
-        .vlp-push-blocked-help {
-          margin: 0;
-          padding: 11px 13px;
-          border: 1px solid rgba(239, 68, 68, 0.24);
-          border-radius: 14px;
-          background: rgba(239, 68, 68, 0.065);
-          color: #fecdd3;
-          font-size: 11px;
-          line-height: 1.5;
-        }
-
-        .vlp-push-toggle {
-          width: 100%;
-          min-height: 46px;
-          padding: 11px 18px;
-          border: 1px solid rgba(250, 204, 21, 0.52);
-          border-radius: 999px;
-          background:
-            linear-gradient(
-              135deg,
-              rgba(250, 204, 21, 0.17),
-              rgba(15, 23, 42, 0.95)
-            );
-          color: #fde68a;
-          font: inherit;
-          font-size: 10px;
-          font-weight: 1000;
-          letter-spacing: 0.1em;
-          cursor: pointer;
-        }
-
-        .vlp-push-toggle:disabled {
-          cursor: default;
-          opacity: 0.55;
-        }
-
-        .vlp-push-feedback {
-          padding: 10px 12px;
-          border: 1px solid rgba(34, 197, 94, 0.28);
-          border-radius: 14px;
-          background: rgba(34, 197, 94, 0.065);
-          color: #bbf7d0;
-          font-size: 10px;
-          font-weight: 850;
-          text-align: center;
-        }
-
-        .vlp-push-feedback.error {
-          border-color: rgba(239, 68, 68, 0.28);
-          background: rgba(239, 68, 68, 0.065);
-          color: #fecdd3;
-        }
-
-        @media (max-width: 700px) {
-          .vlp-push-card {
-            padding: 16px;
-            border-radius: 19px;
-          }
-
-          .vlp-push-events {
-            grid-template-columns:
-              repeat(2, minmax(0, 1fr));
-          }
-
-          .vlp-push-events span:last-child {
-            grid-column: 1 / -1;
-          }
-        }
-      `}</style>
-
-      <section
-        className="vlp-push-card"
-        aria-label="Preferències de notificacions"
-      >
-        <div className="vlp-push-head">
-          <span
-            className="vlp-push-icon"
-            aria-hidden="true"
-          >
-            🔔
-          </span>
-
-          <div className="vlp-push-copy">
-            <span>AVISOS DE VESALAPORRA</span>
-            <strong>Notificacions</strong>
-            <p>
-              Activa els avisos importants del joc
-              en aquest dispositiu.
-            </p>
-          </div>
-
-          <span className="vlp-push-status">
-            {statusLabel}
-          </span>
-        </div>
-
-        <div
-          className="vlp-push-events"
-          aria-label="Tipus de notificacions"
-        >
-          <span>PORRA OBERTA</span>
-          <span>TANCA EN 30 MIN</span>
-          <span>LES NOTES</span>
-          <span>PUNTS I GUANYADOR</span>
-          <span>MEDALLES</span>
-        </div>
-
-        {permissionBlocked && (
-          <p
-            className="vlp-push-blocked-help"
-            role="alert"
-          >
-            Chrome té les notificacions bloquejades
-            per a Vesalaporra.
-          </p>
-        )}
-
-        <button
-          type="button"
-          role="switch"
-          aria-checked={pushState.enabled}
-          className="vlp-push-toggle"
-          disabled={buttonDisabled}
-          onClick={handleTogglePush}
-        >
-          {buttonLabel}
         </button>
 
         {feedback?.message && (
           <div
-            className={`vlp-push-feedback ${feedback.type}`}
+            className={`vlp-push-mobile-feedback ${feedback.type}`}
             role={
               feedback.type === "error"
                 ? "alert"
@@ -917,7 +144,6 @@ export default function NotificationPreferencesCard({
             {feedback.message}
           </div>
         )}
-      </section>
-    </>
-  );
-}
+      </>
+    );
+  }
