@@ -24,14 +24,6 @@ const isStandaloneMode = () => {
   );
 };
 
-const isDesktopMode = () => {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  return window.matchMedia?.("(min-width: 861px)")?.matches === true;
-};
-
 const readCapturedInstallPrompt = () => {
   if (typeof window === "undefined") {
     return null;
@@ -49,7 +41,6 @@ const clearCapturedInstallPrompt = () => {
 };
 
 export default function VesalaporraDesktopAppLauncher() {
-  const desktop = useMemo(() => isDesktopMode(), []);
   const standalone = useMemo(() => isStandaloneMode(), []);
 
   const [installPrompt, setInstallPrompt] = useState(
@@ -74,7 +65,7 @@ export default function VesalaporraDesktopAppLauncher() {
   }, []);
 
   useEffect(() => {
-    if (!desktop || standalone) {
+    if (standalone) {
       return undefined;
     }
 
@@ -111,7 +102,7 @@ export default function VesalaporraDesktopAppLauncher() {
         handleAppInstalled,
       );
     };
-  }, [desktop, standalone, showInstallSuccess]);
+  }, [standalone, showInstallSuccess]);
 
   useEffect(() => {
     if (!successMessage) {
@@ -163,7 +154,7 @@ export default function VesalaporraDesktopAppLauncher() {
     }
   };
 
-  if (!desktop || standalone) {
+  if (standalone) {
     return null;
   }
 
