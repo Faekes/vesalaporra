@@ -3582,7 +3582,11 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       authUser && VESALAPORRA_ADMIN_USER_IDS.includes(String(authUser.id)),
     );
 
-    const activeAdminMatchId = matchData.id || VESALAPORRA_CURRENT_MATCH_ID || null;
+    const activeAdminMatchId =
+      matchData.id || VESALAPORRA_CURRENT_MATCH_ID || null;
+
+    const adminPlayerMatchId =
+      adminMatchForm.matchId || activeAdminMatchId;
 
   const isWaitingForOpening = Boolean(
     matchData.id && matchData.isUpcomingPreview,
@@ -4698,6 +4702,19 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     });
   };
 
+  const prepareAdminMatchPlayers = (match) => {
+    if (!match?.matchId) {
+      return;
+    }
+
+    setAdminMatchForm(adminMatchToForm(match));
+    setAdminPlayerFeedback({
+      type: "success",
+      message: `Preparant convocats i cotitzacions del partit contra ${match.rivalDisplayName}.`,
+    });
+    setAdminScoringTab("players");
+  };
+
  const updateAdminMatchForm = (field, value) => {
   setAdminMatchForm((currentForm) => ({
     ...currentForm,
@@ -5048,7 +5065,7 @@ const validateAdminMatchForm = () => {
     try {
       const [catalogResponse, reviewResponse] = await Promise.all([
         supabase.rpc("vesalaporra_admin_list_player_catalog", {
-          p_match_id: activeAdminMatchId,
+          p_match_id: adminPlayerMatchId,
         }),
         supabase.rpc("vesalaporra_admin_list_badge_review_queue", {
           p_limit: 50,
@@ -5527,7 +5544,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     const { error } = await supabase.rpc(
       "vesalaporra_admin_upsert_match_player",
       {
-        p_match_id: activeAdminMatchId,
+        p_match_id: adminPlayerMatchId,
         p_player_id: player.playerId,
         p_roster_order: nextRosterOrder,
         p_availability_status: nextValues.availabilityStatus,
@@ -5578,7 +5595,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
       const { error } = await supabase.rpc(
         "vesalaporra_admin_remove_match_player",
         {
-          p_match_id: activeAdminMatchId,
+          p_match_id: adminPlayerMatchId,
           p_player_id: player.playerId,
           p_audit_id: createAdminAuditId("REMOVE_MATCH_PLAYER"),
         },
@@ -8029,7 +8046,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     if (activePage === "scoring" && isAdmin && adminScoringTab === "players") {
       loadAdminPlayerWorkspace();
     }
-  }, [activePage, adminScoringTab, isAdmin, activeAdminMatchId]);
+  }, [activePage, adminScoringTab, isAdmin, adminPlayerMatchId]);
 
   useEffect(() => {
     if (
@@ -12622,6 +12639,20 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                             </div>
 
                                                         <div className="admin-catalog-actions primary">
+                              <button
+                                type="button"
+                                className="assign"
+                                disabled={
+                                  adminMatchSaving ||
+                                  Boolean(adminDeletingMatchId)
+                                }
+                                onClick={() =>
+                                  prepareAdminMatchPlayers(match)
+                                }
+                              >
+                                PREPARA CONVOCATS I COTITZACIONS
+                              </button>
+
                               <button
                                 type="button"
                                 className="upload"
