@@ -24,6 +24,35 @@ const isStandaloneMode = () => {
   );
 };
 
+const isMobileDevice = () => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return (
+    /android|iphone|ipad|ipod/i.test(
+      window.navigator?.userAgent || "",
+    ) ||
+    window.matchMedia?.("(pointer: coarse)")?.matches === true
+  );
+};
+
+const getManualInstallMessage = () => {
+  const userAgent = String(
+    window.navigator?.userAgent || "",
+  ).toLowerCase();
+
+  if (/iphone|ipad|ipod/.test(userAgent)) {
+    return "📱 A l’iPhone, obre Vesalaporra amb Safari, prem Compartir i selecciona «Afegeix a la pantalla d’inici».";
+  }
+
+  if (/android/.test(userAgent)) {
+    return "📱 Chrome encara no ofereix la instal·lació automàtica. Comprova que has obert vesalaporra.cat directament amb Chrome i no dins de WhatsApp, X o Instagram.";
+  }
+
+  return "💻 Aquest navegador encara no ofereix la instal·lació automàtica. Obre vesalaporra.cat directament amb Chrome o Edge.";
+};
+
 const readCapturedInstallPrompt = () => {
   if (typeof window === "undefined") {
     return null;
@@ -42,6 +71,7 @@ const clearCapturedInstallPrompt = () => {
 
 export default function VesalaporraDesktopAppLauncher() {
   const standalone = useMemo(() => isStandaloneMode(), []);
+  const mobileDevice = useMemo(() => isMobileDevice(), []);
 
   const [installPrompt, setInstallPrompt] = useState(
     () => readCapturedInstallPrompt(),
@@ -123,7 +153,15 @@ export default function VesalaporraDesktopAppLauncher() {
       installPrompt ||
       readCapturedInstallPrompt();
 
-    if (!capturedPrompt || installing) {
+    if (installing) {
+      return;
+    }
+
+    if (!capturedPrompt) {
+      setSuccessMessage(
+        getManualInstallMessage(),
+      );
+
       return;
     }
 
@@ -167,7 +205,8 @@ export default function VesalaporraDesktopAppLauncher() {
 
   if (
     !installPrompt &&
-    !successMessage
+    !successMessage &&
+    !mobileDevice
   ) {
     return null;
   }
