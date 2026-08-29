@@ -718,6 +718,47 @@ const X_AUTO_LOGIN_COOLDOWN_MS = 15000;
 const VESALAPORRA_ACTIVE_PAGE_STORAGE_KEY =
   "vesalaporra_active_page";
 
+const VESALAPORRA_ADMIN_PREPARATION_MATCH_STORAGE_KEY =
+  "vesalaporra_admin_preparation_match_id";
+
+const readAdminPreparationMatchId = () => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    return (
+      window.localStorage.getItem(
+        VESALAPORRA_ADMIN_PREPARATION_MATCH_STORAGE_KEY,
+      ) || null
+    );
+  } catch {
+    return null;
+  }
+};
+
+const storeAdminPreparationMatchId = (matchId) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    if (matchId) {
+      window.localStorage.setItem(
+        VESALAPORRA_ADMIN_PREPARATION_MATCH_STORAGE_KEY,
+        String(matchId),
+      );
+    } else {
+      window.localStorage.removeItem(
+        VESALAPORRA_ADMIN_PREPARATION_MATCH_STORAGE_KEY,
+      );
+    }
+  } catch {
+    // La preparació continua funcionant durant la sessió encara que
+    // el navegador bloquegi localStorage.
+  }
+};
+
 const VESALAPORRA_PROFILE_TAB_BY_PATH = {
   resum: "overview",
   medalles: "achievements",
@@ -3566,6 +3607,10 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     EMPTY_ADMIN_MATCH_FORM,
   );
 
+  const [adminPreparationMatchId, setAdminPreparationMatchId] = useState(
+    () => readAdminPreparationMatchId(),
+  );
+
   const [adminMatchFeedback, setAdminMatchFeedback] = useState(null);
 
   const adminPlayerFileInputRef = useRef(null);
@@ -3582,11 +3627,28 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       authUser && VESALAPORRA_ADMIN_USER_IDS.includes(String(authUser.id)),
     );
 
-    const activeAdminMatchId =
-      matchData.id || VESALAPORRA_CURRENT_MATCH_ID || null;
+  const activeAdminMatchId =
+    matchData.id || VESALAPORRA_CURRENT_MATCH_ID || null;
 
-    const adminPlayerMatchId =
-      adminMatchForm.matchId || activeAdminMatchId;
+  const adminPlayerMatchId =
+    adminPreparationMatchId || activeAdminMatchId;
+
+  const adminPreparationMatch =
+    adminUpcomingMatches.find(
+      (match) => match.matchId === adminPlayerMatchId,
+    ) || null;
+
+  const adminPreparationMatchLabel = adminPreparationMatch
+    ? `${adminPreparationMatch.homeDisplayName} – ${adminPreparationMatch.awayDisplayName}`
+    : adminPlayerMatchId === activeAdminMatchId && matchData.id
+      ? `${matchData.homeName} – ${matchData.awayName}`
+      : adminPlayerMatchId
+        ? "Carregant el partit seleccionat…"
+        : "No hi ha cap partit seleccionat";
+
+  const adminPreparedPlayerCount = adminPlayerCatalog.filter(
+    (player) => player.assignedToMatch && player.isPublicVisible,
+  ).length;
 
   const isWaitingForOpening = Boolean(
     matchData.id && matchData.isUpcomingPreview,
@@ -4707,10 +4769,11 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       return;
     }
 
-    setAdminMatchForm(adminMatchToForm(match));
+    setAdminPreparationMatchId(match.matchId);
+    storeAdminPreparationMatchId(match.matchId);
     setAdminPlayerFeedback({
       type: "success",
-      message: `Preparant convocats i cotitzacions del partit contra ${match.rivalDisplayName}.`,
+      message: `Preparant convocats i cotitzacions del partit ${match.homeDisplayName} – ${match.awayDisplayName}.`,
     });
     setAdminScoringTab("players");
   };
@@ -5007,6 +5070,11 @@ const validateAdminMatchForm = () => {
 
       if (adminMatchForm.matchId === match.matchId) {
         setAdminMatchForm(EMPTY_ADMIN_MATCH_FORM);
+      }
+
+      if (adminPreparationMatchId === match.matchId) {
+        setAdminPreparationMatchId(null);
+        storeAdminPreparationMatchId(null);
       }
 
       await loadAdminUpcomingMatches({
@@ -8052,7 +8120,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     if (
       activePage === "scoring" &&
       isAdmin &&
-      adminScoringTab === "upcoming"
+      ["players", "upcoming"].includes(adminScoringTab)
     ) {
       loadAdminUpcomingMatches();
     }
@@ -11388,8 +11456,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 />
               ) : adminScoringTab === "players" ? (
                 <div className="admin-player-hero-summary">
-                  <span>CATÀLEG DINÀMIC</span>
-                  <strong>{adminPlayerCatalog.length} jugadors</strong>
+                  <span>PARTIT EN PREPARACIÓ</span>
+                  <strong>{adminPreparationMatchLabel}</strong>
+                  <small>
+                    {adminPreparedPlayerCount} jugadors convocats i visibles
+                  </small>
                 </div>
               ) : (
                 <div className="admin-player-hero-summary">
@@ -11691,6 +11762,56 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   className="admin-hidden-file-input"
                   onChange={handleAdminPlayerSourceFile}
                 />
+
+                <section
+                  aria-live="polite"
+                  style={{
+                    marginBottom: "18px",
+                    padding: "16px 18px",
+                    border: "1px solid rgba(244, 207, 54, 0.52)",
+                    borderRadius: "18px",
+                    background:
+                      "linear-gradient(135deg, rgba(244, 207, 54, 0.14), rgba(8, 12, 28, 0.96) 58%)",
+                    boxShadow:
+                      "0 14px 34px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.07)",
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "block",
+                      marginBottom: "6px",
+                      color: "#f4cf36",
+                      fontSize: "11px",
+                      fontWeight: 900,
+                      letterSpacing: "0.12em",
+                    }}
+                  >
+                    ESTÀS PREPARANT
+                  </span>
+
+                  <strong
+                    style={{
+                      display: "block",
+                      color: "#ffffff",
+                      fontSize: "18px",
+                    }}
+                  >
+                    {adminPreparationMatchLabel}
+                  </strong>
+
+                  <small
+                    style={{
+                      display: "block",
+                      marginTop: "7px",
+                      color: "rgba(255, 255, 255, 0.72)",
+                      lineHeight: 1.45,
+                    }}
+                  >
+                    {adminPreparedPlayerCount} jugadors convocats i visibles.
+                    Els canvis es guarden directament en aquest partit i ja hi
+                    seran quan la porra s’obri automàticament.
+                  </small>
+                </section>
 
                 {adminPlayerFeedback?.message && (
                   <div
