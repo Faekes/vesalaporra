@@ -3478,6 +3478,8 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     createEmptyOfficialMatchState(null),
   );
 
+  const [officialOwnGoalCount, setOfficialOwnGoalCount] = useState(0);
+
   const [officialMatchSaving, setOfficialMatchSaving] = useState(false);
 
   const [officialMatchFeedback, setOfficialMatchFeedback] = useState(null);
@@ -4382,8 +4384,8 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       ? officialMatchState.homeScore
       : officialMatchState.awayScore;
 
-    if (barcaGoals !== officialBarcaScore) {
-      return `Els gols assignats als jugadors (${barcaGoals}) han de coincidir amb els gols del Barça (${officialBarcaScore}).`;
+    if (barcaGoals + officialOwnGoalCount !== officialBarcaScore) {
+      return `Els gols assignats als jugadors (${barcaGoals}) més els gols en pròpia porta (${officialOwnGoalCount}) han de coincidir amb els gols del Barça (${officialBarcaScore}).`;
     }
 
     const invalidEventPlayer = gamePlayers.find((player) => {
@@ -8765,6 +8767,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   useEffect(() => {
     if (matchData.id && officialMatchState.matchId !== matchData.id) {
       setOfficialMatchState(createEmptyOfficialMatchState(matchData.id));
+      setOfficialOwnGoalCount(0);
     }
   }, [matchData.id]);
 
@@ -11552,6 +11555,34 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                         <strong>{tool.label}</strong>
                       </div>
                     ))}
+
+                    <div className="admin-tool goal">
+                      <div className="admin-count-control">
+                        <ProtagonistEventIcon
+                          type="goal"
+                          count={officialOwnGoalCount}
+                          onClick={() =>
+                            setOfficialOwnGoalCount((currentCount) =>
+                              currentCount + 1
+                            )
+                          }
+                          ariaLabel="Suma un gol en pròpia porta del rival"
+                        />
+                        <button
+                          type="button"
+                          disabled={officialOwnGoalCount === 0}
+                          onClick={() =>
+                            setOfficialOwnGoalCount((currentCount) =>
+                              Math.max(0, currentCount - 1)
+                            )
+                          }
+                          aria-label="Resta un gol en pròpia porta del rival"
+                        >
+                          −
+                        </button>
+                      </div>
+                      <strong>PRÒPIA PORTA</strong>
+                    </div>
                   </div>
 
                   <div className="admin-live-summary">
@@ -11563,6 +11594,9 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     </span>
                     <span>
                       GOLS <strong>{adminGoalCount}</strong>
+                    </span>
+                    <span>
+                      PRÒPIA PORTA <strong>{officialOwnGoalCount}</strong>
                     </span>
                     <span>
                       ASSISTÈNCIES <strong>{adminAssistCount}</strong>
