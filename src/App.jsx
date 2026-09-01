@@ -7290,7 +7290,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       setSelectedPrivateLeagueId(null);
       setPrivateLeagueMembers([]);
       setPrivateLeaguesError("");
-      return;
+      return [];
     }
 
     if (!quiet) {
@@ -7335,6 +7335,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
         return leagues[0]?.id || null;
       });
+
+      return leagues;
     } catch (error) {
       if (quiet) {
         console.warn(
@@ -7350,6 +7352,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             "No s’han pogut carregar les teves lligues.",
         );
       }
+
+      return [];
     } finally {
       if (!quiet) {
         setPrivateLeaguesLoading(false);
@@ -7594,6 +7598,32 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
           block: "start",
         });
     });
+  };
+
+  const handleOpenPrivateLeaguesPortal = async () => {
+    setSelectedProfileUserId(
+      authUser?.id ? String(authUser.id) : null,
+    );
+    setProfileTab("leagues");
+    setPrivateLeagueFeedback(null);
+    setActivePage("profile");
+
+    if (!authUser) {
+      return;
+    }
+
+    const leagues = privateLeagues.length
+      ? privateLeagues
+      : await loadPrivateLeagues();
+
+    const leagueToOpen =
+      leagues.find(
+        (league) => league.id === selectedPrivateLeagueId,
+      ) || leagues[0];
+
+    if (leagueToOpen?.id) {
+      await handleOpenPrivateLeague(leagueToOpen.id);
+    }
   };
 
   const buildPrivateLeagueInviteUrl = (league) =>
@@ -9663,6 +9693,35 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   line-height: 1;
 }
 
+.nav-private-leagues-portal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-color: rgba(240, 204, 71, 0.42) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(33, 71, 165, 0.22),
+    rgba(166, 28, 72, 0.2)
+  ) !important;
+  color: #f0cc47 !important;
+  white-space: nowrap;
+}
+
+.nav-private-leagues-portal-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.nav-private-leagues-portal-mobile-label {
+  display: none;
+}
+
+.nav-private-leagues-portal:hover {
+  border-color: rgba(240, 204, 71, 0.72) !important;
+  box-shadow: 0 0 18px rgba(240, 204, 71, 0.12);
+}
+
 .instructions-page {
   width: min(calc(100% - 24px), 1240px);
   margin: 0 auto;
@@ -9670,6 +9729,22 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 }
 
 @media (max-width: 520px) {
+  .nav-private-leagues-portal {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 7px !important;
+  }
+
+  .nav-private-leagues-portal-label {
+    display: none;
+  }
+
+  .nav-private-leagues-portal-mobile-label {
+    display: inline;
+    font-size: 9px;
+    letter-spacing: 0.04em;
+  }
+
   .nav-help-button {
     width: 32px;
     height: 32px;
@@ -9820,6 +9895,27 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             >
               <span className="nav-full-label">RÀNQUING</span>
               <span className="nav-guest-mobile-label">RANK</span>
+            </button>
+
+            <button
+              type="button"
+              className="nav-button nav-private-leagues-portal"
+              onClick={handleOpenPrivateLeaguesPortal}
+              aria-label="Obre les teves lligues privades"
+              title="Lligues privades"
+            >
+              <span
+                className="nav-private-leagues-portal-icon"
+                aria-hidden="true"
+              >
+                🏆
+              </span>
+              <span className="nav-private-leagues-portal-label">
+                LLIGUES PRIVADES
+              </span>
+              <span className="nav-private-leagues-portal-mobile-label">
+                LLIGUES
+              </span>
             </button>
 
             <button
