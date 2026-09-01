@@ -7290,7 +7290,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       setSelectedPrivateLeagueId(null);
       setPrivateLeagueMembers([]);
       setPrivateLeaguesError("");
-      return;
+      return [];
     }
 
     if (!quiet) {
@@ -7335,6 +7335,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
         return leagues[0]?.id || null;
       });
+
+      return leagues;
     } catch (error) {
       if (quiet) {
         console.warn(
@@ -7350,6 +7352,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             "No s’han pogut carregar les teves lligues.",
         );
       }
+
+      return [];
     } finally {
       if (!quiet) {
         setPrivateLeaguesLoading(false);
@@ -7594,6 +7598,32 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
           block: "start",
         });
     });
+  };
+
+  const handleOpenPrivateLeaguesPortal = async () => {
+    setSelectedProfileUserId(
+      authUser?.id ? String(authUser.id) : null,
+    );
+    setProfileTab("leagues");
+    setPrivateLeagueFeedback(null);
+    setActivePage("profile");
+
+    if (!authUser) {
+      return;
+    }
+
+    const leagues = privateLeagues.length
+      ? privateLeagues
+      : await loadPrivateLeagues();
+
+    const leagueToOpen =
+      leagues.find(
+        (league) => league.id === selectedPrivateLeagueId,
+      ) || leagues[0];
+
+    if (leagueToOpen?.id) {
+      await handleOpenPrivateLeague(leagueToOpen.id);
+    }
   };
 
   const buildPrivateLeagueInviteUrl = (league) =>
@@ -9290,6 +9320,53 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     0 0 15px rgba(255, 211, 54, 0.18);
 }
 
+.ranking-private-leagues-portal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 222, 99, 0.34);
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    rgba(33, 71, 165, 0.2),
+    rgba(166, 28, 72, 0.18)
+  );
+  color: #ffe36a;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.ranking-private-leagues-portal:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 222, 99, 0.62);
+  background: linear-gradient(
+    135deg,
+    rgba(33, 71, 165, 0.3),
+    rgba(166, 28, 72, 0.26)
+  );
+}
+
+.ranking-private-leagues-portal-icon {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.ranking-private-leagues-portal-short {
+  display: none;
+}
+
 @keyframes section-info-attention-pulse {
   0%,
   100% {
@@ -9311,6 +9388,22 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     height: 28px !important;
     flex-basis: 28px !important;
     font-size: 14px !important;
+  }
+
+  .ranking-private-leagues-portal {
+    min-height: 26px;
+    padding: 0 7px;
+    gap: 4px;
+    font-size: 8px;
+    letter-spacing: 0.06em;
+  }
+
+  .ranking-private-leagues-portal-long {
+    display: none;
+  }
+
+  .ranking-private-leagues-portal-short {
+    display: inline;
   }
 }
 
@@ -12874,6 +12967,27 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       title="Com s’ordena la classificació?"
                     >
                       i
+                    </button>
+
+                    <button
+                      type="button"
+                      className="ranking-private-leagues-portal"
+                      onClick={handleOpenPrivateLeaguesPortal}
+                      aria-label="Obre les teves lligues privades"
+                      title="Lligues privades"
+                    >
+                      <span
+                        className="ranking-private-leagues-portal-icon"
+                        aria-hidden="true"
+                      >
+                        🏆
+                      </span>
+                      <span className="ranking-private-leagues-portal-long">
+                        LLIGUES PRIVADES
+                      </span>
+                      <span className="ranking-private-leagues-portal-short">
+                        LLIGUES
+                      </span>
                     </button>
                   </div>
 
