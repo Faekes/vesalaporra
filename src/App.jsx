@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLauncher";
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
-import VesalaporraDemo from "./components/VesalaporraDemoV2";
+import VesalaporraDemo from "./components/VesalaporraDemoV3.jsx";
 import instructionsHtml from "./content/instruccions.html?raw";
 import "./App.css";
 import "./VesalaporraLeagues_PRO_V2.css";

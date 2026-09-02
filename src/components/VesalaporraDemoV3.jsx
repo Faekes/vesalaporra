@@ -1,5 +1,5 @@
-import { useState } from "react";
-import "./VesalaporraDemoV2.css";
+import { useRef, useState } from "react";
+import "./VesalaporraDemoV3.css";
 
 const DEMO_STEPS = [
   {
@@ -30,17 +30,46 @@ const DEMO_STEPS = [
     proof: "Una experiència abans, durant i després del partit",
   },
   {
-    id: "community",
+    id: "profile",
     number: "04",
-    label: "COMUNITAT",
-    path: "/com-jugar#lligues",
-    title: "Cada grup pot tenir la seva competició.",
-    description: "Les lligues privades converteixen amics, penyes, podcasts i redaccions en comunitats actives dins del mateix joc.",
-    proof: "25 lligues creades · fins a 39 membres",
+    label: "PERFIL",
+    path: "/perfil/resum",
+    title: "Cada participant construeix la seva història.",
+    description: "El perfil reuneix posició, punts, medalles, historial complet de pronòstics i evolució dins del joc. També és la porta d’entrada a les lligues privades.",
+    proof: "Identitat, progrés i historial en un únic espai",
+  },
+  {
+    id: "leagues",
+    number: "05",
+    label: "LLIGUES",
+    path: "/perfil/lligues",
+    title: "La mateixa porra. La vostra batalla.",
+    description: "Qualsevol usuari pot crear una lliga o entrar-hi amb un codi. Fa una sola porra i els mateixos punts compten al rànquing general i a totes les seves lligues.",
+    proof: "25 lligues creades · fins a 39 membres · 97,4% d’activació",
+  },
+  {
+    id: "instructions",
+    number: "06",
+    label: "COM JUGAR",
+    path: "/com-jugar",
+    title: "Totes les regles, explicades sense deixar dubtes.",
+    description: "Com jugar detalla el resultat, la Lotto Flick, el protagonista, la puntuació, els desempats, les medalles, Les Notes, els perfils i les lligues privades.",
+    proof: "Manual complet integrat dins la mateixa aplicació",
+  },
+  {
+    id: "blog",
+    number: "07",
+    label: "BLOG",
+    path: "/porra",
+    title: "Contingut blaugrana cada dia.",
+    description: "L’accés directe al blog El Yoya amplia l’experiència més enllà del joc, amb conversa i contingut diari sobre el Barça.",
+    proof: "Joc, comunitat i contingut dins un mateix ecosistema",
+    externalUrl: "https://www.elyoya.com/",
+    externalLabel: "OBRIR EL BLOG EL YOYA ↗",
   },
   {
     id: "results",
-    number: "05",
+    number: "08",
     label: "RESULTATS",
     path: "/porra",
     title: "No és una idea: ja està validat.",
@@ -61,6 +90,7 @@ export default function VesalaporraDemo() {
   const [framePath, setFramePath] = useState("/porra");
   const [guideOpen, setGuideOpen] = useState(true);
   const [frameLoading, setFrameLoading] = useState(true);
+  const frameRef = useRef(null);
 
   const activeStep = DEMO_STEPS.find((step) => step.id === activeStepId) || DEMO_STEPS[0];
   const activeIndex = DEMO_STEPS.findIndex((step) => step.id === activeStep.id);
@@ -76,6 +106,34 @@ export default function VesalaporraDemo() {
 
   const nextStep = () => {
     openStep(DEMO_STEPS[Math.min(activeIndex + 1, DEMO_STEPS.length - 1)]);
+  };
+
+  const handleFrameLoad = () => {
+    setFrameLoading(false);
+
+    try {
+      const frameDocument = frameRef.current?.contentDocument;
+
+      if (!frameDocument) return;
+
+      let demoStyle = frameDocument.getElementById(
+        "vesalaporra-commercial-demo-overrides",
+      );
+
+      if (!demoStyle) {
+        demoStyle = frameDocument.createElement("style");
+        demoStyle.id = "vesalaporra-commercial-demo-overrides";
+        frameDocument.head.appendChild(demoStyle);
+      }
+
+      demoStyle.textContent = `
+        .nav-button.admin {
+          display: none !important;
+        }
+      `;
+    } catch (error) {
+      console.warn("No s’ha pogut aplicar el mode comercial:", error);
+    }
   };
 
   return (
@@ -100,7 +158,7 @@ export default function VesalaporraDemo() {
       <section className="vlp-tour-product" aria-label="Vesalaporra en funcionament">
         {frameLoading && <div className="vlp-tour-loading"><span />CARREGANT EL PRODUCTE REAL</div>}
 
-        <iframe key={framePath} className="vlp-tour-frame" src={framePath} title={`Vesalaporra · ${activeStep.label}`} onLoad={() => setFrameLoading(false)} />
+        <iframe ref={frameRef} key={framePath} className="vlp-tour-frame" src={framePath} title={`Vesalaporra · ${activeStep.label}`} onLoad={handleFrameLoad} />
 
         <div className="vlp-tour-live"><i /> PRODUCTE REAL · DADES EN DIRECTE</div>
 
@@ -127,6 +185,12 @@ export default function VesalaporraDemo() {
               </div>
             ) : (
               <div className="vlp-tour-proof"><i /><span>{activeStep.proof}</span></div>
+            )}
+
+            {activeStep.externalUrl && (
+              <a className="vlp-tour-external" href={activeStep.externalUrl} target="_blank" rel="noreferrer">
+                {activeStep.externalLabel}
+              </a>
             )}
 
             <div className="vlp-tour-actions">
