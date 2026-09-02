@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLauncher";
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
+import VesalaporraDemo from "./components/VesalaporraDemo";
 import instructionsHtml from "./content/instruccions.html?raw";
 import "./App.css";
 import "./VesalaporraLeagues_PRO_V2.css";
@@ -3292,7 +3293,7 @@ const formation4231 = [
   },
 ];
 
-function App() {
+function VesalaporraApp() {
   const initialRouteState = useRef(
     getVesalaporraRouteState(),
   ).current;
@@ -15132,5 +15133,16 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     </div>
   );
 }  
+
+function App() {
+  const normalizedPath =
+    window.location.pathname.replace(/\/+$/, "") || "/";
+
+  if (normalizedPath === "/demo") {
+    return <VesalaporraDemo />;
+  }
+
+  return <VesalaporraApp />;
+}
 
 export default App;
