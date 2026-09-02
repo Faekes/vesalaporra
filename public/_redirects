@@ -1,4 +1,6 @@
 /porra /index.html 200
+/demo /index.html 200
+/demo/* /index.html 200
 /com-jugar /index.html 200
 /notes /index.html 200
 /notes/* /index.html 200
