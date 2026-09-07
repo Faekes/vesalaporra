@@ -2425,6 +2425,22 @@ function AchievementIconGraphic({ achievement }) {
   return achievement?.icon || "🏅";
 }
 
+function AchievementMultiplier({ achievement }) {
+  const multiplier = Number(achievement?.multiplier);
+  if (!achievement?.unlocked || !Number.isSafeInteger(multiplier) || multiplier < 2) {
+    return null;
+  }
+  return (
+    <sup
+      className="vlp-achievement-multiplier"
+      title={`${achievement.title} · x${multiplier}`}
+      aria-label={`Aconseguida ${multiplier} vegades`}
+    >
+      x{multiplier}
+    </sup>
+  );
+}
+
 function RankingAchievementIcons({ achievements, className = "" }) {
   const unlockedAchievements = (achievements || []).filter(
     (achievement) => achievement.unlocked,
@@ -2443,10 +2459,11 @@ function RankingAchievementIcons({ achievements, className = "" }) {
         <span
           key={achievement.id}
           className="ranking-achievement-icon"
-          title={achievement.title}
-          aria-label={achievement.title}
+          title={`${achievement.title}${achievement.multiplier > 1 ? ` · x${achievement.multiplier}` : ""}`}
+          aria-label={`${achievement.title}${achievement.multiplier > 1 ? ` · x${achievement.multiplier}` : ""}`}
         >
           <AchievementIconGraphic achievement={achievement} />
+          <AchievementMultiplier achievement={achievement} />
         </span>
       ))}
     </span>
@@ -3426,6 +3443,7 @@ function VesalaporraApp() {
   const [notesRankingRefreshing, setNotesRankingRefreshing] = useState(false);
 
 const [rankingUsers, setRankingUsers] = useState([]);
+  const [achievementMultipliersByUser, setAchievementMultipliersByUser] = useState({});
 const [rankingLoading, setRankingLoading] = useState(false);
 const [rankingError, setRankingError] = useState("");
 const [rankingJornadaNumber, setRankingJornadaNumber] =
@@ -4028,7 +4046,10 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
 
   const selectedProfileData = buildRealProfileData(
     profileHistory,
-    profileAchievements,
+    profileAchievements.map((achievement) => ({
+      ...achievement,
+      multiplier: achievementMultipliersByUser[selectedProfileUser?.id]?.[achievement.id] || 1,
+    })),
   );
 
   const isOwnAuthenticatedProfile = Boolean(
@@ -4225,7 +4246,11 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
   const getRankingAchievements = (user) =>
     ACHIEVEMENT_CATALOG.filter((achievement) =>
       (user?.achievementIds || []).includes(achievement.id),
-    ).map((achievement) => ({ ...achievement, unlocked: true }));
+    ).map((achievement) => ({
+      ...achievement,
+      unlocked: true,
+      multiplier: achievementMultipliersByUser[user?.id]?.[achievement.id] || 1,
+    }));
 
   const adminStarterCount = Object.values(officialMatchStatsByPlayerId).filter(
     (stats) => stats.role === "T",
@@ -8749,6 +8774,53 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     }
   }, [activePage, selectedProfileUser?.id]);
 
+  // Només lectura: els multiplicadors no intervenen en punts ni desempats.
+  // Es refresquen amb les càrregues existents, sense un temporitzador nou.
+  useEffect(() => {
+    if (activePage !== "ranking" && activePage !== "profile") return;
+    let isCurrent = true;
+    const userIds = [...new Set([
+      ...rankingUsers.map((user) => user.id),
+      ...privateLeagueMembers.map((member) => member.userId),
+      selectedProfileUser?.id,
+    ].filter(Boolean))];
+
+    if (userIds.length === 0) {
+      setAchievementMultipliersByUser({});
+      return;
+    }
+
+    const loadMultipliers = async () => {
+      const next = {};
+      // La funció SQL admet fins a 500 usuaris per petició.
+      for (let start = 0; start < userIds.length; start += 500) {
+        if (!isCurrent) return;
+        const batch = userIds.slice(start, start + 500);
+        const { data, error } = await supabase.rpc(
+          "vesalaporra_public_achievement_multipliers",
+          { p_user_ids: batch },
+        );
+        if (error) throw error;
+        if (!Array.isArray(data)) throw new Error("Recompte de medalles no vàlid.");
+        const allowedIds = new Set(batch);
+        for (const row of data) {
+          const multiplier = Number(row.multiplier);
+          if (!allowedIds.has(row.user_id) ||
+              !ACHIEVEMENT_CATALOG.some((achievement) => achievement.id === row.achievement_key) ||
+              !Number.isSafeInteger(multiplier) || multiplier < 1) continue;
+          if (!next[row.user_id]) next[row.user_id] = {};
+          next[row.user_id][row.achievement_key] = multiplier;
+        }
+      }
+      if (isCurrent) setAchievementMultipliersByUser(next);
+    };
+
+    loadMultipliers().catch((error) => {
+      if (isCurrent) console.warn("No s’han pogut actualitzar els multiplicadors de medalles:", error);
+    });
+    return () => { isCurrent = false; };
+  }, [activePage, rankingUsers, privateLeagueMembers, profileAchievements, selectedProfileUser?.id]);
+
   useEffect(() => {
     if (
       activePage !== "profile" ||
@@ -9877,6 +9949,75 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     grid-template-columns: 1fr;
   }
 }
+        /* VLP · Medalles acumulables; la mida de les icones no canvia. */
+        .app-shell .ranking-achievement-icon,
+        .app-shell .profile-achievement-icon {
+          position: relative;
+          overflow: visible;
+        }
+        .app-shell .vlp-achievement-multiplier {
+          position: absolute;
+          top: -5px;
+          right: -6px;
+          z-index: 1;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 14px;
+          padding: 1px 3px;
+          box-sizing: border-box;
+          border-radius: 6px;
+          background: #172033;
+          border: 1px solid #e6bd62;
+          color: #ffe29a;
+          font-size: 9px;
+          line-height: 1.15;
+          font-weight: 800;
+          letter-spacing: 0;
+          white-space: nowrap;
+          text-shadow: none;
+          pointer-events: none;
+        }
+        /* VLP · Només mòbil: medalles en una fila pròpia sota el nom. */
+        @media (max-width: 680px) {
+          .app-shell .ranking-identity-copy,
+          .app-shell .ranking-current-copy {
+            min-width: 0;
+          }
+          .app-shell .ranking-identity-copy > strong,
+          .app-shell .ranking-current-copy > strong {
+            display: flex !important;
+            flex-flow: row wrap !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            gap: 4px 6px !important;
+            min-width: 0;
+            white-space: normal !important;
+            overflow: visible !important;
+          }
+          .app-shell .ranking-identity-copy > strong > .ranking-name-text,
+          .app-shell .ranking-current-copy > strong > span:first-child {
+            min-width: 0;
+            max-width: 100%;
+          }
+          .app-shell .ranking-identity-copy > strong > .ranking-achievement-icons,
+          .app-shell .ranking-current-copy > strong > .ranking-achievement-icons {
+            display: flex !important;
+            order: 10;
+            flex: 0 0 100% !important;
+            width: 100% !important;
+            max-width: 100%;
+            flex-wrap: wrap !important;
+            justify-content: flex-start !important;
+            gap: 7px !important;
+            margin: 0 !important;
+            overflow: visible !important;
+          }
+          .app-shell .ranking-x-handle,
+          .app-shell .profile-x-handle {
+            display: none !important;
+          }
+        }
       `}</style>
 
       <header
@@ -13375,7 +13516,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                               </strong>
 
                               {user.hasXIdentity && user.handle && (
-                                <small>
+                                <small className="ranking-x-handle">
                                   <span aria-hidden="true">𝕏</span>
                                   {user.handle}
                                 </small>
@@ -13833,6 +13974,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                         >
                           <span className="profile-achievement-icon">
                             <AchievementIconGraphic achievement={achievement} />
+                            <AchievementMultiplier achievement={achievement} />
                           </span>
                           <div>
                             <strong
@@ -14753,7 +14895,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                                               {user.hasXIdentity &&
                                                 user.handle && (
-                                                  <small>
+                                                  <small className="ranking-x-handle">
                                                     <span aria-hidden="true">
                                                       𝕏
                                                     </span>
