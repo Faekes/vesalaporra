@@ -2425,20 +2425,28 @@ function AchievementIconGraphic({ achievement }) {
   return achievement?.icon || "🏅";
 }
 
-function AchievementMultiplier({ achievement }) {
+function getAchievementCopyCount(achievement) {
   const multiplier = Number(achievement?.multiplier);
-  if (!achievement?.unlocked || !Number.isSafeInteger(multiplier) || multiplier < 2) {
-    return null;
-  }
-  return (
-    <sup
-      className="vlp-achievement-multiplier"
-      title={`${achievement.title} · x${multiplier}`}
-      aria-label={`Aconseguida ${multiplier} vegades`}
+  return achievement?.unlocked && Number.isSafeInteger(multiplier) && multiplier > 1
+    ? multiplier
+    : 1;
+}
+
+function AchievementIconCopies({ achievement, iconClassName }) {
+  const count = getAchievementCopyCount(achievement);
+  const icons = Array.from({ length: count }, (_, index) => (
+    <span
+      key={`${achievement.id}-${index}`}
+      className={iconClassName}
+      title={count > 1 ? `${achievement.title} · ${index + 1} de ${count}` : achievement.title}
+      aria-label={count > 1 ? `${achievement.title} · ${index + 1} de ${count}` : achievement.title}
     >
-      x{multiplier}
-    </sup>
-  );
+      <AchievementIconGraphic achievement={achievement} />
+    </span>
+  ));
+  return iconClassName === "profile-achievement-icon" && count > 1
+    ? <span className="vlp-profile-achievement-copies">{icons}</span>
+    : icons;
 }
 
 function RankingAchievementIcons({ achievements, className = "" }) {
@@ -2453,18 +2461,14 @@ function RankingAchievementIcons({ achievements, className = "" }) {
   return (
     <span
       className={`ranking-achievement-icons ${className}`.trim()}
-      aria-label={`${unlockedAchievements.length} medalles desbloquejades`}
+      aria-label={`${unlockedAchievements.reduce((total, achievement) => total + getAchievementCopyCount(achievement), 0)} medalles desbloquejades`}
     >
       {unlockedAchievements.map((achievement) => (
-        <span
+        <AchievementIconCopies
           key={achievement.id}
-          className="ranking-achievement-icon"
-          title={`${achievement.title}${achievement.multiplier > 1 ? ` · x${achievement.multiplier}` : ""}`}
-          aria-label={`${achievement.title}${achievement.multiplier > 1 ? ` · x${achievement.multiplier}` : ""}`}
-        >
-          <AchievementIconGraphic achievement={achievement} />
-          <AchievementMultiplier achievement={achievement} />
-        </span>
+          achievement={achievement}
+          iconClassName="ranking-achievement-icon"
+        />
       ))}
     </span>
   );
@@ -9955,28 +9959,19 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
           position: relative;
           overflow: visible;
         }
-        .app-shell .vlp-achievement-multiplier {
-          position: absolute;
-          top: -5px;
-          right: -6px;
-          z-index: 1;
-          display: inline-flex;
+        .app-shell .ranking-achievement-icons {
+          flex-wrap: wrap;
+        }
+        .app-shell .vlp-profile-achievement-copies {
+          display: flex;
+          flex-wrap: wrap;
           align-items: center;
-          justify-content: center;
-          min-width: 14px;
-          padding: 1px 3px;
-          box-sizing: border-box;
-          border-radius: 6px;
-          background: #172033;
-          border: 1px solid #e6bd62;
-          color: #ffe29a;
-          font-size: 9px;
-          line-height: 1.15;
-          font-weight: 800;
-          letter-spacing: 0;
-          white-space: nowrap;
-          text-shadow: none;
-          pointer-events: none;
+          gap: 6px;
+          min-width: 0;
+          max-width: 100%;
+        }
+        .app-shell .vlp-profile-achievement-copies > .profile-achievement-icon {
+          flex-shrink: 0;
         }
         /* VLP · Només mòbil: medalles en una fila pròpia sota el nom. */
         @media (max-width: 680px) {
@@ -13972,10 +13967,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                               : "profile-achievement locked"
                           }
                         >
-                          <span className="profile-achievement-icon">
-                            <AchievementIconGraphic achievement={achievement} />
-                            <AchievementMultiplier achievement={achievement} />
-                          </span>
+                          <AchievementIconCopies
+                            achievement={achievement}
+                            iconClassName="profile-achievement-icon"
+                          />
                           <div>
                             <strong
                               style={{
