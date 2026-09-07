@@ -10739,7 +10739,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                     <div className="section-info-points-row troll">
                       <span>0/11 encerts 😈</span>
-                      <strong>+30</strong>
+                      <strong>+60</strong>
                     </div>
                   </div>
 
