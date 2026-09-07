@@ -2770,7 +2770,7 @@ const getAdminMatchSeasonLabel = (seasonKey, fallback = "TEMPORADA") =>
 
 const EMPTY_ADMIN_MATCH_FORM = {
   matchId: null,
-  seasonKey: "PRETEMPORADA_2026",
+  seasonKey: "TEMPORADA_2026_27",
   rivalName: "",
   rivalKey: "",
   rivalCountry: "",
