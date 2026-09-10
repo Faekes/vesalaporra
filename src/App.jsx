@@ -10390,19 +10390,25 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     <div className="section-info-points-row featured">
                       <span>Marcador exacte</span>
 
-                      <strong>+50</strong>
+                      <strong>+60</strong>
+                    </div>
+
+                    <div className="section-info-points-row">
+                      <span>Encertar els gols del Barça</span>
+
+                      <strong>+30</strong>
+                    </div>
+
+                    <div className="section-info-points-row">
+                      <span>Encertar la diferència de gols</span>
+
+                      <strong>+25</strong>
                     </div>
 
                     <div className="section-info-points-row">
                       <span>Encertar el signe del partit</span>
 
                       <strong>+10</strong>
-                    </div>
-
-                    <div className="section-info-points-row">
-                      <span>Encertar els gols del Barça</span>
-
-                      <strong>+15</strong>
                     </div>
 
                     <div className="section-info-points-row">
@@ -10419,12 +10425,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   </div>
 
                   <small className="section-info-note">
-                    El marcador exacte val +50 i no suma parcials. Si no és
-                    exacte, el signe (+10) es pot acumular amb els gols del
-                    Barça (+15), amb els gols del rival (+10) o amb els gols
-                    totals del partit (+5). Mai se sumen signe + gols del
-                    Barça + gols del rival: si encertes els dos marcadors és
-                    resultat exacte i són +50.
+                    El marcador exacte val +60 i no suma parcials. Si no és
+                    exacte, els encerts parcials són acumulables: gols del
+                    Barça (+30), diferència de gols (+25), signe (+10), gols
+                    del rival (+10) i gols totals del partit (+5). Si encertes
+                    els dos marcadors és resultat exacte i són +60.
                   </small>
                 </div>
               )}
