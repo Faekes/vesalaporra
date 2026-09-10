@@ -3,6 +3,7 @@
   "name": "vesalaporra",
   "compatibility_date": "2026-09-10",
   "assets": {
+    "directory": "./dist",
     "not_found_handling": "single-page-application"
   }
 }
