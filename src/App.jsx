@@ -798,7 +798,8 @@ const getVesalaporraRouteState = (
   const section = String(segments[0] || "").toLowerCase();
   const secondSegment = segments[1] || "";
   const secondSlug = secondSegment.toLowerCase();
-  const thirdSlug = String(segments[2] || "").toLowerCase();
+  const thirdSegment = segments[2] || "";
+  const thirdSlug = String(thirdSegment).toLowerCase();
 
   const defaultRouteState = {
     activePage: "play",
@@ -807,6 +808,7 @@ const getVesalaporraRouteState = (
     profileTab: "overview",
     adminScoringTab: "match",
     selectedProfileUserId: null,
+    selectedNotesUserId: null,
   };
 
   if (section === "com-jugar" || section === "instruccions") {
@@ -817,10 +819,21 @@ const getVesalaporraRouteState = (
   }
 
   if (section === "notes") {
+    const personalNotesSelected =
+      secondSlug === "meves" || secondSlug === "personals";
+
     return {
       ...defaultRouteState,
       activePage: "notes",
-      notesTab: secondSlug === "temporada" ? "season" : "match",
+      notesTab: personalNotesSelected
+        ? "personal"
+        : secondSlug === "temporada"
+          ? "season"
+          : "match",
+      selectedNotesUserId:
+        personalNotesSelected && thirdSegment
+          ? thirdSegment
+          : null,
     };
   }
 
@@ -879,15 +892,22 @@ const getVesalaporraPath = ({
   profileTab,
   adminScoringTab,
   selectedProfileUserId,
+  selectedNotesUserId,
 }) => {
   if (activePage === "instructions") {
     return "/com-jugar";
   }
 
   if (activePage === "notes") {
-    return notesTab === "season"
-      ? "/notes/temporada"
-      : "/notes/partit";
+    if (notesTab === "personal") {
+      const notesUserPath = selectedNotesUserId
+        ? `/${encodeURIComponent(String(selectedNotesUserId))}`
+        : "";
+
+      return `/notes/meves${notesUserPath}`;
+    }
+
+    return notesTab === "season" ? "/notes/temporada" : "/notes/partit";
   }
 
   if (activePage === "ranking") {
@@ -1259,6 +1279,9 @@ const VESALAPORRA_PUBLIC_MATCH_RATINGS_STATE_RPC =
 const VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_ACTIVE_SEASON_NOTES_RPC ||
   "vesalaporra_public_active_season_notes";
+
+const VESALAPORRA_PUBLIC_USER_ACTIVE_SEASON_NOTES_RPC =
+  "vesalaporra_public_user_active_season_notes";
 
 const VESALAPORRA_PUBLIC_ACTIVE_SEASON_MVP_COUNTS_RPC =
   "vesalaporra_public_active_season_mvp_counts";
@@ -3435,6 +3458,12 @@ function VesalaporraApp() {
 
   const [notesRows, setNotesRows] = useState([]);
   const [seasonNotesRows, setSeasonNotesRows] = useState([]);
+  const [personalNotesRows, setPersonalNotesRows] = useState([]);
+  const [personalNotesLoading, setPersonalNotesLoading] = useState(false);
+  const [personalNotesError, setPersonalNotesError] = useState("");
+  const [selectedNotesUserId, setSelectedNotesUserId] = useState(
+    initialRouteState.selectedNotesUserId,
+  );
   const [notesMatchData, setNotesMatchData] = useState(null);
   const [notesLoading, setNotesLoading] = useState(false);
   const [notesError, setNotesError] = useState("");
@@ -3520,6 +3549,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
 
       setActivePage(routeState.activePage);
       setNotesTab(routeState.notesTab);
+      setSelectedNotesUserId(routeState.selectedNotesUserId);
       setRankingTab(routeState.rankingTab);
       setProfileTab(routeState.profileTab);
       setAdminScoringTab(routeState.adminScoringTab);
@@ -3558,6 +3588,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
         profileTab,
         adminScoringTab,
         selectedProfileUserId,
+        selectedNotesUserId,
       });
 
       shouldScroll =
@@ -3593,6 +3624,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     profileTab,
     adminScoringTab,
     selectedProfileUserId,
+    selectedNotesUserId,
   ]);
 
   const [publicMatchPlayers, setPublicMatchPlayers] = useState([]);
@@ -4026,6 +4058,31 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     currentRankingUser ||
     null;
 
+  const personalNotesTargetUserId = firstNonEmptyText(
+    selectedNotesUserId,
+    authUser?.id,
+  );
+
+  const personalNotesUser =
+    rankingUsersWithAuth.find(
+      (user) => user.id === personalNotesTargetUserId,
+    ) ||
+    (authenticatedProfileUser?.id === personalNotesTargetUserId
+      ? authenticatedProfileUser
+      : null);
+
+  const personalNotesDisplayName = firstNonEmptyText(
+    personalNotesUser?.displayName,
+    personalNotesTargetUserId === String(authUser?.id || "")
+      ? profileDisplayName
+      : "Aquest culer",
+  );
+
+  const personalNotesAreOwn = Boolean(
+    authUser?.id &&
+      personalNotesTargetUserId === String(authUser.id),
+  );
+
     const generalRankingRows = [...rankingUsersWithAuth].sort(
     (firstUser, secondUser) =>
       compareRankingUsers(firstUser, secondUser, "general"),
@@ -4207,8 +4264,34 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
 ),
     );
 
+  const notesPersonalRows = [...personalNotesRows]
+    .filter(
+      (row) =>
+        row?.player &&
+        row.player.eligibleForRatings !== false,
+    )
+    .sort(
+      (firstRow, secondRow) =>
+        secondRow.average - firstRow.average ||
+        secondRow.voteCount - firstRow.voteCount ||
+        String(firstRow?.player?.name || "").localeCompare(
+          String(secondRow?.player?.name || ""),
+          "ca",
+        ),
+    );
+
   const visibleNotesRows =
-    notesTab === "match" ? notesMatchRows : notesSeasonRows;
+    notesTab === "match"
+      ? notesMatchRows
+      : notesTab === "personal"
+        ? notesPersonalRows
+        : notesSeasonRows;
+
+  const visibleNotesLoading =
+    notesTab === "personal" ? personalNotesLoading : notesLoading;
+
+  const visibleNotesError =
+    notesTab === "personal" ? personalNotesError : notesError;
 
   const notesRatingsStatus = firstNonEmptyText(
     notesMatchData?.ratingsStatus,
@@ -4232,6 +4315,10 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
 
   const notesSeasonLeaderPlayerId =
     notesSeasonRows.find((row) => row.voteCount > 0)
+      ?.player?.id || "";
+
+  const notesPersonalLeaderPlayerId =
+    notesPersonalRows.find((row) => row.voteCount > 0)
       ?.player?.id || "";
 
   const notesMatchMvpPlayerId =
@@ -4289,6 +4376,19 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     setSelectedProfileUserId(userId);
     setProfileTab("overview");
     setActivePage("profile");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  const openPersonalNotes = (userId) => {
+    const normalizedUserId = firstNonEmptyText(userId, authUser?.id);
+
+    setSelectedNotesUserId(normalizedUserId || null);
+    setNotesTab("personal");
+    setActivePage("notes");
 
     window.scrollTo({
       top: 0,
@@ -7174,6 +7274,139 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     }
   };
 
+  const loadPersonalNotes = async (
+    userId,
+    { quiet = false } = {},
+  ) => {
+    const normalizedUserId = firstNonEmptyText(userId);
+
+    if (!normalizedUserId) {
+      setPersonalNotesRows([]);
+      setPersonalNotesError("");
+      return;
+    }
+
+    if (!quiet) {
+      setPersonalNotesLoading(true);
+      setPersonalNotesRows([]);
+    }
+
+    setPersonalNotesError("");
+
+    try {
+      const { data, error } = await supabase.rpc(
+        VESALAPORRA_PUBLIC_USER_ACTIVE_SEASON_NOTES_RPC,
+        {
+          p_user_id: normalizedUserId,
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const normalizedRows = unwrapRpcRows(
+        data,
+        ["notes", "rows", "players"],
+      )
+        .map((row) => {
+          const playerId = firstNonEmptyText(
+            row?.player_id,
+            row?.id,
+          );
+
+          if (!playerId) {
+            return null;
+          }
+
+          const rosterPlayer = gamePlayersById[playerId] || null;
+
+          const player = rosterPlayer || {
+            id: playerId,
+            name: firstNonEmptyText(
+              row?.display_name,
+              row?.player_name,
+              row?.name,
+              "Jugador",
+            ),
+            shortName: firstNonEmptyText(
+              row?.short_name,
+              row?.display_name,
+              row?.player_name,
+              "Jugador",
+            ),
+            image:
+              getPublicStorageImageUrl(
+                row?.avatar_bucket,
+                row?.avatar_path,
+                row?.avatar_version,
+              ) ||
+              firstNonEmptyText(
+                row?.avatar_url,
+                row?.portrait_url,
+              ) ||
+              "/fcb/PLAYER_PLACEHOLDER.png",
+            eligibleForRatings: true,
+          };
+
+          const average = toFiniteNumber(
+            row?.rating_average,
+            row?.average_rating,
+            row?.personal_average,
+            row?.user_average,
+            row?.average,
+          );
+
+          const voteCount = toFiniteNumber(
+            row?.rating_count,
+            row?.vote_count,
+            row?.match_count,
+            row?.rated_match_count,
+            row?.matches_count,
+          );
+
+          return {
+            player,
+            stats: null,
+            ownStars: 0,
+            hasMyVote: false,
+            displayStars:
+              voteCount > 0
+                ? getFractionalStarsFromAverage(average)
+                : 0,
+            average,
+            voteCount,
+            seasonAverage: average,
+            seasonVoteCount: voteCount,
+            matchId: "",
+            homeScore: 0,
+            awayScore: 0,
+            publishedAt: row?.last_rated_at || null,
+          };
+        })
+        .filter(Boolean);
+
+      setPersonalNotesRows(normalizedRows);
+    } catch (error) {
+      if (quiet) {
+        console.warn(
+          "No s’han pogut actualitzar les notes personals en segon pla:",
+          error,
+        );
+      } else {
+        setPersonalNotesRows([]);
+        setPersonalNotesError(
+          error?.message ||
+            "No s’han pogut carregar les notes personals.",
+        );
+      }
+    } finally {
+      if (!quiet) {
+        setPersonalNotesLoading(false);
+      }
+    }
+  };
+
   const handleRefreshNotesRanking = async () => {
     if (notesLoading || notesRankingRefreshing || ratingSavingPlayerId) {
       return;
@@ -8760,17 +8993,32 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     if (
       activePage === "ranking" ||
       activePage === "profile" ||
-      activePage === "scoring"
+      activePage === "scoring" ||
+      (activePage === "notes" && notesTab === "personal")
     ) {
       loadRealRanking();
     }
-  }, [activePage, authUser?.id, matchData.id]);
+  }, [activePage, notesTab, authUser?.id, matchData.id]);
 
     useEffect(() => {
     if (activePage === "notes") {
       loadRealNotes({ refreshOrder: true });
     }
   }, [activePage, matchData.id, publicMatchPlayers.length]);
+
+  useEffect(() => {
+    if (
+      activePage === "notes" &&
+      notesTab === "personal" &&
+      personalNotesTargetUserId
+    ) {
+      loadPersonalNotes(personalNotesTargetUserId);
+    }
+  }, [
+    activePage,
+    notesTab,
+    personalNotesTargetUserId,
+  ]);
 
   useEffect(() => {
     if (activePage === "profile" && selectedProfileUser?.id) {
@@ -11458,6 +11706,25 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               >
                 LES NOTES DE LA TEMPORADA
               </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={notesTab === "personal"}
+                className={
+                  notesTab === "personal" ? "notes-tab active" : "notes-tab"
+                }
+                onClick={() => {
+                  setSelectedNotesUserId(
+                    personalNotesTargetUserId || null,
+                  );
+                  setNotesTab("personal");
+                }}
+              >
+                {personalNotesAreOwn
+                  ? "LES MEVES NOTES"
+                  : "LES SEVES NOTES"}
+              </button>
             </div>
 
             {openInfoSection === "notes" && (
@@ -11491,11 +11758,13 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   <span>
                     {notesTab === "match"
                       ? "VALORA EL PARTIT OFICIAL"
-                      : "CLASSIFICACIÓ REAL DE LA TEMPORADA"}
+                      : notesTab === "personal"
+                        ? `CRITERI PERSONAL DE ${personalNotesDisplayName.toUpperCase()}`
+                        : "CLASSIFICACIÓ REAL DE LA TEMPORADA"}
                   </span>
 
                   <strong>
-                    {notesLoading
+                    {visibleNotesLoading
                       ? "Carregant dades reals..."
                       : `${visibleNotesRows.length} jugadors`}
                   </strong>
@@ -11511,15 +11780,15 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 </div>
               </header>
 
-              {notesError && (
+              {visibleNotesError && (
                 <div className="real-data-state error" role="alert">
                   <strong>No s’han pogut carregar Les Notes</strong>
-                  <span>{notesError}</span>
+                  <span>{visibleNotesError}</span>
                 </div>
               )}
 
-              {!notesLoading &&
-                !notesError &&
+              {!visibleNotesLoading &&
+                !visibleNotesError &&
                 notesTab === "match" &&
                 notesAreClosed && (
                   <div className="real-data-state empty" role="status">
@@ -11532,8 +11801,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   </div>
                 )}
 
-              {!notesLoading &&
-                !notesError &&
+              {!visibleNotesLoading &&
+                !visibleNotesError &&
                 notesTab === "match" &&
                 notesAreScheduled && (
                   <div className="real-data-state empty" role="status">
@@ -11543,15 +11812,21 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   </div>
                 )}
 
-              {!notesLoading &&
-                !notesError &&
-                !notesAreClosed &&
-                !notesAreScheduled &&
+              {!visibleNotesLoading &&
+                !visibleNotesError &&
+                (notesTab === "personal" ||
+                  (!notesAreClosed && !notesAreScheduled)) &&
                 visibleNotesRows.length === 0 && (
                 <div className="real-data-state empty">
-                  <strong>Sense valoracions encara</strong>
+                  <strong>
+                    {notesTab === "personal"
+                      ? "Aquest culer encara no té notes públiques"
+                      : "Sense valoracions encara"}
+                  </strong>
                   <span>
-                    Quan tinguem les valoracions del primer partit apareixeran aquí.
+                    {notesTab === "personal"
+                      ? "Les mitjanes apareixeran quan es tanquin les valoracions dels partits."
+                      : "Quan tinguem les valoracions del primer partit apareixeran aquí."}
                   </span>
                 </div>
               )}
@@ -11571,8 +11846,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     );
 
                   const isLeader =
-                    notesTab === "season"
-                      ? row.player.id === notesSeasonLeaderPlayerId
+                    notesTab === "personal"
+                      ? row.player.id === notesPersonalLeaderPlayerId
+                      : notesTab === "season"
+                        ? row.player.id === notesSeasonLeaderPlayerId
                       : notesAreClosed &&
                         row.player.id === notesMatchLeaderPlayerId;
 
@@ -11586,13 +11863,13 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       key={`${notesTab}-${row.player.id}`}
                       className={[
                         "notes-player-row",
-                        notesTab === "season" ? "season-row" : "",
+                        notesTab !== "match" ? "season-row" : "",
                         isLeader ? "notes-leader-row" : "",
                       ]
                         .filter(Boolean)
                         .join(" ")}
                     >
-                    {notesTab === "season" && (
+                    {notesTab !== "match" && (
                       <span className="notes-season-position">
                         {index + 1}
                       </span>
@@ -11627,7 +11904,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                             isBlindMatchVoting ? 0 : row.displayStars
                           }
                           readOnly={
-                            notesTab === "season" ||
+                            notesTab !== "match" ||
                             notesAreClosed ||
                             notesAreScheduled
                           }
@@ -11657,8 +11934,12 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                               : "—"}
                           </strong>
                           <span>
-                            {row.voteCount > 0
-                              ? `${row.voteCount} VOTS`
+                            {notesTab === "personal" && row.voteCount > 0
+                              ? `${row.voteCount} ${
+                                  row.voteCount === 1 ? "PARTIT" : "PARTITS"
+                                }`
+                              : row.voteCount > 0
+                                ? `${row.voteCount} VOTS`
                               : "SENSE VOTS"}
                           </span>
                         </div>
@@ -13830,7 +14111,63 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                 {profileTab === "overview" && (
                   <div className="profile-overview">
-                                        <section className="profile-main-stats">
+                    <style>{`
+                      .profile-main-stats > .profile-personal-notes-card {
+                        padding: 0;
+                        overflow: hidden;
+                      }
+
+                      .profile-personal-notes-button {
+                        width: 100%;
+                        height: 100%;
+                        min-height: 142px;
+                        padding: 18px 20px;
+                        border: 0;
+                        background: transparent;
+                        color: inherit;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        justify-content: center;
+                        gap: 8px;
+                        text-align: left;
+                        cursor: pointer;
+                      }
+
+                      .profile-personal-notes-button > span {
+                        color: #8292c8;
+                        font-size: 11px;
+                        font-weight: 900;
+                        letter-spacing: 0.08em;
+                      }
+
+                      .profile-personal-notes-button > strong {
+                        color: #ffd83d;
+                        font-size: 32px;
+                        line-height: 1;
+                      }
+
+                      .profile-personal-notes-button > small {
+                        color: #8292c8;
+                        font-size: 12px;
+                        font-weight: 700;
+                      }
+
+                      .profile-personal-notes-button:hover,
+                      .profile-personal-notes-button:focus-visible {
+                        background: rgba(255, 216, 61, 0.06);
+                        outline: none;
+                      }
+
+                      @media (min-width: 1101px) {
+                        .profile-main-stats > .profile-personal-notes-card {
+                          grid-column: 1;
+                          grid-row: 2;
+                        }
+                      }
+                    `}</style>
+
+                    <section className="profile-main-stats">
                       <article>
                         <span>POSICIÓ</span>
 
@@ -13893,6 +14230,25 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                         </strong>
 
                         <small>encerts oficials</small>
+                      </article>
+
+                      <article className="profile-personal-notes-card">
+                        <button
+                          type="button"
+                          className="profile-personal-notes-button"
+                          onClick={() =>
+                            openPersonalNotes(selectedProfileUser.id)
+                          }
+                          aria-label={`Obre les notes personals de ${selectedProfileUser.displayName}`}
+                        >
+                          <span>
+                            {isOwnAuthenticatedProfile
+                              ? "LES MEVES NOTES"
+                              : "LES SEVES NOTES"}
+                          </span>
+                          <strong aria-hidden="true">★</strong>
+                          <small>VEURE VALORACIONS</small>
+                        </button>
                       </article>
                     </section>
 
