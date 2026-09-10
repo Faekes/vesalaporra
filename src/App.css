@@ -8274,9 +8274,13 @@ button.notes-star:hover {
 .ranking-achievement-icons {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  align-content: flex-start;
+  flex-wrap: wrap;
+  gap: 6px;
   flex: 0 0 auto;
-  max-width: 148px;
+  min-width: 0;
+  max-width: 190px;
+  box-sizing: border-box;
   overflow: hidden;
 }
 
@@ -8284,29 +8288,55 @@ button.notes-star:hover {
   display: none;
 }
 
+.ranking-achievement-unit {
+  --ranking-medal-size: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .ranking-achievement-icon {
   display: grid;
   place-items: center;
-  width: 21px;
-  height: 21px;
-  flex: 0 0 21px;
+  width: var(--ranking-medal-size);
+  height: var(--ranking-medal-size);
+  flex: 0 0 var(--ranking-medal-size);
   border: 1px solid rgba(244, 208, 75, 0.42);
   border-radius: 50%;
   background:
     radial-gradient(circle at 32% 22%, rgba(255, 247, 190, 0.36), transparent 38%),
     rgba(244, 208, 75, 0.1);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
   box-shadow:
     0 0 0 2px rgba(128, 17, 60, 0.24),
     0 0 12px rgba(244, 208, 75, 0.12);
 }
 
+.ranking-achievement-icons.current-user-icons .ranking-achievement-unit {
+  --ranking-medal-size: 26px;
+}
+
 .ranking-achievement-icons.current-user-icons .ranking-achievement-icon {
-  width: 23px;
-  height: 23px;
-  flex-basis: 23px;
-  font-size: 12px;
+  font-size: 13px;
+}
+
+.ranking-achievement-multiplier {
+  display: inline-grid;
+  place-items: center;
+  width: calc(var(--ranking-medal-size) / 2);
+  height: calc(var(--ranking-medal-size) / 2);
+  flex: 0 0 calc(var(--ranking-medal-size) / 2);
+  margin-left: 0;
+  color: #f4d04b;
+  font-size: calc(var(--ranking-medal-size) / 3);
+  font-weight: 1000;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  white-space: nowrap;
+  text-shadow: 0 1px 5px rgba(244, 208, 75, 0.38);
 }
 
 /* El gol continua sent la referÃ¨ncia visual per als quatre tipus. */
@@ -8393,14 +8423,20 @@ button.notes-star:hover {
   }
 
   .ranking-achievement-icons {
-    gap: 2px;
-    max-width: 92px;
+    gap: 7px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    overflow: visible;
   }
 
-  .ranking-achievement-icon {
-    width: 18px;
-    height: 18px;
-    flex-basis: 18px;
+  .ranking-achievement-unit,
+  .ranking-achievement-icons.current-user-icons .ranking-achievement-unit {
+    --ranking-medal-size: 18px;
+  }
+
+  .ranking-achievement-icon,
+  .ranking-achievement-icons.current-user-icons .ranking-achievement-icon {
     font-size: 9px;
   }
 }

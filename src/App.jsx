@@ -2472,6 +2472,31 @@ function AchievementIconCopies({ achievement, iconClassName }) {
     : icons;
 }
 
+function RankingAchievementMedal({ achievement }) {
+  const count = getAchievementCopyCount(achievement);
+  const accessibleLabel = count > 1
+    ? `${achievement.title} · aconseguida ${count} vegades`
+    : achievement.title;
+
+  return (
+    <span
+      className="ranking-achievement-unit"
+      title={accessibleLabel}
+      aria-label={accessibleLabel}
+    >
+      <span className="ranking-achievement-icon" aria-hidden="true">
+        <AchievementIconGraphic achievement={achievement} />
+      </span>
+
+      {count > 1 && (
+        <span className="ranking-achievement-multiplier" aria-hidden="true">
+          x{count}
+        </span>
+      )}
+    </span>
+  );
+}
+
 function RankingAchievementIcons({ achievements, className = "" }) {
   const unlockedAchievements = (achievements || []).filter(
     (achievement) => achievement.unlocked,
@@ -2487,10 +2512,9 @@ function RankingAchievementIcons({ achievements, className = "" }) {
       aria-label={`${unlockedAchievements.reduce((total, achievement) => total + getAchievementCopyCount(achievement), 0)} medalles desbloquejades`}
     >
       {unlockedAchievements.map((achievement) => (
-        <AchievementIconCopies
+        <RankingAchievementMedal
           key={achievement.id}
           achievement={achievement}
-          iconClassName="ranking-achievement-icon"
         />
       ))}
     </span>
@@ -10201,7 +10225,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     grid-template-columns: 1fr;
   }
 }
-        /* VLP · Medalles acumulables; la mida de les icones no canvia. */
+        /* VLP · Una icona per medalla; les repeticions es mostren amb xN. */
         .app-shell .ranking-achievement-icon,
         .app-shell .profile-achievement-icon {
           position: relative;
@@ -10209,6 +10233,41 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
         }
         .app-shell .ranking-achievement-icons {
           flex-wrap: wrap;
+          align-content: flex-start;
+          min-width: 0;
+          box-sizing: border-box;
+        }
+        .app-shell .ranking-achievement-unit {
+          --ranking-medal-size: 24px;
+          display: inline-flex;
+          flex: 0 0 auto;
+          align-items: center;
+          gap: 0;
+          white-space: nowrap;
+        }
+        .app-shell .ranking-achievement-unit > .ranking-achievement-icon {
+          width: var(--ranking-medal-size);
+          height: var(--ranking-medal-size);
+          flex-basis: var(--ranking-medal-size);
+        }
+        .app-shell .ranking-achievement-icons.current-user-icons
+          .ranking-achievement-unit {
+          --ranking-medal-size: 26px;
+        }
+        .app-shell .ranking-achievement-multiplier {
+          display: inline-grid;
+          place-items: center;
+          width: calc(var(--ranking-medal-size) / 2);
+          height: calc(var(--ranking-medal-size) / 2);
+          flex: 0 0 calc(var(--ranking-medal-size) / 2);
+          margin-left: 0;
+          color: #f4d04b;
+          font-size: calc(var(--ranking-medal-size) / 3);
+          font-weight: 1000;
+          line-height: 1;
+          letter-spacing: -0.06em;
+          white-space: nowrap;
+          text-shadow: 0 1px 5px rgba(244, 208, 75, 0.38);
         }
         .app-shell .vlp-profile-achievement-copies {
           display: flex;
@@ -10251,10 +10310,16 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             width: 100% !important;
             max-width: 100%;
             flex-wrap: wrap !important;
+            align-content: flex-start !important;
             justify-content: flex-start !important;
             gap: 7px !important;
             margin: 0 !important;
             overflow: visible !important;
+          }
+          .app-shell .ranking-achievement-unit,
+          .app-shell .ranking-achievement-icons.current-user-icons
+            .ranking-achievement-unit {
+            --ranking-medal-size: 18px;
           }
           .app-shell .ranking-x-handle,
           .app-shell .profile-x-handle {
@@ -13840,13 +13905,6 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                 )}
                               </strong>
 
-                              {user.hasXIdentity && user.handle && (
-                                <small className="ranking-x-handle">
-                                  <span aria-hidden="true">𝕏</span>
-                                  {user.handle}
-                                </small>
-                              )}
-
                             </span>
                           </button>
 
@@ -15293,15 +15351,6 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                                                 )}
                                               </strong>
 
-                                              {user.hasXIdentity &&
-                                                user.handle && (
-                                                  <small className="ranking-x-handle">
-                                                    <span aria-hidden="true">
-                                                      𝕏
-                                                    </span>
-                                                    {user.handle}
-                                                  </small>
-                                                )}
                                             </span>
                                           </button>
 
