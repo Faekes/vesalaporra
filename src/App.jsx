@@ -11678,6 +11678,39 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               />
             </header>
 
+            <style>{`
+              .notes-page .notes-tabs {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+              }
+
+              .notes-page .notes-tab {
+                width: 100%;
+                min-width: 0;
+                white-space: nowrap;
+              }
+
+              .notes-page .notes-tab-label-compact {
+                display: none;
+              }
+
+              @media (max-width: 700px) {
+                .notes-page .notes-tab {
+                  padding-right: 4px;
+                  padding-left: 4px;
+                  font-size: clamp(9px, 2.7vw, 12px);
+                }
+
+                .notes-page .notes-tab-label-full {
+                  display: none;
+                }
+
+                .notes-page .notes-tab-label-compact {
+                  display: inline;
+                }
+              }
+            `}</style>
+
             <div
               className="notes-tabs"
               role="tablist"
@@ -11692,7 +11725,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 }
                 onClick={() => setNotesTab("match")}
               >
-                LES NOTES DEL PARTIT
+                <span className="notes-tab-label-full">
+                  LES NOTES DEL PARTIT
+                </span>
+                <span className="notes-tab-label-compact">PARTIT</span>
               </button>
 
               <button
@@ -11704,7 +11740,10 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 }
                 onClick={() => setNotesTab("season")}
               >
-                LES NOTES DE LA TEMPORADA
+                <span className="notes-tab-label-full">
+                  LES NOTES DE LA TEMPORADA
+                </span>
+                <span className="notes-tab-label-compact">TEMPORADA</span>
               </button>
 
               <button
@@ -11721,9 +11760,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   setNotesTab("personal");
                 }}
               >
-                {personalNotesAreOwn
-                  ? "LES MEVES NOTES"
-                  : "LES SEVES NOTES"}
+                <span className="notes-tab-label-full">
+                  {personalNotesAreOwn
+                    ? "LES MEVES NOTES"
+                    : "LES SEVES NOTES"}
+                </span>
+                <span className="notes-tab-label-compact">
+                  {personalNotesAreOwn ? "MEVES" : "SEVES"}
+                </span>
               </button>
             </div>
 
