@@ -10693,7 +10693,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 </div>
               )}
 
-                            {openInfoSection === "score" && (
+                               {openInfoSection === "score" && (
                 <div className="section-info-panel" role="note">
                   <strong className="section-info-title">
                     PUNTS DEL RESULTAT
@@ -10710,6 +10710,12 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       <span>A un gol del marcador exacte + signe</span>
 
                       <strong>+40</strong>
+                    </div>
+
+                    <div className="section-info-points-row">
+                      <span>Encertar una derrota del Barça</span>
+
+                      <strong>+35</strong>
                     </div>
 
                     <div className="section-info-points-row">
@@ -10746,10 +10752,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   <small className="section-info-note">
                     El marcador exacte val +75 i no suma parcials. Quedar-se a
                     un gol del marcador exacte amb el signe correcte val +40 i
-                    tampoc suma parcials. Encertar la diferència de gols i el
-                    signe val +30 i tampoc suma parcials. En la resta de casos,
-                    són acumulables: gols del Barça (+20), signe (+15), gols
-                    del rival (+10) i gols totals del partit (+10).
+                    tampoc suma parcials. Encertar una derrota del Barça val
+                    +35 i tampoc suma parcials. Encertar la diferència de gols
+                    i el signe val +30 i tampoc suma parcials. En la resta de
+                    casos, són acumulables: gols del Barça (+20), signe (+15),
+                    gols del rival (+10) i gols totals del partit (+10).
                   </small>
                 </div>
               )}
