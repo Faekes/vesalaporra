@@ -10693,7 +10693,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 </div>
               )}
 
-              {openInfoSection === "score" && (
+                            {openInfoSection === "score" && (
                 <div className="section-info-panel" role="note">
                   <strong className="section-info-title">
                     PUNTS DEL RESULTAT
@@ -10703,25 +10703,31 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     <div className="section-info-points-row featured">
                       <span>Marcador exacte</span>
 
-                      <strong>+60</strong>
+                      <strong>+75</strong>
                     </div>
 
                     <div className="section-info-points-row">
-                      <span>Encertar els gols del Barça</span>
+                      <span>A un gol del marcador exacte + signe</span>
+
+                      <strong>+40</strong>
+                    </div>
+
+                    <div className="section-info-points-row">
+                      <span>Diferència de gols exacta + signe</span>
 
                       <strong>+30</strong>
                     </div>
 
                     <div className="section-info-points-row">
-                      <span>Encertar la diferència de gols</span>
+                      <span>Encertar els gols del Barça</span>
 
-                      <strong>+25</strong>
+                      <strong>+20</strong>
                     </div>
 
                     <div className="section-info-points-row">
                       <span>Encertar el signe del partit</span>
 
-                      <strong>+10</strong>
+                      <strong>+15</strong>
                     </div>
 
                     <div className="section-info-points-row">
@@ -10733,16 +10739,17 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     <div className="section-info-points-row">
                       <span>Encertar els gols totals del partit</span>
 
-                      <strong>+5</strong>
+                      <strong>+10</strong>
                     </div>
                   </div>
 
                   <small className="section-info-note">
-                    El marcador exacte val +60 i no suma parcials. Si no és
-                    exacte, els encerts parcials són acumulables: gols del
-                    Barça (+30), diferència de gols (+25), signe (+10), gols
-                    del rival (+10) i gols totals del partit (+5). Si encertes
-                    els dos marcadors és resultat exacte i són +60.
+                    El marcador exacte val +75 i no suma parcials. Quedar-se a
+                    un gol del marcador exacte amb el signe correcte val +40 i
+                    tampoc suma parcials. Encertar la diferència de gols i el
+                    signe val +30 i tampoc suma parcials. En la resta de casos,
+                    són acumulables: gols del Barça (+20), signe (+15), gols
+                    del rival (+10) i gols totals del partit (+10).
                   </small>
                 </div>
               )}
