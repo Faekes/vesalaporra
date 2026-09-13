@@ -11572,7 +11572,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                     {protagonistIsComplete
                       ? `${protagonist.name} · +${protagonistScoring.hitPoints} si marca o assisteix · ${protagonistScoring.missPoints} si no participa en cap gol.${
                           protagonistIsConfirmed && !predictionEditing
-                            ? " Ja no es pot canviar."
+                            ? "Pots corregir-lo fins que es tanqui la porra."
                             : " Clica el cromo amb estrella per desfer."
                         }`
                       : protagonistSelectionActive
