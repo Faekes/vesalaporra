@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLauncher";
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
@@ -8,6 +8,10 @@ import NotesRecap from "./components/NotesRecap.jsx";
 import instructionsHtml from "./content/instruccions.html?raw";
 import "./App.css";
 import "./VesalaporraLeagues_PRO_V2.css";
+
+const PredictionClosingRecap = lazy(
+  () => import("./components/PredictionClosingRecap.jsx"),
+);
 
 const buildVesalaporraInstructionsHtml = (sourceHtml) => {
   let html = String(sourceHtml || "");
@@ -1290,6 +1294,9 @@ const VESALAPORRA_PUBLIC_ACTIVE_SEASON_MVP_COUNTS_RPC =
 
 const VESALAPORRA_PUBLIC_MATCH_MVP_RPC =
   "vesalaporra_public_match_mvp";
+
+const VESALAPORRA_PUBLIC_PREDICTION_CLOSING_RECAP_RPC =
+  "vesalaporra_public_prediction_closing_recap";
 
 const VESALAPORRA_PUBLIC_USER_ACHIEVEMENTS_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_USER_ACHIEVEMENTS_RPC ||
@@ -3242,6 +3249,66 @@ const getPublicStorageImageUrl = (bucket, path, version = null) => {
   return `${publicUrl}?v=${encodeURIComponent(cacheVersion)}`;
 };
 
+const normalizePredictionClosingRecapPlayer = (row) => {
+  if (!row?.player_id) {
+    return null;
+  }
+
+  return {
+    playerId: String(row.player_id),
+    slotIndex: toFiniteNumber(row.slot_index),
+    displayName: firstNonEmptyText(
+      row.display_name,
+      row.short_name,
+      "Jugador",
+    ),
+    shortName: firstNonEmptyText(
+      row.short_name,
+      row.display_name,
+      "Jugador",
+    ),
+    image:
+      getPublicStorageImageUrl(
+        row.avatar_bucket,
+        row.avatar_path,
+        row.avatar_version,
+      ) || "/fcb/PLAYER_PLACEHOLDER.png",
+    voteCount: toFiniteNumber(row.vote_count),
+  };
+};
+
+const normalizePredictionClosingRecap = (payload) => {
+  const source = Array.isArray(payload) ? payload[0] : payload;
+  const result = source?.most_voted_result || null;
+  const protagonist = normalizePredictionClosingRecapPlayer(
+    source?.most_voted_protagonist,
+  );
+
+  return {
+    status: firstNonEmptyText(source?.status),
+    matchId: firstNonEmptyText(source?.match_id),
+    totalPredictions: toFiniteNumber(source?.total_predictions),
+    lineupPredictionCount: toFiniteNumber(
+      source?.lineup_prediction_count,
+    ),
+    mostVotedResult: result
+      ? {
+          barcelonaGoals: toFiniteNumber(result.barcelona_goals),
+          opponentGoals: toFiniteNumber(result.opponent_goals),
+          voteCount: toFiniteNumber(result.vote_count),
+        }
+      : null,
+    consensusLineup: (
+      Array.isArray(source?.consensus_lineup)
+        ? source.consensus_lineup
+        : []
+    )
+      .map(normalizePredictionClosingRecapPlayer)
+      .filter(Boolean),
+    mostVotedProtagonist: protagonist,
+  };
+};
+
 const normalizeAdminPlayer = (row) => ({
   playerId: row.player_id,
   playerKey: row.player_key,
@@ -3513,6 +3580,18 @@ const [rankingJornadaNumber, setRankingJornadaNumber] =
 const [jornadaRecapOpen, setJornadaRecapOpen] =
   useState(false);
 
+const [predictionClosingRecapOpen, setPredictionClosingRecapOpen] =
+  useState(false);
+
+const [predictionClosingRecapLoading, setPredictionClosingRecapLoading] =
+  useState(false);
+
+const [predictionClosingRecapError, setPredictionClosingRecapError] =
+  useState("");
+
+const [predictionClosingRecapData, setPredictionClosingRecapData] =
+  useState(null);
+
 const [profileHistory, setProfileHistory] = useState([]);
 
 const [expandedProfilePrediction, setExpandedProfilePrediction] =
@@ -3738,8 +3817,15 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     (player) => player.assignedToMatch && player.isPublicVisible,
   ).length;
 
-  const isWaitingForOpening = Boolean(
+    const isWaitingForOpening = Boolean(
     matchData.id && matchData.isUpcomingPreview,
+  );
+
+  const predictionClosingRecapAvailable = Boolean(
+    isAdmin &&
+      matchData.id &&
+      !isWaitingForOpening &&
+      countdown.isClosed,
   );
 
   const displayedCountdown = isWaitingForOpening
@@ -4492,6 +4578,51 @@ const getRankingAchievements = (user) =>
     setOpenInfoSection((currentSectionId) =>
       currentSectionId === sectionId ? null : sectionId,
     );
+  };
+
+  const handleOpenPredictionClosingRecap = async () => {
+    if (
+      !predictionClosingRecapAvailable ||
+      predictionClosingRecapLoading
+    ) {
+      return;
+    }
+
+    setPredictionClosingRecapLoading(true);
+    setPredictionClosingRecapError("");
+
+    try {
+      const { data, error } = await supabase.rpc(
+        VESALAPORRA_PUBLIC_PREDICTION_CLOSING_RECAP_RPC,
+        {
+          p_match_id: matchData.id,
+        },
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const normalizedRecap = normalizePredictionClosingRecap(data);
+
+      if (normalizedRecap.status !== "READY") {
+        throw new Error("La porra encara no està tancada.");
+      }
+
+      if (normalizedRecap.totalPredictions < 1) {
+        throw new Error("No hi ha cap porra confirmada per resumir.");
+      }
+
+      setPredictionClosingRecapData(normalizedRecap);
+      setPredictionClosingRecapOpen(true);
+    } catch (error) {
+      setPredictionClosingRecapError(
+        error?.message ||
+          "No s’ha pogut preparar el resum del tancament.",
+      );
+    } finally {
+      setPredictionClosingRecapLoading(false);
+    }
   };
 
   const handleRatePlayer = async (playerId, stars) => {
@@ -10721,6 +10852,66 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                 </div>
               </div>
 
+                            {predictionClosingRecapAvailable && (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    margin: "0 0 18px",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={handleOpenPredictionClosingRecap}
+                    disabled={predictionClosingRecapLoading}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "7px",
+                      minHeight: "38px",
+                      padding: "9px 15px",
+                      border:
+                        "1px solid rgba(247, 215, 92, 0.48)",
+                      borderRadius: "999px",
+                      background:
+                        "linear-gradient(135deg, rgba(165, 0, 68, 0.4), rgba(247, 215, 92, 0.14))",
+                      color: "#f7d75c",
+                      boxShadow:
+                        "0 0 18px rgba(247, 215, 92, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+                      fontSize: "11px",
+                      fontWeight: 950,
+                      letterSpacing: "0.04em",
+                      whiteSpace: "nowrap",
+                      cursor: predictionClosingRecapLoading
+                        ? "wait"
+                        : "pointer",
+                      opacity: predictionClosingRecapLoading
+                        ? 0.7
+                        : 1,
+                    }}
+                    aria-label="Reprodueix el resum del tancament de la porra"
+                  >
+                    <span aria-hidden="true">🎬</span>
+
+                    {predictionClosingRecapLoading
+                      ? "PREPARANT RESUM..."
+                      : "RESUM DEL TANCAMENT"}
+                  </button>
+                </div>
+              )}
+
+              {predictionClosingRecapError && (
+                <div className="real-data-state error" role="alert">
+                  <strong>
+                    No s’ha pogut preparar el resum
+                  </strong>
+
+                  <span>{predictionClosingRecapError}</span>
+                </div>
+              )}
+
+
               {matchData.pointsMultiplier === 2 && (
                 <div
                   role="note"
@@ -15641,6 +15832,25 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   jornadaNumber={notesJornadaNumber}
   onClose={() => setNotesRecapOpen(false)}
 />
+
+<Suspense fallback={null}>
+  <PredictionClosingRecap
+    open={predictionClosingRecapOpen}
+    summary={predictionClosingRecapData}
+    match={matchData}
+    homeBadgeBackground={getTeamBadgeBackground(
+      matchData.homeTeamId,
+      matchData.homeBadgeColors,
+      matchData.homeBadgePattern,
+    )}
+    awayBadgeBackground={getTeamBadgeBackground(
+      matchData.awayTeamId,
+      matchData.awayBadgeColors,
+      matchData.awayBadgePattern,
+    )}
+    onClose={() => setPredictionClosingRecapOpen(false)}
+  />
+</Suspense>
 
 {confirmationDialogOpen && (
         <div className="prediction-confirm-dialog-backdrop">
