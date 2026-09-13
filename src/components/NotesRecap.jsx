@@ -3,9 +3,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 const NOTES_SCENE_TIMINGS = [
   { scene: "intro", at: 0 },
   { scene: "ranking", at: 2200 },
-  { scene: "podium", at: 6500 },
-  { scene: "mvp", at: 9500 },
-  { scene: "outro", at: 13500 },
+  { scene: "podium", at: 8000 },
+  { scene: "mvp", at: 12500 },
+  { scene: "outro", at: 18000 },
 ];
 
 const copyTextToClipboard = async (text) => {
@@ -114,7 +114,7 @@ export default function NotesRecap({
   const mvp = ranking[0] || null;
   const second = ranking[1] || null;
   const third = ranking[2] || null;
-  const chasingGroup = ranking.slice(3, 10).reverse();
+  const chasingGroup = ranking.slice(3, 10);
 
   const homeName = match?.homeName || "BARÇA";
   const awayName = match?.awayName || "RIVAL";
@@ -975,15 +975,6 @@ export default function NotesRecap({
                   VOTACIONS
                   <strong>{mvp.voteCount}</strong>
                 </span>
-
-                {mvp.stats?.role && (
-                  <span>
-                    PARTICIPACIÓ
-                    <strong>
-                      {mvp.stats.role === "T" ? "TITULAR" : "SUPLENT"}
-                    </strong>
-                  </span>
-                )}
 
                 {Number(mvp.stats?.goals || 0) > 0 && (
                   <span>

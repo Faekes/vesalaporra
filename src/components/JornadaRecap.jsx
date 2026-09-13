@@ -3,9 +3,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 const SCENE_TIMINGS = [
   { scene: "intro", at: 0 },
   { scene: "ranking", at: 2200 },
-  { scene: "podium", at: 6500 },
-  { scene: "winner", at: 9500 },
-  { scene: "outro", at: 13500 },
+  { scene: "podium", at: 8000 },
+  { scene: "winner", at: 12500 },
+  { scene: "outro", at: 18000 },
 ];
 
 const copyTextToClipboard = async (text) => {
@@ -101,7 +101,7 @@ export default function JornadaRecap({
   const winner = ranking[0] || null;
   const second = ranking[1] || null;
   const third = ranking[2] || null;
-  const chasingGroup = ranking.slice(3, 10).reverse();
+  const chasingGroup = ranking.slice(3, 10);
 
   useEffect(() => {
     if (!open) {
