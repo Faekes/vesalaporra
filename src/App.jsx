@@ -4458,10 +4458,12 @@ const notesMatchHasRecapData = notesMatchRows.some(
 useEffect(() => {
   const searchParams = new URLSearchParams(window.location.search);
   const sharedRecap = searchParams.get("recap");
+  const sharedMatchId = searchParams.get("match");
 
   const consumeSharedRecapUrl = () => {
     searchParams.delete("recap");
     searchParams.delete("jornada");
+    searchParams.delete("match");
 
     const remainingSearch = searchParams.toString();
 
@@ -4479,6 +4481,70 @@ useEffect(() => {
   };
 
   if (
+    sharedRecap === "closing" &&
+    activePage === "play" &&
+    sharedMatchId
+  ) {
+    let cancelled = false;
+
+    const openSharedPredictionClosingRecap = async () => {
+      setPredictionClosingRecapLoading(true);
+      setPredictionClosingRecapError("");
+
+      try {
+        const { data, error } = await supabase.rpc(
+          VESALAPORRA_PUBLIC_PREDICTION_CLOSING_RECAP_RPC,
+          {
+            p_match_id: sharedMatchId,
+          },
+        );
+
+        if (error) {
+          throw error;
+        }
+
+        const normalizedRecap =
+          normalizePredictionClosingRecap(data);
+
+        if (normalizedRecap.status !== "READY") {
+          throw new Error("La porra encara no està tancada.");
+        }
+
+        if (normalizedRecap.totalPredictions < 1) {
+          throw new Error(
+            "No hi ha cap porra confirmada per resumir.",
+          );
+        }
+
+        if (cancelled) {
+          return;
+        }
+
+        setPredictionClosingRecapData(normalizedRecap);
+        setPredictionClosingRecapOpen(true);
+        consumeSharedRecapUrl();
+      } catch (error) {
+        if (!cancelled) {
+          setPredictionClosingRecapError(
+            error?.message ||
+              "No s’ha pogut obrir el resum compartit.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setPredictionClosingRecapLoading(false);
+        }
+      }
+    };
+
+    openSharedPredictionClosingRecap();
+
+    return () => {
+      cancelled = true;
+    };
+  }
+
+  if (
     sharedRecap === "jornada" &&
     activePage === "ranking" &&
     rankingTab === "jornada" &&
@@ -4487,7 +4553,7 @@ useEffect(() => {
   ) {
     setJornadaRecapOpen(true);
     consumeSharedRecapUrl();
-    return;
+    return undefined;
   }
 
   if (
@@ -4501,6 +4567,8 @@ useEffect(() => {
     setNotesRecapOpen(true);
     consumeSharedRecapUrl();
   }
+
+  return undefined;
 }, [
   activePage,
   rankingTab,
