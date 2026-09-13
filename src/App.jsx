@@ -4,6 +4,7 @@ import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLau
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
 import VesalaporraDemo from "./components/VesalaporraDemoV3.jsx";
 import JornadaRecap from "./components/JornadaRecap.jsx";
+import NotesRecap from "./components/NotesRecap.jsx";
 import instructionsHtml from "./content/instruccions.html?raw";
 import "./App.css";
 import "./VesalaporraLeagues_PRO_V2.css";
@@ -3499,6 +3500,8 @@ function VesalaporraApp() {
     playerIds: [],
   });
   const [notesRankingRefreshing, setNotesRankingRefreshing] = useState(false);
+
+const [notesRecapOpen, setNotesRecapOpen] = useState(false);
 
 const [rankingUsers, setRankingUsers] = useState([]);
   const [achievementMultipliersByUser, setAchievementMultipliersByUser] = useState({});
@@ -11897,14 +11900,47 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   </strong>
                 </div>
 
-                <div className="notes-board-actions">
-                  <small>
-                    {notesTab === "match" && !notesAreClosed
-                      ? "VOTACIÓ CEGA"
-                      : "MITJANA SOBRE 10"}
-                  </small>
+               <div className="notes-board-actions">
+  <small>
+    {notesTab === "match" && !notesAreClosed
+      ? "VOTACIÓ CEGA"
+      : "MITJANA SOBRE 10"}
+  </small>
 
-                </div>
+  {isAdmin &&
+    notesTab === "match" &&
+    notesAreClosed &&
+    notesMatchRows.some((row) => row.voteCount > 0) && (
+      <button
+        type="button"
+        onClick={() => setNotesRecapOpen(true)}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "7px",
+          minHeight: "36px",
+          padding: "8px 13px",
+          border: "1px solid rgba(247, 215, 92, 0.48)",
+          borderRadius: "999px",
+          background:
+            "linear-gradient(135deg, rgba(165, 0, 68, 0.4), rgba(247, 215, 92, 0.14))",
+          color: "#f7d75c",
+          boxShadow:
+            "0 0 18px rgba(247, 215, 92, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+          fontSize: "11px",
+          fontWeight: 950,
+          letterSpacing: "0.04em",
+          whiteSpace: "nowrap",
+          cursor: "pointer",
+        }}
+        aria-label="Reprodueix el resum animat de Les Notes"
+      >
+        <span aria-hidden="true">🎬</span>
+        RESUM DE LES NOTES
+      </button>
+    )}
+</div>
               </header>
 
               {visibleNotesError && (
@@ -15531,13 +15567,21 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             </main>
 
       <JornadaRecap
-        open={jornadaRecapOpen}
-        users={jornadaRankingRows}
-        jornadaNumber={rankingJornadaNumber}
-        onClose={() => setJornadaRecapOpen(false)}
-      />
+  open={jornadaRecapOpen}
+  users={jornadaRankingRows}
+  jornadaNumber={rankingJornadaNumber}
+  onClose={() => setJornadaRecapOpen(false)}
+/>
 
-      {confirmationDialogOpen && (
+<NotesRecap
+  open={notesRecapOpen}
+  rows={notesMatchRows}
+  match={notesMatchData || matchData}
+  jornadaNumber={notesJornadaNumber}
+  onClose={() => setNotesRecapOpen(false)}
+/>
+
+{confirmationDialogOpen && (
         <div className="prediction-confirm-dialog-backdrop">
           <section
             className="prediction-confirm-dialog"
