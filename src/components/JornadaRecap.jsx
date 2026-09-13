@@ -8,6 +8,28 @@ const SCENE_TIMINGS = [
   { scene: "outro", at: 13500 },
 ];
 
+const copyTextToClipboard = async (text) => {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.setAttribute("readonly", "");
+  textArea.style.position = "fixed";
+  textArea.style.opacity = "0";
+  document.body.appendChild(textArea);
+  textArea.select();
+
+  const copied = document.execCommand("copy");
+  textArea.remove();
+
+  if (!copied) {
+    throw new Error("No s’ha pogut copiar l’enllaç.");
+  }
+};
+
 const CONFETTI = Array.from({ length: 54 }, (_, index) => ({
   id: index,
   left: `${(index * 37) % 100}%`,
@@ -58,6 +80,7 @@ export default function JornadaRecap({
 }) {
   const [scene, setScene] = useState("intro");
   const [replayKey, setReplayKey] = useState(0);
+  const [shareStatus, setShareStatus] = useState("idle");
   const stageRef = useRef(null);
 
   const ranking = useMemo(
@@ -129,6 +152,28 @@ export default function JornadaRecap({
     }
 
     await document.exitFullscreen?.();
+  };
+
+  const copyShareLink = async () => {
+    const shareUrl = new URL(
+      "/ranquing/jornada",
+      "https://vesalaporra.cat",
+    );
+
+    shareUrl.searchParams.set("recap", "jornada");
+
+    if (jornadaNumber) {
+      shareUrl.searchParams.set("jornada", String(jornadaNumber));
+    }
+
+    try {
+      await copyTextToClipboard(shareUrl.toString());
+      setShareStatus("copied");
+    } catch {
+      setShareStatus("error");
+    }
+
+    window.setTimeout(() => setShareStatus("idle"), 2200);
   };
 
   if (!open || !winner) {
@@ -791,6 +836,29 @@ export default function JornadaRecap({
         </div>
 
         <div className="jrecap-actions">
+          <button
+            type="button"
+            onClick={copyShareLink}
+            title={
+              shareStatus === "copied"
+                ? "Enllaç copiat"
+                : shareStatus === "error"
+                  ? "No s’ha pogut copiar"
+                  : "Copia l’enllaç del resum"
+            }
+            aria-label={
+              shareStatus === "copied"
+                ? "Enllaç copiat"
+                : "Copia l’enllaç del resum de la jornada"
+            }
+          >
+            {shareStatus === "copied"
+              ? "✓"
+              : shareStatus === "error"
+                ? "!"
+                : "🔗"}
+          </button>
+
           <button type="button" onClick={restart} title="Torna a començar">
             ↻
           </button>

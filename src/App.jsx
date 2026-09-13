@@ -4362,10 +4362,71 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
   );
 
   const notesJornadaLabel = notesJornadaNumber > 0
-    ? `Jornada ${notesJornadaNumber}`
-    : "jornada";
+  ? `Jornada ${notesJornadaNumber}`
+  : "jornada";
 
-  const getRankingAchievements = (user) =>
+const notesMatchHasRecapData = notesMatchRows.some(
+  (row) => Number(row?.voteCount || 0) > 0,
+);
+
+useEffect(() => {
+  const searchParams = new URLSearchParams(window.location.search);
+  const sharedRecap = searchParams.get("recap");
+
+  const consumeSharedRecapUrl = () => {
+    searchParams.delete("recap");
+    searchParams.delete("jornada");
+
+    const remainingSearch = searchParams.toString();
+
+    const cleanUrl = [
+      window.location.pathname,
+      remainingSearch ? `?${remainingSearch}` : "",
+      window.location.hash,
+    ].join("");
+
+    window.history.replaceState(
+      window.history.state,
+      document.title,
+      cleanUrl,
+    );
+  };
+
+  if (
+    sharedRecap === "jornada" &&
+    activePage === "ranking" &&
+    rankingTab === "jornada" &&
+    !rankingLoading &&
+    jornadaRankingRows.length > 0
+  ) {
+    setJornadaRecapOpen(true);
+    consumeSharedRecapUrl();
+    return;
+  }
+
+  if (
+    sharedRecap === "notes" &&
+    activePage === "notes" &&
+    notesTab === "match" &&
+    !notesLoading &&
+    notesAreClosed &&
+    notesMatchHasRecapData
+  ) {
+    setNotesRecapOpen(true);
+    consumeSharedRecapUrl();
+  }
+}, [
+  activePage,
+  rankingTab,
+  rankingLoading,
+  jornadaRankingRows.length,
+  notesTab,
+  notesLoading,
+  notesAreClosed,
+  notesMatchHasRecapData,
+]);
+
+const getRankingAchievements = (user) =>
     ACHIEVEMENT_CATALOG.filter((achievement) =>
       (user?.achievementIds || []).includes(achievement.id),
     ).map((achievement) => ({
