@@ -3,6 +3,7 @@ import { supabase } from "./lib/supabaseClient";
 import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLauncher";
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
 import VesalaporraDemo from "./components/VesalaporraDemoV3.jsx";
+import JornadaRecap from "./components/JornadaRecap.jsx";
 import instructionsHtml from "./content/instruccions.html?raw";
 import "./App.css";
 import "./VesalaporraLeagues_PRO_V2.css";
@@ -3506,7 +3507,10 @@ const [rankingError, setRankingError] = useState("");
 const [rankingJornadaNumber, setRankingJornadaNumber] =
   useState(null);
 
-  const [profileHistory, setProfileHistory] = useState([]);
+const [jornadaRecapOpen, setJornadaRecapOpen] =
+  useState(false);
+
+const [profileHistory, setProfileHistory] = useState([]);
 
 const [expandedProfilePrediction, setExpandedProfilePrediction] =
   useState(null);
@@ -13757,7 +13761,50 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   <strong>Carregant rànquing real...</strong>
 )}
   </div>
-  <small>ES CARREGA DE 20 EN 20</small>
+    <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "flex-end",
+      flexWrap: "wrap",
+      gap: "10px",
+    }}
+  >
+    <small>ES CARREGA DE 20 EN 20</small>
+
+    {isAdmin &&
+      rankingTab === "jornada" &&
+      rankingRows.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setJornadaRecapOpen(true)}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "7px",
+            minHeight: "36px",
+            padding: "8px 13px",
+            border: "1px solid rgba(247, 215, 92, 0.48)",
+            borderRadius: "999px",
+            background:
+              "linear-gradient(135deg, rgba(165, 0, 68, 0.4), rgba(247, 215, 92, 0.14))",
+            color: "#f7d75c",
+            boxShadow:
+              "0 0 18px rgba(247, 215, 92, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+            fontSize: "11px",
+            fontWeight: 950,
+            letterSpacing: "0.04em",
+            whiteSpace: "nowrap",
+            cursor: "pointer",
+          }}
+          aria-label="Reprodueix el resum animat de la jornada"
+        >
+          <span aria-hidden="true">🎬</span>
+          RESUM DE LA JORNADA
+        </button>
+      )}
+  </div>
 </header>
               {rankingError && (
                 <div className="real-data-state error" role="alert">
@@ -15481,7 +15528,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
             )}
           </section>
         )}
-      </main>
+            </main>
+
+      <JornadaRecap
+        open={jornadaRecapOpen}
+        users={jornadaRankingRows}
+        jornadaNumber={rankingJornadaNumber}
+        onClose={() => setJornadaRecapOpen(false)}
+      />
 
       {confirmationDialogOpen && (
         <div className="prediction-confirm-dialog-backdrop">
