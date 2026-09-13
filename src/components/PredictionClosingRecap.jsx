@@ -147,7 +147,28 @@ export default function PredictionClosingRecap({
       return;
     }
 
-       await document.exitFullscreen?.();
+    await document.exitFullscreen?.();
+  };
+
+  const copyShareLink = async () => {
+    const shareUrl = new URL(
+      "/porra",
+      "https://vesalaporra.cat",
+    );
+
+    shareUrl.searchParams.set("recap", "closing");
+    shareUrl.searchParams.set("match", String(summary.matchId));
+
+    try {
+      await copyTextToClipboard(shareUrl.toString());
+      setShareStatus("copied");
+    } catch {
+      setShareStatus("error");
+    }
+
+    window.setTimeout(() => {
+      setShareStatus("idle");
+    }, 2200);
   };
 
   const shareOnX = () => {
@@ -476,14 +497,28 @@ export default function PredictionClosingRecap({
           </div>
         </div>
 
-               <div className="closing-recap-actions">
+                      <div className="closing-recap-actions">
           <button
             type="button"
-            onClick={shareOnX}
-            title="Comparteix a X"
-            aria-label="Comparteix el resum a X"
+            onClick={copyShareLink}
+            title={
+              shareStatus === "copied"
+                ? "Enllaç copiat"
+                : shareStatus === "error"
+                  ? "No s’ha pogut copiar"
+                  : "Copia l’enllaç del resum"
+            }
+            aria-label={
+              shareStatus === "copied"
+                ? "Enllaç copiat"
+                : "Copia l’enllaç del resum del tancament"
+            }
           >
-            𝕏
+            {shareStatus === "copied"
+              ? "✓"
+              : shareStatus === "error"
+                ? "!"
+                : "🔗"}
           </button>
 
           <button
@@ -494,6 +529,7 @@ export default function PredictionClosingRecap({
           >
             ↻
           </button>
+
           <button
             type="button"
             onClick={toggleFullscreen}
@@ -502,6 +538,7 @@ export default function PredictionClosingRecap({
           >
             ⛶
           </button>
+
           <button
             type="button"
             onClick={onClose}
