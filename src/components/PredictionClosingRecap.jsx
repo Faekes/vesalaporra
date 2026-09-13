@@ -123,7 +123,32 @@ export default function PredictionClosingRecap({
       return;
     }
 
-    await document.exitFullscreen?.();
+       await document.exitFullscreen?.();
+  };
+
+  const shareOnX = () => {
+    const shareUrl = new URL(
+      "/porra",
+      "https://vesalaporra.cat",
+    );
+
+    shareUrl.searchParams.set("recap", "closing");
+    shareUrl.searchParams.set("match", summary.matchId);
+
+    const tweetText =
+      `🔒 La porra ha tancat!\n\n` +
+      `${summary.totalPredictions} porres confirmades. ` +
+      `Descobreix el resultat, l’XI i el protagonista més votats 👇`;
+
+    const twitterUrl =
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}` +
+      `&url=${encodeURIComponent(shareUrl.toString())}`;
+
+    window.open(
+      twitterUrl,
+      "_blank",
+      "noopener,noreferrer",
+    );
   };
 
   return (
