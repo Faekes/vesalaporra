@@ -17,6 +17,29 @@ const FORMATION_4231 = [
   { id: "goalkeeper", slots: [10] },
 ];
 
+const copyTextToClipboard = async (text) => {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.setAttribute("readonly", "");
+  textArea.style.position = "fixed";
+  textArea.style.opacity = "0";
+
+  document.body.appendChild(textArea);
+  textArea.select();
+
+  const copied = document.execCommand("copy");
+  textArea.remove();
+
+  if (!copied) {
+    throw new Error("No s’ha pogut copiar l’enllaç.");
+  }
+};
+
 export default function PredictionClosingRecap({
   open,
   summary,
@@ -27,6 +50,7 @@ export default function PredictionClosingRecap({
 }) {
   const [sceneIndex, setSceneIndex] = useState(0);
   const [replayKey, setReplayKey] = useState(0);
+  const [shareStatus, setShareStatus] = useState("idle");
   const stageRef = useRef(null);
 
   const lineupBySlot = useMemo(
