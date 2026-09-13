@@ -452,7 +452,16 @@ export default function PredictionClosingRecap({
           </div>
         </div>
 
-        <div className="closing-recap-actions">
+               <div className="closing-recap-actions">
+          <button
+            type="button"
+            onClick={shareOnX}
+            title="Comparteix a X"
+            aria-label="Comparteix el resum a X"
+          >
+            𝕏
+          </button>
+
           <button
             type="button"
             onClick={() => setReplayKey((current) => current + 1)}
