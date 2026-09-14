@@ -1,7 +1,7 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 
 const FFMPEG_CORE_BASE_URL =
-  "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
+  "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
 
 const wait = (milliseconds) =>
   new Promise((resolve) => window.setTimeout(resolve, milliseconds));
