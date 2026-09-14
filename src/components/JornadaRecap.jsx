@@ -310,6 +310,8 @@ export default function JornadaRecap({
         .jrecap-intro h2,
         .jrecap-outro h2 {
           margin: 0;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           font-size: clamp(39px, 11vw, 58px);
           line-height: .92;
           letter-spacing: -.065em;
@@ -523,6 +525,8 @@ export default function JornadaRecap({
 
         .jrecap-winner-content h2 {
           margin: 0 auto;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           max-width: 340px;
           font-size: 34px;
           line-height: .98;

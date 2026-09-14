@@ -178,14 +178,14 @@ export default function PredictionClosingRecap({
         .closing-recap-scene.active{opacity:1;transform:scale(1);pointer-events:auto}
         .closing-recap-center{text-align:center}
         .closing-recap-eyebrow{display:block;margin-bottom:13px;color:#f7d75c;font-size:10px;font-weight:950;letter-spacing:.15em;text-transform:uppercase}
-        .closing-recap-title{margin:0;font-size:clamp(38px,10vw,56px);line-height:.92;letter-spacing:-.06em;text-transform:uppercase;text-shadow:0 12px 30px rgba(0,0,0,.42)}
+        .closing-recap-title{margin:0;color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:clamp(38px,10vw,56px);line-height:.92;letter-spacing:-.06em;text-transform:uppercase;text-shadow:0 12px 30px rgba(0,0,0,.42)}
         .closing-recap-subtitle{margin:18px 0 0;color:#abb3ca;font-size:14px;font-weight:750}
         .closing-recap-total-number{display:block;color:#f7d75c;font-size:112px;font-weight:1000;line-height:.88;text-shadow:0 0 42px rgba(247,215,92,.32)}
         .closing-recap-total-label{display:block;margin-top:18px;font-size:25px;font-weight:1000;letter-spacing:.05em;text-transform:uppercase}
         .closing-recap-card-scene{align-items:start;padding:84px 14px 32px}
         .closing-recap-card-wrap{width:100%;transform-origin:top center}
         .closing-recap-stage .prediction-card{width:100%;margin:0;box-sizing:border-box}
-        .closing-recap-stage .prediction-card :is(h2,h3,p,strong,small,span,button){-webkit-text-fill-color:currentColor}
+        .closing-recap-stage .prediction-card :is(h2,h3,p,strong,small,span,button){-webkit-text-fill-color:currentColor}.closing-recap-stage .prediction-card :is(h2,h3){color:#fff!important;-webkit-text-fill-color:#fff!important}
         .closing-recap-stage .score-card{padding:18px 14px}
         .closing-recap-stage .score-card .section-heading{margin-bottom:13px}
         .closing-recap-stage .score-match-overview{margin-bottom:13px}

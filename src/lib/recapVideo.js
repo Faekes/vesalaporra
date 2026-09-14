@@ -1,3 +1,8 @@
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+
+const FFMPEG_CORE_BASE_URL =
+  "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
+
 const wait = (milliseconds) =>
   new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 
@@ -8,15 +13,15 @@ const waitForPaint = () =>
     ),
   );
 
-const getMp4MimeType = () => {
+const getRecordingMimeType = () => {
   if (typeof MediaRecorder === "undefined") {
     return null;
   }
 
   return [
-    "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
-    "video/mp4;codecs=h264,aac",
-    "video/mp4",
+    "video/webm;codecs=vp9,opus",
+    "video/webm;codecs=vp8,opus",
+    "video/webm",
   ].find((mimeType) => MediaRecorder.isTypeSupported(mimeType)) || null;
 };
 
@@ -176,6 +181,86 @@ const createSoundtrack = (durationMs, soundCues) => {
   };
 };
 
+const fetchAsBlobUrl = async (url, mimeType) => {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error("No s’han pogut carregar els recursos del convertidor MP4.");
+  }
+
+  return URL.createObjectURL(
+    new Blob([await response.arrayBuffer()], { type: mimeType }),
+  );
+};
+
+const withTimeout = (promise, milliseconds, message) =>
+  Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      window.setTimeout(() => reject(new Error(message)), milliseconds),
+    ),
+  ]);
+
+const convertRecordingToMp4 = async (recordingBlob) => {
+  const ffmpeg = new FFmpeg();
+  const inputName = "vesalaporra-input.webm";
+  const outputName = "vesalaporra-output.mp4";
+
+  try {
+    await withTimeout(ffmpeg.load({
+      coreURL: await fetchAsBlobUrl(
+        FFMPEG_CORE_BASE_URL + "/ffmpeg-core.js",
+        "text/javascript",
+      ),
+      wasmURL: await fetchAsBlobUrl(
+        FFMPEG_CORE_BASE_URL + "/ffmpeg-core.wasm",
+        "application/wasm",
+      ),
+    }), 60_000, "El convertidor MP4 ha trigat massa a carregar-se.");
+
+    await ffmpeg.writeFile(
+      inputName,
+      new Uint8Array(await recordingBlob.arrayBuffer()),
+    );
+
+    const exitCode = await withTimeout(ffmpeg.exec([
+      "-i",
+      inputName,
+      "-vf",
+      "scale=trunc(iw/2)*2:trunc(ih/2)*2",
+      "-r",
+      "30",
+      "-c:v",
+      "libx264",
+      "-preset",
+      "ultrafast",
+      "-crf",
+      "22",
+      "-pix_fmt",
+      "yuv420p",
+      "-c:a",
+      "aac",
+      "-b:a",
+      "192k",
+      "-movflags",
+      "+faststart",
+      outputName,
+    ]), 180_000, "La conversió MP4 ha trigat massa.");
+
+    if (exitCode !== 0) {
+      throw new Error("No s’ha pogut convertir l’enregistrament a MP4.");
+    }
+
+    const outputData = await ffmpeg.readFile(outputName);
+
+    return new Blob([outputData.buffer], {
+      type: "video/mp4",
+    });
+  } finally {
+    ffmpeg.terminate();
+  }
+};
+
 export const restartRecapForExport = async (restart) => {
   restart();
   await waitForPaint();
@@ -236,11 +321,11 @@ export const downloadRecapMp4 = async ({
     throw new Error("No s’ha trobat el resum que s’ha d’enregistrar.");
   }
 
-  const mimeType = getMp4MimeType();
+  const recordingMimeType = getRecordingMimeType();
 
-  if (!mimeType) {
+  if (!recordingMimeType) {
     throw new Error(
-      "Aquest navegador no pot crear MP4. Obre Vesalaporra amb Chrome actualitzat.",
+      "Aquest navegador no permet enregistrar el vídeo. Obre Vesalaporra amb Chrome actualitzat.",
     );
   }
 
@@ -262,7 +347,7 @@ export const downloadRecapMp4 = async ({
     ]);
 
     const recorder = new MediaRecorder(recordingStream, {
-      mimeType,
+      mimeType: recordingMimeType,
       videoBitsPerSecond: 12_000_000,
       audioBitsPerSecond: 192_000,
     });
@@ -298,7 +383,8 @@ export const downloadRecapMp4 = async ({
     await soundtrack?.stop();
   }
 
-  const video = new Blob(chunks, { type: mimeType });
+  const recording = new Blob(chunks, { type: recordingMimeType });
+  const video = await convertRecordingToMp4(recording);
   const downloadUrl = URL.createObjectURL(video);
   const downloadLink = document.createElement("a");
 
