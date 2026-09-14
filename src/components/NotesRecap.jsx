@@ -178,9 +178,13 @@ export default function NotesRecap({
       await downloadRecapMp4({
         stage: stageRef.current,
         durationMs: 23_000,
+<<<<<<< HEAD
         fileName: `vesalaporra-notes-jornada-${
           jornadaNumber || "actual"
         }.mp4`,
+=======
+        fileName: `vesalaporra-notes-jornada-${jornadaNumber || "actual"}.mp4`,
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
         onCaptureReady: () =>
           restartRecapForExport(() =>
             setReplayKey((currentKey) => currentKey + 1),
@@ -193,7 +197,10 @@ export default function NotesRecap({
           { at: 18000, type: "reveal" },
         ],
       });
+<<<<<<< HEAD
 
+=======
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
       setDownloadStatus("done");
     } catch (error) {
       console.error("No s’ha pogut descarregar el vídeo:", error);

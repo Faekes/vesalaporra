@@ -1,8 +1,11 @@
+<<<<<<< HEAD
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 
 const FFMPEG_CORE_BASE_URL =
   "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
 
+=======
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
 const wait = (milliseconds) =>
   new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 
@@ -13,6 +16,7 @@ const waitForPaint = () =>
     ),
   );
 
+<<<<<<< HEAD
 const withTimeout = (promise, milliseconds, message) =>
   Promise.race([
     promise,
@@ -22,10 +26,14 @@ const withTimeout = (promise, milliseconds, message) =>
   ]);
 
 const getRecordingMimeType = () => {
+=======
+const getMp4MimeType = () => {
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
   if (typeof MediaRecorder === "undefined") {
     return null;
   }
 
+<<<<<<< HEAD
   return (
     [
       "video/webm;codecs=vp9,opus",
@@ -33,6 +41,13 @@ const getRecordingMimeType = () => {
       "video/webm",
     ].find((mimeType) => MediaRecorder.isTypeSupported(mimeType)) || null
   );
+=======
+  return [
+    "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+    "video/mp4;codecs=h264,aac",
+    "video/mp4",
+  ].find((mimeType) => MediaRecorder.isTypeSupported(mimeType)) || null;
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
 };
 
 const addTone = (
@@ -86,7 +101,10 @@ const addSoundCue = (audioContext, output, cue) => {
         type: "triangle",
       }),
     );
+<<<<<<< HEAD
 
+=======
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
     return;
   }
 
@@ -99,7 +117,10 @@ const addSoundCue = (audioContext, output, cue) => {
       volume: 0.06,
       type: "sawtooth",
     });
+<<<<<<< HEAD
 
+=======
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
     return;
   }
 
@@ -112,7 +133,10 @@ const addSoundCue = (audioContext, output, cue) => {
       volume: 0.13,
       type: "sine",
     });
+<<<<<<< HEAD
 
+=======
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
     addTone(audioContext, output, {
       at: at + 0.03,
       frequency: 520,
@@ -120,7 +144,10 @@ const addSoundCue = (audioContext, output, cue) => {
       volume: 0.045,
       type: "square",
     });
+<<<<<<< HEAD
 
+=======
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
     return;
   }
 
@@ -134,7 +161,10 @@ const addSoundCue = (audioContext, output, cue) => {
         type: "triangle",
       }),
     );
+<<<<<<< HEAD
 
+=======
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
     return;
   }
 
@@ -178,18 +208,27 @@ const createSoundtrack = (durationMs, soundCues) => {
   master.connect(recordingOutput);
   master.connect(audioContext.destination);
 
+<<<<<<< HEAD
   soundCues.forEach((cue) => {
     addSoundCue(audioContext, master, cue);
   });
 
   const finishAt = audioContext.currentTime + durationMs / 1000;
 
+=======
+  soundCues.forEach((cue) => addSoundCue(audioContext, master, cue));
+
+  const finishAt = audioContext.currentTime + durationMs / 1000;
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
   master.gain.setValueAtTime(master.gain.value, finishAt - 0.35);
   master.gain.exponentialRampToValueAtTime(0.0001, finishAt);
 
   return {
     track: recordingOutput.stream.getAudioTracks()[0],
+<<<<<<< HEAD
 
+=======
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
     stop: async () => {
       master.disconnect();
 
@@ -200,6 +239,7 @@ const createSoundtrack = (durationMs, soundCues) => {
   };
 };
 
+<<<<<<< HEAD
 const fetchAsBlobUrl = async (url, mimeType) => {
   const response = await fetch(url);
 
@@ -301,6 +341,8 @@ const convertRecordingToMp4 = async (recordingBlob) => {
   }
 };
 
+=======
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
 export const restartRecapForExport = async (restart) => {
   restart();
   await waitForPaint();
@@ -309,7 +351,11 @@ export const restartRecapForExport = async (restart) => {
 const getCroppedCurrentTabStream = async (stage) => {
   if (!navigator.mediaDevices?.getDisplayMedia) {
     throw new Error(
+<<<<<<< HEAD
       "Aquest navegador no permet capturar el vídeo. Utilitza Chrome actualitzat.",
+=======
+      "Aquest navegador no permet capturar el vídeo. Obre Vesalaporra amb Chrome actualitzat.",
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
     );
   }
 
@@ -336,12 +382,19 @@ const getCroppedCurrentTabStream = async (stage) => {
       typeof videoTrack.cropTo !== "function"
     ) {
       throw new Error(
+<<<<<<< HEAD
         "Per descarregar el vídeo exactament com es veu cal utilitzar Chrome actualitzat.",
+=======
+        "Per descarregar el vídeo exactament com es veu, cal utilitzar Chrome actualitzat.",
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
       );
     }
 
     const cropTarget = await window.CropTarget.fromElement(stage);
+<<<<<<< HEAD
 
+=======
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
     await videoTrack.cropTo(cropTarget);
 
     return captureStream;
@@ -362,11 +415,19 @@ export const downloadRecapMp4 = async ({
     throw new Error("No s’ha trobat el resum que s’ha d’enregistrar.");
   }
 
+<<<<<<< HEAD
   const recordingMimeType = getRecordingMimeType();
 
   if (!recordingMimeType) {
     throw new Error(
       "Aquest navegador no permet enregistrar el vídeo. Utilitza Chrome actualitzat.",
+=======
+  const mimeType = getMp4MimeType();
+
+  if (!mimeType) {
+    throw new Error(
+      "Aquest navegador no pot crear MP4. Obre Vesalaporra amb Chrome actualitzat.",
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
     );
   }
 
@@ -374,7 +435,10 @@ export const downloadRecapMp4 = async ({
 
   const captureStream = await getCroppedCurrentTabStream(stage);
   const chunks = [];
+<<<<<<< HEAD
 
+=======
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
   let soundtrack = null;
 
   try {
@@ -389,7 +453,11 @@ export const downloadRecapMp4 = async ({
     ]);
 
     const recorder = new MediaRecorder(recordingStream, {
+<<<<<<< HEAD
       mimeType: recordingMimeType,
+=======
+      mimeType,
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
       videoBitsPerSecond: 12_000_000,
       audioBitsPerSecond: 192_000,
     });
@@ -401,6 +469,7 @@ export const downloadRecapMp4 = async ({
         }
       });
 
+<<<<<<< HEAD
       recorder.addEventListener("stop", resolve, {
         once: true,
       });
@@ -414,6 +483,13 @@ export const downloadRecapMp4 = async ({
         {
           once: true,
         },
+=======
+      recorder.addEventListener("stop", resolve, { once: true });
+      recorder.addEventListener(
+        "error",
+        () => reject(new Error("No s’ha pogut completar l’MP4.")),
+        { once: true },
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
       );
     });
 
@@ -433,6 +509,7 @@ export const downloadRecapMp4 = async ({
     await soundtrack?.stop();
   }
 
+<<<<<<< HEAD
   const recording = new Blob(chunks, {
     type: recordingMimeType,
   });
@@ -442,19 +519,31 @@ export const downloadRecapMp4 = async ({
   }
 
   const video = await convertRecordingToMp4(recording);
+=======
+  const video = new Blob(chunks, { type: mimeType });
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
   const downloadUrl = URL.createObjectURL(video);
   const downloadLink = document.createElement("a");
 
   downloadLink.href = downloadUrl;
   downloadLink.download = fileName.endsWith(".mp4")
     ? fileName
+<<<<<<< HEAD
     : `${fileName}.mp4`;
 
+=======
+    : fileName + ".mp4";
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
   document.body.appendChild(downloadLink);
   downloadLink.click();
   downloadLink.remove();
 
+<<<<<<< HEAD
   window.setTimeout(() => {
     URL.revokeObjectURL(downloadUrl);
   }, 60_000);
 };
+=======
+  window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 60_000);
+};
+>>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
