@@ -1,6 +1,3 @@
-const HTML2CANVAS_MODULE_URL =
-  "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm";
-
 const wait = (milliseconds) =>
   new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 
@@ -184,18 +181,59 @@ export const restartRecapForExport = async (restart) => {
   await waitForPaint();
 };
 
+const getCroppedCurrentTabStream = async (stage) => {
+  if (!navigator.mediaDevices?.getDisplayMedia) {
+    throw new Error(
+      "Aquest navegador no permet capturar el vídeo. Obre Vesalaporra amb Chrome actualitzat.",
+    );
+  }
+
+  const captureStream = await navigator.mediaDevices.getDisplayMedia({
+    video: {
+      frameRate: {
+        ideal: 30,
+        max: 30,
+      },
+    },
+    audio: false,
+    preferCurrentTab: true,
+    selfBrowserSurface: "include",
+    surfaceSwitching: "exclude",
+    systemAudio: "exclude",
+  });
+
+  const videoTrack = captureStream.getVideoTracks()[0];
+
+  try {
+    if (
+      !videoTrack ||
+      typeof window.CropTarget?.fromElement !== "function" ||
+      typeof videoTrack.cropTo !== "function"
+    ) {
+      throw new Error(
+        "Per descarregar el vídeo exactament com es veu, cal utilitzar Chrome actualitzat.",
+      );
+    }
+
+    const cropTarget = await window.CropTarget.fromElement(stage);
+    await videoTrack.cropTo(cropTarget);
+
+    return captureStream;
+  } catch (error) {
+    captureStream.getTracks().forEach((track) => track.stop());
+    throw error;
+  }
+};
+
 export const downloadRecapMp4 = async ({
   stage,
   durationMs,
   fileName,
   soundCues,
+  onCaptureReady,
 }) => {
   if (!stage) {
     throw new Error("No s’ha trobat el resum que s’ha d’enregistrar.");
-  }
-
-  if (!HTMLCanvasElement.prototype.captureStream) {
-    throw new Error("Aquest navegador no permet enregistrar el resum.");
   }
 
   const mimeType = getMp4MimeType();
@@ -206,100 +244,59 @@ export const downloadRecapMp4 = async ({
     );
   }
 
-  const [{ default: html2canvas }] = await Promise.all([
-    import(/* @vite-ignore */ HTML2CANVAS_MODULE_URL),
-    document.fonts?.ready || Promise.resolve(),
-  ]);
+  await (document.fonts?.ready || Promise.resolve());
 
-  const bounds = stage.getBoundingClientRect();
-  const outputScale = Math.min(2, 1080 / Math.max(1, bounds.width));
-  const canvas = document.createElement("canvas");
-
-  canvas.width = Math.round(bounds.width * outputScale);
-  canvas.height = Math.round(bounds.height * outputScale);
-
-  const context = canvas.getContext("2d", {
-    alpha: false,
-    desynchronized: true,
-  });
-
-  if (!context) {
-    throw new Error("No s’ha pogut preparar el vídeo.");
-  }
-
-  const videoStream = canvas.captureStream(30);
-  const soundtrack = createSoundtrack(durationMs, soundCues);
-  videoStream.addTrack(soundtrack.track);
-
-  const recorder = new MediaRecorder(videoStream, {
-    mimeType,
-    videoBitsPerSecond: 8_000_000,
-    audioBitsPerSecond: 128_000,
-  });
-
+  const captureStream = await getCroppedCurrentTabStream(stage);
   const chunks = [];
-  const finished = new Promise((resolve, reject) => {
-    recorder.addEventListener("dataavailable", (event) => {
-      if (event.data?.size) {
-        chunks.push(event.data);
-      }
-    });
-    recorder.addEventListener("stop", resolve, { once: true });
-    recorder.addEventListener("error", () => {
-      reject(new Error("No s’ha pogut completar l’MP4."));
-    }, { once: true });
-  });
-
-  let renderingFrame = false;
-  let stopped = false;
-
-  const renderFrame = async () => {
-    if (renderingFrame || stopped) {
-      return;
-    }
-
-    renderingFrame = true;
-
-    try {
-      const frame = await html2canvas(stage, {
-        backgroundColor: null,
-        scale: outputScale,
-        useCORS: true,
-        allowTaint: false,
-        logging: false,
-        width: bounds.width,
-        height: bounds.height,
-        windowWidth: document.documentElement.clientWidth,
-        windowHeight: document.documentElement.clientHeight,
-      });
-
-      context.fillStyle = "#03050c";
-      context.fillRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(frame, 0, 0, canvas.width, canvas.height);
-    } finally {
-      renderingFrame = false;
-    }
-  };
-
-  await renderFrame();
-  recorder.start(1000);
-
-  const frameTimer = window.setInterval(renderFrame, 1000 / 12);
+  let soundtrack = null;
 
   try {
-    await wait(durationMs);
-  } finally {
-    stopped = true;
-    window.clearInterval(frameTimer);
+    await onCaptureReady?.();
+    await waitForPaint();
 
-    if (recorder.state !== "inactive") {
-      recorder.stop();
+    soundtrack = createSoundtrack(durationMs, soundCues);
+
+    const recordingStream = new MediaStream([
+      ...captureStream.getVideoTracks(),
+      soundtrack.track,
+    ]);
+
+    const recorder = new MediaRecorder(recordingStream, {
+      mimeType,
+      videoBitsPerSecond: 12_000_000,
+      audioBitsPerSecond: 192_000,
+    });
+
+    const finished = new Promise((resolve, reject) => {
+      recorder.addEventListener("dataavailable", (event) => {
+        if (event.data?.size) {
+          chunks.push(event.data);
+        }
+      });
+
+      recorder.addEventListener("stop", resolve, { once: true });
+      recorder.addEventListener(
+        "error",
+        () => reject(new Error("No s’ha pogut completar l’MP4.")),
+        { once: true },
+      );
+    });
+
+    recorder.start(1000);
+
+    try {
+      await wait(durationMs);
+    } finally {
+      if (recorder.state !== "inactive") {
+        recorder.stop();
+      }
     }
-  }
 
-  await finished;
-  await soundtrack.stop();
-  videoStream.getTracks().forEach((track) => track.stop());
+    await finished;
+  } finally {
+    captureStream.getTracks().forEach((track) => track.stop());
+    await soundtrack?.stop();
+  }
 
   const video = new Blob(chunks, { type: mimeType });
   const downloadUrl = URL.createObjectURL(video);
@@ -308,7 +305,7 @@ export const downloadRecapMp4 = async ({
   downloadLink.href = downloadUrl;
   downloadLink.download = fileName.endsWith(".mp4")
     ? fileName
-    : `${fileName}.mp4`;
+    : fileName + ".mp4";
   document.body.appendChild(downloadLink);
   downloadLink.click();
   downloadLink.remove();

@@ -144,13 +144,14 @@ export default function JornadaRecap({
     setDownloadStatus("working");
 
     try {
-      await restartRecapForExport(() =>
-        setReplayKey((currentKey) => currentKey + 1),
-      );
       await downloadRecapMp4({
         stage: stageRef.current,
         durationMs: 23_000,
         fileName: `vesalaporra-classificacio-jornada-${jornadaNumber || "actual"}.mp4`,
+        onCaptureReady: () =>
+          restartRecapForExport(() =>
+            setReplayKey((currentKey) => currentKey + 1),
+          ),
         soundCues: [
           { at: 0, type: "intro" },
           { at: 2200, type: "whoosh" },
@@ -467,6 +468,8 @@ export default function JornadaRecap({
         }
 
         .jrecap-block {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           display: grid;
           place-items: center;
           height: 110px;
