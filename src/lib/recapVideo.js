@@ -1,7 +1,5 @@
-const FFMPEG_PACKAGE_BASE_URL =
-  "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist/esm";
-const FFMPEG_UTIL_MODULE_URL =
-  "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.2/dist/esm/index.js";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+
 const FFMPEG_CORE_BASE_URL =
   "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
 
@@ -183,41 +181,49 @@ const createSoundtrack = (durationMs, soundCues) => {
   };
 };
 
-const convertRecordingToMp4 = async (recordingBlob) => {
-  const [{ FFmpeg }, { toBlobURL }] = await Promise.all([
-    import(
-      /* @vite-ignore */
-      FFMPEG_PACKAGE_BASE_URL + "/index.js"
+const fetchAsBlobUrl = async (url, mimeType) => {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error("No s’han pogut carregar els recursos del convertidor MP4.");
+  }
+
+  return URL.createObjectURL(
+    new Blob([await response.arrayBuffer()], { type: mimeType }),
+  );
+};
+
+const withTimeout = (promise, milliseconds, message) =>
+  Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      window.setTimeout(() => reject(new Error(message)), milliseconds),
     ),
-    import(/* @vite-ignore */ FFMPEG_UTIL_MODULE_URL),
   ]);
 
+const convertRecordingToMp4 = async (recordingBlob) => {
   const ffmpeg = new FFmpeg();
   const inputName = "vesalaporra-input.webm";
   const outputName = "vesalaporra-output.mp4";
 
   try {
-    await ffmpeg.load({
-      classWorkerURL: await toBlobURL(
-        FFMPEG_PACKAGE_BASE_URL + "/worker.js",
-        "text/javascript",
-      ),
-      coreURL: await toBlobURL(
+    await withTimeout(ffmpeg.load({
+      coreURL: await fetchAsBlobUrl(
         FFMPEG_CORE_BASE_URL + "/ffmpeg-core.js",
         "text/javascript",
       ),
-      wasmURL: await toBlobURL(
+      wasmURL: await fetchAsBlobUrl(
         FFMPEG_CORE_BASE_URL + "/ffmpeg-core.wasm",
         "application/wasm",
       ),
-    });
+    }), 60_000, "El convertidor MP4 ha trigat massa a carregar-se.");
 
     await ffmpeg.writeFile(
       inputName,
       new Uint8Array(await recordingBlob.arrayBuffer()),
     );
 
-    const exitCode = await ffmpeg.exec([
+    const exitCode = await withTimeout(ffmpeg.exec([
       "-i",
       inputName,
       "-vf",
@@ -227,9 +233,9 @@ const convertRecordingToMp4 = async (recordingBlob) => {
       "-c:v",
       "libx264",
       "-preset",
-      "veryfast",
+      "ultrafast",
       "-crf",
-      "18",
+      "22",
       "-pix_fmt",
       "yuv420p",
       "-c:a",
@@ -239,7 +245,7 @@ const convertRecordingToMp4 = async (recordingBlob) => {
       "-movflags",
       "+faststart",
       outputName,
-    ]);
+    ]), 180_000, "La conversió MP4 ha trigat massa.");
 
     if (exitCode !== 0) {
       throw new Error("No s’ha pogut convertir l’enregistrament a MP4.");
