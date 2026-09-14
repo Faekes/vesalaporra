@@ -149,13 +149,9 @@ export default function PredictionClosingRecap({
       await downloadRecapMp4({
         stage: stageRef.current,
         durationMs: totalDuration,
-<<<<<<< HEAD
         fileName: `vesalaporra-tancament-${
           summary.matchId || "partit"
         }.mp4`,
-=======
-        fileName: `vesalaporra-tancament-${summary.matchId || "partit"}.mp4`,
->>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
         onCaptureReady: () =>
           restartRecapForExport(() =>
             setReplayKey((current) => current + 1),
@@ -169,7 +165,6 @@ export default function PredictionClosingRecap({
           { at: 22100, type: "reveal" },
         ],
       });
-<<<<<<< HEAD
 
       setDownloadStatus("done");
     } catch (error) {
@@ -177,14 +172,6 @@ export default function PredictionClosingRecap({
       setDownloadStatus("error");
     }
 
-=======
-      setDownloadStatus("done");
-    } catch (error) {
-      console.error("No s’ha pogut descarregar el vídeo:", error);
-      setDownloadStatus("error");
-    }
-
->>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
     window.setTimeout(() => setDownloadStatus("idle"), 2600);
   };
 
@@ -195,7 +182,6 @@ export default function PredictionClosingRecap({
       aria-modal="true"
     >
       <style>{`
-<<<<<<< HEAD
         .closing-recap-overlay {
           position: fixed;
           inset: 0;
@@ -286,7 +272,8 @@ export default function PredictionClosingRecap({
           align-items: center;
           justify-content: center;
           gap: 9px;
-          color: #ffffff;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           font-size: 11px;
           font-weight: 950;
           letter-spacing: 0.14em;
@@ -298,6 +285,7 @@ export default function PredictionClosingRecap({
           width: 34px;
           height: 34px;
           color: #ffe66d;
+          -webkit-text-fill-color: #ffe66d;
           border: 2px solid #f7d75c;
           border-radius: 50%;
           background:
@@ -341,6 +329,7 @@ export default function PredictionClosingRecap({
           display: block;
           margin-bottom: 13px;
           color: #f7d75c;
+          -webkit-text-fill-color: #f7d75c;
           font-size: 10px;
           font-weight: 950;
           letter-spacing: 0.15em;
@@ -361,6 +350,7 @@ export default function PredictionClosingRecap({
         .closing-recap-subtitle {
           margin: 18px 0 0;
           color: #abb3ca;
+          -webkit-text-fill-color: #abb3ca;
           font-size: 14px;
           font-weight: 750;
         }
@@ -368,6 +358,7 @@ export default function PredictionClosingRecap({
         .closing-recap-total-number {
           display: block;
           color: #f7d75c;
+          -webkit-text-fill-color: #f7d75c;
           font-size: 112px;
           font-weight: 1000;
           line-height: 0.88;
@@ -377,7 +368,8 @@ export default function PredictionClosingRecap({
         .closing-recap-total-label {
           display: block;
           margin-top: 18px;
-          color: #ffffff;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           font-size: 25px;
           font-weight: 1000;
           letter-spacing: 0.05em;
@@ -450,6 +442,7 @@ export default function PredictionClosingRecap({
 
         .closing-recap-stage .score-match-label {
           color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           font-size: 8px;
         }
 
@@ -477,6 +470,7 @@ export default function PredictionClosingRecap({
           border-radius: 999px;
           background: rgba(247, 215, 92, 0.08);
           color: #f7d75c;
+          -webkit-text-fill-color: #f7d75c;
           font-size: 10px;
           font-weight: 950;
           letter-spacing: 0.08em;
@@ -509,6 +503,11 @@ export default function PredictionClosingRecap({
 
         .closing-recap-stage .field-player-name {
           max-width: 68px;
+        }
+
+        .closing-recap-stage .field-slot-plus {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
         }
 
         .closing-recap-slot-votes {
@@ -638,51 +637,6 @@ export default function PredictionClosingRecap({
             transition: none;
           }
         }
-=======
-        .closing-recap-overlay{position:fixed;inset:0;z-index:999999;display:grid;place-items:center;padding:14px;background:rgba(2,5,17,.96);backdrop-filter:blur(14px)}
-        .closing-recap-shell{display:flex;align-items:center;gap:14px;max-width:100%;max-height:100%}
-        .closing-recap-stage{position:relative;width:min(900px,calc(100vw - 110px));height:min(900px,calc(100vh - 28px));overflow:hidden;isolation:isolate;color:#fff;border:1px solid rgba(247,215,92,.44);border-radius:28px;background:radial-gradient(circle at 50% 18%,rgba(247,215,92,.16),transparent 30%),radial-gradient(circle at 12% 82%,rgba(36,82,199,.3),transparent 38%),radial-gradient(circle at 92% 68%,rgba(165,0,68,.3),transparent 36%),linear-gradient(160deg,#171b2e 0%,#080b17 54%,#03050c 100%);box-shadow:0 35px 100px rgba(0,0,0,.76),0 0 55px rgba(247,215,92,.13);font-family:Inter,system-ui,sans-serif}
-        .closing-recap-stage:before{content:"";position:absolute;inset:0;z-index:-2;opacity:.14;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:36px 36px;mask-image:linear-gradient(to bottom,#000,transparent 94%)}
-        .closing-recap-brand{position:absolute;top:22px;left:0;right:0;z-index:30;display:flex;align-items:center;justify-content:center;gap:9px;font-size:11px;font-weight:950;letter-spacing:.14em}
-        .closing-recap-logo{display:grid;place-items:center;width:34px;height:34px;color:#ffe66d;border:2px solid #f7d75c;border-radius:50%;background:linear-gradient(135deg,#2147a5 0 50%,#a50044 50%);box-shadow:0 0 22px rgba(247,215,92,.28);font-size:20px;font-weight:1000}
-        .closing-recap-scene{position:absolute;inset:0;display:grid;place-items:center;padding:72px 18px 28px;opacity:0;transform:scale(.965);pointer-events:none;transition:opacity .6s ease,transform .6s ease}
-        .closing-recap-scene.active{opacity:1;transform:scale(1);pointer-events:auto}
-        .closing-recap-center{text-align:center}
-        .closing-recap-eyebrow{display:block;margin-bottom:13px;color:#f7d75c;font-size:10px;font-weight:950;letter-spacing:.15em;text-transform:uppercase}
-        .closing-recap-title{margin:0;font-size:clamp(38px,10vw,56px);line-height:.92;letter-spacing:-.06em;text-transform:uppercase;text-shadow:0 12px 30px rgba(0,0,0,.42)}
-        .closing-recap-subtitle{margin:18px 0 0;color:#abb3ca;font-size:14px;font-weight:750}
-        .closing-recap-total-number{display:block;color:#f7d75c;font-size:112px;font-weight:1000;line-height:.88;text-shadow:0 0 42px rgba(247,215,92,.32)}
-        .closing-recap-total-label{display:block;margin-top:18px;font-size:25px;font-weight:1000;letter-spacing:.05em;text-transform:uppercase}
-        .closing-recap-card-scene{align-items:start;padding:84px 14px 32px}
-        .closing-recap-card-wrap{width:100%;transform-origin:top center}
-        .closing-recap-stage .prediction-card{width:100%;margin:0;box-sizing:border-box}
-        .closing-recap-stage .prediction-card :is(h2,h3,p,strong,small,span,button){-webkit-text-fill-color:currentColor}
-        .closing-recap-stage .score-card{padding:18px 14px}
-        .closing-recap-stage .score-card .section-heading{margin-bottom:13px}
-        .closing-recap-stage .score-match-overview{margin-bottom:13px}
-        .closing-recap-stage .scoreboard{margin:0}
-        .closing-recap-stage .score-control>button:not(.score-value){visibility:hidden}
-        .closing-recap-stage :is(.score-value,.field-player-name,.status-pill.completed,.protagonist-binary-pill.selected){color:#fff!important;-webkit-text-fill-color:#fff!important}
-        .closing-recap-stage .score-match-label{font-size:8px}
-        .closing-recap-vote-pill{display:inline-flex;align-items:center;justify-content:center;margin-top:16px;padding:9px 14px;border:1px solid rgba(247,215,92,.34);border-radius:999px;background:rgba(247,215,92,.08);color:#f7d75c;font-size:10px;font-weight:950;letter-spacing:.08em}
-        .closing-recap-stage .lineup-card{padding:13px 12px}
-        .closing-recap-stage .lotto-heading{margin-bottom:9px}
-        .closing-recap-stage .football-field{height:510px;min-height:0;margin:0}
-        .closing-recap-stage .field-slot{cursor:default}
-        .closing-recap-stage .field-player-name{max-width:68px}
-        .closing-recap-slot-votes{position:absolute;right:-4px;bottom:-4px;z-index:7;display:grid;place-items:center;min-width:23px;height:23px;padding:0 4px;border:2px solid #091020;border-radius:999px;background:#f7d75c;color:#fff;font-size:8px;font-weight:1000}
-        .closing-recap-stage .protagonist-card{padding:20px 15px}
-        .closing-recap-stage .protagonist-combined-rule{margin-top:12px}
-        .closing-recap-stage .protagonist-selector-button{pointer-events:none}
-        .closing-recap-stage .protagonist-combined-copy small{display:block}
-        .closing-recap-progress{position:absolute;left:24px;right:24px;bottom:22px;z-index:40;height:3px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.1)}
-        .closing-recap-progress span{display:block;width:var(--progress);height:100%;border-radius:inherit;background:linear-gradient(90deg,#2452c7,#a50044,#f7d75c);transition:width .6s ease}
-        .closing-recap-actions{display:grid;gap:9px}
-        .closing-recap-actions button{width:46px;height:46px;border:1px solid rgba(247,215,92,.28);border-radius:14px;background:#15192a;color:#fff;cursor:pointer;font-size:18px;box-shadow:0 10px 25px rgba(0,0,0,.3)}
-        .closing-recap-actions button:hover{color:#f7d75c;border-color:#f7d75c}
-        @media(max-width:600px){.closing-recap-shell{display:block}.closing-recap-actions{position:absolute;top:18px;right:18px;z-index:50;display:flex}.closing-recap-actions button{width:39px;height:39px;background:rgba(7,10,21,.92)}.closing-recap-stage .football-field{height:500px}}
-        @media(prefers-reduced-motion:reduce){.closing-recap-scene{transition:none}}
->>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
       `}</style>
 
       <div className="closing-recap-shell">
@@ -761,6 +715,7 @@ export default function PredictionClosingRecap({
                 <div className="score-match-overview">
                   <div className="score-match-date">
                     <span>PRONÒSTIC DE LA COMUNITAT</span>
+
                     <strong>
                       {match?.kickoffLabel || "PARTIT"}
                     </strong>

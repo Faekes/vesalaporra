@@ -29,7 +29,8 @@ const formatAverage = (average) =>
 function NotesRecapPlayerImage({ row, mvp = false }) {
   const [failed, setFailed] = useState(false);
   const imageUrl = row?.player?.image;
-  const playerName = row?.player?.shortName || row?.player?.name || "Jugador";
+  const playerName =
+    row?.player?.shortName || row?.player?.name || "Jugador";
 
   useEffect(() => {
     setFailed(false);
@@ -178,13 +179,9 @@ export default function NotesRecap({
       await downloadRecapMp4({
         stage: stageRef.current,
         durationMs: 23_000,
-<<<<<<< HEAD
         fileName: `vesalaporra-notes-jornada-${
           jornadaNumber || "actual"
         }.mp4`,
-=======
-        fileName: `vesalaporra-notes-jornada-${jornadaNumber || "actual"}.mp4`,
->>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
         onCaptureReady: () =>
           restartRecapForExport(() =>
             setReplayKey((currentKey) => currentKey + 1),
@@ -197,10 +194,7 @@ export default function NotesRecap({
           { at: 18000, type: "reveal" },
         ],
       });
-<<<<<<< HEAD
 
-=======
->>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
       setDownloadStatus("done");
     } catch (error) {
       console.error("No s’ha pogut descarregar el vídeo:", error);
@@ -304,6 +298,8 @@ export default function NotesRecap({
           align-items: center;
           justify-content: center;
           gap: 10px;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           font-size: 12px;
           font-weight: 950;
           letter-spacing: 0.14em;
@@ -315,6 +311,7 @@ export default function NotesRecap({
           width: 35px;
           height: 35px;
           color: #ffe66d;
+          -webkit-text-fill-color: #ffe66d;
           border: 2px solid #f7d75c;
           border-radius: 50%;
           background:
@@ -334,6 +331,7 @@ export default function NotesRecap({
           display: grid;
           place-items: center;
           padding: 78px 27px 30px;
+          color: #ffffff;
           text-align: center;
           opacity: 0;
           transform: scale(0.96);
@@ -352,6 +350,7 @@ export default function NotesRecap({
           display: block;
           margin-bottom: 13px;
           color: #f7d75c;
+          -webkit-text-fill-color: #f7d75c;
           font-size: 11px;
           font-weight: 950;
           letter-spacing: 0.16em;
@@ -384,6 +383,8 @@ export default function NotesRecap({
         .nrecap-score-team {
           min-width: 0;
           overflow: hidden;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           font-size: 11px;
           font-weight: 950;
           text-overflow: ellipsis;
@@ -392,6 +393,7 @@ export default function NotesRecap({
 
         .nrecap-score-result {
           color: #f7d75c;
+          -webkit-text-fill-color: #f7d75c;
           font-size: 32px;
           font-weight: 1000;
           letter-spacing: -0.05em;
@@ -409,6 +411,8 @@ export default function NotesRecap({
 
         .nrecap-ranking-title strong {
           display: block;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           font-size: 28px;
           line-height: 1;
           letter-spacing: -0.04em;
@@ -441,6 +445,7 @@ export default function NotesRecap({
 
         .nrecap-row-position {
           color: #8290b3;
+          -webkit-text-fill-color: #8290b3;
           font-size: 13px;
           font-weight: 950;
         }
@@ -448,6 +453,8 @@ export default function NotesRecap({
         .nrecap-row-name {
           min-width: 0;
           overflow: hidden;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           text-align: left;
           white-space: nowrap;
           text-overflow: ellipsis;
@@ -458,6 +465,7 @@ export default function NotesRecap({
         .nrecap-row-average {
           min-width: 43px;
           color: #f7d75c;
+          -webkit-text-fill-color: #f7d75c;
           text-align: right;
           font-size: 18px;
           font-weight: 1000;
@@ -466,6 +474,7 @@ export default function NotesRecap({
         .nrecap-row-average small {
           display: block;
           color: #8f98b2;
+          -webkit-text-fill-color: #8f98b2;
           font-size: 8px;
           font-weight: 850;
         }
@@ -478,9 +487,9 @@ export default function NotesRecap({
           overflow: hidden;
           border: 2px solid #a50044;
           border-radius: 50%;
-          background:
-            linear-gradient(145deg, #26366e, #a50044);
+          background: linear-gradient(145deg, #26366e, #a50044);
           color: #ffffff;
+          -webkit-text-fill-color: #ffffff;
           font-size: 15px;
           font-weight: 950;
         }
@@ -540,6 +549,8 @@ export default function NotesRecap({
         .nrecap-podium-player strong {
           display: block;
           min-height: 32px;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           font-size: 11px;
           line-height: 1.15;
         }
@@ -548,6 +559,7 @@ export default function NotesRecap({
           display: block;
           margin: 5px 0 10px;
           color: #f7d75c;
+          -webkit-text-fill-color: #f7d75c;
           font-size: 18px;
           font-weight: 1000;
         }
@@ -556,29 +568,29 @@ export default function NotesRecap({
           display: block;
           margin-top: 2px;
           color: #8f98b2;
+          -webkit-text-fill-color: #8f98b2;
           font-size: 8px;
         }
 
         .nrecap-podium-block {
-          color: #ffffff !important;
-          -webkit-text-fill-color: #ffffff !important;
           display: grid;
           place-items: center;
           height: 108px;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: 15px 15px 5px 5px;
-          background:
-            linear-gradient(180deg, #29304b, #131726);
+          background: linear-gradient(180deg, #29304b, #131726);
           font-size: 26px;
           font-weight: 1000;
         }
 
         .nrecap-podium-player.first .nrecap-podium-block {
           height: 160px;
-          color: #ffffff;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           border-color: #f7d75c;
-          background:
-            linear-gradient(180deg, #ffe26a, #ba8520);
+          background: linear-gradient(180deg, #ffe26a, #ba8520);
         }
 
         .nrecap-podium-player.second .nrecap-podium-block {
@@ -599,10 +611,10 @@ export default function NotesRecap({
           display: block;
           margin-bottom: -13px;
           color: #f7d75c;
+          -webkit-text-fill-color: #f7d75c;
           font-size: 72px;
           line-height: 1;
-          filter:
-            drop-shadow(0 10px 18px rgba(247, 215, 92, 0.4));
+          filter: drop-shadow(0 10px 18px rgba(247, 215, 92, 0.4));
           animation:
             nrecapStarIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1.3)
             both;
@@ -624,9 +636,9 @@ export default function NotesRecap({
 
         .nrecap-mvp-content h2 {
           margin: 0 auto;
+          max-width: 350px;
           color: #ffffff !important;
           -webkit-text-fill-color: #ffffff !important;
-          max-width: 350px;
           font-size: 36px;
           line-height: 0.98;
           letter-spacing: -0.045em;
@@ -637,6 +649,7 @@ export default function NotesRecap({
           display: block;
           margin: 14px 0;
           color: #f7d75c;
+          -webkit-text-fill-color: #f7d75c;
           font-size: 58px;
           font-weight: 1000;
           line-height: 1;
@@ -647,6 +660,7 @@ export default function NotesRecap({
           display: block;
           margin-top: 6px;
           color: #ffffff;
+          -webkit-text-fill-color: #ffffff;
           font-size: 11px;
           letter-spacing: 0.17em;
         }
@@ -666,6 +680,7 @@ export default function NotesRecap({
           border-radius: 13px;
           background: rgba(255, 255, 255, 0.055);
           color: #aeb6ce;
+          -webkit-text-fill-color: #aeb6ce;
           font-size: 9px;
           font-weight: 900;
         }
@@ -674,6 +689,7 @@ export default function NotesRecap({
           display: block;
           margin-top: 4px;
           color: #ffffff;
+          -webkit-text-fill-color: #ffffff;
           font-size: 17px;
         }
 
@@ -688,12 +704,14 @@ export default function NotesRecap({
           background: var(--color);
           opacity: 0;
           animation:
-            nrecapConfetti var(--duration) linear var(--delay) infinite;
+            nrecapConfetti var(--duration) linear var(--delay)
+            infinite;
         }
 
         .nrecap-outro p {
           margin: 20px 0 0;
           color: #abb3ca;
+          -webkit-text-fill-color: #abb3ca;
           font-size: 15px;
           font-weight: 750;
         }
@@ -718,6 +736,11 @@ export default function NotesRecap({
         .nrecap-actions button:hover {
           color: #f7d75c;
           border-color: #f7d75c;
+        }
+
+        .nrecap-actions button:disabled {
+          cursor: wait;
+          opacity: 0.7;
         }
 
         @keyframes nrecapRowIn {
@@ -859,7 +882,10 @@ export default function NotesRecap({
             }`}
           >
             <div className="nrecap-ranking-title">
-              <span className="nrecap-eyebrow">DEL TOP 10 AL PODI</span>
+              <span className="nrecap-eyebrow">
+                DEL TOP 10 AL PODI
+              </span>
+
               <strong>LES MILLORS NOTES</strong>
             </div>
 
@@ -1020,7 +1046,9 @@ export default function NotesRecap({
                 V
               </span>
 
-              <span className="nrecap-eyebrow">VESALAPORRA</span>
+              <span className="nrecap-eyebrow">
+                VESALAPORRA
+              </span>
 
               <h2>La nota la poseu vosaltres</h2>
 

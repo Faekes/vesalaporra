@@ -92,8 +92,9 @@ export default function JornadaRecap({
 
     setScene("intro");
 
-    const timers = SCENE_TIMINGS.slice(1).map(({ scene: nextScene, at }) =>
-      window.setTimeout(() => setScene(nextScene), at),
+    const timers = SCENE_TIMINGS.slice(1).map(
+      ({ scene: nextScene, at }) =>
+        window.setTimeout(() => setScene(nextScene), at),
     );
 
     return () => {
@@ -147,13 +148,9 @@ export default function JornadaRecap({
       await downloadRecapMp4({
         stage: stageRef.current,
         durationMs: 23_000,
-<<<<<<< HEAD
         fileName: `vesalaporra-classificacio-jornada-${
           jornadaNumber || "actual"
         }.mp4`,
-=======
-        fileName: `vesalaporra-classificacio-jornada-${jornadaNumber || "actual"}.mp4`,
->>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
         onCaptureReady: () =>
           restartRecapForExport(() =>
             setReplayKey((currentKey) => currentKey + 1),
@@ -166,10 +163,7 @@ export default function JornadaRecap({
           { at: 18000, type: "reveal" },
         ],
       });
-<<<<<<< HEAD
 
-=======
->>>>>>> 12109c37bc1898fa13170e4ed4aa0c5eda6f9318
       setDownloadStatus("done");
     } catch (error) {
       console.error("No s’ha pogut descarregar el vídeo:", error);
@@ -193,7 +187,7 @@ export default function JornadaRecap({
           display: grid;
           place-items: center;
           padding: 14px;
-          background: rgba(2, 5, 17, .94);
+          background: rgba(2, 5, 17, 0.94);
           backdrop-filter: blur(14px);
         }
 
@@ -212,16 +206,24 @@ export default function JornadaRecap({
           aspect-ratio: 9 / 16;
           overflow: hidden;
           isolation: isolate;
-          color: #fff;
-          border: 1px solid rgba(247, 215, 92, .4);
+          color: #ffffff;
+          border: 1px solid rgba(247, 215, 92, 0.4);
           border-radius: 28px;
           background:
-            radial-gradient(circle at 50% 28%, rgba(165, 0, 68, .33), transparent 35%),
-            radial-gradient(circle at 15% 85%, rgba(36, 82, 199, .28), transparent 38%),
+            radial-gradient(
+              circle at 50% 28%,
+              rgba(165, 0, 68, 0.33),
+              transparent 35%
+            ),
+            radial-gradient(
+              circle at 15% 85%,
+              rgba(36, 82, 199, 0.28),
+              transparent 38%
+            ),
             linear-gradient(160deg, #15192b 0%, #070a15 50%, #03050c 100%);
           box-shadow:
-            0 35px 100px rgba(0, 0, 0, .75),
-            0 0 50px rgba(247, 215, 92, .15);
+            0 35px 100px rgba(0, 0, 0, 0.75),
+            0 0 50px rgba(247, 215, 92, 0.15);
           font-family: Inter, system-ui, sans-serif;
         }
 
@@ -230,12 +232,19 @@ export default function JornadaRecap({
           position: absolute;
           inset: 0;
           z-index: -2;
-          opacity: .16;
+          opacity: 0.16;
           background-image:
-            linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+            linear-gradient(
+              rgba(255, 255, 255, 0.05) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              90deg,
+              rgba(255, 255, 255, 0.05) 1px,
+              transparent 1px
+            );
           background-size: 36px 36px;
-          mask-image: linear-gradient(to bottom, #000, transparent 90%);
+          mask-image: linear-gradient(to bottom, #000000, transparent 90%);
         }
 
         .jrecap-glow {
@@ -244,7 +253,7 @@ export default function JornadaRecap({
           height: 280px;
           border-radius: 50%;
           filter: blur(75px);
-          opacity: .24;
+          opacity: 0.24;
           animation: jrecapFloat 6s ease-in-out infinite alternate;
         }
 
@@ -271,9 +280,11 @@ export default function JornadaRecap({
           justify-content: center;
           align-items: center;
           gap: 10px;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           font-size: 12px;
           font-weight: 950;
-          letter-spacing: .14em;
+          letter-spacing: 0.14em;
         }
 
         .jrecap-logo {
@@ -282,10 +293,16 @@ export default function JornadaRecap({
           width: 35px;
           height: 35px;
           color: #ffe66d;
+          -webkit-text-fill-color: #ffe66d;
           border: 2px solid #f7d75c;
           border-radius: 50%;
-          background: linear-gradient(135deg, #2147a5 0 50%, #a50044 50%);
-          box-shadow: 0 0 22px rgba(247, 215, 92, .28);
+          background:
+            linear-gradient(
+              135deg,
+              #2147a5 0 50%,
+              #a50044 50%
+            );
+          box-shadow: 0 0 22px rgba(247, 215, 92, 0.28);
           font-size: 21px;
           font-weight: 1000;
         }
@@ -296,11 +313,14 @@ export default function JornadaRecap({
           display: grid;
           place-items: center;
           padding: 78px 27px 30px;
+          color: #ffffff;
           text-align: center;
           opacity: 0;
-          transform: scale(.96);
+          transform: scale(0.96);
           pointer-events: none;
-          transition: opacity .65s ease, transform .65s ease;
+          transition:
+            opacity 0.65s ease,
+            transform 0.65s ease;
         }
 
         .jrecap-scene.active {
@@ -312,9 +332,10 @@ export default function JornadaRecap({
           display: block;
           margin-bottom: 13px;
           color: #f7d75c;
+          -webkit-text-fill-color: #f7d75c;
           font-size: 11px;
           font-weight: 950;
-          letter-spacing: .16em;
+          letter-spacing: 0.16em;
         }
 
         .jrecap-intro h2,
@@ -323,16 +344,17 @@ export default function JornadaRecap({
           color: #ffffff !important;
           -webkit-text-fill-color: #ffffff !important;
           font-size: clamp(39px, 11vw, 58px);
-          line-height: .92;
-          letter-spacing: -.065em;
+          line-height: 0.92;
+          letter-spacing: -0.065em;
           text-transform: uppercase;
-          text-shadow: 0 12px 30px rgba(0, 0, 0, .42);
+          text-shadow: 0 12px 30px rgba(0, 0, 0, 0.42);
         }
 
         .jrecap-intro p,
         .jrecap-outro p {
           margin: 20px 0 0;
           color: #abb3ca;
+          -webkit-text-fill-color: #abb3ca;
           font-size: 15px;
           font-weight: 750;
         }
@@ -349,9 +371,11 @@ export default function JornadaRecap({
 
         .jrecap-ranking-title strong {
           display: block;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           font-size: 29px;
           line-height: 1;
-          letter-spacing: -.04em;
+          letter-spacing: -0.04em;
         }
 
         .jrecap-list {
@@ -367,18 +391,21 @@ export default function JornadaRecap({
           gap: 9px;
           min-height: 54px;
           padding: 7px 12px 7px 8px;
-          border: 1px solid rgba(255,255,255,.08);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 15px;
-          background: rgba(20, 24, 41, .8);
-          box-shadow: 0 8px 22px rgba(0,0,0,.18);
+          background: rgba(20, 24, 41, 0.8);
+          box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
           opacity: 0;
           transform: translateX(-35px);
-          animation: jrecapRowIn .48s cubic-bezier(.2,.8,.2,1) forwards;
+          animation:
+            jrecapRowIn 0.48s cubic-bezier(0.2, 0.8, 0.2, 1)
+            forwards;
           animation-delay: var(--delay);
         }
 
         .jrecap-row-position {
           color: #8290b3;
+          -webkit-text-fill-color: #8290b3;
           font-size: 13px;
           font-weight: 950;
         }
@@ -386,6 +413,8 @@ export default function JornadaRecap({
         .jrecap-row-name {
           min-width: 0;
           overflow: hidden;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           text-align: left;
           white-space: nowrap;
           text-overflow: ellipsis;
@@ -395,6 +424,7 @@ export default function JornadaRecap({
 
         .jrecap-row-points {
           color: #f7d75c;
+          -webkit-text-fill-color: #f7d75c;
           font-size: 16px;
           font-weight: 1000;
         }
@@ -409,7 +439,8 @@ export default function JornadaRecap({
           border: 2px solid #a50044;
           border-radius: 50%;
           background: linear-gradient(135deg, #2147a5, #a50044);
-          color: white;
+          color: #ffffff;
+          -webkit-text-fill-color: #ffffff;
           font-size: 11px;
           font-weight: 950;
         }
@@ -432,7 +463,9 @@ export default function JornadaRecap({
         .jrecap-podium-user {
           width: 31%;
           opacity: 0;
-          animation: jrecapPodiumIn .7s cubic-bezier(.17,.84,.3,1.2) forwards;
+          animation:
+            jrecapPodiumIn 0.7s cubic-bezier(0.17, 0.84, 0.3, 1.2)
+            forwards;
         }
 
         .jrecap-podium-user.first {
@@ -442,12 +475,12 @@ export default function JornadaRecap({
 
         .jrecap-podium-user.second {
           order: 1;
-          animation-delay: .25s;
+          animation-delay: 0.25s;
         }
 
         .jrecap-podium-user.third {
           order: 3;
-          animation-delay: .75s;
+          animation-delay: 0.75s;
         }
 
         .jrecap-podium-user .jrecap-avatar {
@@ -461,12 +494,14 @@ export default function JornadaRecap({
           width: 83px;
           height: 83px;
           border-color: #f7d75c;
-          box-shadow: 0 0 30px rgba(247, 215, 92, .3);
+          box-shadow: 0 0 30px rgba(247, 215, 92, 0.3);
         }
 
         .jrecap-podium-user strong {
           display: block;
           min-height: 32px;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           font-size: 11px;
           line-height: 1.15;
         }
@@ -475,17 +510,18 @@ export default function JornadaRecap({
           display: block;
           margin: 5px 0 10px;
           color: #f7d75c;
+          -webkit-text-fill-color: #f7d75c;
           font-size: 16px;
           font-weight: 1000;
         }
 
         .jrecap-block {
-          color: #ffffff !important;
-          -webkit-text-fill-color: #ffffff !important;
           display: grid;
           place-items: center;
           height: 110px;
-          border: 1px solid rgba(255,255,255,.12);
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+          border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: 15px 15px 5px 5px;
           background: linear-gradient(180deg, #29304b, #131726);
           font-size: 26px;
@@ -494,7 +530,8 @@ export default function JornadaRecap({
 
         .jrecap-podium-user.first .jrecap-block {
           height: 160px;
-          color: #ffffff;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           border-color: #f7d75c;
           background: linear-gradient(180deg, #ffe26a, #ba8520);
         }
@@ -517,8 +554,10 @@ export default function JornadaRecap({
           display: block;
           margin-bottom: -12px;
           font-size: 70px;
-          filter: drop-shadow(0 10px 18px rgba(247,215,92,.35));
-          animation: jrecapCrown .8s cubic-bezier(.2,.8,.2,1.3) both;
+          filter: drop-shadow(0 10px 18px rgba(247, 215, 92, 0.35));
+          animation:
+            jrecapCrown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1.3)
+            both;
         }
 
         .jrecap-avatar.winner {
@@ -527,20 +566,22 @@ export default function JornadaRecap({
           margin: 0 auto 22px;
           border: 5px solid #f7d75c;
           box-shadow:
-            0 0 0 8px rgba(165,0,68,.7),
-            0 0 55px rgba(247,215,92,.45);
+            0 0 0 8px rgba(165, 0, 68, 0.7),
+            0 0 55px rgba(247, 215, 92, 0.45);
           font-size: 30px;
-          animation: jrecapWinnerAvatar .8s cubic-bezier(.2,.9,.2,1.2) both;
+          animation:
+            jrecapWinnerAvatar 0.8s cubic-bezier(0.2, 0.9, 0.2, 1.2)
+            both;
         }
 
         .jrecap-winner-content h2 {
           margin: 0 auto;
+          max-width: 340px;
           color: #ffffff !important;
           -webkit-text-fill-color: #ffffff !important;
-          max-width: 340px;
           font-size: 34px;
-          line-height: .98;
-          letter-spacing: -.045em;
+          line-height: 0.98;
+          letter-spacing: -0.045em;
           text-transform: uppercase;
         }
 
@@ -548,18 +589,20 @@ export default function JornadaRecap({
           display: block;
           margin: 14px 0;
           color: #f7d75c;
+          -webkit-text-fill-color: #f7d75c;
           font-size: 54px;
           font-weight: 1000;
           line-height: 1;
-          text-shadow: 0 0 30px rgba(247,215,92,.28);
+          text-shadow: 0 0 30px rgba(247, 215, 92, 0.28);
         }
 
         .jrecap-winner-total small {
           display: block;
           margin-top: 5px;
-          color: #fff;
+          color: #ffffff;
+          -webkit-text-fill-color: #ffffff;
           font-size: 11px;
-          letter-spacing: .18em;
+          letter-spacing: 0.18em;
         }
 
         .jrecap-breakdown {
@@ -571,10 +614,11 @@ export default function JornadaRecap({
 
         .jrecap-breakdown span {
           padding: 10px 5px;
-          border: 1px solid rgba(255,255,255,.1);
+          border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 13px;
-          background: rgba(255,255,255,.055);
+          background: rgba(255, 255, 255, 0.055);
           color: #aeb6ce;
+          -webkit-text-fill-color: #aeb6ce;
           font-size: 9px;
           font-weight: 900;
         }
@@ -582,7 +626,8 @@ export default function JornadaRecap({
         .jrecap-breakdown strong {
           display: block;
           margin-top: 4px;
-          color: #fff;
+          color: #ffffff;
+          -webkit-text-fill-color: #ffffff;
           font-size: 18px;
         }
 
@@ -597,7 +642,9 @@ export default function JornadaRecap({
           background: var(--color);
           opacity: 0;
           transform: rotate(var(--rotate));
-          animation: jrecapConfetti var(--duration) linear var(--delay) infinite;
+          animation:
+            jrecapConfetti var(--duration) linear var(--delay)
+            infinite;
         }
 
         .jrecap-actions {
@@ -608,13 +655,13 @@ export default function JornadaRecap({
         .jrecap-actions button {
           width: 46px;
           height: 46px;
-          border: 1px solid rgba(247,215,92,.28);
+          border: 1px solid rgba(247, 215, 92, 0.28);
           border-radius: 14px;
           background: #15192a;
-          color: #fff;
+          color: #ffffff;
           cursor: pointer;
           font-size: 18px;
-          box-shadow: 0 10px 25px rgba(0,0,0,.3);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
 
         .jrecap-actions button:hover {
@@ -622,34 +669,72 @@ export default function JornadaRecap({
           border-color: #f7d75c;
         }
 
+        .jrecap-actions button:disabled {
+          cursor: wait;
+          opacity: 0.7;
+        }
+
         @keyframes jrecapFloat {
-          to { transform: translate3d(25px, 35px, 0) scale(1.18); }
+          to {
+            transform: translate3d(25px, 35px, 0) scale(1.18);
+          }
         }
 
         @keyframes jrecapRowIn {
-          to { opacity: 1; transform: translateX(0); }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
 
         @keyframes jrecapPodiumIn {
-          from { opacity: 0; transform: translateY(100px) scale(.86); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
+          from {
+            opacity: 0;
+            transform: translateY(100px) scale(0.86);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
         }
 
         @keyframes jrecapCrown {
-          from { opacity: 0; transform: translateY(-60px) rotate(-12deg); }
-          to { opacity: 1; transform: translateY(0) rotate(0); }
+          from {
+            opacity: 0;
+            transform: translateY(-60px) rotate(-12deg);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0) rotate(0);
+          }
         }
 
         @keyframes jrecapWinnerAvatar {
-          from { opacity: 0; transform: scale(.25) rotate(-15deg); }
-          to { opacity: 1; transform: scale(1) rotate(0); }
+          from {
+            opacity: 0;
+            transform: scale(0.25) rotate(-15deg);
+          }
+
+          to {
+            opacity: 1;
+            transform: scale(1) rotate(0);
+          }
         }
 
         @keyframes jrecapConfetti {
-          0% { opacity: 0; transform: translateY(-20px) rotate(0); }
-          12% { opacity: 1; }
+          0% {
+            opacity: 0;
+            transform: translateY(-20px) rotate(0);
+          }
+
+          12% {
+            opacity: 1;
+          }
+
           100% {
-            opacity: .8;
+            opacity: 0.8;
             transform: translateY(800px) rotate(720deg);
           }
         }
@@ -670,7 +755,7 @@ export default function JornadaRecap({
           .jrecap-actions button {
             width: 39px;
             height: 39px;
-            background: rgba(7,10,21,.88);
+            background: rgba(7, 10, 21, 0.88);
           }
         }
       `}</style>
@@ -697,8 +782,11 @@ export default function JornadaRecap({
           >
             <div>
               <span className="jrecap-eyebrow">
-                {jornadaNumber ? `JORNADA ${jornadaNumber}` : "VESALAPORRA"}
+                {jornadaNumber
+                  ? `JORNADA ${jornadaNumber}`
+                  : "VESALAPORRA"}
               </span>
+
               <h2>Jornada finalitzada</h2>
               <p>Així ha quedat la porra dels culers</p>
             </div>
@@ -710,7 +798,10 @@ export default function JornadaRecap({
             }`}
           >
             <div className="jrecap-ranking-title">
-              <span className="jrecap-eyebrow">DEL TOP 10 AL PODI</span>
+              <span className="jrecap-eyebrow">
+                DEL TOP 10 AL PODI
+              </span>
+
               <strong>LA CLASSIFICACIÓ</strong>
             </div>
 
@@ -719,7 +810,9 @@ export default function JornadaRecap({
                 <div
                   key={user.id}
                   className="jrecap-row"
-                  style={{ "--delay": `${index * 0.25}s` }}
+                  style={{
+                    "--delay": `${index * 0.25}s`,
+                  }}
                 >
                   <span className="jrecap-row-position">
                     #{user.jornadaPosition}
@@ -727,7 +820,9 @@ export default function JornadaRecap({
 
                   <RecapAvatar user={user} />
 
-                  <span className="jrecap-row-name">{user.displayName}</span>
+                  <span className="jrecap-row-name">
+                    {user.displayName}
+                  </span>
 
                   <strong className="jrecap-row-points">
                     {user.jornada.totalPoints}
@@ -746,10 +841,13 @@ export default function JornadaRecap({
               {winner && (
                 <div className="jrecap-podium-user first">
                   <RecapAvatar user={winner} />
+
                   <strong>{winner.displayName}</strong>
+
                   <span className="jrecap-podium-points">
                     {winner.jornada.totalPoints} PTS
                   </span>
+
                   <div className="jrecap-block">1</div>
                 </div>
               )}
@@ -757,10 +855,13 @@ export default function JornadaRecap({
               {second && (
                 <div className="jrecap-podium-user second">
                   <RecapAvatar user={second} />
+
                   <strong>{second.displayName}</strong>
+
                   <span className="jrecap-podium-points">
                     {second.jornada.totalPoints} PTS
                   </span>
+
                   <div className="jrecap-block">2</div>
                 </div>
               )}
@@ -768,10 +869,13 @@ export default function JornadaRecap({
               {third && (
                 <div className="jrecap-podium-user third">
                   <RecapAvatar user={third} />
+
                   <strong>{third.displayName}</strong>
+
                   <span className="jrecap-podium-points">
                     {third.jornada.totalPoints} PTS
                   </span>
+
                   <div className="jrecap-block">3</div>
                 </div>
               )}
@@ -799,6 +903,7 @@ export default function JornadaRecap({
 
             <div className="jrecap-winner-content">
               <span className="jrecap-crown">👑</span>
+
               <RecapAvatar user={winner} winner />
 
               <span className="jrecap-eyebrow">
@@ -815,17 +920,23 @@ export default function JornadaRecap({
               <div className="jrecap-breakdown">
                 <span>
                   RESULTAT
-                  <strong>{winner.jornada.resultPoints}</strong>
+                  <strong>
+                    {winner.jornada.resultPoints}
+                  </strong>
                 </span>
 
                 <span>
                   LOTTO FLICK
-                  <strong>{winner.jornada.xiPoints}</strong>
+                  <strong>
+                    {winner.jornada.xiPoints}
+                  </strong>
                 </span>
 
                 <span>
                   PROTAGONISTA
-                  <strong>{winner.jornada.protagonistPoints}</strong>
+                  <strong>
+                    {winner.jornada.protagonistPoints}
+                  </strong>
                 </span>
               </div>
             </div>
@@ -844,7 +955,10 @@ export default function JornadaRecap({
                 V
               </span>
 
-              <span className="jrecap-eyebrow">VESALAPORRA</span>
+              <span className="jrecap-eyebrow">
+                VESALAPORRA
+              </span>
+
               <h2>Ens veiem a la pròxima</h2>
               <p>La porra dels culers 🔥</p>
             </div>
@@ -880,6 +994,7 @@ export default function JornadaRecap({
             type="button"
             onClick={restart}
             title="Torna a començar"
+            aria-label="Torna a començar"
           >
             ↻
           </button>
@@ -888,11 +1003,17 @@ export default function JornadaRecap({
             type="button"
             onClick={toggleFullscreen}
             title="Pantalla completa"
+            aria-label="Pantalla completa"
           >
             ⛶
           </button>
 
-          <button type="button" onClick={onClose} title="Tanca">
+          <button
+            type="button"
+            onClick={onClose}
+            title="Tanca"
+            aria-label="Tanca"
+          >
             ×
           </button>
         </div>
