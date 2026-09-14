@@ -12,7 +12,9 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.110.2",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "@ffmpeg/ffmpeg": "0.12.15",
+    "@ffmpeg/types": "0.12.4"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
