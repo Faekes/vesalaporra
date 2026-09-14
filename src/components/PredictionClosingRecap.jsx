@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  downloadRecapMp4,
+  restartRecapForExport,
+} from "../lib/recapVideo.js";
 
 const SCENES = [
   { key: "intro", duration: 1900 },
@@ -17,29 +21,6 @@ const FORMATION_4231 = [
   { id: "goalkeeper", slots: [10] },
 ];
 
-const copyTextToClipboard = async (text) => {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-
-  const textArea = document.createElement("textarea");
-  textArea.value = text;
-  textArea.setAttribute("readonly", "");
-  textArea.style.position = "fixed";
-  textArea.style.opacity = "0";
-
-  document.body.appendChild(textArea);
-  textArea.select();
-
-  const copied = document.execCommand("copy");
-  textArea.remove();
-
-  if (!copied) {
-    throw new Error("No s’ha pogut copiar l’enllaç.");
-  }
-};
-
 export default function PredictionClosingRecap({
   open,
   summary,
@@ -50,7 +31,7 @@ export default function PredictionClosingRecap({
 }) {
   const [sceneIndex, setSceneIndex] = useState(0);
   const [replayKey, setReplayKey] = useState(0);
-  const [shareStatus, setShareStatus] = useState("idle");
+  const [downloadStatus, setDownloadStatus] = useState("idle");
   const stageRef = useRef(null);
 
   const lineupBySlot = useMemo(
@@ -150,50 +131,37 @@ export default function PredictionClosingRecap({
     await document.exitFullscreen?.();
   };
 
-  const copyShareLink = async () => {
-    const shareUrl = new URL(
-      "/porra",
-      "https://vesalaporra.cat",
-    );
-
-    shareUrl.searchParams.set("recap", "closing");
-    shareUrl.searchParams.set("match", String(summary.matchId));
-
-    try {
-      await copyTextToClipboard(shareUrl.toString());
-      setShareStatus("copied");
-    } catch {
-      setShareStatus("error");
+  const downloadVideo = async () => {
+    if (downloadStatus === "working") {
+      return;
     }
 
-    window.setTimeout(() => {
-      setShareStatus("idle");
-    }, 2200);
-  };
+    setDownloadStatus("working");
 
-  const shareOnX = () => {
-    const shareUrl = new URL(
-      "/porra",
-      "https://vesalaporra.cat",
-    );
+    try {
+      await restartRecapForExport(() =>
+        setReplayKey((current) => current + 1),
+      );
+      await downloadRecapMp4({
+        stage: stageRef.current,
+        durationMs: totalDuration,
+        fileName: `vesalaporra-tancament-${summary.matchId || "partit"}.mp4`,
+        soundCues: [
+          { at: 0, type: "intro" },
+          { at: 1900, type: "impact" },
+          { at: 5300, type: "whoosh" },
+          { at: 10100, type: "whoosh" },
+          { at: 17300, type: "celebration" },
+          { at: 22100, type: "reveal" },
+        ],
+      });
+      setDownloadStatus("done");
+    } catch (error) {
+      console.error("No s’ha pogut descarregar el vídeo:", error);
+      setDownloadStatus("error");
+    }
 
-    shareUrl.searchParams.set("recap", "closing");
-    shareUrl.searchParams.set("match", summary.matchId);
-
-    const tweetText =
-      `🔒 La porra ha tancat!\n\n` +
-      `${summary.totalPredictions} porres confirmades. ` +
-      `Descobreix el resultat, l’XI i el protagonista més votats 👇`;
-
-    const twitterUrl =
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}` +
-      `&url=${encodeURIComponent(shareUrl.toString())}`;
-
-    window.open(
-      twitterUrl,
-      "_blank",
-      "noopener,noreferrer",
-    );
+    window.setTimeout(() => setDownloadStatus("idle"), 2600);
   };
 
   return (
@@ -228,7 +196,7 @@ export default function PredictionClosingRecap({
         .closing-recap-stage .football-field{height:510px;min-height:0;margin:0}
         .closing-recap-stage .field-slot{cursor:default}
         .closing-recap-stage .field-player-name{max-width:68px}
-        .closing-recap-slot-votes{position:absolute;right:-4px;bottom:-4px;z-index:7;display:grid;place-items:center;min-width:23px;height:23px;padding:0 4px;border:2px solid #091020;border-radius:999px;background:#f7d75c;color:#11162a;font-size:8px;font-weight:1000}
+        .closing-recap-slot-votes{position:absolute;right:-4px;bottom:-4px;z-index:7;display:grid;place-items:center;min-width:23px;height:23px;padding:0 4px;border:2px solid #091020;border-radius:999px;background:#f7d75c;color:#fff;font-size:8px;font-weight:1000}
         .closing-recap-stage .protagonist-card{padding:20px 15px}
         .closing-recap-stage .protagonist-combined-rule{margin-top:12px}
         .closing-recap-stage .protagonist-selector-button{pointer-events:none}
@@ -500,25 +468,26 @@ export default function PredictionClosingRecap({
                       <div className="closing-recap-actions">
           <button
             type="button"
-            onClick={copyShareLink}
+            onClick={downloadVideo}
+            disabled={downloadStatus === "working"}
             title={
-              shareStatus === "copied"
-                ? "Enllaç copiat"
-                : shareStatus === "error"
-                  ? "No s’ha pogut copiar"
-                  : "Copia l’enllaç del resum"
+              downloadStatus === "working"
+                ? "Creant l’MP4…"
+                : downloadStatus === "done"
+                  ? "MP4 descarregat"
+                  : downloadStatus === "error"
+                    ? "No s’ha pogut crear l’MP4"
+                    : "Descarrega el vídeo en MP4"
             }
-            aria-label={
-              shareStatus === "copied"
-                ? "Enllaç copiat"
-                : "Copia l’enllaç del resum del tancament"
-            }
+            aria-label="Descarrega el resum del tancament en MP4"
           >
-            {shareStatus === "copied"
-              ? "✓"
-              : shareStatus === "error"
-                ? "!"
-                : "🔗"}
+            {downloadStatus === "working"
+              ? "…"
+              : downloadStatus === "done"
+                ? "✓"
+                : downloadStatus === "error"
+                  ? "!"
+                  : "⬇"}
           </button>
 
           <button
