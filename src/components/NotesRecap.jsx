@@ -345,6 +345,8 @@ export default function NotesRecap({
         .nrecap-intro h2,
         .nrecap-outro h2 {
           margin: 0;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           font-size: clamp(39px, 11vw, 57px);
           line-height: 0.92;
           letter-spacing: -0.065em;
@@ -607,6 +609,8 @@ export default function NotesRecap({
 
         .nrecap-mvp-content h2 {
           margin: 0 auto;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           max-width: 350px;
           font-size: 36px;
           line-height: 0.98;
