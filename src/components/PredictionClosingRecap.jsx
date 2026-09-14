@@ -139,13 +139,14 @@ export default function PredictionClosingRecap({
     setDownloadStatus("working");
 
     try {
-      await restartRecapForExport(() =>
-        setReplayKey((current) => current + 1),
-      );
       await downloadRecapMp4({
         stage: stageRef.current,
         durationMs: totalDuration,
         fileName: `vesalaporra-tancament-${summary.matchId || "partit"}.mp4`,
+        onCaptureReady: () =>
+          restartRecapForExport(() =>
+            setReplayKey((current) => current + 1),
+          ),
         soundCues: [
           { at: 0, type: "intro" },
           { at: 1900, type: "impact" },
@@ -184,11 +185,13 @@ export default function PredictionClosingRecap({
         .closing-recap-card-scene{align-items:start;padding:84px 14px 32px}
         .closing-recap-card-wrap{width:100%;transform-origin:top center}
         .closing-recap-stage .prediction-card{width:100%;margin:0;box-sizing:border-box}
+        .closing-recap-stage .prediction-card :is(h2,h3,p,strong,small,span,button){-webkit-text-fill-color:currentColor}
         .closing-recap-stage .score-card{padding:18px 14px}
         .closing-recap-stage .score-card .section-heading{margin-bottom:13px}
         .closing-recap-stage .score-match-overview{margin-bottom:13px}
         .closing-recap-stage .scoreboard{margin:0}
         .closing-recap-stage .score-control>button:not(.score-value){visibility:hidden}
+        .closing-recap-stage :is(.score-value,.field-player-name,.status-pill.completed,.protagonist-binary-pill.selected){color:#fff!important;-webkit-text-fill-color:#fff!important}
         .closing-recap-stage .score-match-label{font-size:8px}
         .closing-recap-vote-pill{display:inline-flex;align-items:center;justify-content:center;margin-top:16px;padding:9px 14px;border:1px solid rgba(247,215,92,.34);border-radius:999px;background:rgba(247,215,92,.08);color:#f7d75c;font-size:10px;font-weight:950;letter-spacing:.08em}
         .closing-recap-stage .lineup-card{padding:13px 12px}
