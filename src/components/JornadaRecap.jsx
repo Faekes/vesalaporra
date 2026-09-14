@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  downloadRecapMp4,
+  restartRecapForExport,
+} from "../lib/recapVideo.js";
 
 const SCENE_TIMINGS = [
   { scene: "intro", at: 0 },
@@ -7,28 +11,6 @@ const SCENE_TIMINGS = [
   { scene: "winner", at: 12500 },
   { scene: "outro", at: 18000 },
 ];
-
-const copyTextToClipboard = async (text) => {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-
-  const textArea = document.createElement("textarea");
-  textArea.value = text;
-  textArea.setAttribute("readonly", "");
-  textArea.style.position = "fixed";
-  textArea.style.opacity = "0";
-  document.body.appendChild(textArea);
-  textArea.select();
-
-  const copied = document.execCommand("copy");
-  textArea.remove();
-
-  if (!copied) {
-    throw new Error("No s’ha pogut copiar l’enllaç.");
-  }
-};
 
 const CONFETTI = Array.from({ length: 54 }, (_, index) => ({
   id: index,
@@ -80,7 +62,7 @@ export default function JornadaRecap({
 }) {
   const [scene, setScene] = useState("intro");
   const [replayKey, setReplayKey] = useState(0);
-  const [shareStatus, setShareStatus] = useState("idle");
+  const [downloadStatus, setDownloadStatus] = useState("idle");
   const stageRef = useRef(null);
 
   const ranking = useMemo(
@@ -154,26 +136,40 @@ export default function JornadaRecap({
     await document.exitFullscreen?.();
   };
 
-  const copyShareLink = async () => {
-    const shareUrl = new URL(
-      "/ranquing/jornada",
-      "https://vesalaporra.cat",
-    );
-
-    shareUrl.searchParams.set("recap", "jornada");
-
-    if (jornadaNumber) {
-      shareUrl.searchParams.set("jornada", String(jornadaNumber));
+  const downloadVideo = async () => {
+    if (downloadStatus === "working") {
+      return;
     }
+
+    setDownloadStatus("working");
 
     try {
-      await copyTextToClipboard(shareUrl.toString());
-      setShareStatus("copied");
-    } catch {
-      setShareStatus("error");
+      await downloadRecapMp4({
+        stage: stageRef.current,
+        durationMs: 23_000,
+        fileName: `vesalaporra-classificacio-jornada-${
+          jornadaNumber || "actual"
+        }.mp4`,
+        onCaptureReady: () =>
+          restartRecapForExport(() =>
+            setReplayKey((currentKey) => currentKey + 1),
+          ),
+        soundCues: [
+          { at: 0, type: "intro" },
+          { at: 2200, type: "whoosh" },
+          { at: 8000, type: "impact" },
+          { at: 12500, type: "celebration" },
+          { at: 18000, type: "reveal" },
+        ],
+      });
+
+      setDownloadStatus("done");
+    } catch (error) {
+      console.error("No s’ha pogut descarregar el vídeo:", error);
+      setDownloadStatus("error");
     }
 
-    window.setTimeout(() => setShareStatus("idle"), 2200);
+    window.setTimeout(() => setDownloadStatus("idle"), 2600);
   };
 
   if (!open || !winner) {
@@ -317,6 +313,8 @@ export default function JornadaRecap({
         .jrecap-intro h2,
         .jrecap-outro h2 {
           margin: 0;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           font-size: clamp(39px, 11vw, 58px);
           line-height: .92;
           letter-spacing: -.065em;
@@ -475,6 +473,8 @@ export default function JornadaRecap({
         }
 
         .jrecap-block {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           display: grid;
           place-items: center;
           height: 110px;
@@ -487,7 +487,7 @@ export default function JornadaRecap({
 
         .jrecap-podium-user.first .jrecap-block {
           height: 160px;
-          color: #2a2100;
+          color: #ffffff;
           border-color: #f7d75c;
           background: linear-gradient(180deg, #ffe26a, #ba8520);
         }
@@ -528,6 +528,8 @@ export default function JornadaRecap({
 
         .jrecap-winner-content h2 {
           margin: 0 auto;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           max-width: 340px;
           font-size: 34px;
           line-height: .98;
@@ -792,7 +794,10 @@ export default function JornadaRecap({
               <span className="jrecap-crown">👑</span>
               <RecapAvatar user={winner} winner />
 
-              <span className="jrecap-eyebrow">GUANYADOR/A DE LA JORNADA</span>
+              <span className="jrecap-eyebrow">
+                GUANYADOR/A DE LA JORNADA
+              </span>
+
               <h2>{winner.displayName}</h2>
 
               <strong className="jrecap-winner-total">
@@ -825,9 +830,13 @@ export default function JornadaRecap({
             }`}
           >
             <div>
-              <span className="jrecap-logo" style={{ margin: "0 auto 24px" }}>
+              <span
+                className="jrecap-logo"
+                style={{ margin: "0 auto 24px" }}
+              >
                 V
               </span>
+
               <span className="jrecap-eyebrow">VESALAPORRA</span>
               <h2>Ens veiem a la pròxima</h2>
               <p>La porra dels culers 🔥</p>
@@ -838,32 +847,41 @@ export default function JornadaRecap({
         <div className="jrecap-actions">
           <button
             type="button"
-            onClick={copyShareLink}
+            onClick={downloadVideo}
+            disabled={downloadStatus === "working"}
             title={
-              shareStatus === "copied"
-                ? "Enllaç copiat"
-                : shareStatus === "error"
-                  ? "No s’ha pogut copiar"
-                  : "Copia l’enllaç del resum"
+              downloadStatus === "working"
+                ? "Creant l’MP4…"
+                : downloadStatus === "done"
+                  ? "MP4 descarregat"
+                  : downloadStatus === "error"
+                    ? "No s’ha pogut crear l’MP4"
+                    : "Descarrega el vídeo en MP4"
             }
-            aria-label={
-              shareStatus === "copied"
-                ? "Enllaç copiat"
-                : "Copia l’enllaç del resum de la jornada"
-            }
+            aria-label="Descarrega el resum de la jornada en MP4"
           >
-            {shareStatus === "copied"
-              ? "✓"
-              : shareStatus === "error"
-                ? "!"
-                : "🔗"}
+            {downloadStatus === "working"
+              ? "…"
+              : downloadStatus === "done"
+                ? "✓"
+                : downloadStatus === "error"
+                  ? "!"
+                  : "⬇"}
           </button>
 
-          <button type="button" onClick={restart} title="Torna a començar">
+          <button
+            type="button"
+            onClick={restart}
+            title="Torna a començar"
+          >
             ↻
           </button>
 
-          <button type="button" onClick={toggleFullscreen} title="Pantalla completa">
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            title="Pantalla completa"
+          >
             ⛶
           </button>
 

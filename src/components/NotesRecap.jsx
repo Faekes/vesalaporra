@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  downloadRecapMp4,
+  restartRecapForExport,
+} from "../lib/recapVideo.js";
 
 const NOTES_SCENE_TIMINGS = [
   { scene: "intro", at: 0 },
@@ -7,28 +11,6 @@ const NOTES_SCENE_TIMINGS = [
   { scene: "mvp", at: 12500 },
   { scene: "outro", at: 18000 },
 ];
-
-const copyTextToClipboard = async (text) => {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-
-  const textArea = document.createElement("textarea");
-  textArea.value = text;
-  textArea.setAttribute("readonly", "");
-  textArea.style.position = "fixed";
-  textArea.style.opacity = "0";
-  document.body.appendChild(textArea);
-  textArea.select();
-
-  const copied = document.execCommand("copy");
-  textArea.remove();
-
-  if (!copied) {
-    throw new Error("No s’ha pogut copiar l’enllaç.");
-  }
-};
 
 const NOTES_CONFETTI = Array.from({ length: 56 }, (_, index) => ({
   id: index,
@@ -81,7 +63,7 @@ export default function NotesRecap({
 }) {
   const [scene, setScene] = useState("intro");
   const [replayKey, setReplayKey] = useState(0);
-  const [shareStatus, setShareStatus] = useState("idle");
+  const [downloadStatus, setDownloadStatus] = useState("idle");
   const stageRef = useRef(null);
 
   const ranking = useMemo(
@@ -185,26 +167,40 @@ export default function NotesRecap({
     await document.exitFullscreen?.();
   };
 
-  const copyShareLink = async () => {
-    const shareUrl = new URL(
-      "/notes/partit",
-      "https://vesalaporra.cat",
-    );
-
-    shareUrl.searchParams.set("recap", "notes");
-
-    if (jornadaNumber) {
-      shareUrl.searchParams.set("jornada", String(jornadaNumber));
+  const downloadVideo = async () => {
+    if (downloadStatus === "working") {
+      return;
     }
+
+    setDownloadStatus("working");
 
     try {
-      await copyTextToClipboard(shareUrl.toString());
-      setShareStatus("copied");
-    } catch {
-      setShareStatus("error");
+      await downloadRecapMp4({
+        stage: stageRef.current,
+        durationMs: 23_000,
+        fileName: `vesalaporra-notes-jornada-${
+          jornadaNumber || "actual"
+        }.mp4`,
+        onCaptureReady: () =>
+          restartRecapForExport(() =>
+            setReplayKey((currentKey) => currentKey + 1),
+          ),
+        soundCues: [
+          { at: 0, type: "intro" },
+          { at: 2200, type: "whoosh" },
+          { at: 8000, type: "impact" },
+          { at: 12500, type: "celebration" },
+          { at: 18000, type: "reveal" },
+        ],
+      });
+
+      setDownloadStatus("done");
+    } catch (error) {
+      console.error("No s’ha pogut descarregar el vídeo:", error);
+      setDownloadStatus("error");
     }
 
-    window.setTimeout(() => setShareStatus("idle"), 2200);
+    window.setTimeout(() => setDownloadStatus("idle"), 2600);
   };
 
   if (!open || !mvp) {
@@ -259,7 +255,12 @@ export default function NotesRecap({
               rgba(165, 0, 68, 0.25),
               transparent 35%
             ),
-            linear-gradient(160deg, #171b2e 0%, #080b17 54%, #03050c 100%);
+            linear-gradient(
+              160deg,
+              #171b2e 0%,
+              #080b17 54%,
+              #03050c 100%
+            );
           box-shadow:
             0 35px 100px rgba(0, 0, 0, 0.76),
             0 0 55px rgba(247, 215, 92, 0.13);
@@ -352,6 +353,8 @@ export default function NotesRecap({
         .nrecap-intro h2,
         .nrecap-outro h2 {
           margin: 0;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           font-size: clamp(39px, 11vw, 57px);
           line-height: 0.92;
           letter-spacing: -0.065em;
@@ -550,6 +553,8 @@ export default function NotesRecap({
         }
 
         .nrecap-podium-block {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           display: grid;
           place-items: center;
           height: 108px;
@@ -563,7 +568,7 @@ export default function NotesRecap({
 
         .nrecap-podium-player.first .nrecap-podium-block {
           height: 160px;
-          color: #2a2100;
+          color: #ffffff;
           border-color: #f7d75c;
           background:
             linear-gradient(180deg, #ffe26a, #ba8520);
@@ -612,6 +617,8 @@ export default function NotesRecap({
 
         .nrecap-mvp-content h2 {
           margin: 0 auto;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
           max-width: 350px;
           font-size: 36px;
           line-height: 0.98;
@@ -1018,25 +1025,26 @@ export default function NotesRecap({
         <div className="nrecap-actions">
           <button
             type="button"
-            onClick={copyShareLink}
+            onClick={downloadVideo}
+            disabled={downloadStatus === "working"}
             title={
-              shareStatus === "copied"
-                ? "Enllaç copiat"
-                : shareStatus === "error"
-                  ? "No s’ha pogut copiar"
-                  : "Copia l’enllaç del resum"
+              downloadStatus === "working"
+                ? "Creant l’MP4…"
+                : downloadStatus === "done"
+                  ? "MP4 descarregat"
+                  : downloadStatus === "error"
+                    ? "No s’ha pogut crear l’MP4"
+                    : "Descarrega el vídeo en MP4"
             }
-            aria-label={
-              shareStatus === "copied"
-                ? "Enllaç copiat"
-                : "Copia l’enllaç del resum de Les Notes"
-            }
+            aria-label="Descarrega el resum de Les Notes en MP4"
           >
-            {shareStatus === "copied"
-              ? "✓"
-              : shareStatus === "error"
-                ? "!"
-                : "🔗"}
+            {downloadStatus === "working"
+              ? "…"
+              : downloadStatus === "done"
+                ? "✓"
+                : downloadStatus === "error"
+                  ? "!"
+                  : "⬇"}
           </button>
 
           <button

@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  downloadRecapMp4,
+  restartRecapForExport,
+} from "../lib/recapVideo.js";
 
 const SCENES = [
   { key: "intro", duration: 1900 },
@@ -17,29 +21,6 @@ const FORMATION_4231 = [
   { id: "goalkeeper", slots: [10] },
 ];
 
-const copyTextToClipboard = async (text) => {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-
-  const textArea = document.createElement("textarea");
-  textArea.value = text;
-  textArea.setAttribute("readonly", "");
-  textArea.style.position = "fixed";
-  textArea.style.opacity = "0";
-
-  document.body.appendChild(textArea);
-  textArea.select();
-
-  const copied = document.execCommand("copy");
-  textArea.remove();
-
-  if (!copied) {
-    throw new Error("No s’ha pogut copiar l’enllaç.");
-  }
-};
-
 export default function PredictionClosingRecap({
   open,
   summary,
@@ -50,7 +31,7 @@ export default function PredictionClosingRecap({
 }) {
   const [sceneIndex, setSceneIndex] = useState(0);
   const [replayKey, setReplayKey] = useState(0);
-  const [shareStatus, setShareStatus] = useState("idle");
+  const [downloadStatus, setDownloadStatus] = useState("idle");
   const stageRef = useRef(null);
 
   const lineupBySlot = useMemo(
@@ -66,22 +47,28 @@ export default function PredictionClosingRecap({
 
   const barcelonaFirst = match?.barcelonaFirst !== false;
   const mostVotedResult = summary?.mostVotedResult || null;
+
   const homeScore = barcelonaFirst
     ? mostVotedResult?.barcelonaGoals
     : mostVotedResult?.opponentGoals;
+
   const awayScore = barcelonaFirst
     ? mostVotedResult?.opponentGoals
     : mostVotedResult?.barcelonaGoals;
+
   const protagonist = summary?.mostVotedProtagonist || null;
   const scene = SCENES[sceneIndex]?.key || "intro";
+
   const totalDuration = SCENES.reduce(
     (total, item) => total + item.duration,
     0,
   );
+
   const elapsedBeforeScene = SCENES.slice(0, sceneIndex).reduce(
     (total, item) => total + item.duration,
     0,
   );
+
   const progress = Math.min(
     100,
     ((elapsedBeforeScene + SCENES[sceneIndex].duration * 0.5) /
@@ -95,6 +82,7 @@ export default function PredictionClosingRecap({
     }
 
     setSceneIndex(0);
+
     const timers = [];
     let elapsed = 0;
 
@@ -150,96 +138,492 @@ export default function PredictionClosingRecap({
     await document.exitFullscreen?.();
   };
 
-  const copyShareLink = async () => {
-    const shareUrl = new URL(
-      "/porra",
-      "https://vesalaporra.cat",
-    );
-
-    shareUrl.searchParams.set("recap", "closing");
-    shareUrl.searchParams.set("match", String(summary.matchId));
-
-    try {
-      await copyTextToClipboard(shareUrl.toString());
-      setShareStatus("copied");
-    } catch {
-      setShareStatus("error");
+  const downloadVideo = async () => {
+    if (downloadStatus === "working") {
+      return;
     }
 
-    window.setTimeout(() => {
-      setShareStatus("idle");
-    }, 2200);
-  };
+    setDownloadStatus("working");
 
-  const shareOnX = () => {
-    const shareUrl = new URL(
-      "/porra",
-      "https://vesalaporra.cat",
-    );
+    try {
+      await downloadRecapMp4({
+        stage: stageRef.current,
+        durationMs: totalDuration,
+        fileName: `vesalaporra-tancament-${
+          summary.matchId || "partit"
+        }.mp4`,
+        onCaptureReady: () =>
+          restartRecapForExport(() =>
+            setReplayKey((current) => current + 1),
+          ),
+        soundCues: [
+          { at: 0, type: "intro" },
+          { at: 1900, type: "impact" },
+          { at: 5300, type: "whoosh" },
+          { at: 10100, type: "whoosh" },
+          { at: 17300, type: "celebration" },
+          { at: 22100, type: "reveal" },
+        ],
+      });
 
-    shareUrl.searchParams.set("recap", "closing");
-    shareUrl.searchParams.set("match", summary.matchId);
+      setDownloadStatus("done");
+    } catch (error) {
+      console.error("No s’ha pogut descarregar el vídeo:", error);
+      setDownloadStatus("error");
+    }
 
-    const tweetText =
-      `🔒 La porra ha tancat!\n\n` +
-      `${summary.totalPredictions} porres confirmades. ` +
-      `Descobreix el resultat, l’XI i el protagonista més votats 👇`;
-
-    const twitterUrl =
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}` +
-      `&url=${encodeURIComponent(shareUrl.toString())}`;
-
-    window.open(
-      twitterUrl,
-      "_blank",
-      "noopener,noreferrer",
-    );
+    window.setTimeout(() => setDownloadStatus("idle"), 2600);
   };
 
   return (
-    <div className="closing-recap-overlay" role="dialog" aria-modal="true">
+    <div
+      className="closing-recap-overlay"
+      role="dialog"
+      aria-modal="true"
+    >
       <style>{`
-        .closing-recap-overlay{position:fixed;inset:0;z-index:999999;display:grid;place-items:center;padding:14px;background:rgba(2,5,17,.96);backdrop-filter:blur(14px)}
-        .closing-recap-shell{display:flex;align-items:center;gap:14px;max-width:100%;max-height:100%}
-        .closing-recap-stage{position:relative;width:min(900px,calc(100vw - 110px));height:min(900px,calc(100vh - 28px));overflow:hidden;isolation:isolate;color:#fff;border:1px solid rgba(247,215,92,.44);border-radius:28px;background:radial-gradient(circle at 50% 18%,rgba(247,215,92,.16),transparent 30%),radial-gradient(circle at 12% 82%,rgba(36,82,199,.3),transparent 38%),radial-gradient(circle at 92% 68%,rgba(165,0,68,.3),transparent 36%),linear-gradient(160deg,#171b2e 0%,#080b17 54%,#03050c 100%);box-shadow:0 35px 100px rgba(0,0,0,.76),0 0 55px rgba(247,215,92,.13);font-family:Inter,system-ui,sans-serif}
-        .closing-recap-stage:before{content:"";position:absolute;inset:0;z-index:-2;opacity:.14;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:36px 36px;mask-image:linear-gradient(to bottom,#000,transparent 94%)}
-        .closing-recap-brand{position:absolute;top:22px;left:0;right:0;z-index:30;display:flex;align-items:center;justify-content:center;gap:9px;font-size:11px;font-weight:950;letter-spacing:.14em}
-        .closing-recap-logo{display:grid;place-items:center;width:34px;height:34px;color:#ffe66d;border:2px solid #f7d75c;border-radius:50%;background:linear-gradient(135deg,#2147a5 0 50%,#a50044 50%);box-shadow:0 0 22px rgba(247,215,92,.28);font-size:20px;font-weight:1000}
-        .closing-recap-scene{position:absolute;inset:0;display:grid;place-items:center;padding:72px 18px 28px;opacity:0;transform:scale(.965);pointer-events:none;transition:opacity .6s ease,transform .6s ease}
-        .closing-recap-scene.active{opacity:1;transform:scale(1);pointer-events:auto}
-        .closing-recap-center{text-align:center}
-        .closing-recap-eyebrow{display:block;margin-bottom:13px;color:#f7d75c;font-size:10px;font-weight:950;letter-spacing:.15em;text-transform:uppercase}
-        .closing-recap-title{margin:0;font-size:clamp(38px,10vw,56px);line-height:.92;letter-spacing:-.06em;text-transform:uppercase;text-shadow:0 12px 30px rgba(0,0,0,.42)}
-        .closing-recap-subtitle{margin:18px 0 0;color:#abb3ca;font-size:14px;font-weight:750}
-        .closing-recap-total-number{display:block;color:#f7d75c;font-size:112px;font-weight:1000;line-height:.88;text-shadow:0 0 42px rgba(247,215,92,.32)}
-        .closing-recap-total-label{display:block;margin-top:18px;font-size:25px;font-weight:1000;letter-spacing:.05em;text-transform:uppercase}
-        .closing-recap-card-scene{align-items:start;padding:84px 14px 32px}
-        .closing-recap-card-wrap{width:100%;transform-origin:top center}
-        .closing-recap-stage .prediction-card{width:100%;margin:0;box-sizing:border-box}
-        .closing-recap-stage .score-card{padding:18px 14px}
-        .closing-recap-stage .score-card .section-heading{margin-bottom:13px}
-        .closing-recap-stage .score-match-overview{margin-bottom:13px}
-        .closing-recap-stage .scoreboard{margin:0}
-        .closing-recap-stage .score-control>button:not(.score-value){visibility:hidden}
-        .closing-recap-stage .score-match-label{font-size:8px}
-        .closing-recap-vote-pill{display:inline-flex;align-items:center;justify-content:center;margin-top:16px;padding:9px 14px;border:1px solid rgba(247,215,92,.34);border-radius:999px;background:rgba(247,215,92,.08);color:#f7d75c;font-size:10px;font-weight:950;letter-spacing:.08em}
-        .closing-recap-stage .lineup-card{padding:13px 12px}
-        .closing-recap-stage .lotto-heading{margin-bottom:9px}
-        .closing-recap-stage .football-field{height:510px;min-height:0;margin:0}
-        .closing-recap-stage .field-slot{cursor:default}
-        .closing-recap-stage .field-player-name{max-width:68px}
-        .closing-recap-slot-votes{position:absolute;right:-4px;bottom:-4px;z-index:7;display:grid;place-items:center;min-width:23px;height:23px;padding:0 4px;border:2px solid #091020;border-radius:999px;background:#f7d75c;color:#11162a;font-size:8px;font-weight:1000}
-        .closing-recap-stage .protagonist-card{padding:20px 15px}
-        .closing-recap-stage .protagonist-combined-rule{margin-top:12px}
-        .closing-recap-stage .protagonist-selector-button{pointer-events:none}
-        .closing-recap-stage .protagonist-combined-copy small{display:block}
-        .closing-recap-progress{position:absolute;left:24px;right:24px;bottom:22px;z-index:40;height:3px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.1)}
-        .closing-recap-progress span{display:block;width:var(--progress);height:100%;border-radius:inherit;background:linear-gradient(90deg,#2452c7,#a50044,#f7d75c);transition:width .6s ease}
-        .closing-recap-actions{display:grid;gap:9px}
-        .closing-recap-actions button{width:46px;height:46px;border:1px solid rgba(247,215,92,.28);border-radius:14px;background:#15192a;color:#fff;cursor:pointer;font-size:18px;box-shadow:0 10px 25px rgba(0,0,0,.3)}
-        .closing-recap-actions button:hover{color:#f7d75c;border-color:#f7d75c}
-        @media(max-width:600px){.closing-recap-shell{display:block}.closing-recap-actions{position:absolute;top:18px;right:18px;z-index:50;display:flex}.closing-recap-actions button{width:39px;height:39px;background:rgba(7,10,21,.92)}.closing-recap-stage .football-field{height:500px}}
-        @media(prefers-reduced-motion:reduce){.closing-recap-scene{transition:none}}
+        .closing-recap-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 999999;
+          display: grid;
+          place-items: center;
+          padding: 14px;
+          background: rgba(2, 5, 17, 0.96);
+          backdrop-filter: blur(14px);
+        }
+
+        .closing-recap-shell {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          max-width: 100%;
+          max-height: 100%;
+        }
+
+        .closing-recap-stage {
+          position: relative;
+          width: min(900px, calc(100vw - 110px));
+          height: min(900px, calc(100vh - 28px));
+          overflow: hidden;
+          isolation: isolate;
+          color: #ffffff;
+          border: 1px solid rgba(247, 215, 92, 0.44);
+          border-radius: 28px;
+          background:
+            radial-gradient(
+              circle at 50% 18%,
+              rgba(247, 215, 92, 0.16),
+              transparent 30%
+            ),
+            radial-gradient(
+              circle at 12% 82%,
+              rgba(36, 82, 199, 0.3),
+              transparent 38%
+            ),
+            radial-gradient(
+              circle at 92% 68%,
+              rgba(165, 0, 68, 0.3),
+              transparent 36%
+            ),
+            linear-gradient(
+              160deg,
+              #171b2e 0%,
+              #080b17 54%,
+              #03050c 100%
+            );
+          box-shadow:
+            0 35px 100px rgba(0, 0, 0, 0.76),
+            0 0 55px rgba(247, 215, 92, 0.13);
+          font-family: Inter, system-ui, sans-serif;
+        }
+
+        .closing-recap-stage::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: -2;
+          opacity: 0.14;
+          background-image:
+            linear-gradient(
+              rgba(255, 255, 255, 0.05) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              90deg,
+              rgba(255, 255, 255, 0.05) 1px,
+              transparent 1px
+            );
+          background-size: 36px 36px;
+          mask-image: linear-gradient(
+            to bottom,
+            #000000,
+            transparent 94%
+          );
+        }
+
+        .closing-recap-brand {
+          position: absolute;
+          top: 22px;
+          left: 0;
+          right: 0;
+          z-index: 30;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 9px;
+          color: #ffffff;
+          font-size: 11px;
+          font-weight: 950;
+          letter-spacing: 0.14em;
+        }
+
+        .closing-recap-logo {
+          display: grid;
+          place-items: center;
+          width: 34px;
+          height: 34px;
+          color: #ffe66d;
+          border: 2px solid #f7d75c;
+          border-radius: 50%;
+          background:
+            linear-gradient(
+              135deg,
+              #2147a5 0 50%,
+              #a50044 50%
+            );
+          box-shadow: 0 0 22px rgba(247, 215, 92, 0.28);
+          font-size: 20px;
+          font-weight: 1000;
+        }
+
+        .closing-recap-scene {
+          position: absolute;
+          inset: 0;
+          display: grid;
+          place-items: center;
+          padding: 72px 18px 28px;
+          color: #ffffff;
+          opacity: 0;
+          transform: scale(0.965);
+          pointer-events: none;
+          transition:
+            opacity 0.6s ease,
+            transform 0.6s ease;
+        }
+
+        .closing-recap-scene.active {
+          opacity: 1;
+          transform: scale(1);
+          pointer-events: auto;
+        }
+
+        .closing-recap-center {
+          color: #ffffff;
+          text-align: center;
+        }
+
+        .closing-recap-eyebrow {
+          display: block;
+          margin-bottom: 13px;
+          color: #f7d75c;
+          font-size: 10px;
+          font-weight: 950;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+        }
+
+        .closing-recap-title {
+          margin: 0;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+          font-size: clamp(38px, 10vw, 56px);
+          line-height: 0.92;
+          letter-spacing: -0.06em;
+          text-transform: uppercase;
+          text-shadow: 0 12px 30px rgba(0, 0, 0, 0.42);
+        }
+
+        .closing-recap-subtitle {
+          margin: 18px 0 0;
+          color: #abb3ca;
+          font-size: 14px;
+          font-weight: 750;
+        }
+
+        .closing-recap-total-number {
+          display: block;
+          color: #f7d75c;
+          font-size: 112px;
+          font-weight: 1000;
+          line-height: 0.88;
+          text-shadow: 0 0 42px rgba(247, 215, 92, 0.32);
+        }
+
+        .closing-recap-total-label {
+          display: block;
+          margin-top: 18px;
+          color: #ffffff;
+          font-size: 25px;
+          font-weight: 1000;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+
+        .closing-recap-card-scene {
+          align-items: start;
+          padding: 84px 14px 32px;
+        }
+
+        .closing-recap-card-wrap {
+          width: 100%;
+          transform-origin: top center;
+        }
+
+        .closing-recap-stage .prediction-card {
+          width: 100%;
+          margin: 0;
+          box-sizing: border-box;
+        }
+
+        .closing-recap-stage
+          .prediction-card
+          :is(h2, h3, p, strong, small, span, button) {
+          -webkit-text-fill-color: currentColor;
+        }
+
+        .closing-recap-stage
+          .prediction-card
+          :is(h2, h3) {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+        }
+
+        .closing-recap-stage .score-card {
+          padding: 18px 14px;
+        }
+
+        .closing-recap-stage
+          .score-card
+          .section-heading {
+          margin-bottom: 13px;
+        }
+
+        .closing-recap-stage .score-match-overview {
+          margin-bottom: 13px;
+        }
+
+        .closing-recap-stage .scoreboard {
+          margin: 0;
+        }
+
+        .closing-recap-stage
+          .score-control
+          > button:not(.score-value) {
+          visibility: hidden;
+        }
+
+        .closing-recap-stage
+          :is(
+            .score-value,
+            .field-player-name,
+            .status-pill.completed,
+            .protagonist-binary-pill.selected
+          ) {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+        }
+
+        .closing-recap-stage .score-match-label {
+          color: #ffffff !important;
+          font-size: 8px;
+        }
+
+        .closing-recap-stage
+          .score-team-copy
+          :is(strong, small) {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+        }
+
+        .closing-recap-stage
+          .score-match-date
+          :is(span, strong) {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+        }
+
+        .closing-recap-vote-pill {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          margin-top: 16px;
+          padding: 9px 14px;
+          border: 1px solid rgba(247, 215, 92, 0.34);
+          border-radius: 999px;
+          background: rgba(247, 215, 92, 0.08);
+          color: #f7d75c;
+          font-size: 10px;
+          font-weight: 950;
+          letter-spacing: 0.08em;
+        }
+
+        .closing-recap-stage .lineup-card {
+          padding: 13px 12px;
+        }
+
+        .closing-recap-stage .lotto-heading {
+          margin-bottom: 9px;
+        }
+
+        .closing-recap-stage
+          .lotto-title-copy
+          :is(h2, span) {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+        }
+
+        .closing-recap-stage .football-field {
+          height: 510px;
+          min-height: 0;
+          margin: 0;
+        }
+
+        .closing-recap-stage .field-slot {
+          cursor: default;
+        }
+
+        .closing-recap-stage .field-player-name {
+          max-width: 68px;
+        }
+
+        .closing-recap-slot-votes {
+          position: absolute;
+          right: -4px;
+          bottom: -4px;
+          z-index: 7;
+          display: grid;
+          place-items: center;
+          min-width: 23px;
+          height: 23px;
+          padding: 0 4px;
+          border: 2px solid #091020;
+          border-radius: 999px;
+          background: #f7d75c;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+          font-size: 8px;
+          font-weight: 1000;
+        }
+
+        .closing-recap-stage .protagonist-card {
+          padding: 20px 15px;
+        }
+
+        .closing-recap-stage .protagonist-combined-rule {
+          margin-top: 12px;
+        }
+
+        .closing-recap-stage .protagonist-selector-button {
+          pointer-events: none;
+        }
+
+        .closing-recap-stage
+          .protagonist-combined-copy
+          :is(span, strong, small) {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+        }
+
+        .closing-recap-stage
+          .protagonist-combined-copy
+          small {
+          display: block;
+        }
+
+        .closing-recap-progress {
+          position: absolute;
+          left: 24px;
+          right: 24px;
+          bottom: 22px;
+          z-index: 40;
+          height: 3px;
+          overflow: hidden;
+          border-radius: 99px;
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        .closing-recap-progress span {
+          display: block;
+          width: var(--progress);
+          height: 100%;
+          border-radius: inherit;
+          background:
+            linear-gradient(
+              90deg,
+              #2452c7,
+              #a50044,
+              #f7d75c
+            );
+          transition: width 0.6s ease;
+        }
+
+        .closing-recap-actions {
+          display: grid;
+          gap: 9px;
+        }
+
+        .closing-recap-actions button {
+          width: 46px;
+          height: 46px;
+          border: 1px solid rgba(247, 215, 92, 0.28);
+          border-radius: 14px;
+          background: #15192a;
+          color: #ffffff;
+          cursor: pointer;
+          font-size: 18px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .closing-recap-actions button:hover {
+          color: #f7d75c;
+          border-color: #f7d75c;
+        }
+
+        .closing-recap-actions button:disabled {
+          cursor: wait;
+          opacity: 0.7;
+        }
+
+        @media (max-width: 600px) {
+          .closing-recap-shell {
+            display: block;
+          }
+
+          .closing-recap-actions {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            z-index: 50;
+            display: flex;
+          }
+
+          .closing-recap-actions button {
+            width: 39px;
+            height: 39px;
+            background: rgba(7, 10, 21, 0.92);
+          }
+
+          .closing-recap-stage .football-field {
+            height: 500px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .closing-recap-scene {
+            transition: none;
+          }
+        }
       `}</style>
 
       <div className="closing-recap-shell">
@@ -255,11 +639,19 @@ export default function PredictionClosingRecap({
           </div>
 
           <section
-            className={`closing-recap-scene ${scene === "intro" ? "active" : ""}`}
+            className={`closing-recap-scene ${
+              scene === "intro" ? "active" : ""
+            }`}
           >
             <div className="closing-recap-center">
-              <span className="closing-recap-eyebrow">PORRA TANCADA</span>
-              <h2 className="closing-recap-title">La culerada ha parlat</h2>
+              <span className="closing-recap-eyebrow">
+                PORRA TANCADA
+              </span>
+
+              <h2 className="closing-recap-title">
+                La culerada ha parlat
+              </h2>
+
               <p className="closing-recap-subtitle">
                 Així veu el partit la comunitat de Vesalaporra
               </p>
@@ -267,14 +659,23 @@ export default function PredictionClosingRecap({
           </section>
 
           <section
-            className={`closing-recap-scene ${scene === "total" ? "active" : ""}`}
+            className={`closing-recap-scene ${
+              scene === "total" ? "active" : ""
+            }`}
           >
             <div className="closing-recap-center">
-              <span className="closing-recap-eyebrow">PARTICIPACIÓ FINAL</span>
+              <span className="closing-recap-eyebrow">
+                PARTICIPACIÓ FINAL
+              </span>
+
               <strong className="closing-recap-total-number">
                 {summary.totalPredictions}
               </strong>
-              <span className="closing-recap-total-label">porres fetes</span>
+
+              <span className="closing-recap-total-label">
+                porres fetes
+              </span>
+
               <p className="closing-recap-subtitle">
                 Gràcies per tornar-hi una jornada més 💙❤️
               </p>
@@ -282,7 +683,9 @@ export default function PredictionClosingRecap({
           </section>
 
           <section
-            className={`closing-recap-scene closing-recap-card-scene ${scene === "result" ? "active" : ""}`}
+            className={`closing-recap-scene closing-recap-card-scene ${
+              scene === "result" ? "active" : ""
+            }`}
           >
             <div className="closing-recap-card-wrap">
               <section className="prediction-card score-card">
@@ -290,13 +693,18 @@ export default function PredictionClosingRecap({
                   <div>
                     <h2>Resultat més votat</h2>
                   </div>
-                  <span className="status-pill completed">CULERADA</span>
+
+                  <span className="status-pill completed">
+                    CULERADA
+                  </span>
                 </div>
 
                 <div className="score-match-overview">
                   <div className="score-match-date">
                     <span>PRONÒSTIC DE LA COMUNITAT</span>
-                    <strong>{match?.kickoffLabel || "PARTIT"}</strong>
+                    <strong>
+                      {match?.kickoffLabel || "PARTIT"}
+                    </strong>
                   </div>
                 </div>
 
@@ -305,45 +713,103 @@ export default function PredictionClosingRecap({
                     <div className="score-team-label">
                       <span
                         className="team-color-dot"
-                        style={{ background: homeBadgeBackground }}
+                        style={{
+                          background: homeBadgeBackground,
+                        }}
                         aria-hidden="true"
                       />
+
                       <span className="score-team-copy">
-                        <strong>{match?.homeName || "Local"}</strong>
+                        <strong>
+                          {match?.homeName || "Local"}
+                        </strong>
                       </span>
                     </div>
                   </div>
 
                   <div className="score-center-controls">
                     <div className="score-control">
-                      <button type="button" disabled aria-hidden="true">−</button>
-                      <button type="button" className="score-value" disabled>
+                      <button
+                        type="button"
+                        disabled
+                        aria-hidden="true"
+                      >
+                        −
+                      </button>
+
+                      <button
+                        type="button"
+                        className="score-value"
+                        disabled
+                      >
                         {homeScore ?? "–"}
                       </button>
-                      <button type="button" disabled aria-hidden="true">+</button>
+
+                      <button
+                        type="button"
+                        disabled
+                        aria-hidden="true"
+                      >
+                        +
+                      </button>
                     </div>
-                    <span className="score-separator" aria-hidden="true">vs</span>
+
+                    <span
+                      className="score-separator"
+                      aria-hidden="true"
+                    >
+                      vs
+                    </span>
+
                     <div className="score-control">
-                      <button type="button" disabled aria-hidden="true">−</button>
-                      <button type="button" className="score-value" disabled>
+                      <button
+                        type="button"
+                        disabled
+                        aria-hidden="true"
+                      >
+                        −
+                      </button>
+
+                      <button
+                        type="button"
+                        className="score-value"
+                        disabled
+                      >
                         {awayScore ?? "–"}
                       </button>
-                      <button type="button" disabled aria-hidden="true">+</button>
+
+                      <button
+                        type="button"
+                        disabled
+                        aria-hidden="true"
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
 
-                  <small className="score-match-label">EL PARTIT</small>
+                  <small className="score-match-label">
+                    EL PARTIT
+                  </small>
 
                   <div className="score-team away">
                     <div className="score-team-label">
                       <span
                         className="team-color-dot"
-                        style={{ background: awayBadgeBackground }}
+                        style={{
+                          background: awayBadgeBackground,
+                        }}
                         aria-hidden="true"
                       />
+
                       <span className="score-team-copy">
-                        <strong>{match?.awayName || "Visitant"}</strong>
-                        <small>{match?.awayCountry || ""}</small>
+                        <strong>
+                          {match?.awayName || "Visitant"}
+                        </strong>
+
+                        <small>
+                          {match?.awayCountry || ""}
+                        </small>
                       </span>
                     </div>
                   </div>
@@ -359,7 +825,9 @@ export default function PredictionClosingRecap({
           </section>
 
           <section
-            className={`closing-recap-scene closing-recap-card-scene ${scene === "lineup" ? "active" : ""}`}
+            className={`closing-recap-scene closing-recap-card-scene ${
+              scene === "lineup" ? "active" : ""
+            }`}
           >
             <div className="closing-recap-card-wrap">
               <section className="prediction-card lineup-card">
@@ -372,11 +840,16 @@ export default function PredictionClosingRecap({
                         alt="Hansi Flick"
                       />
                     </span>
+
                     <div className="lotto-title-copy">
                       <h2>La Lotto Flick</h2>
-                      <span className="formation-label">XI MÉS VOTAT</span>
+
+                      <span className="formation-label">
+                        XI MÉS VOTAT
+                      </span>
                     </div>
                   </div>
+
                   <span className="status-pill completed">
                     {summary.lineupPredictionCount} XI
                   </span>
@@ -395,12 +868,17 @@ export default function PredictionClosingRecap({
                         className={`formation-row formation-${line.id}`}
                       >
                         {line.slots.map((slotIndex) => {
-                          const player = lineupBySlot[slotIndex];
+                          const player =
+                            lineupBySlot[slotIndex];
 
                           return (
                             <div
                               key={slotIndex}
-                              className={player ? "field-slot occupied" : "field-slot"}
+                              className={
+                                player
+                                  ? "field-slot occupied"
+                                  : "field-slot"
+                              }
                             >
                               {player ? (
                                 <>
@@ -409,15 +887,19 @@ export default function PredictionClosingRecap({
                                     className="field-player-image"
                                     alt=""
                                   />
+
                                   <small className="field-player-name">
                                     {player.shortName}
                                   </small>
+
                                   <span className="closing-recap-slot-votes">
                                     {player.voteCount}
                                   </span>
                                 </>
                               ) : (
-                                <span className="field-slot-plus">+</span>
+                                <span className="field-slot-plus">
+                                  +
+                                </span>
                               )}
                             </div>
                           );
@@ -431,7 +913,9 @@ export default function PredictionClosingRecap({
           </section>
 
           <section
-            className={`closing-recap-scene closing-recap-card-scene ${scene === "protagonist" ? "active" : ""}`}
+            className={`closing-recap-scene closing-recap-card-scene ${
+              scene === "protagonist" ? "active" : ""
+            }`}
           >
             <div className="closing-recap-card-wrap">
               <section className="prediction-card protagonist-card">
@@ -439,7 +923,10 @@ export default function PredictionClosingRecap({
                   <div>
                     <h2>El protagonista</h2>
                   </div>
-                  <span className="status-pill completed">MÉS VOTAT</span>
+
+                  <span className="status-pill completed">
+                    MÉS VOTAT
+                  </span>
                 </div>
 
                 <div className="protagonist-combined-rule selector-selected selector-confirmed">
@@ -450,17 +937,31 @@ export default function PredictionClosingRecap({
                   >
                     {protagonist ? (
                       <span className="protagonist-selector-player">
-                        <img src={protagonist.image} alt="" />
+                        <img
+                          src={protagonist.image}
+                          alt=""
+                        />
+
                         <span aria-hidden="true">★</span>
                       </span>
                     ) : (
-                      <span className="protagonist-selector-star" aria-hidden="true">★</span>
+                      <span
+                        className="protagonist-selector-star"
+                        aria-hidden="true"
+                      >
+                        ★
+                      </span>
                     )}
                   </button>
 
                   <div className="protagonist-combined-copy">
                     <span>LA CULERADA HA ESCOLLIT</span>
-                    <strong>{protagonist?.displayName || "Sense protagonista"}</strong>
+
+                    <strong>
+                      {protagonist?.displayName ||
+                        "Sense protagonista"}
+                    </strong>
+
                     <small>
                       {protagonist
                         ? `${protagonist.voteCount} vots per marcar o assistir`
@@ -477,11 +978,19 @@ export default function PredictionClosingRecap({
           </section>
 
           <section
-            className={`closing-recap-scene ${scene === "outro" ? "active" : ""}`}
+            className={`closing-recap-scene ${
+              scene === "outro" ? "active" : ""
+            }`}
           >
             <div className="closing-recap-center">
-              <span className="closing-recap-eyebrow">TOT ESTÀ DECIDIT</span>
-              <h2 className="closing-recap-title">Ara que parli la pilota</h2>
+              <span className="closing-recap-eyebrow">
+                TOT ESTÀ DECIDIT
+              </span>
+
+              <h2 className="closing-recap-title">
+                Ara que parli la pilota
+              </h2>
+
               <p className="closing-recap-subtitle">
                 Molta sort, porrer@s! 🔥
               </p>
@@ -497,33 +1006,36 @@ export default function PredictionClosingRecap({
           </div>
         </div>
 
-                      <div className="closing-recap-actions">
+        <div className="closing-recap-actions">
           <button
             type="button"
-            onClick={copyShareLink}
+            onClick={downloadVideo}
+            disabled={downloadStatus === "working"}
             title={
-              shareStatus === "copied"
-                ? "Enllaç copiat"
-                : shareStatus === "error"
-                  ? "No s’ha pogut copiar"
-                  : "Copia l’enllaç del resum"
+              downloadStatus === "working"
+                ? "Creant l’MP4…"
+                : downloadStatus === "done"
+                  ? "MP4 descarregat"
+                  : downloadStatus === "error"
+                    ? "No s’ha pogut crear l’MP4"
+                    : "Descarrega el vídeo en MP4"
             }
-            aria-label={
-              shareStatus === "copied"
-                ? "Enllaç copiat"
-                : "Copia l’enllaç del resum del tancament"
-            }
+            aria-label="Descarrega el resum del tancament en MP4"
           >
-            {shareStatus === "copied"
-              ? "✓"
-              : shareStatus === "error"
-                ? "!"
-                : "🔗"}
+            {downloadStatus === "working"
+              ? "…"
+              : downloadStatus === "done"
+                ? "✓"
+                : downloadStatus === "error"
+                  ? "!"
+                  : "⬇"}
           </button>
 
           <button
             type="button"
-            onClick={() => setReplayKey((current) => current + 1)}
+            onClick={() =>
+              setReplayKey((current) => current + 1)
+            }
             title="Torna a començar"
             aria-label="Torna a començar"
           >
