@@ -8521,9 +8521,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
       if (oauthError) {
         window.sessionStorage.removeItem(X_AUTO_LOGIN_STORAGE_KEY);
-        setAuthError(
-          "L’enllaç d’accés ha caducat. Torna a entrar amb X, Google o Disqus.",
-        );
+        setAuthError(`No s’ha pogut completar l’accés: ${oauthError}`);
         cleanAuthUrl();
         return;
       }
@@ -13684,7 +13682,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       </div>
 
                       <div className="section-info-points-row">
-                        <span>5. Aposta enviada abans</span>
+                        <span>5. Última porra guardada abans</span>
                         <strong>5è</strong>
                       </div>
 
@@ -13700,8 +13698,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       A la jornada només hi ha un guanyador.
                       Si dos o més culers acaben amb els mateixos
                       punts, el desempat segueix exactament aquest
-                      ordre: Resultat, XI, Protagonista, hora
-                      d’enviament i, només si encara persistís
+                      ordre: Resultat, XI, Protagonista, hora de l’última
+                      porra guardada i, només si encara persistís
                       l’empat, queda davant qui es va registrar abans a Vesalaporra.
                     </small>
                   </>
