@@ -164,10 +164,10 @@ const PROTAGONIST_GROUP_OPTIONS = [
   {
     key: "f",
     label: "GRUP F · PORTER",
-    hitPoints: null,
-    missPoints: null,
+    hitPoints: 75,
+    missPoints: 0,
     sortOrder: 600,
-    excludesProtagonist: true,
+    excludesProtagonist: false,
   },
 ];
 
@@ -3316,8 +3316,10 @@ const getDefaultDynamicProtagonistScoring = (player) => {
 
   const group = PROTAGONIST_GROUP_BY_KEY[groupKey];
 
+  const isGoalkeeperGroup = groupKey === "f";
+
   if (
-    !player?.eligibleForProtagonist ||
+    (!player?.eligibleForProtagonist && !isGoalkeeperGroup) ||
     group?.excludesProtagonist === true
   ) {
     return null;
@@ -5718,11 +5720,10 @@ const saveAdminMatchPlayer = async (player, patch) => {
   const nextProtagonistGroup =
     PROTAGONIST_GROUP_BY_KEY[nextProtagonistGroupKey];
 
-  const isGoalkeeperGroup =
-    nextProtagonistGroup?.excludesProtagonist === true;
+  const isGoalkeeperGroup = nextProtagonistGroupKey === "f";
 
   const nextEligibleForProtagonist = isGoalkeeperGroup
-    ? false
+    ? nextVisibility
     : visibilityWasChanged || protagonistGroupWasChanged
       ? nextVisibility
       : patch.eligibleForProtagonist ??
@@ -5788,7 +5789,7 @@ const saveAdminMatchPlayer = async (player, patch) => {
     setAdminPlayerFeedback({
       type: "success",
       message: isGoalkeeperGroup
-        ? "Porter guardat. Serà visible a l’XI i Les Notes, però no com a protagonista."
+        ? "Porter guardat. També serà seleccionable com a protagonista: +75 si marca o assisteix i 0 si no ho fa."
         : "Configuració del jugador guardada.",
     });
 
@@ -9000,7 +9001,6 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
     const isStillEligible =
       protagonistPlayer &&
-      !protagonistPlayer.isGoalkeeper &&
       Boolean(getPlayerProtagonistScoring(protagonistPlayer));
 
     if (!isStillEligible) {
@@ -9155,12 +9155,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   }, [activePage, isAdmin]);
 
   const isPlayerEligibleForProtagonist = (player) =>
-    Boolean(
-      player &&
-        !player.isGoalkeeper &&
-        player.eligibleForProtagonist !== false &&
-        getPlayerProtagonistScoring(player),
-    );
+    Boolean(player && getPlayerProtagonistScoring(player));
 
   const clearProtagonistSelectionMode = () => {
     setProtagonistSelectionActive(false);
@@ -9322,8 +9317,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     }
 
     if (fieldPlayerId) {
-      setSelectedPlayerId(fieldPlayerId);
-      setSelectedSlotIndex(null);
+      const sameSelection =
+        selectedSlotIndex === slotIndex && selectedPlayerId === fieldPlayerId;
+
+      setSelectedSlotIndex(sameSelection ? null : slotIndex);
+      setSelectedPlayerId(sameSelection ? null : fieldPlayerId);
 
       return;
     }
@@ -9331,6 +9329,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     setSelectedSlotIndex((currentSlotIndex) =>
       currentSlotIndex === slotIndex ? null : slotIndex,
     );
+    setSelectedPlayerId(null);
   };
 
   const handlePlayerClick = (playerId) => {
@@ -11478,8 +11477,8 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
                   <small className="section-info-note">
                     El primer número són els punts si marca o assisteix. El
-                    segon és la penalització si no participa en cap gol. Gol i
-                    assistència no acumulen.
+                    segon són els punts si no participa en cap gol. Als porters
+                    és 0: no hi ha penalització. Gol i assistència no acumulen.
                   </small>
                 </div>
               )}
