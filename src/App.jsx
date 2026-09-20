@@ -4290,12 +4290,39 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
 ),
     );
 
+  const notesSeasonAverageByPlayerId = new Map(
+    notesSeasonRows
+      .filter((row) => row?.player?.id && row.voteCount > 0)
+      .map((row) => [row.player.id, row.average]),
+  );
+
   const notesPersonalRows = [...personalNotesRows]
     .filter(
       (row) =>
         row?.player &&
         row.player.eligibleForRatings !== false,
     )
+    .map((row) => {
+      const generalAverage =
+        notesSeasonAverageByPlayerId.get(row.player.id);
+
+      const rawDifference =
+        row.voteCount > 0 && Number.isFinite(generalAverage)
+          ? row.average - generalAverage
+          : null;
+
+      const averageDifference =
+        Number.isFinite(rawDifference) &&
+        Math.abs(rawDifference) < 0.05
+          ? 0
+          : rawDifference;
+
+      return {
+        ...row,
+        generalAverage,
+        averageDifference,
+      };
+    })
     .sort(
       (firstRow, secondRow) =>
         secondRow.average - firstRow.average ||
@@ -10044,6 +10071,36 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   line-height: 1;
 }
 
+.app-shell .notes-personal-difference {
+  display: inline-block;
+  margin-left: 7px;
+  font-size: 0.72em;
+  font-weight: 950;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.app-shell .notes-personal-difference.positive {
+  color: #65e6a7;
+}
+
+.app-shell .notes-personal-difference.negative {
+  color: #ff7070;
+}
+
+.app-shell .notes-personal-difference.neutral {
+  color: #aeb7c8;
+}
+
+.app-shell .notes-personal-difference-help {
+  margin: 0 0 10px;
+  color: rgba(220, 226, 238, 0.68);
+  font-size: 11px;
+  font-style: italic;
+  line-height: 1.4;
+  text-align: right;
+}
+
 .app-shell .notes-average.notes-blind-count strong {
   color: #f7cf4a;
 }
@@ -11952,7 +12009,13 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                   </span>
                 </div>
               )}
-
+              {notesTab === "personal" && (
+                <p className="notes-personal-difference-help">
+                  * Els números verds o vermells indiquen la diferència
+                  entre la teva mitjana i la de tothom. Les teves fílies
+                  i fòbies.
+                </p>
+              )}
               <div className="notes-player-list">
                 {visibleNotesRows.map((row, index) => {
                   const isBlindMatchVoting =
@@ -12050,10 +12113,32 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                         </div>
                       ) : (
                         <div className="notes-average">
-                          <strong>
+                                                   <strong>
                             {row.voteCount > 0
                               ? formatRatingAverage(row.average)
                               : "—"}
+
+                            {notesTab === "personal" &&
+                              Number.isFinite(row.averageDifference) && (
+                                <small
+                                  className={[
+                                    "notes-personal-difference",
+                                    row.averageDifference > 0
+                                      ? "positive"
+                                      : row.averageDifference < 0
+                                        ? "negative"
+                                        : "neutral",
+                                  ].join(" ")}
+                                  title={`Diferència respecte de la mitjana general: ${formatRatingAverage(
+                                    row.generalAverage,
+                                  )}`}
+                                >
+                                  {row.averageDifference > 0 ? "+" : ""}
+                                  {formatRatingAverage(
+                                    row.averageDifference,
+                                  )}
+                                </small>
+                              )}
                           </strong>
                           <span>
                             {notesTab === "personal" && row.voteCount > 0
