@@ -6118,11 +6118,12 @@ const saveAdminMatchPlayer = async (player, patch) => {
       const redirectTo = `${window.location.origin}/auth/callback`;
 
       const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo,
-        },
-      });
+  provider,
+  options: {
+    redirectTo,
+    ...(provider === "custom:disqus" ? { scopes: "read" } : {}),
+  },
+});
 
       if (error) {
         throw error;
