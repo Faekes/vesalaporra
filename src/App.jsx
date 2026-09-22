@@ -4472,8 +4472,14 @@ const getRankingAchievements = (user) =>
   };
 
   const changeScoredJornada = (direction) => {
-    const nextIndex = selectedScoredJornadaIndex + direction;
-    const nextJornada = scoredJornades[nextIndex];
+    const currentIndex = scoredJornades.findIndex(
+      (jornada) =>
+        String(jornada.match_id) === String(selectedRankingMatchId),
+    );
+
+    if (currentIndex < 0 || rankingLoading) return;
+
+    const nextJornada = scoredJornades[currentIndex + direction];
 
     if (!nextJornada) return;
 
@@ -6860,7 +6866,30 @@ const fetchScoredJornades = async () => {
     VESALAPORRA_PUBLIC_SCORED_JORNADES_RPC,
   );
   if (error) throw error;
-  return Array.isArray(data) ? data : [];
+  const uniqueByMatchId = new Map();
+
+  for (const jornada of Array.isArray(data) ? data : []) {
+    if (!jornada?.match_id) continue;
+
+    const key = String(jornada.match_id);
+    const previous = uniqueByMatchId.get(key);
+
+    if (
+      !previous ||
+      new Date(jornada.finalized_at || 0).getTime() >
+        new Date(previous.finalized_at || 0).getTime()
+    ) {
+      uniqueByMatchId.set(key, jornada);
+    }
+  }
+
+  return [...uniqueByMatchId.values()].sort(
+    (first, second) =>
+      Number(first.jornada_number || first.season_match_no || 0) -
+        Number(second.jornada_number || second.season_match_no || 0) ||
+      new Date(first.scheduled_kickoff_at || 0).getTime() -
+        new Date(second.scheduled_kickoff_at || 0).getTime(),
+  );
 };
 
 const fetchNewPredictionRanking = async () => {
@@ -13969,7 +13998,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
           type="button"
           className="ranking-jornada-arrow"
           onClick={() => changeScoredJornada(-1)}
-          disabled={selectedScoredJornadaIndex <= 0}
+          disabled={rankingLoading || selectedScoredJornadaIndex <= 0}
           aria-label="Jornada anterior"
           title="Jornada anterior"
         >
@@ -13983,6 +14012,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
           className="ranking-jornada-arrow"
           onClick={() => changeScoredJornada(1)}
           disabled={
+            rankingLoading ||
             selectedScoredJornadaIndex < 0 ||
             selectedScoredJornadaIndex >= scoredJornades.length - 1
           }
