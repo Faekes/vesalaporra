@@ -4011,9 +4011,21 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
   const activeRankingUsers =
     rankingTab === "new" ? newPredictionRankingUsers : rankingUsers;
 
-  const publicRankingUsers = activeRankingUsers.filter(
-    (user) => !isVesalaporraTechnicalAccount(user),
-  );
+  const publicRankingUsers = activeRankingUsers.filter((user) => {
+    if (isVesalaporraTechnicalAccount(user)) {
+      return false;
+    }
+
+    if (rankingTab === "general") {
+      return user.generalPosition !== null && user.generalPosition !== undefined;
+    }
+
+    if (rankingTab === "jornada") {
+      return user.jornadaPosition !== null && user.jornadaPosition !== undefined;
+    }
+
+    return user.newPosition !== null && user.newPosition !== undefined;
+  });
 
   const rankingUsersWithAuth = publicRankingUsers;
 
