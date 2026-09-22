@@ -841,7 +841,12 @@ const getVesalaporraRouteState = (
     return {
       ...defaultRouteState,
       activePage: "ranking",
-      rankingTab: secondSlug === "jornada" ? "jornada" : "general",
+      rankingTab:
+        secondSlug === "porra-nova"
+          ? "new"
+          : secondSlug === "jornada"
+            ? "jornada"
+            : "general",
     };
   }
 
@@ -911,9 +916,11 @@ const getVesalaporraPath = ({
   }
 
   if (activePage === "ranking") {
-    return rankingTab === "jornada"
-      ? "/ranquing/jornada"
-      : "/ranquing/general";
+    return rankingTab === "new"
+      ? "/ranquing/porra-nova"
+      : rankingTab === "jornada"
+        ? "/ranquing/jornada"
+        : "/ranquing/general";
   }
 
   if (activePage === "profile") {
@@ -1271,6 +1278,10 @@ const VESALAPORRA_PUBLIC_LATEST_SCORED_MATCH_RPC =
 
 const VESALAPORRA_PUBLIC_LATEST_SCORED_JORNADA_NUMBER_RPC =
   "vesalaporra_public_latest_scored_jornada_number";
+const VESALAPORRA_PUBLIC_SCORED_JORNADES_RPC =
+  "vesalaporra_public_scored_jornades";
+const VESALAPORRA_PUBLIC_NEW_PREDICTION_RANKING_RPC =
+  "vesalaporra_public_new_prediction_ranking";
 
 const VESALAPORRA_PUBLIC_SCORED_MATCH_CARD_RPC =
   "vesalaporra_public_scored_match_card";
@@ -3502,6 +3513,9 @@ function VesalaporraApp() {
   const [notesRankingRefreshing, setNotesRankingRefreshing] = useState(false);
 
 const [rankingUsers, setRankingUsers] = useState([]);
+const [newPredictionRankingUsers, setNewPredictionRankingUsers] = useState([]);
+const [scoredJornades, setScoredJornades] = useState([]);
+const [selectedRankingMatchId, setSelectedRankingMatchId] = useState(null);
   const [achievementMultipliersByUser, setAchievementMultipliersByUser] = useState({});
 const [rankingLoading, setRankingLoading] = useState(false);
 const [rankingError, setRankingError] = useState("");
@@ -3994,7 +4008,10 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       }
     : null;
 
-  const publicRankingUsers = rankingUsers.filter(
+  const activeRankingUsers =
+    rankingTab === "new" ? newPredictionRankingUsers : rankingUsers;
+
+  const publicRankingUsers = activeRankingUsers.filter(
     (user) => !isVesalaporraTechnicalAccount(user),
   );
 
@@ -4004,7 +4021,9 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     const rawPosition =
       scope === "general"
         ? user?.generalPosition
-        : user?.jornadaPosition;
+        : scope === "new"
+          ? user?.newPosition
+          : user?.jornadaPosition;
 
     const numericPosition = Number(rawPosition);
 
@@ -4024,7 +4043,14 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       Number(user.preseasonFinalPosition) > 0,
   );
 
-   const compareRankingUsers = (firstUser, secondUser, scope) => {
+  const compareRankingUsers = (firstUser, secondUser, scope) => {
+    if (scope === "new") {
+      return (
+        getRankingScopePosition(firstUser, "new") -
+          getRankingScopePosition(secondUser, "new") ||
+        firstUser.displayName.localeCompare(secondUser.displayName, "ca")
+      );
+    }
     if (
       scope === "general" &&
       !generalRankingHasOfficialPoints &&
@@ -4075,6 +4101,14 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     rankingRows.findIndex((user) => user.isCurrentUser) + 1;
   const currentRankingUser =
     rankingRows.find((user) => user.isCurrentUser) || null;
+
+  const selectedScoredJornadaIndex = scoredJornades.findIndex(
+    (jornada) => String(jornada.match_id) === String(selectedRankingMatchId),
+  );
+  const selectedScoredJornada =
+    scoredJornades[selectedScoredJornadaIndex] ||
+    scoredJornades[scoredJornades.length - 1] ||
+    null;
 
   const selectedProfileUser =
     rankingUsersWithAuth.find((user) => user.id === selectedProfileUserId) ||
@@ -4423,6 +4457,18 @@ const getRankingAchievements = (user) =>
   const changeRankingTab = (nextTab) => {
     setRankingTab(nextTab);
     setVisibleRankingCount(RANKING_PAGE_SIZE);
+  };
+
+  const changeScoredJornada = (direction) => {
+    const nextIndex = selectedScoredJornadaIndex + direction;
+    const nextJornada = scoredJornades[nextIndex];
+
+    if (!nextJornada) return;
+
+    setSelectedRankingMatchId(nextJornada.match_id);
+    setRankingJornadaNumber(nextJornada.jornada_number);
+    setVisibleRankingCount(RANKING_PAGE_SIZE);
+    loadRealRanking({ matchId: nextJornada.match_id });
   };
 
   const openRankingProfile = (userId) => {
@@ -6776,11 +6822,12 @@ const saveAdminMatchPlayer = async (player, patch) => {
     }
   };
 
-const fetchRankingScope = async (scope) => {
+const fetchRankingScope = async (scope, matchId = null) => {
   const { data: payload, error } = await supabase.rpc(
     VESALAPORRA_PUBLIC_RANKING_RPC,
     {
       p_scope: scope,
+      p_match_id: scope === "jornada" ? matchId : null,
       p_limit: 500,
     },
   );
@@ -6793,6 +6840,35 @@ const fetchRankingScope = async (scope) => {
     .map((row, index) =>
       normalizeRankingUser(row, scope, authUser?.id, index),
     )
+    .filter(Boolean);
+};
+
+const fetchScoredJornades = async () => {
+  const { data, error } = await supabase.rpc(
+    VESALAPORRA_PUBLIC_SCORED_JORNADES_RPC,
+  );
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+};
+
+const fetchNewPredictionRanking = async () => {
+  const { data: payload, error } = await supabase.rpc(
+    VESALAPORRA_PUBLIC_NEW_PREDICTION_RANKING_RPC,
+    { p_limit: 500 },
+  );
+  if (error) throw error;
+
+  return unwrapRpcRows(payload, ["ranking", "rows", "items", "users"])
+    .map((row, index) => {
+      const user = normalizeRankingUser(row, "jornada", authUser?.id, index);
+      return user
+        ? {
+            ...user,
+            new: { ...user.jornada },
+            newPosition: user.jornadaPosition,
+          }
+        : null;
+    })
     .filter(Boolean);
 };
 
@@ -6873,7 +6949,7 @@ const fetchLatestScoredJornadaNumber = async () => {
     : null;
 };
 
-const loadRealRanking = async ({ quiet = false } = {}) => {
+const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
   if (!quiet) {
     setRankingLoading(true);
   }
@@ -6881,15 +6957,23 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
   setRankingError("");
 
   try {
+    const jornadas = await fetchScoredJornades();
+    const effectiveMatchId =
+      matchId ||
+      selectedRankingMatchId ||
+      jornadas[jornadas.length - 1]?.match_id ||
+      null;
+
     const [
       generalRows,
       jornadaRows,
       jornadaNumber,
       preseasonFinalPositionById,
+      newPredictionRows,
     ] =
       await Promise.all([
         fetchRankingScope("general"),
-        fetchRankingScope("jornada"),
+        fetchRankingScope("jornada", effectiveMatchId),
         fetchLatestScoredJornadaNumber().catch((error) => {
           console.warn(
             "No s’ha pogut carregar el número de jornada:",
@@ -6906,6 +6990,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
           return {};
         }),
+        fetchNewPredictionRanking(),
       ]);
 
     const mergedRows = mergeRankingScopes(
@@ -6929,7 +7014,14 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     }));
 
     setRankingUsers(mergedRowsWithSignupDates);
-    setRankingJornadaNumber(jornadaNumber);
+    setNewPredictionRankingUsers(newPredictionRows);
+    setScoredJornades(jornadas);
+    setSelectedRankingMatchId(effectiveMatchId);
+    setRankingJornadaNumber(
+      jornadas.find(
+        (jornada) => String(jornada.match_id) === String(effectiveMatchId),
+      )?.jornada_number || jornadaNumber,
+    );
 
     if (!selectedProfileUserId && authUser?.id) {
       setSelectedProfileUserId(String(authUser.id));
@@ -13737,7 +13829,7 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
                       Els criteris s’apliquen exactament en aquest
                       ordre i només dins de la temporada activa.
                       Participació significa porres confirmades
-                      vàlides. Després de sis partits consecutius
+                      vàlides. Després de cinc partits consecutius
                       sense participar, el compte deixa d’aparèixer
                       fins que torna a confirmar una porra.
                       Si encara hi ha empat, queda davant qui es va registrar abans a Vesalaporra.
@@ -13826,6 +13918,20 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
               >
                 JORNADA
               </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={rankingTab === "new"}
+                className={
+                  rankingTab === "new"
+                    ? "ranking-tab active"
+                    : "ranking-tab"
+                }
+                onClick={() => changeRankingTab("new")}
+              >
+                PORRA NOVA
+              </button>
             </div>
 
             <section className="ranking-board">
@@ -13834,9 +13940,11 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
     <span>
      {rankingTab === "general"
   ? "CLASSIFICACIÓ GENERAL"
-  : rankingJornadaNumber
-    ? `JORNADA ${rankingJornadaNumber}`
-    : "JORNADA"}
+  : rankingTab === "new"
+    ? "PORRA NOVA"
+    : rankingJornadaNumber
+      ? `JORNADA ${rankingJornadaNumber}`
+      : "JORNADA"}
     </span>
     {rankingLoading && (
   <strong>Carregant rànquing real...</strong>
@@ -13851,6 +13959,34 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
       gap: "10px",
     }}
   >
+    {rankingTab === "jornada" && (
+      <>
+        <button
+          type="button"
+          onClick={() => changeScoredJornada(-1)}
+          disabled={selectedScoredJornadaIndex <= 0}
+          aria-label="Jornada anterior"
+          title="Jornada anterior"
+        >
+          ←
+        </button>
+        <small>
+          {selectedScoredJornada?.opponent_display_name || "JORNADES ANTERIORS"}
+        </small>
+        <button
+          type="button"
+          onClick={() => changeScoredJornada(1)}
+          disabled={
+            selectedScoredJornadaIndex < 0 ||
+            selectedScoredJornadaIndex >= scoredJornades.length - 1
+          }
+          aria-label="Jornada següent"
+          title="Jornada següent"
+        >
+          →
+        </button>
+      </>
+    )}
     <small>ES CARREGA DE 20 EN 20</small>
 
   </div>
@@ -13864,10 +14000,15 @@ const loadRealRanking = async ({ quiet = false } = {}) => {
 
               {!rankingLoading && !rankingError && rankingRows.length === 0 && (
                 <div className="real-data-state empty">
-                  <strong>Encara no hi ha cap jornada puntuada</strong>
+                  <strong>
+                    {rankingTab === "new"
+                      ? "Encara no hi ha cap porra confirmada"
+                      : "Encara no hi ha cap jornada puntuada"}
+                  </strong>
                   <span>
-                    El rànquing començarà quan Puntuacions publiqui el primer
-                    resultat oficial.
+                    {rankingTab === "new"
+                      ? "Els participants apareixeran quan confirmin la porra."
+                      : "El rànquing començarà quan Puntuacions publiqui el primer resultat oficial."}
                   </span>
                 </div>
               )}
