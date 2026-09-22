@@ -13950,19 +13950,12 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
   <strong>Carregant rànquing real...</strong>
 )}
   </div>
-    <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "flex-end",
-      flexWrap: "wrap",
-      gap: "10px",
-    }}
-  >
+    <div className="ranking-jornada-navigation">
     {rankingTab === "jornada" && (
       <>
         <button
           type="button"
+          className="ranking-jornada-arrow"
           onClick={() => changeScoredJornada(-1)}
           disabled={selectedScoredJornadaIndex <= 0}
           aria-label="Jornada anterior"
@@ -13975,6 +13968,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
         </small>
         <button
           type="button"
+          className="ranking-jornada-arrow"
           onClick={() => changeScoredJornada(1)}
           disabled={
             selectedScoredJornadaIndex < 0 ||
@@ -13987,8 +13981,6 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
         </button>
       </>
     )}
-    <small>ES CARREGA DE 20 EN 20</small>
-
   </div>
 </header>
               {rankingError && (
