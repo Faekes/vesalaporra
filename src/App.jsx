@@ -1849,53 +1849,10 @@ const compareMatchNotesRows = (firstRow, secondRow) => {
 
 const ACHIEVEMENT_CATALOG = [
   {
-    id: "flick-reader",
-    icon: "🧠",
-    title: "Llegeix Flick",
-    description: "Encerta 3 vegades l’11 titular exacte.",
-  },
-  {
-    id: "nostradamus",
-    icon: "🔮",
-    title: "Nostradamus",
-    description: "Encerta el resultat exacte 3 cops.",
-  },
-  {
-    id: "yoyalodije",
-    icon: "🎯",
-    title: "Yoyalodije",
-    description: "Encerta el protagonista 4 cops.",
-  },
-  {
-    id: "winner",
-    icon: "👑",
-    title: "Winner",
-    description: "Guanya 2 jornades.",
-  },
-  {
-    id: "candidat",
-    icon: "🚴",
-    title: "Candidat",
-    description: "Acaba 4 jornades dins del Top 10 de la classificació general.",
-  },
-  {
-    id: "xop-xop-salinas",
-    icon: "🐙",
-    title: "Xop xop Salinas",
-    description: "Falla els 11 jugadors d’un XI en una jornada.",
-  },
-  {
-    id: "kamikaze",
-    icon: "kamikaze-plane",
-    title: "Kamikaze",
-    description: "Encertar un 0-0 o el resultat exacte d’una derrota.",
-  },
-   {
-    id: "preseason_champion_2026",
-    icon: "preseason-sun-sunglasses",
-    title: "Campió de la pretemporada 2026",
-    description:
-      "Guanya la classificació general definitiva de la pretemporada 2026.",
+    id: "season_champion_2026_27",
+    icon: "vesalaporra-v",
+    title: "Campió de la temporada 26/27",
+    description: "Guanya la classificació general definitiva 2026/27.",
   },
   {
     id: "winter_champion_2026",
@@ -1905,10 +1862,53 @@ const ACHIEVEMENT_CATALOG = [
       "Lidera la classificació general de Vesalaporra en acabar l’any natural 2026.",
   },
   {
-    id: "season_champion_2026_27",
-    icon: "vesalaporra-v",
-    title: "Campió de la temporada 26/27",
-    description: "Guanya la classificació general definitiva 2026/27.",
+    id: "preseason_champion_2026",
+    icon: "preseason-sun-sunglasses",
+    title: "Campió de la pretemporada 2026",
+    description:
+      "Guanya la classificació general definitiva de la pretemporada 2026.",
+  },
+  {
+    id: "winner",
+    icon: "👑",
+    title: "Guanyador de la jornada",
+    description: "Guanya una jornada.",
+  },
+  {
+    id: "nostradamus",
+    icon: "🔮",
+    title: "Nostradamus",
+    description: "Encerta el resultat exacte 3 cops.",
+  },
+  {
+    id: "flick-reader",
+    icon: "🧠",
+    title: "Llegeix Flick",
+    description: "Encerta 3 vegades l’11 titular exacte.",
+  },
+  {
+    id: "yoyalodije",
+    icon: "🎯",
+    title: "Yoyalodije",
+    description: "Encerta el protagonista 4 cops.",
+  },
+  {
+    id: "candidat",
+    icon: "🚴",
+    title: "Candidat",
+    description: "Acaba 4 jornades dins del Top 10 de la classificació general.",
+  },
+  {
+    id: "kamikaze",
+    icon: "kamikaze-plane",
+    title: "Kamikaze",
+    description: "Encertar un 0-0 o el resultat exacte d’una derrota.",
+  },
+  {
+    id: "xop-xop-salinas",
+    icon: "🐙",
+    title: "Xop xop Salinas",
+    description: "Falla els 11 jugadors d’un XI en una jornada.",
   },
 ];
 
@@ -13831,9 +13831,16 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
 
                       <div className="section-info-points-row">
                         <span>
-                          3. Més medalles desbloquejades
+                          3. Més medalles aconseguides (les repeticions xN també compten)
                         </span>
                         <strong>3r</strong>
+                      </div>
+
+                      <div className="section-info-points-row">
+                        <span>
+                          Desempat de medalles: Temporada · Hivern · Pretemporada · Jornada · Nostradamus · Llegeix Flick · Yoyalodije · Candidat · Kamikaze · Xop xop Salinas
+                        </span>
+                        <strong>ORDRE</strong>
                       </div>
 
                       <div className="section-info-points-row">
