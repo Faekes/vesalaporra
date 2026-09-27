@@ -811,7 +811,7 @@ const getVesalaporraRouteState = (
     selectedNotesUserId: null,
   };
 
-  if (section === "com-jugar" || section === "instruccions") {
+  if (section === "coe" || section === "com-jugar" || section === "instruccions") {
     return {
       ...defaultRouteState,
       activePage: "instructions",
@@ -900,7 +900,7 @@ const getVesalaporraPath = ({
   selectedNotesUserId,
 }) => {
   if (activePage === "instructions") {
-    return "/com-jugar";
+    return "/coe";
   }
 
   if (activePage === "notes") {
@@ -10295,6 +10295,61 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
   line-height: 1;
 }
 
+.coe-nav-icon {
+  border: 0;
+  font-size: 19px;
+  width: 24px;
+  flex-basis: 24px;
+}
+.coe-page {
+  width: min(calc(100% - 28px), 1080px);
+  margin: 0 auto;
+  padding: clamp(24px, 5vw, 58px) 0 90px;
+}
+.coe-poster {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 590px;
+  padding: clamp(36px, 7vw, 84px) 22px;
+  border: 1px solid rgba(255, 199, 83, .42);
+  border-radius: 24px;
+  color: #fff7e6;
+  background: radial-gradient(ellipse at 50% 3%, rgba(202, 127, 28, .38), transparent 47%),
+    radial-gradient(ellipse at 0% 96%, rgba(131, 29, 43, .58), transparent 58%),
+    radial-gradient(ellipse at 100% 89%, rgba(21, 57, 141, .65), transparent 58%),
+    linear-gradient(145deg, #0b1020, #16152d 52%, #090d18);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, .25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 18px;
+}
+.coe-poster::before {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(240, 183, 86, .23);
+  border-radius: 15px;
+  pointer-events: none;
+}
+.coe-eyebrow { font-size: 11px; letter-spacing: .38em; font-weight: 800; color: #e8c489; }
+.coe-mark { font-size: clamp(54px, 9vw, 88px); filter: drop-shadow(0 5px 23px rgba(244, 167, 57, .42)); }
+.coe-poster h1 { margin: 0; font-size: clamp(44px, 9vw, 102px); line-height: .97; font-weight: 1000; letter-spacing: -.055em; text-shadow: 0 6px 28px rgba(0,0,0,.5); }
+.coe-poster h1 span { display: inline-block; font-size: .4em; color: #f5c674; vertical-align: middle; letter-spacing: -.03em; }
+.coe-subtitle { margin: 2px 0 0; color: #f8d58a; font-weight: 900; letter-spacing: .14em; font-size: clamp(12px, 2vw, 18px); }
+.coe-poster-divider { width: 88px; height: 2px; background: linear-gradient(90deg, transparent, #ebbe72, transparent); margin-top: 6px; }
+.coe-description { max-width: 570px; font-size: clamp(15px, 2vw, 19px); line-height: 1.65; color: #e5e8f3; margin: 0; }
+.coe-play-button { display: inline-flex; justify-content: center; align-items: center; gap: 12px; margin-top: 18px; padding: 17px 27px; color: #15111b; background: linear-gradient(135deg, #ffe5a3, #efb648); border-radius: 12px; font-weight: 950; text-decoration: none; box-shadow: 0 7px 35px rgba(239,182,72,.25); transition: transform .2s, box-shadow .2s; }
+.coe-play-button:hover { transform: translateY(-2px); box-shadow: 0 10px 42px rgba(239,182,72,.4); }
+.coe-footnote { font-size: 12px; color: #abb5ca; }
+@media (max-width: 520px) {
+  .coe-poster { min-height: 540px; }
+  .coe-poster h1 span { display: block; margin: 5px 0; }
+}
+
 .instructions-page {
   width: min(calc(100% - 24px), 1240px);
   margin: 0 auto;
@@ -10588,13 +10643,13 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                   : "nav-button nav-help-button"
               }
               onClick={() => setActivePage("instructions")}
-              aria-label="Com jugar: instruccions de Vesalaporra"
-              title="Com jugar"
+              aria-label="Clash of Eras"
+              title="Clash of Eras"
             >
-              <span className="nav-help-icon" aria-hidden="true">
-                ?
+              <span className="nav-help-icon coe-nav-icon" aria-hidden="true">
+                🕹️
               </span>
-              <span className="nav-help-label">COM JUGAR</span>
+              <span className="nav-help-label">COE</span>
             </button>
                         <button
   type="button"
@@ -10709,13 +10764,24 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
 
       <main className="app-main">
         {activePage === "instructions" && (
-          <section
-            className="instructions-page"
-            aria-label="Com jugar a Vesalaporra"
-          >
-            <div
-              dangerouslySetInnerHTML={{ __html: enhancedInstructionsHtml }}
-            />
+          <section className="coe-page" aria-label="Clash of Eras">
+            <div className="coe-poster">
+              <span className="coe-eyebrow">VESALAPORRA PRESENTA</span>
+              <div className="coe-mark" aria-hidden="true">⚔️</div>
+              <h1>CLASH <span>OF</span> ERAS</h1>
+              <p className="coe-subtitle">20 BARÇAS HISTÒRICS. UNA SOLA LLEGENDA.</p>
+              <div className="coe-poster-divider" aria-hidden="true" />
+              <p className="coe-description">Tria una època, prepara el teu onze i competeix contra els altres grans Barças de la història.</p>
+              <a
+                className="coe-play-button"
+                href="https://chatgpt.com/g/g-p-6ab646582d70819186b40cd2b4ecf011-simulador/c/6ab821dd-d140-83ed-95a8-eb546a0260cc"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                🕹️ ENTRA AL JOC <span aria-hidden="true">↗</span>
+              </a>
+              <span className="coe-footnote">S’obre a ChatGPT en una pestanya nova.</span>
+            </div>
           </section>
         )}
 
