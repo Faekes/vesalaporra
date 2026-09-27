@@ -10409,3 +10409,46 @@ border-color: #f5c542 !important;
 .coe-title-bottom{display:grid;grid-template-columns:repeat(3,1fr);background:#0b1630;border-top:1px solid #6b7193}.coe-title-bottom div{padding:18px 24px;border-right:1px solid #35446a;color:#afc0dc;font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;font-weight:800}.coe-title-bottom div:last-child{border:0}.coe-title-bottom b{display:block;color:#fff1c8;font-size:1.3rem;letter-spacing:0;margin-bottom:3px}
 @media(max-width:760px){.app-shell .coe-page .coe-title-screen{padding:10px}.coe-title-stage{grid-template-columns:1fr;min-height:0;padding:39px 24px;gap:35px}.coe-title-logo{font-size:clamp(3.1rem,13vw,6.4rem)}.coe-title-console{transform:none;max-width:480px}.coe-title-bottom div{padding:12px 10px;font-size:.65rem}.coe-title-bottom b{font-size:1rem}.coe-title-topline{font-size:.65rem;padding:12px}.coe-title-actions{display:grid}.coe-title-play,.coe-title-pick{width:100%}}
 @media(prefers-reduced-motion:reduce){.coe-title-play{transition:none}}
+
+/* Selecció d'èpoques amb els mateixos patrons de samarreta del joc. */
+.app-shell .coe-catalog { margin:0; color:#f4f5fa; }
+.app-shell .coe-catalog .coe-back { margin:0 0 18px; }
+.app-shell .coe-catalog-brand { border:1px solid #506591; border-radius:16px; padding:13px 20px; margin-bottom:28px; color:#fff; background:#111e3d; font-weight:950; font-size:22px; letter-spacing:.1em; }
+.app-shell .coe-catalog-brand span { color:#f2cd7b; }
+.app-shell .coe-catalog h2 { color:#fff; font-size:clamp(32px,5vw,52px); margin:0 0 6px; line-height:1.12; }
+.app-shell .coe-catalog-lead { color:#b7c1d5; font-size:clamp(17px,2vw,23px); margin:0 0 22px; }
+.app-shell .coe-catalog-panel { padding:22px; border:1px solid #526a9c; border-radius:18px; background:#192a50; }
+.app-shell .coe-catalog-panel h3 { color:#fff; font-size:clamp(22px,2.8vw,30px); margin:0 0 12px; }
+.app-shell .coe-catalog-panel > p { color:#b7c1d5; font-size:18px; line-height:1.4; margin:0 0 20px; }
+.app-shell .coe-team-grid { grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; }
+.app-shell .coe-team { flex-direction:row; align-items:center; gap:18px; min-height:126px; padding:14px; border-color:#738bbd; border-radius:14px; background:linear-gradient(135deg,#243b68,#182344); }
+.app-shell .coe-team-copy { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.app-shell .coe-team-years { color:#c7cee0; font-size:13px; font-weight:900; letter-spacing:.14em; }
+.app-shell .coe-team strong { color:#f2f4fa; font-size:20px; }
+.app-shell .coe-team-open { display:block; width:auto; margin:0; padding:0; color:#bac5d9; font-size:14px; font-weight:500; }
+.app-shell .coe-era-pattern { position:relative; display:block; flex:none; width:82px; height:82px; border-radius:10px; box-shadow:0 9px 22px #0008; overflow:hidden; }
+.app-shell .coe-era-daucik { background:repeating-linear-gradient(90deg,#172549 0 15px,#732039 15px 28px); }
+.app-shell .coe-era-hh { background:linear-gradient(135deg,#f4f2e9 0 43%,#a32343 43% 48%,#153e79 48% 56%,#f4f2e9 56%); }
+.app-shell .coe-era-sixtiesEarly { background:linear-gradient(90deg,#ede0b9 0 30%,#315486 30% 40%,#762f4b 40% 60%,#315486 60% 70%,#ede0b9 70%); }
+.app-shell .coe-era-fires { background:linear-gradient(90deg,#183967 0 36%,#6e233c 36% 64%,#183967 64%); }
+.app-shell .coe-era-michels { background:repeating-linear-gradient(90deg,#142e69 0 19px,#5c1238 19px 38px); }
+.app-shell .coe-era-basilea { background:#e8c94a; }
+.app-shell .coe-era-basilea:before { content:""; position:absolute; inset:-24%; background:linear-gradient(135deg,transparent 43%,#123d81 43% 49%,#a62044 49% 55%,transparent 55%); }
+.app-shell .coe-era-simonsen { background:linear-gradient(90deg,#5976a1 0 20%,#9b5266 20% 37%,#54739d 37% 63%,#9b5266 63% 80%,#5976a1 80%); }
+.app-shell .coe-era-eighties { background:linear-gradient(180deg,#ad2745 0 38%,#133f82 38% 53%,#ad2745 53%); }
+.app-shell .coe-era-cruyff { background:linear-gradient(95deg,#f47c28,#ff9a40 42%,#f17b27); }
+.app-shell .coe-era-cruyff:before,.app-shell .coe-era-cruyff:after { content:""; position:absolute; inset:0; background:repeating-conic-gradient(#bd2d61 0 25%,#1463a6 0 50%) 0 0/13px 13px; }
+.app-shell .coe-era-cruyff:before { clip-path:polygon(0 0,8% 0,35% 29%,27% 42%,0 11%); }
+.app-shell .coe-era-cruyff:after { clip-path:polygon(92% 0,100% 0,100% 11%,73% 42%,65% 29%); }
+.app-shell .coe-era-mini { background:linear-gradient(90deg,#50c7c2 0 54%,#174383 54% 70%,#8d2148 70% 86%,#50c7c2 86%); }
+.app-shell .coe-era-robson { background:linear-gradient(180deg,#163b76 0 8%,#39bea0 8% 90%,#163b76 90% 95%,#a32247 95%); }
+.app-shell .coe-era-vanGaal { background:linear-gradient(90deg,#80213d 0 50%,#153d7a 50%); }
+.app-shell .coe-era-serra { background:linear-gradient(90deg,#17427d 0 9%,#a52a4b 9% 13%,#aeb4b8 13% 87%,#a52a4b 87% 91%,#17427d 91%); }
+.app-shell .coe-era-antic { background:linear-gradient(180deg,#bd9850 0 9%,#132e5b 9% 24%,#bd9850 24%); }
+.app-shell .coe-era-rijkaard { background:repeating-linear-gradient(90deg,#133c82 0 7px,#a51f42 7px 14px); }
+.app-shell .coe-era-guardiola { background:linear-gradient(180deg,#f5e836 0 42%,#164386 42% 49%,#a92345 49% 56%,#f5e836 56%); }
+.app-shell .coe-era-luisEnrique { background:repeating-linear-gradient(180deg,#163e86 0 18px,#a42143 18px 36px); }
+.app-shell .coe-era-valverde { background:linear-gradient(135deg,#ec8ba8 0 24%,#62c9c1 24% 30%,#f09aaf 30% 75%,#58bdbb 75% 82%,#ec8ba8 82%); }
+.app-shell .coe-era-xavi { background:repeating-linear-gradient(146deg,#e3ba37 0 18px,#b72b3b 18px 23px,#e3ba37 23px 37px); }
+.app-shell .coe-era-flick { background:linear-gradient(90deg,#a41f43 0 19%,#09224f 19% 28%,#1452aa 28% 40%,#c62b4b 40% 51%,#8a173b 51% 62%,#0a204b 62% 74%,#1851a1 74% 88%,#a51d42 88%); }
+@media(max-width:600px) { .app-shell .coe-page { padding:10px 10px 48px; } .app-shell .coe-catalog-panel { padding:15px; } .app-shell .coe-team-grid { grid-template-columns:1fr; } .app-shell .coe-team { min-height:110px; gap:12px; padding:12px; } .app-shell .coe-team strong { font-size:18px; } }
