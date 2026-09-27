@@ -8,14 +8,14 @@ export default function ClashOfErasCatalog() {
   const [showTeams, setShowTeams] = useState(false);
   const openTeams = () => {
     setShowTeams(true);
-    requestAnimationFrame(() => document.getElementById("coe-teams")?.scrollIntoView({ behavior: "smooth" }));
+    setSelectedId(null);
   };
   const selected = catalog.teams.find((team) => team.id === selectedId);
 
   return (
     <section className="coe-page" aria-label="Clash of Eras">
       <div className="coe-content">
-        <div className="coe-title-frame">
+        {!showTeams && <div className="coe-title-frame">
           <div className="coe-title-topline"><span>CLASH OF ERAS <b>·</b> EDICIÓ DE PROVA</span><span>LA COPA DE LES ÈPOQUES</span></div>
           <div className="coe-title-stage">
             <div className="coe-title-copy">
@@ -34,9 +34,9 @@ export default function ClashOfErasCatalog() {
             </div>
           </div>
           <div className="coe-title-bottom"><div><b>20</b> ÈPOQUES</div><div><b>16</b> EQUIPS PER COPA</div><div><b>4</b> RONDES</div></div>
-        </div>
+        </div>}
 
-        {!showTeams ? null : selected ? (
+        {showTeams && (selected ? (
           <div className="coe-detail" id="coe-teams">
             <button className="coe-back" type="button" onClick={() => setSelectedId(null)}>← Tots els equips</button>
             <div className="coe-detail-head">
@@ -59,6 +59,7 @@ export default function ClashOfErasCatalog() {
           </div>
         ) : (
           <div className="coe-catalog" id="coe-teams">
+            <button className="coe-back" type="button" onClick={() => setShowTeams(false)}>← Portada</button>
             <h2>Escull el teu Barça</h2>
             <div className="coe-team-grid">
               {catalog.teams.map((team) => (
@@ -71,7 +72,7 @@ export default function ClashOfErasCatalog() {
               ))}
             </div>
           </div>
-        )}
+        ))}
       </div>
     </section>
   );
