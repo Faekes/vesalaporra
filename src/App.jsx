@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLauncher";
+import ClashOfErasCatalog from "./components/ClashOfErasCatalog";
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
 import VesalaporraDemo from "./components/VesalaporraDemoV3.jsx";
 import instructionsHtml from "./content/instruccions.html?raw";
@@ -10763,27 +10764,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
       )}
 
       <main className="app-main">
-        {activePage === "instructions" && (
-          <section className="coe-page" aria-label="Clash of Eras">
-            <div className="coe-poster">
-              <span className="coe-eyebrow">VESALAPORRA PRESENTA</span>
-              <div className="coe-mark" aria-hidden="true">⚔️</div>
-              <h1>CLASH <span>OF</span> ERAS</h1>
-              <p className="coe-subtitle">20 BARÇAS HISTÒRICS. UNA SOLA LLEGENDA.</p>
-              <div className="coe-poster-divider" aria-hidden="true" />
-              <p className="coe-description">Tria una època, prepara el teu onze i competeix contra els altres grans Barças de la història.</p>
-              <a
-                className="coe-play-button"
-                href="https://chatgpt.com/g/g-p-6ab646582d70819186b40cd2b4ecf011-simulador/c/6ab821dd-d140-83ed-95a8-eb546a0260cc"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                🕹️ ENTRA AL JOC <span aria-hidden="true">↗</span>
-              </a>
-              <span className="coe-footnote">S’obre a ChatGPT en una pestanya nova.</span>
-            </div>
-          </section>
-        )}
+        {activePage === "instructions" && <ClashOfErasCatalog />}
 
         {activePage === "play" && (
           <section

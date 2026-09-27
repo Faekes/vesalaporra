@@ -10358,3 +10358,51 @@ border-color: #f5c542 !important;
 .score-separator {
   color: #f5d34b;
 }
+
+/* Catàleg local de Clash of Eras. */
+.app-shell .coe-page { display:block; min-height:0; padding:28px 16px 64px; }
+.app-shell .coe-content { width:min(100%,1100px); margin:auto; }
+.app-shell .coe-content .coe-poster { min-height:390px; padding:clamp(32px,5vw,58px) clamp(22px,5vw,64px); }
+.app-shell .coe-content .coe-poster h1 { font-size:clamp(42px,8vw,82px); }
+
+.app-shell .coe-content .coe-description { margin-bottom:0; }
+.app-shell .coe-catalog, .app-shell .coe-detail { margin-top:28px; color:#eef2fc; }
+.app-shell .coe-catalog h2 { font-size:clamp(23px,3vw,32px); margin:0 0 20px; }
+.app-shell .coe-team-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:13px; }
+.app-shell .coe-team { display:flex; flex-direction:column; align-items:flex-start; gap:7px; min-height:150px; padding:18px; text-align:left; color:#f4f6fb; border:1px solid #34466d; border-radius:15px; background:linear-gradient(145deg,#1d2e55,#111e3b); cursor:pointer; font:inherit; transition:transform .16s,border-color .16s; }
+.app-shell .coe-team:hover, .app-shell .coe-team:focus-visible { transform:translateY(-2px); border-color:#e4b75d; }
+.app-shell .coe-team strong { font-size:19px; line-height:1.2; }
+.app-shell .coe-team-years, .app-shell .coe-detail-meta { color:#f2c875; font-size:14px; font-weight:800; }
+.app-shell .coe-team-systems { margin-top:auto; color:#c5d5ee; font-size:14px; }
+.app-shell .coe-team-systems span { margin-left:8px; color:#f2c875; }
+.app-shell .coe-back { margin:0 0 20px; padding:9px 0; color:#f2c875; background:none; border:0; cursor:pointer; font:inherit; font-weight:800; }
+.app-shell .coe-detail-head { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:22px; }
+.app-shell .coe-detail-head h2 { margin:3px 0; font-size:clamp(28px,4vw,42px); }
+.app-shell .coe-detail-meta { margin:0; }
+.app-shell .coe-systems { margin:10px 0 0; color:#cbd7ed; }
+.app-shell .coe-roster { display:grid; grid-template-columns:repeat(auto-fit,minmax(245px,1fr)); gap:9px; }
+.app-shell .coe-player { display:flex; align-items:center; gap:12px; min-height:57px; padding:9px 13px; border:1px solid #34466d; border-radius:10px; background:#172749; }
+.app-shell .coe-player-position { min-width:45px; color:#f2c875; font-size:13px; font-weight:800; }
+.app-shell .coe-player-name { flex:1; font-weight:700; }
+.app-shell .coe-player-rating { color:#fff; font-size:20px; }
+@media(max-width:600px) { .app-shell .coe-detail-head { align-items:stretch; flex-direction:column; } .app-shell .coe-detail-head .coe-play-button { align-self:stretch; } }
+
+/* Portada exacta de la pantalla inicial de Clash of Eras. */
+
+.app-shell .coe-page .coe-title-screen{min-height:100svh;display:grid;place-items:center;padding:22px;background:radial-gradient(circle at 50% 20%,#273b79 0,#101b3b 48%,#070d20 100%);color:#f8f4e9}
+.app-shell .coe-page .coe-title-frame{width:min(1120px,100%);border:1px solid #7084a8;border-top:5px solid #e6bd60;border-radius:16px;box-shadow:0 28px 75px #020612b0,0 0 0 6px #142544;overflow:hidden;background:#111e3d}
+.coe-title-topline{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 24px;background:#0a1632;color:#d6e0f2;font-size:.78rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.coe-title-topline b{color:#f5cd73}
+.coe-title-stage{position:relative;isolation:isolate;min-height:570px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:30px;align-items:center;padding:54px clamp(26px,5vw,72px);background:linear-gradient(115deg,#11275b 0%,#101e47 53%,#521b47 100%);overflow:hidden}
+.coe-title-stage:before{content:'';position:absolute;inset:0;z-index:-1;background:repeating-linear-gradient(90deg,transparent 0 80px,#ffffff08 80px 81px),linear-gradient(155deg,transparent 48%,#a92149 48% 53%,transparent 53% 58%,#204d9c 58% 63%,transparent 63%);opacity:.58}
+.coe-title-stage:after{content:'';position:absolute;inset:auto -8% -42% 24%;height:70%;border:2px solid #eecb7650;border-radius:50%;z-index:-1;transform:rotate(-12deg)}
+.coe-title-kicker{display:inline-flex;align-items:center;gap:9px;color:#f7d47a;font-size:.85rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase}.coe-title-kicker:before{content:'';width:33px;height:3px;background:#edca6d}
+.coe-title-logo{font-family:Impact,'Arial Narrow',system-ui,sans-serif;font-stretch:condensed;font-weight:950;font-size:clamp(4rem,8.5vw,7.6rem);line-height:1.05;letter-spacing:.015em;margin:24px 0 25px;text-transform:uppercase;color:#fff9ee;text-shadow:2px 3px 0 #06122d,0 6px 18px #0008}.coe-title-logo span{display:block;white-space:nowrap}.coe-title-logo span:last-child{color:#ffe083}
+.coe-title-lead{font-size:clamp(1.05rem,1.6vw,1.35rem);font-weight:700;line-height:1.4;max-width:490px;margin:0 0 32px;color:#ecf1fb}
+.coe-title-play{display:inline-flex;align-items:center;justify-content:space-between;gap:36px;min-width:250px;padding:17px 23px;border:1px solid #fff3a8;border-bottom:4px solid #9a6a23;border-radius:5px;background:linear-gradient(#ffe084,#e5aa49);color:#101b37;font-size:1.2rem;font-weight:950;letter-spacing:.12em;box-shadow:0 9px 0 #091634,0 14px 25px #0007;transition:transform .2s,box-shadow .2s}.coe-title-play:hover{transform:translateY(-3px);box-shadow:0 12px 0 #091634,0 18px 25px #0007}.coe-title-play:focus-visible{outline:3px solid white;outline-offset:7px}.coe-title-play span{font-size:1.55rem;line-height:1}
+.coe-title-actions{display:flex;align-items:stretch;gap:14px;flex-wrap:wrap}.coe-title-pick{display:inline-flex;align-items:center;justify-content:space-between;gap:20px;min-width:220px;padding:17px 21px;border:2px solid #e7cf8e;border-radius:5px;background:#0b1b3acc;color:#fff2c8;font-size:1rem;font-weight:900;letter-spacing:.07em;box-shadow:0 9px 0 #091634;transition:transform .2s,background .2s}.coe-title-pick:hover{background:#1b3974;transform:translateY(-3px)}.coe-title-pick:focus-visible{outline:3px solid #fff;outline-offset:6px}.coe-title-pick span{font-size:1.35rem}.coe-title-progress{margin:21px 0 0;color:#c3d4ee;font-size:.87rem;font-weight:700}
+.coe-title-console{border:1px solid #8298b8;background:#0c1835dd;box-shadow:12px 12px 0 #07132d77;border-radius:8px;overflow:hidden;transform:rotate(2deg)}.coe-title-console-head{padding:13px 17px;background:linear-gradient(90deg,#b52a53 0 44%,#173e84 44% 100%);font-size:.75rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.coe-title-console-body{padding:22px}.coe-title-console-score{display:flex;align-items:center;justify-content:space-between;color:#e9efff;font-weight:900;font-size:1.1rem;border-bottom:1px solid #53688c;padding:11px 0}.coe-title-console-score strong{color:#f4ca6a;font-size:1.7rem}.coe-title-console-score:last-of-type{border-bottom:0}.coe-title-console-vs{text-align:center;color:#f4ca6a;font-size:.85rem;font-weight:950;letter-spacing:.3em;padding:12px}.coe-title-console-foot{border-top:1px solid #40577d;color:#b4c6df;font-size:.78rem;padding-top:17px;margin-top:12px;letter-spacing:.08em;text-transform:uppercase}
+.coe-title-bottom{display:grid;grid-template-columns:repeat(3,1fr);background:#0b1630;border-top:1px solid #6b7193}.coe-title-bottom div{padding:18px 24px;border-right:1px solid #35446a;color:#afc0dc;font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;font-weight:800}.coe-title-bottom div:last-child{border:0}.coe-title-bottom b{display:block;color:#fff1c8;font-size:1.3rem;letter-spacing:0;margin-bottom:3px}
+@media(max-width:760px){.app-shell .coe-page .coe-title-screen{padding:10px}.coe-title-stage{grid-template-columns:1fr;min-height:0;padding:39px 24px;gap:35px}.coe-title-logo{font-size:clamp(3.1rem,13vw,6.4rem)}.coe-title-console{transform:none;max-width:480px}.coe-title-bottom div{padding:12px 10px;font-size:.65rem}.coe-title-bottom b{font-size:1rem}.coe-title-topline{font-size:.65rem;padding:12px}.coe-title-actions{display:grid}.coe-title-play,.coe-title-pick{width:100%}}
+@media(prefers-reduced-motion:reduce){.coe-title-play{transition:none}}
+
