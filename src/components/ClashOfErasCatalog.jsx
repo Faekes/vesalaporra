@@ -2,6 +2,15 @@ import { useState } from "react";
 import catalog from "../data/coe-catalog.json";
 
 const gameOrigin = "https://lliga-epoques-prova.boltxevic.chatgpt.site/";
+const crestColors = [
+  ["#9d213b", "#183b82"], ["#a82538", "#182c77"], ["#b52c3f", "#17377d"],
+  ["#aa2038", "#214c99"], ["#a52040", "#233c86"], ["#9e1936", "#224487"],
+  ["#a52145", "#193e87"], ["#b32a46", "#1b408c"], ["#a82242", "#17438d"],
+  ["#a61e3a", "#253c8e"], ["#a51c3e", "#244f9e"], ["#b22240", "#1e4799"],
+  ["#a71b41", "#1d3f85"], ["#af2946", "#193d88"], ["#a92c4b", "#24469a"],
+  ["#a71e43", "#173c90"], ["#a72141", "#184a9b"], ["#a62848", "#193a85"],
+  ["#af2144", "#234395"], ["#a92246", "#194291"],
+];
 
 export default function ClashOfErasCatalog() {
   const [selectedId, setSelectedId] = useState(null);
@@ -62,12 +71,12 @@ export default function ClashOfErasCatalog() {
             <button className="coe-back" type="button" onClick={() => setShowTeams(false)}>← Portada</button>
             <h2>Escull el teu Barça</h2>
             <div className="coe-team-grid">
-              {catalog.teams.map((team) => (
+              {catalog.teams.map((team, index) => (
                 <button className="coe-team" type="button" key={team.id} onClick={() => setSelectedId(team.id)}>
+                  <span className="coe-team-crest" aria-hidden="true" style={{ "--crest-red": crestColors[index][0], "--crest-blue": crestColors[index][1] }}><span /></span>
                   <span className="coe-team-years">{team.years}</span>
-                  <strong>{team.name}</strong>
                   <span>{team.coach}</span>
-                  <span className="coe-team-systems">{team.systems.join(" · ")} <span aria-hidden="true">→</span></span>
+                  <span className="coe-team-open">Veure plantilla <span aria-hidden="true">→</span></span>
                 </button>
               ))}
             </div>
