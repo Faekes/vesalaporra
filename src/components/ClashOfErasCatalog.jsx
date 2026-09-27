@@ -5,6 +5,11 @@ const gameOrigin = "https://lliga-epoques-prova.boltxevic.chatgpt.site/";
 
 export default function ClashOfErasCatalog() {
   const [selectedId, setSelectedId] = useState(null);
+  const [showTeams, setShowTeams] = useState(false);
+  const openTeams = () => {
+    setShowTeams(true);
+    requestAnimationFrame(() => document.getElementById("coe-teams")?.scrollIntoView({ behavior: "smooth" }));
+  };
   const selected = catalog.teams.find((team) => team.id === selectedId);
 
   return (
@@ -18,8 +23,8 @@ export default function ClashOfErasCatalog() {
               <h1 className="coe-title-logo"><span>CLASH</span><span>OF ERAS</span></h1>
               <p className="coe-title-lead">Vint Barças. Una Copa. Quin equip portaries fins a la final?</p>
               <div className="coe-title-actions">
-                <button type="button" className="coe-title-play" onClick={() => document.getElementById("coe-teams")?.scrollIntoView({ behavior: "smooth" })}>JUGAR <span aria-hidden="true">›</span></button>
-                <button type="button" className="coe-title-pick" onClick={() => document.getElementById("coe-teams")?.scrollIntoView({ behavior: "smooth" })}>ESCULL EQUIP <span aria-hidden="true">↗</span></button>
+                <button type="button" className="coe-title-play" onClick={openTeams}>JUGAR <span aria-hidden="true">›</span></button>
+                <button type="button" className="coe-title-pick" onClick={openTeams}>ESCULL EQUIP <span aria-hidden="true">↗</span></button>
               </div>
               <p className="coe-title-progress">Tria una època i comença el torneig.</p>
             </div>
@@ -31,7 +36,7 @@ export default function ClashOfErasCatalog() {
           <div className="coe-title-bottom"><div><b>20</b> ÈPOQUES</div><div><b>16</b> EQUIPS PER COPA</div><div><b>4</b> RONDES</div></div>
         </div>
 
-        {selected ? (
+        {!showTeams ? null : selected ? (
           <div className="coe-detail" id="coe-teams">
             <button className="coe-back" type="button" onClick={() => setSelectedId(null)}>← Tots els equips</button>
             <div className="coe-detail-head">
