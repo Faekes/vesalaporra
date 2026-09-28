@@ -10636,22 +10636,20 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
               <span className="nav-guest-mobile-label">NOTES</span>
             </button>
 
-            <button
-              type="button"
-              className={
-                activePage === "instructions"
-                  ? "nav-button nav-help-button active"
-                  : "nav-button nav-help-button"
-              }
-              onClick={() => setActivePage("instructions")}
-              aria-label="Clash of Eras"
-              title="Clash of Eras"
+            <a
+              className="nav-button nav-help-button"
+              href="https://lliga-epoques-prova.boltxevic.chatgpt.site/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Obre Clash of Eras en una pestanya nova"
+              title="Clash of Eras · pestanya nova"
+              style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}
             >
               <span className="nav-help-icon coe-nav-icon" aria-hidden="true">
                 🕹️
               </span>
               <span className="nav-help-label">COE</span>
-            </button>
+            </a>
                         <button
   type="button"
   className="nav-button nav-blog-placeholder"
