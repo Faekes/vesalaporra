@@ -10640,6 +10640,15 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
               className="nav-button nav-help-button"
               href="https://lliga-epoques-prova.boltxevic.chatgpt.site/"
               target="_blank"
+              onClick={(event) => {
+                if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                const gameTab = window.open("", "_blank");
+                if (!gameTab) return;
+                event.preventDefault();
+                gameTab.document.documentElement.style.backgroundColor = "#f6efdf";
+                gameTab.document.body.style.backgroundColor = "#f6efdf";
+                gameTab.location.replace(event.currentTarget.href);
+              }}
               rel="noopener noreferrer"
               aria-label="Obre Clash of Eras en una pestanya nova"
               title="Clash of Eras · pestanya nova"
