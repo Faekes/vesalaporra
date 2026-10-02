@@ -10648,7 +10648,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
               <span className="nav-help-icon coe-nav-icon" aria-hidden="true">
                 🕹️
               </span>
-              <span className="nav-help-label">COE</span>
+              
             </a>
                         <button
   type="button"
