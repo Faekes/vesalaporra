@@ -90,3 +90,5 @@
 .q14-ranking .q14-rank:first-of-type{background:#ffd16c0c}
 @media(max-width:760px){.q14-root .q14-finish{padding:28px 17px}.q14-finish-subtitle{font-size:13px}.q14-root .q14-finish .q14-zoom{font-size:88px}.q14-root .q14-question{padding:20px 16px}.q14-choices button{padding:16px;min-height:68px}.q14-result-details{gap:8px}.q14-result-details span{font-size:8px}.q14-root .q14-finish .q14-finish-title{font-size:28px}}
 @media(prefers-reduced-motion:reduce){.q14-root .q14-finish .q14-zoom{animation:none}.q14-choices button{transition:none}}
+
+.q14-footer{margin-top:24px;padding-top:15px;border-top:1px solid #ffffff12;text-align:center}.q14-root .q14-footer a{color:#a9bbd3;font-size:12px;font-weight:500;text-decoration:none;line-height:1.5}.q14-root .q14-footer a:hover{color:#e0e9f7;text-decoration:underline}
