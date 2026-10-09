@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLauncher";
 import ClashOfErasCatalog from "./components/ClashOfErasCatalog";
+import Quiz14 from "./components/Quiz14";
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
 import VesalaporraDemo from "./components/VesalaporraDemoV3.jsx";
 import instructionsHtml from "./content/instruccions.html?raw";
@@ -10636,29 +10637,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
               <span className="nav-guest-mobile-label">NOTES</span>
             </button>
 
-            <a
-              className="nav-button nav-help-button"
-              href="https://lliga-epoques-prova.boltxevic.chatgpt.site/"
-              target="_blank"
-              onClick={(event) => {
-                if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-                const gameTab = window.open("", "_blank");
-                if (!gameTab) return;
-                event.preventDefault();
-                gameTab.document.documentElement.style.backgroundColor = "#f6efdf";
-                gameTab.document.body.style.backgroundColor = "#f6efdf";
-                gameTab.location.replace(event.currentTarget.href);
-              }}
-              rel="noopener noreferrer"
-              aria-label="Obre Clash of Eras en una pestanya nova"
-              title="Clash of Eras · pestanya nova"
-              style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}
-            >
-              <span className="nav-help-icon coe-nav-icon" aria-hidden="true">
-                🕹️
-              </span>
-              
-            </a>
+            <button type="button" className={activePage === "quiz" ? "nav-button active" : "nav-button"} onClick={() => setActivePage("quiz")} aria-label="Obre el Quiz14" title="Quiz14 i Clash of Eras"><span className="nav-full-label">🧠 QUIZ</span><span className="nav-guest-mobile-label">QUIZ</span></button>
                         <button
   type="button"
   className="nav-button nav-blog-placeholder"
@@ -10772,6 +10751,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
 
       <main className="app-main">
         {activePage === "instructions" && <ClashOfErasCatalog />}
+        {activePage === "quiz" && <Quiz14 userId={authUser?.id || null} displayName={profileDisplayName} avatarUrl={profileAvatarUrl} />}
 
         {activePage === "play" && (
           <section
