@@ -813,6 +813,13 @@ const getVesalaporraRouteState = (
     selectedNotesUserId: null,
   };
 
+  if (section === "quiz") {
+    return {
+      ...defaultRouteState,
+      activePage: "quiz",
+    };
+  }
+
   if (section === "coe" || section === "com-jugar" || section === "instruccions") {
     return {
       ...defaultRouteState,
@@ -901,6 +908,10 @@ const getVesalaporraPath = ({
   selectedProfileUserId,
   selectedNotesUserId,
 }) => {
+  if (activePage === "quiz") {
+    return "/quiz";
+  }
+
   if (activePage === "instructions") {
     return "/coe";
   }
