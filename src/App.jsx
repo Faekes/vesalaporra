@@ -3529,6 +3529,8 @@ const [rankingUsers, setRankingUsers] = useState([]);
 const [newPredictionRankingUsers, setNewPredictionRankingUsers] = useState([]);
 const [scoredJornades, setScoredJornades] = useState([]);
 const [selectedRankingMatchId, setSelectedRankingMatchId] = useState(null);
+const rankingMatchSelectionRef = useRef(null);
+const rankingRequestRef = useRef(0);
   const [achievementMultipliersByUser, setAchievementMultipliersByUser] = useState({});
 const [rankingLoading, setRankingLoading] = useState(false);
 const [rankingError, setRankingError] = useState("");
@@ -4496,6 +4498,7 @@ const getRankingAchievements = (user) =>
 
     if (!nextJornada) return;
 
+    rankingMatchSelectionRef.current = nextJornada.match_id;
     setSelectedRankingMatchId(nextJornada.match_id);
     setRankingJornadaNumber(nextJornada.jornada_number);
     setVisibleRankingCount(RANKING_PAGE_SIZE);
@@ -7004,6 +7007,7 @@ const fetchLatestScoredJornadaNumber = async () => {
 };
 
 const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
+  const requestId = ++rankingRequestRef.current;
   if (!quiet) {
     setRankingLoading(true);
   }
@@ -7014,7 +7018,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
     const jornadas = await fetchScoredJornades();
     const effectiveMatchId =
       matchId ||
-      selectedRankingMatchId ||
+      rankingMatchSelectionRef.current ||
       jornadas[jornadas.length - 1]?.match_id ||
       null;
 
@@ -7067,6 +7071,8 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
         null,
     }));
 
+    if (requestId !== rankingRequestRef.current) return;
+
     setRankingUsers(mergedRowsWithSignupDates);
     setNewPredictionRankingUsers(newPredictionRows);
     setScoredJornades(jornadas);
@@ -7081,6 +7087,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
       setSelectedProfileUserId(String(authUser.id));
     }
   } catch (error) {
+    if (requestId !== rankingRequestRef.current) return;
     if (quiet) {
       console.warn(
         "No s’ha pogut actualitzar el rànquing en segon pla:",
@@ -7094,7 +7101,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
       );
     }
   } finally {
-    if (!quiet) {
+    if (requestId === rankingRequestRef.current) {
       setRankingLoading(false);
     }
   }
@@ -9186,6 +9193,10 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
       protagonistTouchPreviewIdRef.current = null;
     }
   }, [protagonistId, publicMatchPlayers]);
+
+  useEffect(() => {
+    if (activePage === "ranking") rankingMatchSelectionRef.current = null;
+  }, [activePage]);
 
   useEffect(() => {
     if (
