@@ -108,10 +108,17 @@
 /* Framed champions, immediately below the other-games link. */
 .q14-champions{margin-top:18px;padding:20px 16px;border:1px solid #c7a45a55;border-radius:18px;background:radial-gradient(ellipse at top,#b7862917,transparent 65%),#0b1c36;text-align:left}
 .q14-champions-heading{display:flex;gap:11px;align-items:center;margin-bottom:17px}.q14-champions-heading>span{font-size:27px}.q14-champions-heading h3{margin:0;font-size:14px;color:#ffe09a;letter-spacing:1px}.q14-champions-heading p{margin:4px 0 0;font-size:11px;color:#b6c9e6}
-.q14-champions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px;max-height:480px;overflow:auto;padding:5px}
+.q14-champions-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;max-height:480px;overflow:auto;padding:5px}
 .q14-champion-frame{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;padding:27px 12px 17px;border:3px double #d3af65;border-radius:12px;background:linear-gradient(145deg,#27394f,#14223c);box-shadow:inset 0 0 0 4px #071222,0 4px 15px #0004;color:white;text-align:center;transition:border-color .18s,box-shadow .18s}
 .q14-champion-frame:hover{border-color:#ffe09a;box-shadow:inset 0 0 0 4px #071222,0 0 16px #ffd16c40}
 .q14-champion-portrait{position:relative;margin:12px 0 4px;width:74px;height:74px}.q14-champion-portrait img,.q14-champion-placeholder{display:grid;place-items:center;width:74px;height:74px;object-fit:cover;border-radius:50%;border:2px solid #ffdc7e;box-sizing:border-box;box-shadow:0 0 17px #ffda7333;background:#254570;font-size:32px}.q14-champion-crown{position:absolute;z-index:1;top:-27px;left:50%;transform:translateX(-50%);font-size:31px;filter:drop-shadow(0 0 6px #ffd16c77)}
 .q14-champion-frame>strong{font-size:15px;color:#ffe9af;overflow-wrap:anywhere}.q14-champion-quiz{font-size:12px;font-weight:800;color:#e0ebff;overflow-wrap:anywhere}.q14-champion-frame>small{font-size:11px;color:#a9c3e6}.q14-champions-empty{margin:0;text-align:center;color:#bacde8;font-size:12px;padding:14px 6px}
-@media(max-width:480px){.q14-champions{padding:17px 11px}.q14-champions-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.q14-champion-frame{padding-left:8px;padding-right:8px}.q14-champions-heading h3{font-size:12px}}
+@media(max-width:480px){.q14-champions{padding:17px 11px}.q14-champions-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.q14-champion-frame{padding-left:8px;padding-right:8px}.q14-champions-heading h3{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.q14-champion-frame{transition:none}}
+
+/* Compact champion portraits: four fixed slots per row, including one winner. */
+.q14-champions{padding:15px 12px}.q14-champions-heading{margin-bottom:12px}.q14-champions-grid{gap:9px;padding:3px;align-items:start}
+.q14-champion-frame{gap:5px;padding:16px 6px 10px;border-radius:9px;box-shadow:inset 0 0 0 2px #071222,0 3px 10px #0003}
+.q14-champion-portrait{width:48px;height:48px;margin:8px 0 2px}.q14-champion-portrait img,.q14-champion-placeholder{width:48px;height:48px;font-size:23px}.q14-champion-crown{top:-19px;font-size:22px}
+.q14-champion-frame>strong{font-size:12px;line-height:1.2}.q14-champion-quiz{font-size:10px;line-height:1.3}.q14-champion-frame>small{font-size:9px;line-height:1.2}
+@media(max-width:480px){.q14-champions{padding:12px 7px}.q14-champions-grid{gap:5px}.q14-champion-frame{padding:13px 3px 8px}.q14-champion-portrait,.q14-champion-portrait img,.q14-champion-placeholder{width:36px;height:36px}.q14-champion-crown{font-size:18px;top:-16px}.q14-champion-frame>strong{font-size:10px}.q14-champion-quiz{font-size:8px}.q14-champion-frame>small{font-size:8px}}
