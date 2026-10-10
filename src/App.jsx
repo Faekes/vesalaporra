@@ -14300,6 +14300,14 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                   Quan hi hagi dades oficials al rànquing, el perfil apareixerà
                   aquí.
                 </span>
+                {authUser && (
+                  <div className="profile-inline-actions">
+                    <button type="button" className="profile-inline-action" onClick={handleSignOut} disabled={authActionLoading}>
+                      {authActionLoading ? "TANCANT SESSIÓ…" : "TANCAR SESSIÓ"}
+                    </button>
+                    {authError && <p role="alert">{authError}</p>}
+                  </div>
+                )}
               </div>
             ) : (
               <>
