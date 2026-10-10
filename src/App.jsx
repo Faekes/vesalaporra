@@ -10762,7 +10762,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
 
       <main className="app-main">
         {activePage === "instructions" && <ClashOfErasCatalog />}
-        {activePage === "quiz" && <Quiz14 userId={authUser?.id || null} displayName={profileDisplayName} avatarUrl={profileAvatarUrl} />}
+        {activePage === "quiz" && <Quiz14 isAdmin={isAdmin} userId={authUser?.id || null} displayName={profileDisplayName} avatarUrl={profileAvatarUrl} />}
 
         {activePage === "play" && (
           <section

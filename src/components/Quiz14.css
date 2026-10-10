@@ -92,3 +92,15 @@
 @media(prefers-reduced-motion:reduce){.q14-root .q14-finish .q14-zoom{animation:none}.q14-choices button{transition:none}}
 
 .q14-footer{margin-top:24px;padding-top:15px;border-top:1px solid #ffffff12;text-align:center}.q14-root .q14-footer a{color:#a9bbd3;font-size:12px;font-weight:500;text-decoration:none;line-height:1.5}.q14-root .q14-footer a:hover{color:#e0e9f7;text-decoration:underline}
+
+/* Quiz archive and balanced desktop columns. */
+.q14-layout{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.q14-footer{margin-top:16px;padding-top:12px}
+.q14-root .q14-footer a{display:inline-block;padding:8px 10px;color:#ff505f;font-size:14px;font-weight:900;text-shadow:0 0 8px #ff304b88,0 0 20px #ff304b55;text-decoration:none}
+.q14-root .q14-footer a:hover{color:#ff8190;text-shadow:0 0 10px #ff304bcc;text-decoration:underline}
+.q14-history{display:flex;align-items:center;gap:12px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid #50719b}
+.q14-history>div{flex:1;min-width:0;text-align:center}.q14-history strong{display:block;color:#ffe09a;font-size:18px}.q14-history small{display:block;color:#bbd1ed;font-size:10px;letter-spacing:1px;margin-top:5px}
+.q14-history button{flex-shrink:0;width:36px;height:38px;border:1px solid #587db0;background:#254570;color:white;border-radius:10px;font-size:26px}.q14-history button:disabled{opacity:.3}
+.q14-rank.q14-winner{margin:12px 0;padding:14px 10px;border:1px solid #ffda73;background:linear-gradient(100deg,#87662380,#3f354e);box-shadow:0 0 18px #ffd16c40,inset 0 0 20px #ffd16c15}.q14-winner .q14-player{font-weight:900;color:#ffe9a6}.q14-rank.q14-winner>b{width:30px;font-size:23px}.q14-winner .q14-photo{box-shadow:0 0 12px #ffd16c80}
+.q14-admin{margin-top:20px;padding-top:16px;border-top:1px solid #5673a0;text-align:center}.q14-admin p{font-size:13px}.q14-admin button{margin:4px;padding:10px 14px;border:1px solid #fa6c75;border-radius:10px;background:#6d263a;color:#fff;font-weight:800}
+@media(max-width:850px){.q14-layout{grid-template-columns:1fr}.q14-ranking{position:static}}
