@@ -10773,7 +10773,11 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
 
       <main className="app-main">
         {activePage === "instructions" && <ClashOfErasCatalog />}
-        {activePage === "quiz" && <Quiz14 isAdmin={isAdmin} userId={authUser?.id || null} displayName={profileDisplayName} avatarUrl={profileAvatarUrl} />}
+        {activePage === "quiz" && <Quiz14 isAdmin={isAdmin} userId={authUser?.id || null} displayName={profileDisplayName} avatarUrl={profileAvatarUrl} renderOpponentBadge={(teamKey) => {
+          const matchSide = matchData.homeTeamId === teamKey ? "home" : matchData.awayTeamId === teamKey ? "away" : null;
+          const savedColors = teamKey === "galatasaray" ? ["#D71920", "#F4CF36"] : ["#163F8F"];
+          return <TeamColorBadge teamId={teamKey} colors={matchSide ? matchData[matchSide + "BadgeColors"] : savedColors} pattern={matchSide ? matchData[matchSide + "BadgePattern"] : teamKey === "galatasaray" ? "striped" : "solid"} />;
+        }} />}
 
         {activePage === "play" && (
           <section
