@@ -10358,3 +10358,14 @@ border-color: #f5c542 !important;
 .score-separator {
   color: #f5d34b;
 }
+
+.q14-footer a {
+  color: #58d8ff;
+  text-shadow: 0 0 8px rgba(88, 216, 255, 0.65),
+               0 0 18px rgba(88, 216, 255, 0.3);
+}
+
+.q14-footer a:hover {
+  color: #a5eeff;
+  text-shadow: 0 0 12px rgba(88, 216, 255, 0.9);
+}
