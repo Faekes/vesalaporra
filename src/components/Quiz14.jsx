@@ -68,7 +68,7 @@ export default function Quiz14({userId,displayName,avatarUrl,isAdmin=false,rende
   if(generation!==generationRef.current)return;
   setBusy(false);
   if(e){setError("No s’ha pogut enregistrar la resposta. Torna-ho a provar.");submitRef.current=false;return}
-  const outcome=result.awarded>0?"correct":choice===-1||choice===result.correct?"timeout":"wrong";
+  const outcome=result.outcome|| (result.awarded>0?"correct":choice===-1||choice===result.correct?"timeout":"wrong");
   setReveal({correct:result.correct,awarded:result.awarded,index:oldIndex,choice,outcome,score:result.score,explanation:result.explanation});
   playAnswerSound(audioRef.current,outcome);
   clearTimeout(transitionRef.current);
