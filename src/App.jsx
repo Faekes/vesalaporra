@@ -3,6 +3,7 @@ import { supabase } from "./lib/supabaseClient";
 import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLauncher";
 import ClashOfErasCatalog from "./components/ClashOfErasCatalog";
 import Quiz14 from "./components/Quiz14";
+import QuizAdmin from "./components/QuizAdmin";
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
 import VesalaporraDemo from "./components/VesalaporraDemoV3.jsx";
 import instructionsHtml from "./content/instruccions.html?raw";
@@ -883,7 +884,7 @@ const getVesalaporraRouteState = (
 
   if (section === "puntuacions") {
     const adminScoringTab =
-      secondSlug === "jugadors"
+      secondSlug === "quiz" ? "quiz" : secondSlug === "jugadors"
         ? "players"
         : secondSlug === "propers-partits"
           ? "upcoming"
@@ -948,6 +949,7 @@ const getVesalaporraPath = ({
   }
 
   if (activePage === "scoring") {
+    if (adminScoringTab === "quiz") return "/puntuacions/quiz";
     if (adminScoringTab === "players") {
       return "/puntuacions/jugadors";
     }
@@ -10773,11 +10775,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
 
       <main className="app-main">
         {activePage === "instructions" && <ClashOfErasCatalog />}
-        {activePage === "quiz" && <Quiz14 isAdmin={isAdmin} userId={authUser?.id || null} displayName={profileDisplayName} avatarUrl={profileAvatarUrl} renderOpponentBadge={(teamKey) => {
-          const matchSide = matchData.homeTeamId === teamKey ? "home" : matchData.awayTeamId === teamKey ? "away" : null;
-          const savedColors = teamKey === "galatasaray" ? ["#D71920", "#F4CF36"] : ["#163F8F"];
-          return <TeamColorBadge teamId={teamKey} colors={matchSide ? matchData[matchSide + "BadgeColors"] : savedColors} pattern={matchSide ? matchData[matchSide + "BadgePattern"] : teamKey === "galatasaray" ? "striped" : "solid"} />;
-        }} />}
+        {activePage === "quiz" && <Quiz14 isAdmin={isAdmin} userId={authUser?.id || null} displayName={profileDisplayName} avatarUrl={profileAvatarUrl} renderOpponentBadge={(edition) => <TeamColorBadge teamId={edition?.opponent_team_key} colors={edition?.opponent_colors?.filter(Boolean)||[]} pattern={edition?.opponent_pattern||"solid"} />} />}
 
         {activePage === "play" && (
           <section
@@ -12384,8 +12382,8 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                 </div>
               ) : (
                 <div className="admin-player-hero-summary">
-                  <span>CALENDARI REAL</span>
-                  <strong>{adminUpcomingMatches.length} partits</strong>
+                  <span>{adminScoringTab === "quiz" ? "EDICIONS DEL QUIZ" : "CALENDARI REAL"}</span>
+                  <strong>{adminScoringTab === "quiz" ? "Preguntes i publicació" : `${adminUpcomingMatches.length} partits`}</strong>
                   <small>
                     Crear, editar i publicar el proper rival de la portada.
                   </small>
@@ -12441,6 +12439,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
               >
                 PROPERS PARTITS
               </button>
+              <button type="button" role="tab" aria-selected={adminScoringTab === "quiz"} className={adminScoringTab === "quiz" ? "admin-area-tab active" : "admin-area-tab"} onClick={() => setAdminScoringTab("quiz")}>GESTIONAR QUIZ</button>
             </div>
 
             {adminScoringTab === "match" ? (
@@ -13148,7 +13147,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                   )}
                 </section>
               </section>
-            ) : (
+            ) : adminScoringTab === "quiz" ? (<QuizAdmin />) : (
               <section className="admin-player-workspace" role="tabpanel">
                 {adminMatchFeedback?.message && (
                   <div
@@ -16097,3 +16096,4 @@ function App() {
 }
 
 export default App;
+
