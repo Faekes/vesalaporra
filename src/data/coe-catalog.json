@@ -1,0 +1,2246 @@
+{
+  "version": 1,
+  "gameUrl": "https://lliga-epoques-prova.boltxevic.chatgpt.site/",
+  "teams": [
+    {
+      "id": "daucik",
+      "name": "5 Copes",
+      "years": "1950–54",
+      "coach": "László Daučík",
+      "systems": [
+        "WM",
+        "3-2-5"
+      ],
+      "players": [
+        {
+          "name": "Ramallets",
+          "position": "POR",
+          "rating": 89
+        },
+        {
+          "name": "Zambudio Velasco",
+          "position": "POR",
+          "rating": 74
+        },
+        {
+          "name": "Gustavo Biosca",
+          "position": "DFC",
+          "rating": 88
+        },
+        {
+          "name": "Segarra",
+          "position": "MC",
+          "rating": 85
+        },
+        {
+          "name": "Calvet",
+          "position": "MC",
+          "rating": 78
+        },
+        {
+          "name": "Seguer",
+          "position": "DFC",
+          "rating": 80
+        },
+        {
+          "name": "Gonzalo",
+          "position": "MC",
+          "rating": 89
+        },
+        {
+          "name": "Bosch",
+          "position": "DFC",
+          "rating": 81
+        },
+        {
+          "name": "Brugué",
+          "position": "MC",
+          "rating": 83
+        },
+        {
+          "name": "Flotats",
+          "position": "DFC",
+          "rating": 81
+        },
+        {
+          "name": "László Kubala",
+          "position": "MCO",
+          "rating": 94
+        },
+        {
+          "name": "César Rodríguez",
+          "position": "DC",
+          "rating": 92
+        },
+        {
+          "name": "Estanislao Basora",
+          "position": "ED",
+          "rating": 87
+        },
+        {
+          "name": "Josep Manchón",
+          "position": "EI",
+          "rating": 86
+        },
+        {
+          "name": "Moreno",
+          "position": "DC",
+          "rating": 87
+        },
+        {
+          "name": "Vila",
+          "position": "ED",
+          "rating": 77
+        },
+        {
+          "name": "Aldecoa",
+          "position": "EI",
+          "rating": 76
+        },
+        {
+          "name": "Nicolau",
+          "position": "MC",
+          "rating": 78
+        },
+        {
+          "name": "Canal",
+          "position": "MC",
+          "rating": 80
+        },
+        {
+          "name": "Martín",
+          "position": "MC",
+          "rating": 79
+        }
+      ]
+    },
+    {
+      "id": "hh",
+      "name": "Helenio Herrera",
+      "years": "1958–60",
+      "coach": "Helenio Herrera",
+      "systems": [
+        "4-2-4",
+        "3-2-5"
+      ],
+      "players": [
+        {
+          "name": "Ramallets",
+          "position": "POR",
+          "rating": 89
+        },
+        {
+          "name": "Estrems",
+          "position": "POR",
+          "rating": 76
+        },
+        {
+          "name": "Ferrán Olivella",
+          "position": "DFC",
+          "rating": 84
+        },
+        {
+          "name": "Gustavo Biosca",
+          "position": "DFC",
+          "rating": 88
+        },
+        {
+          "name": "Rodri",
+          "position": "DFC",
+          "rating": 88
+        },
+        {
+          "name": "Gràcia",
+          "position": "LE",
+          "rating": 81
+        },
+        {
+          "name": "Gensana",
+          "position": "DFC",
+          "rating": 82
+        },
+        {
+          "name": "Vergés",
+          "position": "MC",
+          "rating": 83
+        },
+        {
+          "name": "Flotats",
+          "position": "DFC",
+          "rating": 81
+        },
+        {
+          "name": "Brugué",
+          "position": "MC",
+          "rating": 83
+        },
+        {
+          "name": "Luis Suárez Miramontes",
+          "position": "MCO",
+          "rating": 95
+        },
+        {
+          "name": "László Kubala",
+          "position": "MCO",
+          "rating": 94
+        },
+        {
+          "name": "Kocsis",
+          "position": "DC",
+          "rating": 92
+        },
+        {
+          "name": "Zoltán Czibor",
+          "position": "EI",
+          "rating": 87
+        },
+        {
+          "name": "Evaristo",
+          "position": "DC",
+          "rating": 89
+        },
+        {
+          "name": "Eulogio Martínez",
+          "position": "DC",
+          "rating": 86
+        },
+        {
+          "name": "Justo Tejada",
+          "position": "ED",
+          "rating": 87
+        },
+        {
+          "name": "Villaverde",
+          "position": "ED",
+          "rating": 85
+        },
+        {
+          "name": "Ribelles",
+          "position": "MC",
+          "rating": 82
+        },
+        {
+          "name": "Coll",
+          "position": "ED",
+          "rating": 77
+        }
+      ]
+    },
+    {
+      "id": "sixtiesEarly",
+      "name": "La generació de Fusté",
+      "years": "1961–65",
+      "coach": "Lluís Miró / César Rodríguez / Josep Gonzalvo",
+      "systems": [
+        "4-3-3",
+        "4-2-4"
+      ],
+      "players": [
+        {
+          "name": "Sadurní",
+          "position": "POR",
+          "rating": 84
+        },
+        {
+          "name": "Pesudo",
+          "position": "POR",
+          "rating": 79
+        },
+        {
+          "name": "Julio César Benítez",
+          "position": "LD",
+          "rating": 86
+        },
+        {
+          "name": "Eladio",
+          "position": "LE",
+          "rating": 83
+        },
+        {
+          "name": "Ferrán Olivella",
+          "position": "DFC",
+          "rating": 83
+        },
+        {
+          "name": "Gràcia",
+          "position": "LE",
+          "rating": 80
+        },
+        {
+          "name": "Rodri",
+          "position": "DFC",
+          "rating": 82
+        },
+        {
+          "name": "Foncho",
+          "position": "DFC",
+          "rating": 80
+        },
+        {
+          "name": "Garay",
+          "position": "DFC",
+          "rating": 84
+        },
+        {
+          "name": "Josep Maria Fusté",
+          "position": "MC",
+          "rating": 88
+        },
+        {
+          "name": "Gensana",
+          "position": "MCD",
+          "rating": 81
+        },
+        {
+          "name": "Vergés",
+          "position": "MC",
+          "rating": 82
+        },
+        {
+          "name": "Segarra",
+          "position": "MCD",
+          "rating": 81
+        },
+        {
+          "name": "Chus Pereda",
+          "position": "EI",
+          "rating": 85
+        },
+        {
+          "name": "Kocsis",
+          "position": "DC",
+          "rating": 82
+        },
+        {
+          "name": "Cayetano Ré",
+          "position": "DC",
+          "rating": 86
+        },
+        {
+          "name": "Zaldua",
+          "position": "DC",
+          "rating": 84
+        },
+        {
+          "name": "Zaballa",
+          "position": "ED",
+          "rating": 82
+        },
+        {
+          "name": "Goyvaerts",
+          "position": "ED",
+          "rating": 82
+        },
+        {
+          "name": "Luis Cubilla",
+          "position": "EI",
+          "rating": 83
+        }
+      ]
+    },
+    {
+      "id": "fires",
+      "name": "La Copa de Fires",
+      "years": "1966–70",
+      "coach": "Roque Olsen / Salvador Artigas",
+      "systems": [
+        "4-3-3",
+        "4-2-4"
+      ],
+      "players": [
+        {
+          "name": "Sadurní",
+          "position": "POR",
+          "rating": 84
+        },
+        {
+          "name": "Reina",
+          "position": "POR",
+          "rating": 80
+        },
+        {
+          "name": "Julio César Benítez",
+          "position": "LD",
+          "rating": 86
+        },
+        {
+          "name": "Eladio",
+          "position": "LE",
+          "rating": 83
+        },
+        {
+          "name": "Gallego",
+          "position": "DFC",
+          "rating": 84
+        },
+        {
+          "name": "Ferrán Olivella",
+          "position": "DFC",
+          "rating": 83
+        },
+        {
+          "name": "Joaquim Rifé",
+          "position": "LD",
+          "rating": 81
+        },
+        {
+          "name": "Torres",
+          "position": "DFC",
+          "rating": 82
+        },
+        {
+          "name": "Rodri",
+          "position": "DFC",
+          "rating": 82
+        },
+        {
+          "name": "Josep Maria Fusté",
+          "position": "MC",
+          "rating": 88
+        },
+        {
+          "name": "Lucien Muller",
+          "position": "MCO",
+          "rating": 85
+        },
+        {
+          "name": "Juan Carlos",
+          "position": "MC",
+          "rating": 81
+        },
+        {
+          "name": "Martí Filosía",
+          "position": "MCO",
+          "rating": 83
+        },
+        {
+          "name": "Lluís Pujol",
+          "position": "DC",
+          "rating": 86
+        },
+        {
+          "name": "Chus Pereda",
+          "position": "EI",
+          "rating": 85
+        },
+        {
+          "name": "Zaldua",
+          "position": "DC",
+          "rating": 84
+        },
+        {
+          "name": "Zaballa",
+          "position": "ED",
+          "rating": 82
+        },
+        {
+          "name": "Carles Rexach",
+          "position": "ED",
+          "rating": 75
+        },
+        {
+          "name": "Mendonça",
+          "position": "DC",
+          "rating": 84
+        },
+        {
+          "name": "Zabalza",
+          "position": "MC",
+          "rating": 81
+        }
+      ]
+    },
+    {
+      "id": "michels",
+      "name": "Mister Mármol",
+      "years": "1971–75",
+      "coach": "Rinus Michels",
+      "systems": [
+        "4-3-3",
+        "4-2-4"
+      ],
+      "players": [
+        {
+          "name": "Sadurní",
+          "position": "POR",
+          "rating": 84
+        },
+        {
+          "name": "Mora",
+          "position": "POR",
+          "rating": 78
+        },
+        {
+          "name": "Migueli",
+          "position": "DFC",
+          "rating": 84
+        },
+        {
+          "name": "Gallego",
+          "position": "DFC",
+          "rating": 84
+        },
+        {
+          "name": "Rifé",
+          "position": "LD",
+          "rating": 83
+        },
+        {
+          "name": "De la Cruz",
+          "position": "LE",
+          "rating": 81
+        },
+        {
+          "name": "Costas",
+          "position": "MCD",
+          "rating": 82
+        },
+        {
+          "name": "Torres",
+          "position": "DFC",
+          "rating": 82
+        },
+        {
+          "name": "Juan Carlos",
+          "position": "LE",
+          "rating": 80
+        },
+        {
+          "name": "Josep Maria Fusté",
+          "position": "MC",
+          "rating": 85
+        },
+        {
+          "name": "Juan Manuel Asensi",
+          "position": "MC",
+          "rating": 88
+        },
+        {
+          "name": "Marcial",
+          "position": "MCO",
+          "rating": 88
+        },
+        {
+          "name": "Johan Neeskens",
+          "position": "MC",
+          "rating": 90
+        },
+        {
+          "name": "Johan Cruyff",
+          "position": "DC",
+          "rating": 96
+        },
+        {
+          "name": "Carles Rexach",
+          "position": "ED",
+          "rating": 86
+        },
+        {
+          "name": "Hugo Sotil",
+          "position": "DC",
+          "rating": 87
+        },
+        {
+          "name": "Heredia",
+          "position": "MCO",
+          "rating": 79
+        },
+        {
+          "name": "Clares",
+          "position": "DC",
+          "rating": 80
+        },
+        {
+          "name": "Martí Filosía",
+          "position": "MCO",
+          "rating": 83
+        },
+        {
+          "name": "Carreño",
+          "position": "DC",
+          "rating": 77
+        }
+      ]
+    },
+    {
+      "id": "basilea",
+      "name": "Basilea 76–79",
+      "years": "1976–79",
+      "coach": "Rinus Michels / Lucien Muller / Joaquim Rifé",
+      "systems": [
+        "4-3-3",
+        "4-4-2"
+      ],
+      "players": [
+        {
+          "name": "Artola",
+          "position": "POR",
+          "rating": 84
+        },
+        {
+          "name": "Mora",
+          "position": "POR",
+          "rating": 78
+        },
+        {
+          "name": "Migueli",
+          "position": "DFC",
+          "rating": 87
+        },
+        {
+          "name": "Antonio Olmo",
+          "position": "DFC",
+          "rating": 82
+        },
+        {
+          "name": "Albaladejo",
+          "position": "DFC",
+          "rating": 79
+        },
+        {
+          "name": "Zuviría",
+          "position": "LD",
+          "rating": 82
+        },
+        {
+          "name": "De la Cruz",
+          "position": "LE",
+          "rating": 81
+        },
+        {
+          "name": "Rifé",
+          "position": "LD",
+          "rating": 83
+        },
+        {
+          "name": "Gallego",
+          "position": "DFC",
+          "rating": 81
+        },
+        {
+          "name": "Costas",
+          "position": "MCD",
+          "rating": 82
+        },
+        {
+          "name": "Juan Manuel Asensi",
+          "position": "MC",
+          "rating": 88
+        },
+        {
+          "name": "Johan Neeskens",
+          "position": "MC",
+          "rating": 91
+        },
+        {
+          "name": "Tente Sánchez",
+          "position": "MC",
+          "rating": 82
+        },
+        {
+          "name": "Heredia",
+          "position": "MCO",
+          "rating": 79
+        },
+        {
+          "name": "Johan Cruyff",
+          "position": "DC",
+          "rating": 92
+        },
+        {
+          "name": "Hugo Sotil",
+          "position": "DC",
+          "rating": 84
+        },
+        {
+          "name": "Hans Krankl",
+          "position": "DC",
+          "rating": 93
+        },
+        {
+          "name": "Lobo Carrasco",
+          "position": "EI",
+          "rating": 78
+        },
+        {
+          "name": "Carles Rexach",
+          "position": "ED",
+          "rating": 86
+        },
+        {
+          "name": "Clares",
+          "position": "DC",
+          "rating": 78
+        }
+      ]
+    },
+    {
+      "id": "simonsen",
+      "name": "Maradona & Simonsen",
+      "years": "1980–83",
+      "coach": "Helenio Herrera / Udo Lattek / César Luis Menotti",
+      "systems": [
+        "4-3-3",
+        "4-4-2"
+      ],
+      "players": [
+        {
+          "name": "Artola",
+          "position": "POR",
+          "rating": 84
+        },
+        {
+          "name": "Urruti",
+          "position": "POR",
+          "rating": 83
+        },
+        {
+          "name": "Migueli",
+          "position": "DFC",
+          "rating": 88
+        },
+        {
+          "name": "José Ramón Alexanko",
+          "position": "DFC",
+          "rating": 85
+        },
+        {
+          "name": "Antonio Olmo",
+          "position": "DFC",
+          "rating": 82
+        },
+        {
+          "name": "Zuviría",
+          "position": "LD",
+          "rating": 82
+        },
+        {
+          "name": "Gerardo",
+          "position": "LD",
+          "rating": 78
+        },
+        {
+          "name": "Julio Alberto",
+          "position": "LE",
+          "rating": 82
+        },
+        {
+          "name": "Bernd Schuster",
+          "position": "MC",
+          "rating": 92
+        },
+        {
+          "name": "Víctor Muñoz",
+          "position": "MCD",
+          "rating": 83
+        },
+        {
+          "name": "Tente Sánchez",
+          "position": "MC",
+          "rating": 84
+        },
+        {
+          "name": "Landáburu",
+          "position": "MC",
+          "rating": 79
+        },
+        {
+          "name": "Asensi",
+          "position": "MC",
+          "rating": 81
+        },
+        {
+          "name": "Esteban Vigo",
+          "position": "ED",
+          "rating": 78
+        },
+        {
+          "name": "Diego Maradona",
+          "position": "MCO",
+          "rating": 96
+        },
+        {
+          "name": "Allan Simonsen",
+          "position": "ED",
+          "rating": 92
+        },
+        {
+          "name": "Quini",
+          "position": "DC",
+          "rating": 91
+        },
+        {
+          "name": "Lobo Carrasco",
+          "position": "EI",
+          "rating": 85
+        },
+        {
+          "name": "Hansi Krankl",
+          "position": "DC",
+          "rating": 87
+        },
+        {
+          "name": "Pichi Alonso",
+          "position": "DC",
+          "rating": 81
+        }
+      ]
+    },
+    {
+      "id": "eighties",
+      "name": "El Barça de Venables",
+      "years": "1984–87",
+      "coach": "Terry Venables",
+      "systems": [
+        "4-4-2",
+        "4-3-3"
+      ],
+      "players": [
+        {
+          "name": "Urruti",
+          "position": "POR",
+          "rating": 89
+        },
+        {
+          "name": "Zubizarreta",
+          "position": "POR",
+          "rating": 89
+        },
+        {
+          "name": "Migueli",
+          "position": "DFC",
+          "rating": 88
+        },
+        {
+          "name": "José Ramón Alexanko",
+          "position": "DFC",
+          "rating": 85
+        },
+        {
+          "name": "Julio Alberto",
+          "position": "LE",
+          "rating": 86
+        },
+        {
+          "name": "Moratalla",
+          "position": "DFC",
+          "rating": 82
+        },
+        {
+          "name": "Gerardo",
+          "position": "LD",
+          "rating": 78
+        },
+        {
+          "name": "Urbano",
+          "position": "MCD",
+          "rating": 80
+        },
+        {
+          "name": "Bernd Schuster",
+          "position": "MC",
+          "rating": 94
+        },
+        {
+          "name": "Víctor Muñoz",
+          "position": "MCD",
+          "rating": 83
+        },
+        {
+          "name": "Calderé",
+          "position": "MC",
+          "rating": 83
+        },
+        {
+          "name": "Robert Fernández",
+          "position": "MC",
+          "rating": 84
+        },
+        {
+          "name": "Periko Alonso",
+          "position": "MCD",
+          "rating": 83
+        },
+        {
+          "name": "Gary Lineker",
+          "position": "DC",
+          "rating": 89
+        },
+        {
+          "name": "Steve Archibald",
+          "position": "DC",
+          "rating": 90
+        },
+        {
+          "name": "Lobo Carrasco",
+          "position": "EI",
+          "rating": 85
+        },
+        {
+          "name": "Pichi Alonso",
+          "position": "DC",
+          "rating": 85
+        },
+        {
+          "name": "Mark Hughes",
+          "position": "DC",
+          "rating": 85
+        },
+        {
+          "name": "Marcos Alonso",
+          "position": "ED",
+          "rating": 83
+        },
+        {
+          "name": "Paco Clos",
+          "position": "DC",
+          "rating": 82
+        }
+      ]
+    },
+    {
+      "id": "cruyff",
+      "name": "Dream team",
+      "years": "1988–94",
+      "coach": "Johan Cruyff",
+      "systems": [
+        "3-4-3",
+        "4-3-3"
+      ],
+      "players": [
+        {
+          "name": "Zubizarreta",
+          "position": "POR",
+          "rating": 89
+        },
+        {
+          "name": "Carles Busquets",
+          "position": "POR",
+          "rating": 75
+        },
+        {
+          "name": "Ronald Koeman",
+          "position": "DFC",
+          "rating": 92
+        },
+        {
+          "name": "José Ramón Alexanko",
+          "position": "DFC",
+          "rating": 85
+        },
+        {
+          "name": "Miguel Ángel Nadal",
+          "position": "DFC",
+          "rating": 84
+        },
+        {
+          "name": "Albert Ferrer",
+          "position": "LD",
+          "rating": 87
+        },
+        {
+          "name": "Sergi",
+          "position": "LE",
+          "rating": 88
+        },
+        {
+          "name": "Juan Carlos",
+          "position": "LE",
+          "rating": 80
+        },
+        {
+          "name": "Nando",
+          "position": "DFC",
+          "rating": 83
+        },
+        {
+          "name": "Julio Alberto",
+          "position": "LE",
+          "rating": 83
+        },
+        {
+          "name": "Pep Guardiola",
+          "position": "MCD",
+          "rating": 92
+        },
+        {
+          "name": "José Mari Bakero",
+          "position": "MCO",
+          "rating": 89
+        },
+        {
+          "name": "Guillermo Amor",
+          "position": "MC",
+          "rating": 87
+        },
+        {
+          "name": "Eusebio Sacristán",
+          "position": "MC",
+          "rating": 86
+        },
+        {
+          "name": "Goikoetxea",
+          "position": "ED",
+          "rating": 87
+        },
+        {
+          "name": "Hristo Stoítxkov",
+          "position": "EI",
+          "rating": 93
+        },
+        {
+          "name": "Michael Laudrup",
+          "position": "MCI",
+          "rating": 91
+        },
+        {
+          "name": "Romário",
+          "position": "DC",
+          "rating": 96
+        },
+        {
+          "name": "Txiki Begiristain",
+          "position": "EI",
+          "rating": 88
+        },
+        {
+          "name": "Julio Salinas",
+          "position": "DC",
+          "rating": 86
+        }
+      ]
+    },
+    {
+      "id": "mini",
+      "name": "La Quinta del Mini",
+      "years": "1994–96",
+      "coach": "Johan Cruyff",
+      "systems": [
+        "3-4-3",
+        "4-3-3"
+      ],
+      "players": [
+        {
+          "name": "Carles Busquets",
+          "position": "POR",
+          "rating": 81
+        },
+        {
+          "name": "Lopetegui",
+          "position": "POR",
+          "rating": 74
+        },
+        {
+          "name": "Albert Ferrer",
+          "position": "LD",
+          "rating": 87
+        },
+        {
+          "name": "Abelardo",
+          "position": "DFC",
+          "rating": 86
+        },
+        {
+          "name": "Miguel Ángel Nadal",
+          "position": "DFC",
+          "rating": 85
+        },
+        {
+          "name": "Sergi",
+          "position": "LE",
+          "rating": 87
+        },
+        {
+          "name": "Juan Carlos",
+          "position": "LE",
+          "rating": 79
+        },
+        {
+          "name": "Gheorghe Popescu",
+          "position": "MCD",
+          "rating": 85
+        },
+        {
+          "name": "Pep Guardiola",
+          "position": "MCD",
+          "rating": 90
+        },
+        {
+          "name": "Guillermo Amor",
+          "position": "MC",
+          "rating": 84
+        },
+        {
+          "name": "José Mari Bakero",
+          "position": "MCO",
+          "rating": 84
+        },
+        {
+          "name": "Celades",
+          "position": "MCD",
+          "rating": 79
+        },
+        {
+          "name": "Iván de la Peña",
+          "position": "MCO",
+          "rating": 84
+        },
+        {
+          "name": "Gheorghe Hagi",
+          "position": "MCI",
+          "rating": 87
+        },
+        {
+          "name": "Luis Figo",
+          "position": "ED",
+          "rating": 87
+        },
+        {
+          "name": "Jordi Cruyff",
+          "position": "EI",
+          "rating": 79
+        },
+        {
+          "name": "Óscar García",
+          "position": "DC",
+          "rating": 84
+        },
+        {
+          "name": "Roger García",
+          "position": "EI",
+          "rating": 83
+        },
+        {
+          "name": "Hristo Stoítxkov",
+          "position": "EI",
+          "rating": 89
+        },
+        {
+          "name": "Meho Kodro",
+          "position": "DC",
+          "rating": 83
+        }
+      ]
+    },
+    {
+      "id": "robson",
+      "name": "O’Fenomeno",
+      "years": "1996–97",
+      "coach": "Bobby Robson",
+      "systems": [
+        "4-2-3-1",
+        "4-3-3"
+      ],
+      "players": [
+        {
+          "name": "Ronaldo Nazário",
+          "position": "DC",
+          "rating": 97
+        },
+        {
+          "name": "Luis Figo",
+          "position": "ED",
+          "rating": 92
+        },
+        {
+          "name": "Pep Guardiola",
+          "position": "MCD",
+          "rating": 91
+        },
+        {
+          "name": "Hristo Stoítxkov",
+          "position": "EI",
+          "rating": 89
+        },
+        {
+          "name": "Albert Ferrer",
+          "position": "LD",
+          "rating": 87
+        },
+        {
+          "name": "Abelardo",
+          "position": "DFC",
+          "rating": 86
+        },
+        {
+          "name": "Gheorghe Popescu",
+          "position": "MCD",
+          "rating": 86
+        },
+        {
+          "name": "Guillermo Amor",
+          "position": "MC",
+          "rating": 86
+        },
+        {
+          "name": "Iván de la Peña",
+          "position": "MCO",
+          "rating": 86
+        },
+        {
+          "name": "Sergi",
+          "position": "LE",
+          "rating": 86
+        },
+        {
+          "name": "Vítor Baía",
+          "position": "POR",
+          "rating": 86
+        },
+        {
+          "name": "Fernando Couto",
+          "position": "DFC",
+          "rating": 85
+        },
+        {
+          "name": "Luis Enrique",
+          "position": "MC",
+          "rating": 85
+        },
+        {
+          "name": "Laurent Blanc",
+          "position": "DFC",
+          "rating": 84
+        },
+        {
+          "name": "Miguel Ángel Nadal",
+          "position": "DFC",
+          "rating": 84
+        },
+        {
+          "name": "Giovanni",
+          "position": "MCO",
+          "rating": 83
+        },
+        {
+          "name": "Pizzi",
+          "position": "DC",
+          "rating": 83
+        },
+        {
+          "name": "Celades",
+          "position": "MCD",
+          "rating": 78
+        },
+        {
+          "name": "Emmanuel Amunike",
+          "position": "EI",
+          "rating": 78
+        },
+        {
+          "name": "Lopetegui",
+          "position": "POR",
+          "rating": 72
+        }
+      ]
+    },
+    {
+      "id": "vanGaal",
+      "name": "El Centenari",
+      "years": "1997–2000",
+      "coach": "Louis van Gaal",
+      "systems": [
+        "3-4-3",
+        "4-3-3"
+      ],
+      "players": [
+        {
+          "name": "Hesp",
+          "position": "POR",
+          "rating": 83
+        },
+        {
+          "name": "Arnau",
+          "position": "POR",
+          "rating": 73
+        },
+        {
+          "name": "Frank de Boer",
+          "position": "DFC",
+          "rating": 88
+        },
+        {
+          "name": "Abelardo",
+          "position": "DFC",
+          "rating": 86
+        },
+        {
+          "name": "Sergi",
+          "position": "LE",
+          "rating": 88
+        },
+        {
+          "name": "Michael Reiziger",
+          "position": "LD",
+          "rating": 85
+        },
+        {
+          "name": "Miguel Ángel Nadal",
+          "position": "DFC",
+          "rating": 84
+        },
+        {
+          "name": "Pep Guardiola",
+          "position": "MCD",
+          "rating": 89
+        },
+        {
+          "name": "Phillip Cocu",
+          "position": "MCD",
+          "rating": 88
+        },
+        {
+          "name": "Luis Enrique",
+          "position": "MC",
+          "rating": 86
+        },
+        {
+          "name": "Ronald de Boer",
+          "position": "MCO",
+          "rating": 84
+        },
+        {
+          "name": "Xavi Hernández",
+          "position": "MC",
+          "rating": 85
+        },
+        {
+          "name": "Celades",
+          "position": "MCD",
+          "rating": 78
+        },
+        {
+          "name": "Rivaldo",
+          "position": "EI",
+          "rating": 93
+        },
+        {
+          "name": "Luis Figo",
+          "position": "ED",
+          "rating": 94
+        },
+        {
+          "name": "Patrick Kluivert",
+          "position": "DC",
+          "rating": 91
+        },
+        {
+          "name": "Sonny Anderson",
+          "position": "DC",
+          "rating": 85
+        },
+        {
+          "name": "Giovanni",
+          "position": "MCO",
+          "rating": 84
+        },
+        {
+          "name": "Zenden",
+          "position": "EI",
+          "rating": 84
+        },
+        {
+          "name": "Dani García",
+          "position": "DC",
+          "rating": 79
+        }
+      ]
+    },
+    {
+      "id": "serra",
+      "name": "Gaspartisme dur",
+      "years": "2000–01",
+      "coach": "Llorenç Serra Ferrer",
+      "systems": [
+        "4-3-3",
+        "4-2-3-1"
+      ],
+      "players": [
+        {
+          "name": "Rivaldo",
+          "position": "MCO",
+          "rating": 90
+        },
+        {
+          "name": "Patrick Kluivert",
+          "position": "DC",
+          "rating": 88
+        },
+        {
+          "name": "Marc Overmars",
+          "position": "EI",
+          "rating": 87
+        },
+        {
+          "name": "Phillip Cocu",
+          "position": "MCD",
+          "rating": 87
+        },
+        {
+          "name": "Frank de Boer",
+          "position": "DFC",
+          "rating": 86
+        },
+        {
+          "name": "Pep Guardiola",
+          "position": "MCD",
+          "rating": 85
+        },
+        {
+          "name": "Xavi Hernández",
+          "position": "MC",
+          "rating": 85
+        },
+        {
+          "name": "Abelardo",
+          "position": "DFC",
+          "rating": 84
+        },
+        {
+          "name": "Alfonso Pérez",
+          "position": "DC",
+          "rating": 84
+        },
+        {
+          "name": "Carles Puyol",
+          "position": "DFC",
+          "rating": 84
+        },
+        {
+          "name": "Michael Reiziger",
+          "position": "LD",
+          "rating": 84
+        },
+        {
+          "name": "Sergi",
+          "position": "LE",
+          "rating": 83
+        },
+        {
+          "name": "Luis Enrique",
+          "position": "MC",
+          "rating": 82
+        },
+        {
+          "name": "Simão Sabrosa",
+          "position": "ED",
+          "rating": 82
+        },
+        {
+          "name": "Emmanuel Petit",
+          "position": "MCD",
+          "rating": 80
+        },
+        {
+          "name": "Gerard López",
+          "position": "MC",
+          "rating": 79
+        },
+        {
+          "name": "Reina",
+          "position": "POR",
+          "rating": 79
+        },
+        {
+          "name": "Dani García",
+          "position": "DC",
+          "rating": 78
+        },
+        {
+          "name": "Dutruel",
+          "position": "POR",
+          "rating": 76
+        },
+        {
+          "name": "Zenden",
+          "position": "EI",
+          "rating": 82
+        }
+      ]
+    },
+    {
+      "id": "antic",
+      "name": "Rexach/Antic",
+      "years": "2001–03",
+      "coach": "Rexach · Van Gaal · Antic",
+      "systems": [
+        "4-3-3",
+        "4-2-3-1"
+      ],
+      "players": [
+        {
+          "name": "Bonano",
+          "position": "POR",
+          "rating": 80
+        },
+        {
+          "name": "Víctor Valdés",
+          "position": "POR",
+          "rating": 80
+        },
+        {
+          "name": "Carles Puyol",
+          "position": "DFC",
+          "rating": 89
+        },
+        {
+          "name": "Frank de Boer",
+          "position": "DFC",
+          "rating": 88
+        },
+        {
+          "name": "Michael Reiziger",
+          "position": "LD",
+          "rating": 85
+        },
+        {
+          "name": "Phillip Cocu",
+          "position": "MCD",
+          "rating": 88
+        },
+        {
+          "name": "Xavi Hernández",
+          "position": "MC",
+          "rating": 86
+        },
+        {
+          "name": "Luis Enrique",
+          "position": "MC",
+          "rating": 86
+        },
+        {
+          "name": "Thiago Motta",
+          "position": "MCD",
+          "rating": 80
+        },
+        {
+          "name": "Gabri",
+          "position": "MC",
+          "rating": 78
+        },
+        {
+          "name": "Gaizka Mendieta",
+          "position": "MC",
+          "rating": 81
+        },
+        {
+          "name": "Sorín",
+          "position": "LE",
+          "rating": 78
+        },
+        {
+          "name": "Rivaldo",
+          "position": "EI",
+          "rating": 89
+        },
+        {
+          "name": "Patrick Kluivert",
+          "position": "DC",
+          "rating": 91
+        },
+        {
+          "name": "Javier Saviola",
+          "position": "DC",
+          "rating": 85
+        },
+        {
+          "name": "Riquelme",
+          "position": "MCO",
+          "rating": 80
+        },
+        {
+          "name": "Marc Overmars",
+          "position": "EI",
+          "rating": 87
+        },
+        {
+          "name": "Geovanni",
+          "position": "ED",
+          "rating": 77
+        },
+        {
+          "name": "Dani García",
+          "position": "DC",
+          "rating": 79
+        },
+        {
+          "name": "Alfonso Pérez",
+          "position": "DC",
+          "rating": 84
+        }
+      ]
+    },
+    {
+      "id": "rijkaard",
+      "name": "Rijkaard",
+      "years": "2003–08",
+      "coach": "Frank Rijkaard",
+      "systems": [
+        "4-3-3",
+        "4-2-3-1"
+      ],
+      "players": [
+        {
+          "name": "Víctor Valdés",
+          "position": "POR",
+          "rating": 89
+        },
+        {
+          "name": "Jorquera",
+          "position": "POR",
+          "rating": 77
+        },
+        {
+          "name": "Carles Puyol",
+          "position": "DFC",
+          "rating": 94
+        },
+        {
+          "name": "Rafa Márquez",
+          "position": "DFC",
+          "rating": 89
+        },
+        {
+          "name": "Edmílson",
+          "position": "MCD",
+          "rating": 86
+        },
+        {
+          "name": "Oleguer Presas",
+          "position": "DFC",
+          "rating": 83
+        },
+        {
+          "name": "Belletti",
+          "position": "LD",
+          "rating": 82
+        },
+        {
+          "name": "Giovanni van Bronckhorst",
+          "position": "LE",
+          "rating": 86
+        },
+        {
+          "name": "Sylvinho",
+          "position": "LE",
+          "rating": 82
+        },
+        {
+          "name": "Xavi Hernández",
+          "position": "MC",
+          "rating": 91
+        },
+        {
+          "name": "Andrés Iniesta",
+          "position": "MC",
+          "rating": 90
+        },
+        {
+          "name": "Deco",
+          "position": "MC",
+          "rating": 93
+        },
+        {
+          "name": "Yaya Touré",
+          "position": "MCD",
+          "rating": 85
+        },
+        {
+          "name": "Edgar Davids",
+          "position": "MCD",
+          "rating": 90
+        },
+        {
+          "name": "Ronaldinho",
+          "position": "EI",
+          "rating": 96
+        },
+        {
+          "name": "Samuel Eto’o",
+          "position": "DC",
+          "rating": 93
+        },
+        {
+          "name": "Lionel Messi",
+          "position": "ED",
+          "rating": 93
+        },
+        {
+          "name": "Thierry Henry",
+          "position": "EI",
+          "rating": 87
+        },
+        {
+          "name": "Giuly",
+          "position": "ED",
+          "rating": 87
+        },
+        {
+          "name": "Henrik Larsson",
+          "position": "DC",
+          "rating": 86
+        }
+      ]
+    },
+    {
+      "id": "guardiola",
+      "name": "Pep Team",
+      "years": "2008–12",
+      "coach": "Pep Guardiola",
+      "systems": [
+        "4-3-3",
+        "3-4-3"
+      ],
+      "players": [
+        {
+          "name": "Víctor Valdés",
+          "position": "POR",
+          "rating": 93
+        },
+        {
+          "name": "Pinto",
+          "position": "POR",
+          "rating": 79
+        },
+        {
+          "name": "Carles Puyol",
+          "position": "DFC",
+          "rating": 94
+        },
+        {
+          "name": "Gerard Piqué",
+          "position": "DFC",
+          "rating": 91
+        },
+        {
+          "name": "Dani Alves",
+          "position": "LD",
+          "rating": 94
+        },
+        {
+          "name": "Éric Abidal",
+          "position": "LE",
+          "rating": 88
+        },
+        {
+          "name": "Sergio Busquets",
+          "position": "MCD",
+          "rating": 91
+        },
+        {
+          "name": "Xavi Hernández",
+          "position": "MC",
+          "rating": 96
+        },
+        {
+          "name": "Andrés Iniesta",
+          "position": "MC",
+          "rating": 94
+        },
+        {
+          "name": "Yaya Touré",
+          "position": "MCD",
+          "rating": 89
+        },
+        {
+          "name": "Javier Mascherano",
+          "position": "DFC",
+          "rating": 89
+        },
+        {
+          "name": "Seydou Keita",
+          "position": "MC",
+          "rating": 85
+        },
+        {
+          "name": "Thiago Alcántara",
+          "position": "MC",
+          "rating": 82
+        },
+        {
+          "name": "Rafa Márquez",
+          "position": "DFC",
+          "rating": 89
+        },
+        {
+          "name": "Lionel Messi",
+          "position": "ED",
+          "rating": 96
+        },
+        {
+          "name": "Samuel Eto’o",
+          "position": "DC",
+          "rating": 93
+        },
+        {
+          "name": "Thierry Henry",
+          "position": "EI",
+          "rating": 92
+        },
+        {
+          "name": "David Villa",
+          "position": "DC",
+          "rating": 91
+        },
+        {
+          "name": "Pedro Rodríguez",
+          "position": "ED",
+          "rating": 87
+        },
+        {
+          "name": "Alexis Sánchez",
+          "position": "ED",
+          "rating": 84
+        }
+      ]
+    },
+    {
+      "id": "luisEnrique",
+      "name": "MSN",
+      "years": "2014–17",
+      "coach": "Luis Enrique",
+      "systems": [
+        "4-3-3",
+        "4-2-3-1"
+      ],
+      "players": [
+        {
+          "name": "Ter Stegen",
+          "position": "POR",
+          "rating": 88
+        },
+        {
+          "name": "Claudio Bravo",
+          "position": "POR",
+          "rating": 89
+        },
+        {
+          "name": "Gerard Piqué",
+          "position": "DFC",
+          "rating": 91
+        },
+        {
+          "name": "Javier Mascherano",
+          "position": "DFC",
+          "rating": 89
+        },
+        {
+          "name": "Jordi Alba",
+          "position": "LE",
+          "rating": 90
+        },
+        {
+          "name": "Dani Alves",
+          "position": "LD",
+          "rating": 89
+        },
+        {
+          "name": "Sergi Roberto",
+          "position": "MC",
+          "rating": 83
+        },
+        {
+          "name": "Jérémy Mathieu",
+          "position": "DFC",
+          "rating": 84
+        },
+        {
+          "name": "Samuel Umtiti",
+          "position": "DFC",
+          "rating": 85
+        },
+        {
+          "name": "Sergio Busquets",
+          "position": "MCD",
+          "rating": 93
+        },
+        {
+          "name": "Andrés Iniesta",
+          "position": "MC",
+          "rating": 91
+        },
+        {
+          "name": "Ivan Rakitic",
+          "position": "MC",
+          "rating": 89
+        },
+        {
+          "name": "Xavi Hernández",
+          "position": "MC",
+          "rating": 85
+        },
+        {
+          "name": "Rafinha",
+          "position": "MCO",
+          "rating": 82
+        },
+        {
+          "name": "Arda Turan",
+          "position": "MC",
+          "rating": 81
+        },
+        {
+          "name": "Lionel Messi",
+          "position": "ED",
+          "rating": 96
+        },
+        {
+          "name": "Neymar",
+          "position": "EI",
+          "rating": 95
+        },
+        {
+          "name": "Luis Suárez",
+          "position": "DC",
+          "rating": 94
+        },
+        {
+          "name": "Pedro Rodríguez",
+          "position": "ED",
+          "rating": 87
+        },
+        {
+          "name": "Paco Alcácer",
+          "position": "DC",
+          "rating": 81
+        }
+      ]
+    },
+    {
+      "id": "valverde",
+      "name": "Bartorosellisme dur",
+      "years": "2020–22",
+      "coach": "Ronald Koeman",
+      "systems": [
+        "4-2-3-1",
+        "3-5-2"
+      ],
+      "players": [
+        {
+          "name": "Ter Stegen",
+          "position": "POR",
+          "rating": 83
+        },
+        {
+          "name": "Neto",
+          "position": "POR",
+          "rating": 79
+        },
+        {
+          "name": "Dest",
+          "position": "LD",
+          "rating": 79
+        },
+        {
+          "name": "Gerard Piqué",
+          "position": "DFC",
+          "rating": 81
+        },
+        {
+          "name": "Ronald Araújo",
+          "position": "DFC",
+          "rating": 90
+        },
+        {
+          "name": "Clément Lenglet",
+          "position": "DFC",
+          "rating": 82
+        },
+        {
+          "name": "Jordi Alba",
+          "position": "LE",
+          "rating": 81
+        },
+        {
+          "name": "Mingueza",
+          "position": "DFC",
+          "rating": 78
+        },
+        {
+          "name": "Sergio Busquets",
+          "position": "MCD",
+          "rating": 81
+        },
+        {
+          "name": "Frenkie de Jong",
+          "position": "MC",
+          "rating": 88
+        },
+        {
+          "name": "Pedri",
+          "position": "MC",
+          "rating": 78
+        },
+        {
+          "name": "Sergi Roberto",
+          "position": "MC",
+          "rating": 79
+        },
+        {
+          "name": "Ilaix Moriba",
+          "position": "MC",
+          "rating": 79
+        },
+        {
+          "name": "Nico González",
+          "position": "MC",
+          "rating": 78
+        },
+        {
+          "name": "Lionel Messi",
+          "position": "ED",
+          "rating": 94
+        },
+        {
+          "name": "Antoine Griezmann",
+          "position": "DC",
+          "rating": 88
+        },
+        {
+          "name": "Ousmane Dembélé",
+          "position": "ED",
+          "rating": 84
+        },
+        {
+          "name": "Ansu Fati",
+          "position": "EI",
+          "rating": 89
+        },
+        {
+          "name": "Philippe Coutinho",
+          "position": "MCO",
+          "rating": 77
+        },
+        {
+          "name": "Martin Braithwaite",
+          "position": "DC",
+          "rating": 77
+        }
+      ]
+    },
+    {
+      "id": "xavi",
+      "name": "La Xavineta",
+      "years": "2022–24",
+      "coach": "Xavi Hernández",
+      "systems": [
+        "4-3-3",
+        "4-4-2"
+      ],
+      "players": [
+        {
+          "name": "Ter Stegen",
+          "position": "POR",
+          "rating": 78
+        },
+        {
+          "name": "Iñaki Peña",
+          "position": "POR",
+          "rating": 78
+        },
+        {
+          "name": "Héctor Bellerín",
+          "position": "LD",
+          "rating": 73
+        },
+        {
+          "name": "Ronald Araújo",
+          "position": "DFC",
+          "rating": 89
+        },
+        {
+          "name": "Jules Koundé",
+          "position": "LD",
+          "rating": 87
+        },
+        {
+          "name": "Jordi Alba",
+          "position": "LE",
+          "rating": 80
+        },
+        {
+          "name": "Andreas Christensen",
+          "position": "DFC",
+          "rating": 88
+        },
+        {
+          "name": "Balde",
+          "position": "LE",
+          "rating": 85
+        },
+        {
+          "name": "Íñigo Martínez",
+          "position": "DFC",
+          "rating": 82
+        },
+        {
+          "name": "Sergio Busquets",
+          "position": "MCD",
+          "rating": 79
+        },
+        {
+          "name": "Frenkie de Jong",
+          "position": "MC",
+          "rating": 88
+        },
+        {
+          "name": "Pedri",
+          "position": "MC",
+          "rating": 90
+        },
+        {
+          "name": "Gavi",
+          "position": "MC",
+          "rating": 87
+        },
+        {
+          "name": "Ilkay Gündoğan",
+          "position": "MC",
+          "rating": 82
+        },
+        {
+          "name": "Ousmane Dembélé",
+          "position": "ED",
+          "rating": 86
+        },
+        {
+          "name": "Ferran Torres",
+          "position": "ED",
+          "rating": 81
+        },
+        {
+          "name": "Memphis Depay",
+          "position": "DC",
+          "rating": 75
+        },
+        {
+          "name": "Luuk de Jong",
+          "position": "DC",
+          "rating": 82
+        },
+        {
+          "name": "Pierre-Emerick Aubameyang",
+          "position": "DC",
+          "rating": 87
+        },
+        {
+          "name": "João Félix",
+          "position": "EI",
+          "rating": 82
+        }
+      ]
+    },
+    {
+      "id": "flick",
+      "name": "Flickwagen",
+      "years": "2024–27",
+      "coach": "Hansi Flick",
+      "systems": [
+        "4-2-3-1",
+        "4-3-3"
+      ],
+      "players": [
+        {
+          "name": "Joan García",
+          "position": "POR",
+          "rating": 91
+        },
+        {
+          "name": "Szczęsny",
+          "position": "POR",
+          "rating": 77
+        },
+        {
+          "name": "Pau Cubarsí",
+          "position": "DFC",
+          "rating": 93
+        },
+        {
+          "name": "Jules Koundé",
+          "position": "LD",
+          "rating": 87
+        },
+        {
+          "name": "Xavi Espart",
+          "position": "LD",
+          "rating": 82
+        },
+        {
+          "name": "Gerard Martín",
+          "position": "DFC",
+          "rating": 81
+        },
+        {
+          "name": "Eric García",
+          "position": "DFC",
+          "rating": 85
+        },
+        {
+          "name": "João Cancelo",
+          "position": "LE",
+          "rating": 82
+        },
+        {
+          "name": "Pedri",
+          "position": "MC",
+          "rating": 94
+        },
+        {
+          "name": "Frenkie de Jong",
+          "position": "MC",
+          "rating": 88
+        },
+        {
+          "name": "Gavi",
+          "position": "MC",
+          "rating": 84
+        },
+        {
+          "name": "Fermín López",
+          "position": "MCO",
+          "rating": 91
+        },
+        {
+          "name": "Rodri",
+          "position": "MCD",
+          "rating": 88
+        },
+        {
+          "name": "Marc Bernal",
+          "position": "MCD",
+          "rating": 84
+        },
+        {
+          "name": "Lamine Yamal",
+          "position": "ED",
+          "rating": 96
+        },
+        {
+          "name": "Raphinha",
+          "position": "EI",
+          "rating": 93
+        },
+        {
+          "name": "Robert Lewandowski",
+          "position": "DC",
+          "rating": 91
+        },
+        {
+          "name": "Dani Olmo",
+          "position": "MCO",
+          "rating": 88
+        },
+        {
+          "name": "Anthony Gordon",
+          "position": "EI",
+          "rating": 83
+        },
+        {
+          "name": "Karim Adeyemi",
+          "position": "ED",
+          "rating": 82
+        }
+      ]
+    }
+  ]
+}

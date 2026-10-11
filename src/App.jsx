@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLauncher";
+import ClashOfErasCatalog from "./components/ClashOfErasCatalog";
+import Quiz14 from "./components/Quiz14";
+import QuizAdmin from "./components/QuizAdmin";
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
 import VesalaporraDemo from "./components/VesalaporraDemoV3.jsx";
 import instructionsHtml from "./content/instruccions.html?raw";
@@ -811,7 +814,14 @@ const getVesalaporraRouteState = (
     selectedNotesUserId: null,
   };
 
-  if (section === "com-jugar" || section === "instruccions") {
+  if (section === "quiz") {
+    return {
+      ...defaultRouteState,
+      activePage: "quiz",
+    };
+  }
+
+  if (section === "coe" || section === "com-jugar" || section === "instruccions") {
     return {
       ...defaultRouteState,
       activePage: "instructions",
@@ -874,7 +884,7 @@ const getVesalaporraRouteState = (
 
   if (section === "puntuacions") {
     const adminScoringTab =
-      secondSlug === "jugadors"
+      secondSlug === "quiz" ? "quiz" : secondSlug === "jugadors"
         ? "players"
         : secondSlug === "propers-partits"
           ? "upcoming"
@@ -899,8 +909,12 @@ const getVesalaporraPath = ({
   selectedProfileUserId,
   selectedNotesUserId,
 }) => {
+  if (activePage === "quiz") {
+    return "/quiz";
+  }
+
   if (activePage === "instructions") {
-    return "/com-jugar";
+    return "/coe";
   }
 
   if (activePage === "notes") {
@@ -935,6 +949,7 @@ const getVesalaporraPath = ({
   }
 
   if (activePage === "scoring") {
+    if (adminScoringTab === "quiz") return "/puntuacions/quiz";
     if (adminScoringTab === "players") {
       return "/puntuacions/jugadors";
     }
@@ -3516,6 +3531,8 @@ const [rankingUsers, setRankingUsers] = useState([]);
 const [newPredictionRankingUsers, setNewPredictionRankingUsers] = useState([]);
 const [scoredJornades, setScoredJornades] = useState([]);
 const [selectedRankingMatchId, setSelectedRankingMatchId] = useState(null);
+const rankingMatchSelectionRef = useRef(null);
+const rankingRequestRef = useRef(0);
   const [achievementMultipliersByUser, setAchievementMultipliersByUser] = useState({});
 const [rankingLoading, setRankingLoading] = useState(false);
 const [rankingError, setRankingError] = useState("");
@@ -4483,6 +4500,7 @@ const getRankingAchievements = (user) =>
 
     if (!nextJornada) return;
 
+    rankingMatchSelectionRef.current = nextJornada.match_id;
     setSelectedRankingMatchId(nextJornada.match_id);
     setRankingJornadaNumber(nextJornada.jornada_number);
     setVisibleRankingCount(RANKING_PAGE_SIZE);
@@ -6991,6 +7009,7 @@ const fetchLatestScoredJornadaNumber = async () => {
 };
 
 const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
+  const requestId = ++rankingRequestRef.current;
   if (!quiet) {
     setRankingLoading(true);
   }
@@ -7001,7 +7020,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
     const jornadas = await fetchScoredJornades();
     const effectiveMatchId =
       matchId ||
-      selectedRankingMatchId ||
+      rankingMatchSelectionRef.current ||
       jornadas[jornadas.length - 1]?.match_id ||
       null;
 
@@ -7054,6 +7073,8 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
         null,
     }));
 
+    if (requestId !== rankingRequestRef.current) return;
+
     setRankingUsers(mergedRowsWithSignupDates);
     setNewPredictionRankingUsers(newPredictionRows);
     setScoredJornades(jornadas);
@@ -7068,6 +7089,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
       setSelectedProfileUserId(String(authUser.id));
     }
   } catch (error) {
+    if (requestId !== rankingRequestRef.current) return;
     if (quiet) {
       console.warn(
         "No s’ha pogut actualitzar el rànquing en segon pla:",
@@ -7081,7 +7103,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
       );
     }
   } finally {
-    if (!quiet) {
+    if (requestId === rankingRequestRef.current) {
       setRankingLoading(false);
     }
   }
@@ -9175,6 +9197,10 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
   }, [protagonistId, publicMatchPlayers]);
 
   useEffect(() => {
+    if (activePage === "ranking") rankingMatchSelectionRef.current = null;
+  }, [activePage]);
+
+  useEffect(() => {
     if (
       activePage === "ranking" ||
       activePage === "profile" ||
@@ -10295,6 +10321,61 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
   line-height: 1;
 }
 
+.coe-nav-icon {
+  border: 0;
+  font-size: 19px;
+  width: 24px;
+  flex-basis: 24px;
+}
+.coe-page {
+  width: min(calc(100% - 28px), 1080px);
+  margin: 0 auto;
+  padding: clamp(24px, 5vw, 58px) 0 90px;
+}
+.coe-poster {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 590px;
+  padding: clamp(36px, 7vw, 84px) 22px;
+  border: 1px solid rgba(255, 199, 83, .42);
+  border-radius: 24px;
+  color: #fff7e6;
+  background: radial-gradient(ellipse at 50% 3%, rgba(202, 127, 28, .38), transparent 47%),
+    radial-gradient(ellipse at 0% 96%, rgba(131, 29, 43, .58), transparent 58%),
+    radial-gradient(ellipse at 100% 89%, rgba(21, 57, 141, .65), transparent 58%),
+    linear-gradient(145deg, #0b1020, #16152d 52%, #090d18);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, .25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 18px;
+}
+.coe-poster::before {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(240, 183, 86, .23);
+  border-radius: 15px;
+  pointer-events: none;
+}
+.coe-eyebrow { font-size: 11px; letter-spacing: .38em; font-weight: 800; color: #e8c489; }
+.coe-mark { font-size: clamp(54px, 9vw, 88px); filter: drop-shadow(0 5px 23px rgba(244, 167, 57, .42)); }
+.coe-poster h1 { margin: 0; font-size: clamp(44px, 9vw, 102px); line-height: .97; font-weight: 1000; letter-spacing: -.055em; text-shadow: 0 6px 28px rgba(0,0,0,.5); }
+.coe-poster h1 span { display: inline-block; font-size: .4em; color: #f5c674; vertical-align: middle; letter-spacing: -.03em; }
+.coe-subtitle { margin: 2px 0 0; color: #f8d58a; font-weight: 900; letter-spacing: .14em; font-size: clamp(12px, 2vw, 18px); }
+.coe-poster-divider { width: 88px; height: 2px; background: linear-gradient(90deg, transparent, #ebbe72, transparent); margin-top: 6px; }
+.coe-description { max-width: 570px; font-size: clamp(15px, 2vw, 19px); line-height: 1.65; color: #e5e8f3; margin: 0; }
+.coe-play-button { display: inline-flex; justify-content: center; align-items: center; gap: 12px; margin-top: 18px; padding: 17px 27px; color: #15111b; background: linear-gradient(135deg, #ffe5a3, #efb648); border-radius: 12px; font-weight: 950; text-decoration: none; box-shadow: 0 7px 35px rgba(239,182,72,.25); transition: transform .2s, box-shadow .2s; }
+.coe-play-button:hover { transform: translateY(-2px); box-shadow: 0 10px 42px rgba(239,182,72,.4); }
+.coe-footnote { font-size: 12px; color: #abb5ca; }
+@media (max-width: 520px) {
+  .coe-poster { min-height: 540px; }
+  .coe-poster h1 span { display: block; margin: 5px 0; }
+}
+
 .instructions-page {
   width: min(calc(100% - 24px), 1240px);
   margin: 0 auto;
@@ -10580,22 +10661,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
               <span className="nav-guest-mobile-label">NOTES</span>
             </button>
 
-            <button
-              type="button"
-              className={
-                activePage === "instructions"
-                  ? "nav-button nav-help-button active"
-                  : "nav-button nav-help-button"
-              }
-              onClick={() => setActivePage("instructions")}
-              aria-label="Com jugar: instruccions de Vesalaporra"
-              title="Com jugar"
-            >
-              <span className="nav-help-icon" aria-hidden="true">
-                ?
-              </span>
-              <span className="nav-help-label">COM JUGAR</span>
-            </button>
+            <button type="button" className={activePage === "quiz" ? "nav-button active" : "nav-button"} onClick={() => setActivePage("quiz")} aria-label="Obre el Quiz14" title="Quiz14 i Clash of Eras"><span className="nav-full-label">🧠 QUIZ</span><span className="nav-guest-mobile-label">QUIZ</span></button>
                         <button
   type="button"
   className="nav-button nav-blog-placeholder"
@@ -10708,16 +10774,8 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
       )}
 
       <main className="app-main">
-        {activePage === "instructions" && (
-          <section
-            className="instructions-page"
-            aria-label="Com jugar a Vesalaporra"
-          >
-            <div
-              dangerouslySetInnerHTML={{ __html: enhancedInstructionsHtml }}
-            />
-          </section>
-        )}
+        {activePage === "instructions" && <ClashOfErasCatalog />}
+        {activePage === "quiz" && <Quiz14 isAdmin={isAdmin} userId={authUser?.id || null} displayName={profileDisplayName} avatarUrl={profileAvatarUrl} renderOpponentBadge={(edition) => <TeamColorBadge teamId={edition?.opponent_team_key} colors={edition?.opponent_colors?.filter(Boolean)||[]} pattern={edition?.opponent_pattern||"solid"} />} />}
 
         {activePage === "play" && (
           <section
@@ -12324,8 +12382,8 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                 </div>
               ) : (
                 <div className="admin-player-hero-summary">
-                  <span>CALENDARI REAL</span>
-                  <strong>{adminUpcomingMatches.length} partits</strong>
+                  <span>{adminScoringTab === "quiz" ? "EDICIONS DEL QUIZ" : "CALENDARI REAL"}</span>
+                  <strong>{adminScoringTab === "quiz" ? "Preguntes i publicació" : `${adminUpcomingMatches.length} partits`}</strong>
                   <small>
                     Crear, editar i publicar el proper rival de la portada.
                   </small>
@@ -12381,6 +12439,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
               >
                 PROPERS PARTITS
               </button>
+              <button type="button" role="tab" aria-selected={adminScoringTab === "quiz"} className={adminScoringTab === "quiz" ? "admin-area-tab active" : "admin-area-tab"} onClick={() => setAdminScoringTab("quiz")}>GESTIONAR QUIZ</button>
             </div>
 
             {adminScoringTab === "match" ? (
@@ -13088,7 +13147,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                   )}
                 </section>
               </section>
-            ) : (
+            ) : adminScoringTab === "quiz" ? (<QuizAdmin />) : (
               <section className="admin-player-workspace" role="tabpanel">
                 {adminMatchFeedback?.message && (
                   <div
@@ -14255,6 +14314,14 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                   Quan hi hagi dades oficials al rànquing, el perfil apareixerà
                   aquí.
                 </span>
+                {authUser && (
+                  <div className="profile-inline-actions">
+                    <button type="button" className="profile-inline-action" onClick={handleSignOut} disabled={authActionLoading}>
+                      {authActionLoading ? "TANCANT SESSIÓ…" : "TANCAR SESSIÓ"}
+                    </button>
+                    {authError && <p role="alert">{authError}</p>}
+                  </div>
+                )}
               </div>
             ) : (
               <>
@@ -16029,3 +16096,4 @@ function App() {
 }
 
 export default App;
+
