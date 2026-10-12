@@ -1,14 +1,30 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLauncher";
-import ClashOfErasCatalog from "./components/ClashOfErasCatalog";
-import Quiz14 from "./components/Quiz14";
-import QuizAdmin from "./components/QuizAdmin";
+const LazyClashOfErasCatalog = lazy(() => import("./components/ClashOfErasCatalog"));
+const LazyQuiz14 = lazy(() => import("./components/Quiz14"));
+const LazyQuizAdmin = lazy(() => import("./components/QuizAdmin"));
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
-import VesalaporraDemo from "./components/VesalaporraDemoV3.jsx";
+const LazyVesalaporraDemo = lazy(() => import("./components/VesalaporraDemoV3.jsx"));
 import instructionsHtml from "./content/instruccions.html?raw";
 import "./App.css";
 import "./VesalaporraLeagues_PRO_V2.css";
+
+function ClashOfErasCatalog(props) {
+  return <Suspense fallback={null}><LazyClashOfErasCatalog {...props} /></Suspense>;
+}
+
+function Quiz14(props) {
+  return <Suspense fallback={null}><LazyQuiz14 {...props} /></Suspense>;
+}
+
+function QuizAdmin(props) {
+  return <Suspense fallback={null}><LazyQuizAdmin {...props} /></Suspense>;
+}
+
+function VesalaporraDemo(props) {
+  return <Suspense fallback={null}><LazyVesalaporraDemo {...props} /></Suspense>;
+}
 
 const buildVesalaporraInstructionsHtml = (sourceHtml) => {
   let html = String(sourceHtml || "");
