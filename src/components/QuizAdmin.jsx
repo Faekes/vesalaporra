@@ -1,16 +1,143 @@
-import {useEffect,useState} from "react";
-import {supabase} from "../lib/supabaseClient";
+import { useCallback, useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient";
 import "./QuizAdmin.css";
-const emptyQuestion=()=>({prompt:"",options:["","","",""],correct_index:null,explanation:""});
-export default function QuizAdmin(){
- const [catalog,setCatalog]=useState({editions:[],matches:[]}),[edition,setEdition]=useState(null),[questions,setQuestions]=useState([]),[busy,setBusy]=useState(false),[message,setMessage]=useState(""),[preview,setPreview]=useState(false);
- async function list(){const {data,error}=await supabase.rpc("quiz14_admin_list");if(error)throw error;setCatalog(data);}
- useEffect(()=>{list().catch(e=>setMessage(e.message));},[]);
- async function act(fn){setBusy(true);setMessage("");try{await fn();}catch(e){setMessage(e.message);}finally{setBusy(false);}}
- function apply(data){setEdition(data);setQuestions(data.questions||[]);setPreview(false);}
- function open(id){act(async()=>{const {data,error}=await supabase.rpc("quiz14_admin_get",{p_quiz_id:id});if(error)throw error;apply(data);});}
- function change(index,patch){setQuestions(q=>q.map((item,i)=>i===index?{...item,...patch}:item));}
- async function save(){const {data,error}=await supabase.rpc("quiz14_admin_save",{p_quiz_id:edition.id||null,p_title:edition.title,p_match_id:edition.match_id||null,p_questions:questions});if(error)throw error;apply(data);await list();return data;}
- const locked=edition?.locked,complete=questions.length===14&&questions.every(q=>q.prompt.trim()&&q.options.every(o=>o.trim())&&q.correct_index!==null),anotherOpen=catalog.editions.some(e=>e.published_at&&!e.closed_at&&e.id!==edition?.id);
- return <section className="qa-root" role="tabpanel"><header><h2>Gestionar quiz</h2><p>Crea les preguntes, revisa’n l’ordre i publica una nova edició vinculada a un partit.</p></header><button disabled={busy} onClick={()=>{setEdition({title:"",match_id:"",locked:false});setQuestions(Array.from({length:14},emptyQuestion));setPreview(false);setMessage("");}}>+ Nova edició</button><div className="qa-editions">{catalog.editions.map(e=><button disabled={busy} className={edition?.id===e.id?"selected":""} key={e.id} onClick={()=>open(e.id)}>{e.title||"Sense títol"}<small>{e.closed_at?"Tancat":e.published_at?"Publicat":"Esborrany"} · {e.participants} participants</small></button>)}</div>{message&&<p role="status" className="qa-message">{message}</p>}{edition&&<><p>{locked?"Aquesta edició té participants o està tancada: el contingut està protegit.":"Els esborranys són privats. Amb el primer participant, les preguntes queden bloquejades."}</p><label>Títol<input disabled={locked||busy} value={edition.title} onChange={e=>setEdition({...edition,title:e.target.value})} maxLength={150}/></label><label>Partit<select disabled={locked||busy} value={edition.match_id||""} onChange={e=>setEdition({...edition,match_id:e.target.value})}><option value="">Selecciona el partit</option>{catalog.matches.map(m=><option value={m.id} key={m.id}>{m.barcelona_first?`Barça – ${m.opponent_display_name}`:`${m.opponent_display_name} – Barça`} · {m.scheduled_kickoff_at?new Date(m.scheduled_kickoff_at).toLocaleDateString("ca-ES"):"Sense data"}</option>)}</select></label><div className="qa-actions"><button onClick={()=>setPreview(!preview)}>{preview?"Editar":"Previsualitzar"}</button>{!locked&&<><button disabled={busy} onClick={()=>act(async()=>{await save();setMessage("Esborrany guardat.");})}>Guardar</button>{!edition.published_at&&<button disabled={busy||!complete||!edition.title.trim()||!edition.match_id||anotherOpen} onClick={()=>act(async()=>{const saved=await save();const {data,error}=await supabase.rpc("quiz14_admin_publish",{p_quiz_id:saved.id});if(error)throw error;apply(data);await list();setMessage("Quiz publicat. Ja és visible a la pàgina Quiz.");})}>Publicar quiz</button>}</>}{edition.published_at&&!edition.closed_at&&<button disabled={busy} onClick={()=>{if(window.confirm("Tancar aquesta edició i fixar la classificació final?"))act(async()=>{const {error}=await supabase.rpc("quiz14_close",{p_quiz_id:edition.id});if(error)throw error;const {data,error:getError}=await supabase.rpc("quiz14_admin_get",{p_quiz_id:edition.id});if(getError)throw getError;apply(data);await list();setMessage("Edició tancada i classificació guardada.");});}}>Tancar edició</button>}</div>{anotherOpen&&!edition.published_at&&<p>Per publicar aquesta edició, primer cal tancar el quiz obert. Pots continuar preparant l’esborrany.</p>}<p>{questions.length} / 14 preguntes · 4 opcions · 10 segons per resposta. Revisa que cap pregunta, opció o explicació reveli una resposta posterior.</p>{questions.map((q,i)=><article className="qa-question" key={i}><header><h3>Pregunta {i+1}</h3>{!preview&&!locked&&<div><button disabled={busy||i===0} aria-label="Pujar pregunta" onClick={()=>setQuestions(a=>{const b=[...a];[b[i-1],b[i]]=[b[i],b[i-1]];return b;})}>↑</button><button disabled={busy||i===questions.length-1} aria-label="Baixar pregunta" onClick={()=>setQuestions(a=>{const b=[...a];[b[i+1],b[i]]=[b[i],b[i+1]];return b;})}>↓</button><button disabled={busy} onClick={()=>setQuestions(a=>a.filter((_,n)=>n!==i))}>Eliminar</button></div>}</header>{preview?<><h4>{q.prompt||"Pregunta pendent"}</h4>{q.options.map((o,j)=><p key={j}>{"ABCD"[j]}) {o}{q.correct_index===j?" ✓":""}</p>)}<p>{q.explanation}</p></>:<><label>Pregunta<textarea disabled={locked||busy} value={q.prompt} maxLength={1000} onChange={e=>change(i,{prompt:e.target.value})}/></label>{q.options.map((o,j)=><label className="qa-option" key={j}><input type="radio" name={`correct-${i}`} disabled={locked||busy} checked={q.correct_index===j} onChange={()=>change(i,{correct_index:j})} aria-label={`Resposta correcta ${"ABCD"[j]}`}/><span>{"ABCD"[j]}</span><input disabled={locked||busy} value={o} maxLength={500} onChange={e=>change(i,{options:q.options.map((v,n)=>n===j?e.target.value:v)})}/></label>)}<label>Explicació després de respondre<textarea disabled={locked||busy} value={q.explanation} maxLength={1000} onChange={e=>change(i,{explanation:e.target.value})}/></label></>}</article>)}{!locked&&!preview&&questions.length<14&&<button disabled={busy} onClick={()=>setQuestions(a=>[...a,emptyQuestion()])}>+ Afegir pregunta</button>}</>}</section>;
+
+export default function QuizAdmin() {
+  const [catalog, setCatalog] = useState({ editions: [], matches: [] });
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const refresh = useCallback(async () => {
+    const { data, error: requestError } = await supabase.rpc("quiz14_admin_list");
+    if (requestError) throw requestError;
+    setCatalog({
+      editions: Array.isArray(data?.editions) ? data.editions : [],
+      matches: Array.isArray(data?.matches) ? data.matches : [],
+    });
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    supabase.rpc("quiz14_admin_list").then(({ data, error: requestError }) => {
+      if (!active) return;
+      if (requestError) {
+        setError("No s'ha pogut carregar la gestió dels quizzes.");
+      } else {
+        setCatalog({
+          editions: Array.isArray(data?.editions) ? data.editions : [],
+          matches: Array.isArray(data?.matches) ? data.matches : [],
+        });
+      }
+    });
+    return () => { active = false; };
+  }, []);
+
+  async function run(action) {
+    if (busy) return;
+    setBusy(true);
+    setMessage("");
+    setError("");
+    try {
+      await action();
+      await refresh();
+    } catch (requestError) {
+      setError(requestError?.message || "No s'ha pogut completar l'operació.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function publish(quiz) {
+    if (!window.confirm(`Vols publicar «${quiz.title || "Quiz sense títol"}»? A partir d'aquest moment els participants podran jugar-hi.`)) return;
+    await run(async () => {
+      const { error: requestError } = await supabase.rpc("quiz14_admin_publish", { p_quiz_id: quiz.id });
+      if (requestError) throw requestError;
+      setMessage("Quiz publicat correctament. Ja és visible a la pàgina Quiz.");
+    });
+  }
+
+  async function close(quiz) {
+    if (!window.confirm(`Vols tancar «${quiz.title || "Quiz"}» i fixar-ne la classificació final?`)) return;
+    await run(async () => {
+      const { error: requestError } = await supabase.rpc("quiz14_close", { p_quiz_id: quiz.id });
+      if (requestError) throw requestError;
+      setMessage("Edició tancada i classificació final guardada.");
+    });
+  }
+
+  const editions = catalog.editions;
+  const openQuiz = editions.find((quiz) => quiz.published_at && !quiz.closed_at);
+  const drafts = editions.filter((quiz) => !quiz.published_at && !quiz.closed_at);
+  const published = editions.filter((quiz) => quiz.published_at && !quiz.closed_at);
+  const archived = editions.filter((quiz) => quiz.closed_at);
+
+  function matchName(quiz) {
+    const match = catalog.matches.find((item) => item.id === quiz.match_id);
+    if (!match) return "Partit no vinculat o no disponible";
+    const opponent = match.opponent_display_name || "Rival";
+    return match.barcelona_first ? `Barça – ${opponent}` : `${opponent} – Barça`;
+  }
+
+  function renderEdition(quiz) {
+    const isDraft = !quiz.published_at && !quiz.closed_at;
+    const isLive = !!quiz.published_at && !quiz.closed_at;
+    const hasMatch = !!quiz.match_id;
+    const participants = Number(quiz.participants || 0);
+    return (
+      <article className="qa-question" key={quiz.id} style={{ marginBottom: 14 }}>
+        <header>
+          <h3>{quiz.title || "Quiz sense títol"}</h3>
+          <span aria-label="Estat del quiz" style={{ fontWeight: 700 }}>
+            {quiz.closed_at ? "🏆 Finalitzat" : isLive ? "🟢 Publicat" : "🔒 Esborrany privat"}
+          </span>
+        </header>
+        <p>{matchName(quiz)} · {participants} participants</p>
+        {isDraft && <p>Les preguntes i les respostes estan ocultes en aquesta pantalla.</p>}
+        <div className="qa-actions">
+          {isDraft && (
+            <button
+              type="button"
+              disabled={busy || !!openQuiz || !hasMatch || !quiz.title?.trim()}
+              onClick={() => publish(quiz)}
+            >
+              🚀 Publicar quiz
+            </button>
+          )}
+          {isLive && (
+            <button type="button" disabled={busy} onClick={() => close(quiz)}>
+              🔒 Tancar edició
+            </button>
+          )}
+        </div>
+        {isDraft && openQuiz && <p>Primer cal tancar el quiz actual per publicar aquest esborrany.</p>}
+        {isDraft && !hasMatch && <p>Falta vincular aquesta edició a un partit abans de publicar-la.</p>}
+      </article>
+    );
+  }
+
+  return (
+    <section className="qa-root" role="tabpanel">
+      <header>
+        <h2>Gestió dels quizzes</h2>
+        <p>Consulta els quizzes preparats i publica'ls quan vulguis, sense veure les respostes.</p>
+      </header>
+      <div className="qa-actions">
+        <button type="button" disabled={busy} onClick={() => run(async () => { setMessage("Llista actualitzada."); })}>
+          ↻ Actualitzar llista
+        </button>
+      </div>
+      {message && <p role="status" className="qa-message">{message}</p>}
+      {error && <p role="alert" className="qa-message">{error}</p>}
+
+      <h3>🔒 Preparats per publicar ({drafts.length})</h3>
+      {drafts.length ? drafts.map(renderEdition) : <p>Encara no hi ha cap esborrany guardat.</p>}
+
+      <h3>🟢 Quiz actius ({published.length})</h3>
+      {published.length ? published.map(renderEdition) : <p>No hi ha cap quiz actiu.</p>}
+
+      <h3>🏆 Historial ({archived.length})</h3>
+      {archived.length ? archived.map(renderEdition) : <p>Encara no hi ha quizzes finalitzats.</p>}
+    </section>
+  );
 }
