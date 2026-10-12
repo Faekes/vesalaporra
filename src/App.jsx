@@ -10661,7 +10661,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
               <span className="nav-guest-mobile-label">NOTES</span>
             </button>
 
-            <button type="button" className={activePage === "quiz" ? "nav-button active" : "nav-button"} onClick={() => setActivePage("quiz")} aria-label="Obre el Quiz14" title="Quiz14 i Clash of Eras"><span className="nav-full-label">🧠 QUIZ</span><span className="nav-guest-mobile-label">QUIZ</span></button>
+            <button type="button" className={activePage === "quiz" ? "nav-button active" : "nav-button"} onClick={() => setActivePage("quiz")} aria-label="Obre Jocs" title="Jocs: Quiz14 i Clash of Eras"><span className="nav-full-label">JOCS</span><span className="nav-guest-mobile-label">JOCS</span></button>
                         <button
   type="button"
   className="nav-button nav-blog-placeholder"
