@@ -151,3 +151,12 @@
 .q14-other-games-name{font-size:16px;line-height:1.35;color:#a21c45}
 @media(max-width:480px){.q14-root .q14-footer .q14-other-games-tab{min-height:67px;padding:11px 14px}.q14-other-games-name{font-size:15px}}
 @media(prefers-reduced-motion:reduce){.q14-root .q14-footer .q14-other-games-tab{transition:none}}
+
+/* Align champion cards regardless of nickname and quiz title length. */
+.q14-champions-grid{align-items:stretch}
+.q14-champion-frame{height:100%;box-sizing:border-box;display:grid;grid-template-rows:60px minmax(2.4em,auto) minmax(2.6em,auto) 1.2em;justify-items:center;align-content:start;align-items:center;gap:6px}
+.q14-champion-portrait{margin:8px 0 0;align-self:center}
+.q14-champion-frame>strong{display:flex;align-items:center;justify-content:center;min-width:0;text-align:center}
+.q14-champion-quiz{display:flex;align-items:center;justify-content:center;min-width:0;text-align:center}
+.q14-champion-frame>small{align-self:center}
+@media(max-width:480px){.q14-champion-frame{grid-template-rows:45px minmax(2.4em,auto) minmax(2.6em,auto) 1.2em;gap:5px}}
