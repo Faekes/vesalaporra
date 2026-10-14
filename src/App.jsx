@@ -1337,7 +1337,7 @@ const VESALAPORRA_PUBLIC_USER_ACHIEVEMENTS_RPC =
 
 const VESALAPORRA_PUBLIC_PROFILE_HISTORY_RPC =
   import.meta.env.VITE_VESALAPORRA_PUBLIC_PROFILE_HISTORY_RPC ||
-  "vesalaporra_public_profile_history";
+  "vesalaporra_public_profile_history_v2";
 
 const VESALAPORRA_PUBLIC_PROFILE_COMPETITIVE_SUMMARY_RPC =
   import.meta.env
@@ -1982,6 +1982,8 @@ const normalizeScoreHistoryRow = (row, index) => ({
     row?.opponent_name,
     "Rival",
   ),
+  barcelonaFirst: readOptionalBoolean(row?.barcelona_first),
+  barcelonaName: firstNonEmptyText(row?.barcelona_display_name, "Barça"),
   predictedHome: toFiniteNumber(row?.predicted_home_goals, row?.predicted_home),
   predictedAway: toFiniteNumber(row?.predicted_away_goals, row?.predicted_away),
   actualHome: toFiniteNumber(row?.official_home_goals, row?.home_score),
@@ -14882,7 +14884,11 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                                     match.label || "PARTIT",
                                   ).toUpperCase()}
                                 </span>
-                                <strong>{match.opponent}</strong>
+                                <strong>
+                                  {match.barcelonaFirst === false
+                                    ? `${match.opponent} – ${match.barcelonaName}`
+                                    : `${match.barcelonaName} – ${match.opponent}`}
+                                </strong>
                                 <small>{match.dateLabel || ""}</small>
 
                                 <button
