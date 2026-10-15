@@ -160,3 +160,9 @@
 .q14-champion-quiz{display:flex;align-items:center;justify-content:center;min-width:0;text-align:center}
 .q14-champion-frame>small{align-self:center}
 @media(max-width:480px){.q14-champion-frame{grid-template-rows:45px minmax(2.4em,auto) minmax(2.6em,auto) 1.2em;gap:5px}}
+
+/* Compact switch between the edition and cumulative quiz rankings. */
+.q14-ranking-tabs{display:flex;gap:4px;padding:4px;margin-bottom:16px;border:1px solid #ffffff24;border-radius:12px;background:#071428}
+.q14-root .q14-ranking-tabs button{flex:1;min-height:38px;padding:8px 14px;border:0;border-radius:8px;background:transparent;color:#bdc9da;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.q14-root .q14-ranking-tabs button[aria-pressed="true"]{background:linear-gradient(120deg,#9b2047,#214f85);color:#fff;box-shadow:0 2px 8px #0004}
+.q14-root .q14-ranking-tabs button:focus-visible{outline:2px solid #77dcff;outline-offset:2px}
