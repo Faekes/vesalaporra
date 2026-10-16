@@ -3879,18 +3879,12 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
   const lottoRanking = new Map(lottoOrder.map((name, index) => [
     normalizeTechnicalAccountKey(name), index,
   ]));
-  const sortedUnselected = lineupPlayers
-    .filter((player) => !lineup.includes(player.id))
-    .sort((a, b) =>
-      (lottoRanking.get(normalizeTechnicalAccountKey(a.name)) ?? 9999) -
-      (lottoRanking.get(normalizeTechnicalAccountKey(b.name)) ?? 9999),
-    );
-  // Keep available badges together in the requested order. Selected badges
-  // follow afterwards without changing their current selection or field slot.
-  const orderedLottoBadges = [
-    ...sortedUnselected,
-    ...lineupPlayers.filter((player) => lineup.includes(player.id)),
-  ];
+  // Sort every badge visually, including selected (grayscale) badges.
+  // The actual XI stays stored in `lineup` by player ID and slot; never modify it.
+  const orderedLottoBadges = [...lineupPlayers].sort((a, b) =>
+    (lottoRanking.get(normalizeTechnicalAccountKey(a.name)) ?? 9999) -
+    (lottoRanking.get(normalizeTechnicalAccountKey(b.name)) ?? 9999),
+  );
 
   const gamePlayersById = Object.fromEntries(
     gamePlayers.map((player) => [player.id, player]),
