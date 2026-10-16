@@ -1,5 +1,5 @@
 const VLP_SW_VERSION =
-  'VLP_PWA_PUSH_SERVICE_WORKER_20260927_COE_002'
+  'VLP_PWA_PUSH_SERVICE_WORKER_20261016_ASSET_FIX_003'
 
 const VLP_CACHE_NAME =
   `vesalaporra-pwa-${VLP_SW_VERSION}`
@@ -190,12 +190,13 @@ const staticDestinations = new Set([
   'manifest',
 ])
 
-if (
-  staticDestinations.has(request.destination)
-) {
-  event.respondWith(
-    cacheFirstStaticAsset(request),
-  )
+if (request.destination === 'script' || request.destination === 'style') {
+  event.respondWith(networkFirstCriticalAsset(request))
+  return
+}
+
+if (staticDestinations.has(request.destination)) {
+  event.respondWith(cacheFirstStaticAsset(request))
 }
 })
 
