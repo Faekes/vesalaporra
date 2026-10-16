@@ -3885,10 +3885,12 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
       (lottoRanking.get(normalizeTechnicalAccountKey(a.name)) ?? 9999) -
       (lottoRanking.get(normalizeTechnicalAccountKey(b.name)) ?? 9999),
     );
-  let unselectedIndex = 0;
-  const orderedLottoBadges = lineupPlayers.map((player) =>
-    lineup.includes(player.id) ? player : sortedUnselected[unselectedIndex++],
-  );
+  // Keep available badges together in the requested order. Selected badges
+  // follow afterwards without changing their current selection or field slot.
+  const orderedLottoBadges = [
+    ...sortedUnselected,
+    ...lineupPlayers.filter((player) => lineup.includes(player.id)),
+  ];
 
   const gamePlayersById = Object.fromEntries(
     gamePlayers.map((player) => [player.id, player]),
