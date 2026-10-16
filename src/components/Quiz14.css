@@ -166,3 +166,34 @@
 .q14-root .q14-ranking-tabs button{flex:1;min-height:38px;padding:8px 14px;border:0;border-radius:8px;background:transparent;color:#bdc9da;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
 .q14-root .q14-ranking-tabs button[aria-pressed="true"]{background:linear-gradient(120deg,#9b2047,#214f85);color:#fff;box-shadow:0 2px 8px #0004}
 .q14-root .q14-ranking-tabs button:focus-visible{outline:2px solid #77dcff;outline-offset:2px}
+
+
+/* Champion gallery: compact cards on desktop and mobile, no stretched rows. */
+.q14-champions-grid {
+  grid-template-columns: repeat(4, minmax(0, 148px));
+  justify-content: center;
+  align-items: start;
+}
+.q14-champion-frame {
+  height: auto;
+  min-height: 0;
+  grid-template-rows: auto auto auto auto;
+  align-content: start;
+  gap: 5px;
+  padding: 13px 6px 10px;
+}
+.q14-champion-portrait { margin: 8px 0 2px; }
+.q14-champion-frame > strong,
+.q14-champion-quiz { min-height: 0; }
+@media (max-width: 480px) {
+  .q14-champions-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+  }
+  .q14-champion-frame {
+    grid-template-rows: auto auto auto auto;
+    padding: 10px 2px 7px;
+    gap: 4px;
+  }
+  .q14-champion-portrait { margin: 6px 0 1px; }
+}
