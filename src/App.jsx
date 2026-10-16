@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { Component, lazy, Suspense, useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLauncher";
 const LazyClashOfErasCatalog = lazy(() => import("./components/ClashOfErasCatalog"));
@@ -14,8 +14,42 @@ function ClashOfErasCatalog(props) {
   return <Suspense fallback={null}><LazyClashOfErasCatalog {...props} /></Suspense>;
 }
 
+class GamesLoadBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { failed: false };
+  }
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error) {
+    console.error("Error carregant Jocs:", error);
+  }
+  render() {
+    if (this.state.failed) {
+      return (
+        <section role="alert" style={{ margin: "40px auto", padding: 28, maxWidth: 480, textAlign: "center" }}>
+          <h2>No s'ha pogut carregar Jocs</h2>
+          <button type="button" onClick={() => window.location.replace("/porra")}>TORNA A LA PORRA</button>
+        </section>
+      );
+    }
+    return this.props.children;
+  }
+}
 function Quiz14(props) {
-  return <Suspense fallback={null}><LazyQuiz14 {...props} /></Suspense>;
+  return (
+    <GamesLoadBoundary>
+      <Suspense fallback={
+        <section role="status" style={{ margin: "40px auto", padding: 28, maxWidth: 480, textAlign: "center" }}>
+          <h2>Carregant Jocs…</h2>
+          <button type="button" onClick={() => window.location.replace("/porra")}>TORNA A LA PORRA</button>
+        </section>
+      }>
+        <LazyQuiz14 {...props} />
+      </Suspense>
+    </GamesLoadBoundary>
+  );
 }
 
 function QuizAdmin(props) {
