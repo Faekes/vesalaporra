@@ -3869,12 +3869,18 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
   // Internal Lotto Flick badge ordering, no visible position labels.
   const lottoOrder = [
     "Joan García", "Dominik Livakovic", "Wojciech Szczesny",
-    "Pau Cubarsí", "Gerard Martín", "Andreas Christensen", "Eric García",
-    "Jules Koundé", "Alejandro Balde", "Xavi Espart", "Joao Cancelo",
+    "Iker Rodriguez",
+    "Pau Cubarsí", "Gerard Martín", "Hafiz Gariba",
+    "Andreas Christensen", "Eric García", "Jules Koundé",
+    "Jordi Pesquer", "Alejandro Balde", "Xavi Espart", "Joao Cancelo",
     "Rodri", "Frenkie de Jong", "Marc Bernal", "Gavi",
-    "Brian Fariñas", "Pedri", "Fermín López", "Dani Olmo",
-    "Anthony Gordon", "Lamine Yamal", "Karim Adeyemi", "Jesse Bisiwu",
-    "Raphinha", "Gabriel Jesús", "Hamza Abdelkarim",
+    "Brian Fariñas", "Pedri", "Ibrahima Diarra",
+    "Fermín López", "Dani Olmo",
+    "Anthony Gordon", "Ebrima Tunkara", "Roony Bardghji",
+    "Lamine Yamal", "Shane Kluivert",
+    "Karim Adeyemi", "Álex González", "Jesse Bisiwu",
+    "Raphinha", "Orian Goren", "Gabriel Jesús",
+    "Hamza Abdelkarim", "Òscar Gistau",
   ];
   const lottoRanking = new Map(lottoOrder.map((name, index) => [
     normalizeTechnicalAccountKey(name), index,
