@@ -197,3 +197,33 @@
   }
   .q14-champion-portrait { margin: 6px 0 1px; }
 }
+
+
+/* Mobile: every champion card has exactly the same height, across all rows. */
+@media (max-width: 480px) {
+  .q14-champions-grid { align-items: stretch; }
+  .q14-champion-frame {
+    height: 168px;
+    min-height: 168px;
+    max-height: 168px;
+    box-sizing: border-box;
+    grid-template-rows: 45px 36px 40px 16px;
+    align-content: start;
+    align-items: center;
+    overflow: hidden;
+  }
+  .q14-champion-frame > strong,
+  .q14-champion-quiz {
+    width: 100%;
+    min-width: 0;
+    max-height: 100%;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    text-align: center;
+  }
+  .q14-champion-frame > small { white-space: nowrap; }
+}
