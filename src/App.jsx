@@ -3866,6 +3866,30 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
         (player) => player.eligibleForLineup !== false,
       );
 
+  // Internal Lotto Flick badge ordering, no visible position labels.
+  const lottoOrder = [
+    "Joan García", "Dominik Livakovic", "Wojciech Szczesny",
+    "Pau Cubarsí", "Gerard Martín", "Andreas Christensen", "Eric García",
+    "Jules Koundé", "Alejandro Balde", "Xavi Espart", "Joao Cancelo",
+    "Rodri", "Frenkie de Jong", "Marc Bernal", "Gavi",
+    "Brian Fariñas", "Pedri", "Fermín López", "Dani Olmo",
+    "Anthony Gordon", "Lamine Yamal", "Karim Adeyemi", "Jesse Bisiwu",
+    "Raphinha", "Gabriel Jesús", "Hamza Abdelkarim",
+  ];
+  const lottoRanking = new Map(lottoOrder.map((name, index) => [
+    normalizeTechnicalAccountKey(name), index,
+  ]));
+  const sortedUnselected = lineupPlayers
+    .filter((player) => !lineup.includes(player.id))
+    .sort((a, b) =>
+      (lottoRanking.get(normalizeTechnicalAccountKey(a.name)) ?? 9999) -
+      (lottoRanking.get(normalizeTechnicalAccountKey(b.name)) ?? 9999),
+    );
+  let unselectedIndex = 0;
+  const orderedLottoBadges = lineupPlayers.map((player) =>
+    lineup.includes(player.id) ? player : sortedUnselected[unselectedIndex++],
+  );
+
   const gamePlayersById = Object.fromEntries(
     gamePlayers.map((player) => [player.id, player]),
   );
@@ -11532,7 +11556,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                 </div>
 
                 <div className="player-badges">
-                  {lineupPlayers.map((player) => {
+                  {orderedLottoBadges.map((player) => {
                     const isInLineup = lineup.includes(player.id);
 
                     const isPendingSelection = selectedPlayerId === player.id;
