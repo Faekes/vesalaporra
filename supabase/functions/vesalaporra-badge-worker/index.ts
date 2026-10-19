@@ -1,6 +1,6 @@
 // =========================================================
 // VESALAPORRA · BADGE WORKER
-// worker_id: VLP_EDGE_BADGE_WORKER_V1_1_20260714_040
+// worker_id: VLP_EDGE_BADGE_WORKER_V1_2_20261019_FAST_WEBP
 //
 // Implementat:
 //   ready_portrait_import
@@ -247,7 +247,7 @@ const FUNCTION_NAME =
   "vesalaporra-badge-worker";
 
 const WORKER_VERSION =
-  "VLP_EDGE_BADGE_WORKER_V1_1_20260714_040";
+  "VLP_EDGE_BADGE_WORKER_V1_2_20261019_FAST_WEBP";
 
 const TARGET_SIZE =
   1024;
@@ -570,6 +570,14 @@ const normalizePreparedPortrait = (
         TARGET_SIZE,
         TARGET_SIZE,
       );
+
+      // Edge Functions have a 2-second CPU budget. The default WebP
+      // encoder can exceed it on transparent 1024px portraits.
+      // Explicitly avoid lossless encoding and use the fastest method;
+      // preserve the existing alpha channel and full output dimensions.
+      image.quality = 85;
+      image.settings.setDefine(MagickFormat.WebP, "method", 0);
+      image.settings.setDefine(MagickFormat.WebP, "lossless", false);
 
       return image.write(
         MagickFormat.WebP,
