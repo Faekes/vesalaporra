@@ -3904,7 +3904,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
   const lottoOrder = [
     "Joan García", "Dominik Livakovic", "Wojciech Szczesny",
     "Iker Rodriguez",
-    "Pau Cubarsí", "Gerard Martín", "Hafiz Gariba",
+    "Pau Cubarsí", "Gerard Martín", "Hafiz Gariba", "Àlex Campos",
     "Andreas Christensen", "Eric García", "Jules Koundé",
     "Jordi Pesquer", "Alejandro Balde", "Xavi Espart", "Joao Cancelo",
     "Rodri", "Frenkie de Jong", "Marc Bernal", "Gavi",
