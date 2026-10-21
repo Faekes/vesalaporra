@@ -1967,7 +1967,7 @@ const ACHIEVEMENT_CATALOG = [
     id: "kamikaze",
     icon: "kamikaze-plane",
     title: "Kamikaze",
-    description: "Encertar un 0-0 o el resultat exacte d’una derrota.",
+    description: "Encertar el resultat exacte de qualsevol empat o derrota del Barça.",
   },
   {
     id: "xop-xop-salinas",
