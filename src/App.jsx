@@ -178,7 +178,7 @@ const PROTAGONIST_GROUP_OPTIONS = [
     key: "a",
     label: "GRUP A",
     hitPoints: 10,
-    missPoints: -5,
+    missPoints: -10,
     sortOrder: 100,
     excludesProtagonist: false,
   },
