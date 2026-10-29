@@ -62,7 +62,7 @@ export default function Quiz14({userId,displayName,avatarUrl,renderOpponentBadge
    const previous=totals.get(player.user_id);
    totals.set(player.user_id,{...player,score:(previous?.score||0)+Number(player.score||0),editions:(previous?.editions||0)+1,completed:(previous?.completed||0)+(player.finished?1:0)});
   }
-  setGeneralRanking([...totals.values()].map(player=>({...player,score:player.score/player.editions})).sort((a,b)=>b.score-a.score||String(a.user_id).localeCompare(String(b.user_id))));
+  setGeneralRanking([...totals.values()].map(player=>({...player,score:player.score/player.editions})).sort((a,b)=>b.score-a.score||b.editions-a.editions||String(a.user_id).localeCompare(String(b.user_id))));
  },[selectedId]);
  useEffect(()=>{rank();const id=setInterval(rank,7000);return()=>clearInterval(id)},[rank]);
  useEffect(()=>{
