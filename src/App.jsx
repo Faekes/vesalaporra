@@ -3897,7 +3897,9 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     hasOfficialResult || matchData.homeMode === "MATCH_SCORED"
     ? []
     : gamePlayers.filter(
-        (player) => player.eligibleForLineup !== false,
+        (player) => player.eligibleForLineup !== false ||
+          (confirmedPrediction?.matchId === String(matchData.id) &&
+            confirmedPrediction.lineup.includes(player.id) && lineup.includes(player.id)),
       );
 
   // Internal Lotto Flick badge ordering, no visible position labels.
