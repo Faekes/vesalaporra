@@ -5065,8 +5065,8 @@ const getRankingAchievements = (user) =>
         .filter((match) => match.matchId && match.kickoffAt)
         .sort(
           (firstMatch, secondMatch) =>
-            new Date(firstMatch.kickoffAt).getTime() -
-            new Date(secondMatch.kickoffAt).getTime(),
+            new Date(secondMatch.kickoffAt).getTime() -
+            new Date(firstMatch.kickoffAt).getTime(),
         );
 
       const pointsMultipliers = await loadMatchPointsMultipliers(
