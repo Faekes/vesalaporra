@@ -3906,7 +3906,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     "Iker Rodriguez",
     "Pau Cubarsí", "Gerard Martín", "Hafiz Gariba", "Àlex Campos",
     "Andreas Christensen", "Eric García", "Jules Koundé",
-    "Jordi Pesquer", "Alejandro Balde", "Xavi Espart", "Joao Cancelo",
+    "Guillem Victor", "Jordi Pesquer", "Alejandro Balde", "Xavi Espart", "Joao Cancelo",
     "Rodri", "Frenkie de Jong", "Marc Bernal", "Gavi",
     "Brian Fariñas", "Pedri", "Ibrahima Diarra",
     "Fermín López", "Dani Olmo",
