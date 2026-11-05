@@ -2566,7 +2566,7 @@ function getAchievementCopyCount(achievement) {
 }
 
 function AchievementIconCopies({ achievement, iconClassName }) {
-  const count = getAchievementCopyCount(achievement);
+  const count = achievement?.id === "xop-xop-salinas" ? 1 : getAchievementCopyCount(achievement);
   const icons = Array.from({ length: count }, (_, index) => (
     <span
       key={`${achievement.id}-${index}`}
