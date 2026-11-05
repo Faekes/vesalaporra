@@ -3689,8 +3689,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     useState([]);
   const [privateLeagueMembersLoading, setPrivateLeagueMembersLoading] =
     useState(false);
-  const [privateLeagueRankingTab, setPrivateLeagueRankingTab] =
-    useState("general");
+  const privateLeagueRankingTab = "general";
 
   const [officialMatchState, setOfficialMatchState] = useState(() =>
     createEmptyOfficialMatchState(null),
@@ -4349,8 +4348,9 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     ) || null;
 
   const privateLeagueRankingUsers = privateLeagueMembers.map((member) => {
-    const rankingUser = rankingUsersWithAuth.find(
-      (user) => user.id === member.userId,
+    // Private leagues always use full-season General, independently of the public tab.
+    const rankingUser = rankingUsers.find(
+      (user) => user.id === member.userId && !isVesalaporraTechnicalAccount(user),
     );
 
     if (rankingUser) {
@@ -8087,7 +8087,6 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
       await loadPrivateLeagues({ quiet: true });
 
       if (createdLeague?.id) {
-        setPrivateLeagueRankingTab("general");
         setSelectedPrivateLeagueId(createdLeague.id);
         await loadPrivateLeagueMembers(createdLeague.id);
       }
@@ -8158,7 +8157,6 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
       await loadPrivateLeagues({ quiet: true });
 
       if (joinedLeague?.id) {
-        setPrivateLeagueRankingTab("general");
         setSelectedPrivateLeagueId(joinedLeague.id);
         await loadPrivateLeagueMembers(joinedLeague.id);
       }
@@ -8205,7 +8203,6 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
     }
 
     setSelectedPrivateLeagueId(leagueId);
-    setPrivateLeagueRankingTab("general");
     setPrivateLeagueFeedback(null);
 
     await loadPrivateLeagueMembers(leagueId);
@@ -8895,7 +8892,6 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
         setPrivateLeagueCreateOpen(false);
         setPrivateLeagueJoinOpen(false);
         setPrivateLeagueInfoOpen(false);
-        setPrivateLeagueRankingTab("general");
       }
     });
 
@@ -15667,57 +15663,15 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                           id="private-league-ranking"
                           className="private-league-ranking-section"
                         >
-                          <div
-                            className="ranking-tabs private-league-ranking-tabs"
-                            role="tablist"
-                            aria-label={`Classificació de ${selectedPrivateLeague.name}`}
-                          >
-                            <button
-                              type="button"
-                              role="tab"
-                              aria-selected={
-                                privateLeagueRankingTab === "general"
-                              }
-                              className={
-                                privateLeagueRankingTab === "general"
-                                  ? "ranking-tab active"
-                                  : "ranking-tab"
-                              }
-                              onClick={() =>
-                                setPrivateLeagueRankingTab("general")
-                              }
-                            >
-                              GENERAL
-                            </button>
-
-                            <button
-                              type="button"
-                              role="tab"
-                              aria-selected={
-                                privateLeagueRankingTab === "jornada"
-                              }
-                              className={
-                                privateLeagueRankingTab === "jornada"
-                                  ? "ranking-tab active"
-                                  : "ranking-tab"
-                              }
-                              onClick={() =>
-                                setPrivateLeagueRankingTab("jornada")
-                              }
-                            >
-                              JORNADA
-                            </button>
-                          </div>
+                          <p className="private-league-ranking-scope">
+                            Classificació general de tota la temporada. Els punts no es reinicien entre Apertura i Clausura.
+                          </p>
 
                           <section className="ranking-board private-league-ranking-board">
                             <header className="ranking-board-heading">
                               <div>
                                 <span>
-                                  {privateLeagueRankingTab === "general"
-                                    ? "CLASSIFICACIÓ GENERAL"
-                                    : rankingJornadaNumber
-                                      ? `JORNADA ${rankingJornadaNumber}`
-                                      : "JORNADA"}
+                                  CLASSIFICACIÓ GENERAL
                                 </span>
                                 <strong>{selectedPrivateLeague.name}</strong>
                               </div>
