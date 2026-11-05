@@ -2517,22 +2517,42 @@ function WinterSnowflakeIcon({ className = "" }) {
 function ChromeBumblebeeIcon() {
   const gradientId = useId();
   return (
-    <svg className="achievement-custom-icon chrome-bumblebee-icon" viewBox="0 0 64 64" role="img" aria-label="Abellot cromat">
+    <svg className="achievement-custom-icon chrome-bumblebee-icon" viewBox="0 0 64 64" role="img" aria-label="Abellot groc i negre lluent amb ales blau cel">
       <defs><linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stopColor="#fff"/><stop offset=".25" stopColor="#b9c5d2"/>
-        <stop offset=".46" stopColor="#fff"/><stop offset=".55" stopColor="#566577"/>
-        <stop offset=".8" stopColor="#dce6ef"/><stop offset="1" stopColor="#8393a5"/>
-      </linearGradient></defs>
-      <g stroke="#405064" strokeWidth="2.3" strokeLinejoin="round">
-        <ellipse cx="23" cy="20" rx="10" ry="16" transform="rotate(-34 23 20)" fill="#e8f4ff" fillOpacity=".85"/>
-        <ellipse cx="41" cy="20" rx="10" ry="16" transform="rotate(34 41 20)" fill="#e8f4ff" fillOpacity=".85"/>
+        <stop offset="0" stopColor="#fff"/><stop offset=".25" stopColor="#ffe331"/>
+        <stop offset=".46" stopColor="#fff"/><stop offset=".55" stopColor="#e4a600"/>
+        <stop offset=".8" stopColor="#fff46a"/><stop offset="1" stopColor="#ffc400"/>
+      </linearGradient>
+        <linearGradient id={`${gradientId}-rim`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#b9ffcb"/><stop offset=".2" stopColor="#22c55e"/>
+          <stop offset=".43" stopColor="#087c36"/><stop offset=".5" stopColor="#a3ffb7"/>
+          <stop offset=".62" stopColor="#16a34a"/><stop offset="1" stopColor="#064d26"/>
+        </linearGradient>
+        <radialGradient id={`${gradientId}-plate`} cx=".32" cy=".2" r=".85">
+          <stop offset="0" stopColor="#f5fff5"/><stop offset=".45" stopColor="#d8eadf"/>
+          <stop offset="1" stopColor="#718b7d"/>
+        </radialGradient>
+        <linearGradient id={`${gradientId}-gloss`} x1="0" y1="0" x2=".8" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity=".7"/><stop offset=".45" stopColor="#fff" stopOpacity=".04"/>
+          <stop offset=".6" stopColor="#fff" stopOpacity="0"/><stop offset="1" stopColor="#fff" stopOpacity=".22"/>
+        </linearGradient>
+      </defs>
+      <circle cx="32" cy="32" r="31" fill={`url(#${gradientId}-rim)`} stroke="#064d26" strokeWidth="1"/>
+      <circle cx="32" cy="32" r="26.5" fill={`url(#${gradientId}-plate)`} stroke="#baffcb" strokeWidth=".7"/>
+      <g transform="translate(6.4 6.4) scale(.8)">
+      <g stroke="#111318" strokeWidth="2.3" strokeLinejoin="round">
+        <ellipse cx="23" cy="20" rx="10" ry="16" transform="rotate(-34 23 20)" fill="#72d4ff" fillOpacity="1"/>
+        <ellipse cx="41" cy="20" rx="10" ry="16" transform="rotate(34 41 20)" fill="#72d4ff" fillOpacity="1"/>
         <path d="M27 17 23 9M37 17l4-8M22 43l-7 6M42 43l7 6M25 49l-4 7M39 49l4 7" fill="none" strokeLinecap="round"/>
         <ellipse cx="32" cy="38" rx="15" ry="19" fill={`url(#${gradientId})`}/>
         <path d="M18 32q14 6 28 0M18 42q14 7 28 0M23 52q9 4 18 0" fill="none" strokeWidth="5"/>
         <ellipse cx="32" cy="22" rx="11" ry="10" fill={`url(#${gradientId})`}/>
       </g>
-      <circle cx="28" cy="21" r="2" fill="#162131"/><circle cx="36" cy="21" r="2" fill="#162131"/>
+      <circle cx="28" cy="21" r="2" fill="#08090c"/><circle cx="36" cy="21" r="2" fill="#08090c"/>
       <path d="m49 9 1.4 4.6L55 15l-4.6 1.4L49 21l-1.4-4.6L43 15l4.6-1.4Z" fill="#fff"/>
+      </g>
+      <circle cx="32" cy="32" r="29.5" fill={`url(#${gradientId}-gloss)`} pointerEvents="none"/>
+      <path d="M12 13A27 27 0 0 1 41 7" fill="none" stroke="#e2ffe7" strokeOpacity=".8" strokeWidth="1" strokeLinecap="round"/>
     </svg>
   );
 }
