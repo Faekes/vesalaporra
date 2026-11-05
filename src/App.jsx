@@ -1,4 +1,4 @@
-import { Component, lazy, Suspense, useEffect, useRef, useState } from "react";
+import { Component, lazy, Suspense, useEffect, useId, useRef, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import VesalaporraDesktopAppLauncher from "./components/VesalaporraDesktopAppLauncher";
 const LazyClashOfErasCatalog = lazy(() => import("./components/ClashOfErasCatalog"));
@@ -857,7 +857,7 @@ const getVesalaporraRouteState = (
   const defaultRouteState = {
     activePage: "play",
     notesTab: "match",
-    rankingTab: "general",
+    rankingTab: "phase",
     profileTab: "overview",
     adminScoringTab: "match",
     selectedProfileUserId: null,
@@ -906,7 +906,9 @@ const getVesalaporraRouteState = (
           ? "new"
           : secondSlug === "jornada"
             ? "jornada"
-            : "general",
+            : ["torneig", "apertura", "clausura", ""].includes(secondSlug)
+              ? "phase"
+              : "general",
     };
   }
 
@@ -984,7 +986,7 @@ const getVesalaporraPath = ({
       ? "/ranquing/porra-nova"
       : rankingTab === "jornada"
         ? "/ranquing/jornada"
-        : "/ranquing/general";
+        : rankingTab === "phase" ? "/ranquing/torneig" : "/ranquing/general";
   }
 
   if (activePage === "profile") {
@@ -1922,9 +1924,21 @@ const ACHIEVEMENT_CATALOG = [
   {
     id: "winter_champion_2026",
     icon: "winter-snowflake",
-    title: "Campió d’hivern 2026",
+    title: "Campió de l’Apertura 26/27",
     description:
-      "Lidera la classificació general de Vesalaporra en acabar l’any natural 2026.",
+      "Guanya l’Apertura 2026/27, fins a l’Osasuna–Barça del 10 de gener inclòs.",
+  },
+  {
+    id: "clausura_champion_2026_27",
+    icon: "chrome-bumblebee",
+    title: "Campió del Clausura 26/27",
+    description: "Guanya el Clausura 2026/27, des del Barça–Elche del 17 de gener.",
+  },
+  {
+    id: "winner",
+    icon: "👑",
+    title: "Guanyador de la jornada",
+    description: "Guanya una jornada.",
   },
   {
     id: "preseason_champion_2026",
@@ -1932,12 +1946,6 @@ const ACHIEVEMENT_CATALOG = [
     title: "Campió de la pretemporada 2026",
     description:
       "Guanya la classificació general definitiva de la pretemporada 2026.",
-  },
-  {
-    id: "winner",
-    icon: "👑",
-    title: "Guanyador de la jornada",
-    description: "Guanya una jornada.",
   },
   {
     id: "nostradamus",
@@ -2506,7 +2514,31 @@ function WinterSnowflakeIcon({ className = "" }) {
   );
 }
 
+function ChromeBumblebeeIcon() {
+  const gradientId = useId();
+  return (
+    <svg className="achievement-custom-icon chrome-bumblebee-icon" viewBox="0 0 64 64" role="img" aria-label="Abellot cromat">
+      <defs><linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="#fff"/><stop offset=".25" stopColor="#b9c5d2"/>
+        <stop offset=".46" stopColor="#fff"/><stop offset=".55" stopColor="#566577"/>
+        <stop offset=".8" stopColor="#dce6ef"/><stop offset="1" stopColor="#8393a5"/>
+      </linearGradient></defs>
+      <g stroke="#405064" strokeWidth="2.3" strokeLinejoin="round">
+        <ellipse cx="23" cy="20" rx="10" ry="16" transform="rotate(-34 23 20)" fill="#e8f4ff" fillOpacity=".85"/>
+        <ellipse cx="41" cy="20" rx="10" ry="16" transform="rotate(34 41 20)" fill="#e8f4ff" fillOpacity=".85"/>
+        <path d="M27 17 23 9M37 17l4-8M22 43l-7 6M42 43l7 6M25 49l-4 7M39 49l4 7" fill="none" strokeLinecap="round"/>
+        <ellipse cx="32" cy="38" rx="15" ry="19" fill={`url(#${gradientId})`}/>
+        <path d="M18 32q14 6 28 0M18 42q14 7 28 0M23 52q9 4 18 0" fill="none" strokeWidth="5"/>
+        <ellipse cx="32" cy="22" rx="11" ry="10" fill={`url(#${gradientId})`}/>
+      </g>
+      <circle cx="28" cy="21" r="2" fill="#162131"/><circle cx="36" cy="21" r="2" fill="#162131"/>
+      <path d="m49 9 1.4 4.6L55 15l-4.6 1.4L49 21l-1.4-4.6L43 15l4.6-1.4Z" fill="#fff"/>
+    </svg>
+  );
+}
+
 function AchievementIconGraphic({ achievement }) {
+  if (achievement?.icon === "chrome-bumblebee") return <ChromeBumblebeeIcon />;
   if (achievement?.icon === "kamikaze-plane") {
     return <KamikazePlaneIcon />;
   }
@@ -2552,27 +2584,15 @@ function AchievementIconCopies({ achievement, iconClassName }) {
 
 function RankingAchievementMedal({ achievement }) {
   const count = getAchievementCopyCount(achievement);
-  const accessibleLabel = count > 1
-    ? `${achievement.title} · aconseguida ${count} vegades`
-    : achievement.title;
-
-  return (
-    <span
-      className="ranking-achievement-unit"
-      title={accessibleLabel}
-      aria-label={accessibleLabel}
-    >
+  return Array.from({ length: count }, (_, index) => (
+    <span key={`${achievement.id}-${index}`} className="ranking-achievement-unit"
+      title={count > 1 ? `${achievement.title} · ${index + 1} de ${count}` : achievement.title}
+      aria-label={count > 1 ? `${achievement.title} · ${index + 1} de ${count}` : achievement.title}>
       <span className="ranking-achievement-icon" aria-hidden="true">
         <AchievementIconGraphic achievement={achievement} />
       </span>
-
-      {count > 1 && (
-        <span className="ranking-achievement-multiplier" aria-hidden="true">
-          x{count}
-        </span>
-      )}
     </span>
-  );
+  ));
 }
 
 function RankingAchievementIcons({ achievements, className = "" }) {
@@ -3456,6 +3476,11 @@ function VesalaporraApp() {
     initialRouteState.rankingTab,
   );
 
+  const [phaseRankingUsers, setPhaseRankingUsers] = useState([]);
+  const [competitionPhase, setCompetitionPhase] = useState("apertura");
+  const [competitionArchives, setCompetitionArchives] = useState([]);
+  const [competitionArchiveError, setCompetitionArchiveError] = useState("");
+
   const [visibleRankingCount, setVisibleRankingCount] =
     useState(RANKING_PAGE_SIZE);
 
@@ -4106,14 +4131,14 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     : null;
 
   const activeRankingUsers =
-    rankingTab === "new" ? newPredictionRankingUsers : rankingUsers;
+    rankingTab === "new" ? newPredictionRankingUsers : rankingTab === "phase" ? phaseRankingUsers : rankingUsers;
 
   const publicRankingUsers = activeRankingUsers.filter((user) => {
     if (isVesalaporraTechnicalAccount(user)) {
       return false;
     }
 
-    if (rankingTab === "general") {
+    if (rankingTab === "general" || rankingTab === "phase") {
       return user.generalPosition !== null && user.generalPosition !== undefined;
     }
 
@@ -4202,7 +4227,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
 
   const rankingRows = [...rankingUsersWithAuth].sort(
     (firstUser, secondUser) =>
-      compareRankingUsers(firstUser, secondUser, rankingTab),
+      compareRankingUsers(firstUser, secondUser, rankingTab === "phase" ? "general" : rankingTab),
   );
   const visibleRankingRows = rankingRows.slice(0, visibleRankingCount);
   const rankingHasMore = visibleRankingCount < rankingRows.length;
@@ -6954,7 +6979,7 @@ const fetchRankingScope = async (scope, matchId = null) => {
 
   return unwrapRpcRows(payload, ["ranking", "rows", "items", "users"])
     .map((row, index) =>
-      normalizeRankingUser(row, scope, authUser?.id, index),
+      normalizeRankingUser(row, scope === "phase" ? "general" : scope, authUser?.id, index),
     )
     .filter(Boolean);
 };
@@ -7110,6 +7135,8 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
       jornadaNumber,
       preseasonFinalPositionById,
       newPredictionRows,
+      phaseRows,
+      phaseState,
     ] =
       await Promise.all([
         fetchRankingScope("general"),
@@ -7131,6 +7158,11 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
           return {};
         }),
         fetchNewPredictionRanking(),
+        fetchRankingScope("phase"),
+        supabase.rpc("vesalaporra_public_competition_state").then(({data,error}) => {
+          if (error) throw error;
+          return data;
+        }),
       ]);
 
     const mergedRows = mergeRankingScopes(
@@ -7156,6 +7188,8 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
     if (requestId !== rankingRequestRef.current) return;
 
     setRankingUsers(mergedRowsWithSignupDates);
+    setPhaseRankingUsers(phaseRows);
+    setCompetitionPhase(phaseState?.phase || "apertura");
     setNewPredictionRankingUsers(newPredictionRows);
     setScoredJornades(jornadas);
     setSelectedRankingMatchId(effectiveMatchId);
@@ -7177,6 +7211,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
       );
     } else {
       setRankingUsers([]);
+      setPhaseRankingUsers([]);
       setRankingJornadaNumber(null);
       setRankingError(
         error?.message || "No s’ha pogut carregar el rànquing real.",
@@ -9317,13 +9352,26 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
     }
   }, [activePage, selectedProfileUser?.id]);
 
-  // Només lectura: els multiplicadors no intervenen en punts ni desempats.
+  useEffect(() => {
+    if (activePage !== "profile" || profileTab !== "history") return;
+    let current = true;
+    setCompetitionArchiveError("");
+    supabase.rpc("vesalaporra_public_competition_archives").then(({data,error}) => {
+      if (!current) return;
+      if (error) setCompetitionArchiveError("No s’ha pogut carregar l’historial de torneigs.");
+      else setCompetitionArchives(data || []);
+    });
+    return () => { current = false; };
+  }, [activePage, profileTab]);
+
+  // Cada còpia representa una medalla; la jerarquia canònica es calcula al servidor.
   // Es refresquen amb les càrregues existents, sense un temporitzador nou.
   useEffect(() => {
     if (activePage !== "ranking" && activePage !== "profile") return;
     let isCurrent = true;
     const userIds = [...new Set([
       ...rankingUsers.map((user) => user.id),
+      ...phaseRankingUsers.map((user) => user.id),
       ...privateLeagueMembers.map((member) => member.userId),
       selectedProfileUser?.id,
     ].filter(Boolean))];
@@ -9362,7 +9410,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
       if (isCurrent) console.warn("No s’han pogut actualitzar els multiplicadors de medalles:", error);
     });
     return () => { isCurrent = false; };
-  }, [activePage, rankingUsers, privateLeagueMembers, profileAchievements, selectedProfileUser?.id]);
+  }, [activePage, rankingUsers, phaseRankingUsers, privateLeagueMembers, profileAchievements, selectedProfileUser?.id]);
 
   useEffect(() => {
     if (
@@ -13931,7 +13979,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                   <span className="ranking-current-stat points">
                     <small>PUNTS</small>
                     <strong>
-                      {currentRankingUser[rankingTab].totalPoints}
+                      {currentRankingUser[rankingTab === "phase" ? "general" : rankingTab].totalPoints}
                     </strong>
                   </span>
                 </button>
@@ -13950,12 +13998,12 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
     }}
   >
                 <strong className="section-info-title">
-                  {rankingTab === "general"
+                  {(rankingTab === "general" || rankingTab === "phase")
                     ? "CRITERIS DE CLASSIFICACIÓ GENERAL I DESEMPAT"
                     : "CRITERIS DE LA JORNADA I DESEMPAT"}
                 </strong>
 
-                {rankingTab === "general" ? (
+                {(rankingTab === "general" || rankingTab === "phase") ? (
                   <>
                     <div className="section-info-points-list">
                       <div className="section-info-points-row featured">
@@ -13964,20 +14012,15 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                       </div>
 
                       <div className="section-info-points-row">
-                        <span>2. Més jornades guanyades</span>
+                        <span>
+                          2. Més medalles aconseguides (cada còpia compta)
+                        </span>
                         <strong>2n</strong>
                       </div>
 
                       <div className="section-info-points-row">
                         <span>
-                          3. Més medalles aconseguides (les repeticions xN també compten)
-                        </span>
-                        <strong>3r</strong>
-                      </div>
-
-                      <div className="section-info-points-row">
-                        <span>
-                          Desempat de medalles: Temporada · Hivern · Pretemporada · Jornada · Nostradamus · Llegeix Flick · Yoyalodije · Candidat · Kamikaze · Xop xop Salinas
+                          Amb el mateix nombre de medalles: Temporada · Apertura/Clausura (mateix valor) · Jornada · Pretemporada · Nostradamus · Llegeix Flick · Yoyalodije · Candidat · Kamikaze · Xop xop Salinas
                         </span>
                         <strong>ORDRE</strong>
                       </div>
@@ -14073,60 +14116,25 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
               </div>
             )}
 
-            <div
-              className="ranking-tabs"
-              role="tablist"
-              aria-label="Tipus de rànquing"
-            >
-              <button
-                type="button"
-                role="tab"
-                aria-selected={rankingTab === "general"}
-                className={
-                  rankingTab === "general"
-                    ? "ranking-tab active"
-                    : "ranking-tab"
-                }
-                onClick={() => changeRankingTab("general")}
-              >
-                GENERAL
-              </button>
-
-              <button
-                type="button"
-                role="tab"
-                aria-selected={rankingTab === "jornada"}
-                className={
-                  rankingTab === "jornada"
-                    ? "ranking-tab active"
-                    : "ranking-tab"
-                }
-                onClick={() => changeRankingTab("jornada")}
-              >
-                JORNADA
-              </button>
-
-              <button
-                type="button"
-                role="tab"
-                aria-selected={rankingTab === "new"}
-                className={
-                  rankingTab === "new"
-                    ? "ranking-tab active"
-                    : "ranking-tab"
-                }
-                onClick={() => changeRankingTab("new")}
-              >
-                PORRA NOVA
-              </button>
+            <div className="ranking-tabs" role="tablist" aria-label="Tipus de rànquing">
+              {[
+                ["jornada", "JORNADA"],
+                ["phase", competitionPhase === "clausura" ? "CLAUSURA" : "APERTURA"],
+                ["general", "GENERAL"],
+                ["new", "PORRA"],
+              ].map(([key, label]) => (
+                <button key={key} type="button" role="tab" aria-selected={rankingTab === key}
+                  className={rankingTab === key ? "ranking-tab active" : "ranking-tab"}
+                  onClick={() => changeRankingTab(key)}>{label}</button>
+              ))}
             </div>
 
             <section className="ranking-board">
               <header className="ranking-board-heading">
   <div>
     <span>
-     {rankingTab === "general"
-  ? "CLASSIFICACIÓ GENERAL"
+     {(rankingTab === "general" || rankingTab === "phase")
+  ? (rankingTab === "phase" ? `CLASSIFICACIÓ ${competitionPhase.toUpperCase()}` : "CLASSIFICACIÓ GENERAL")
   : rankingTab === "new"
     ? "PORRA NOVA"
     : rankingJornadaNumber
@@ -14207,9 +14215,9 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                   <div className="ranking-list">
                     {visibleRankingRows.map((user, index) => {
                                             const position = index + 1;
-                      const points = user[rankingTab];
+                      const points = user[rankingTab === "phase" ? "general" : rankingTab];
                       const movement =
-                        rankingTab === "general"
+                        (rankingTab === "general" || rankingTab === "phase")
                           ? user.generalMovement
                           : null;
                       const showMovement =
@@ -14905,6 +14913,23 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                 )}
 
                 {profileTab === "history" && (
+                  <>
+                    <section className="competition-archives">
+                      <h3>HISTORIAL DE TORNEIGS</h3>
+                      {competitionArchiveError && <p role="alert">{competitionArchiveError}</p>}
+                      {!competitionArchiveError && competitionArchives.length === 0 && <p>L’Apertura 26/27 quedarà guardat aquí quan es tanqui després de l’Osasuna–Barça.</p>}
+                      {competitionArchives.map((archive) => (
+                        <details key={`${archive.season_key}-${archive.phase}`}>
+                          <summary>{archive.phase === "apertura" ? "Apertura" : "Clausura"} · {archive.season_key.replace("TEMPORADA_", "").replace("_", "/")}</summary>
+                          <div className="competition-archive-table"><table>
+                            <thead><tr><th>Posició</th><th>Participant</th><th>Punts</th></tr></thead>
+                            <tbody>{archive.standings.map(row => <tr key={row.user_id}>
+                              <td>{row.ranking_position}</td><td>{row.display_name}</td><td>{row.total_points}</td>
+                            </tr>)}</tbody>
+                          </table></div>
+                        </details>
+                      ))}
+                    </section>
                   <section className="profile-history-card">
                     <header>
                       <div>
@@ -15173,6 +15198,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                       </div>
                     )}
                   </section>
+                  </>
                 )}
 
                 {profileTab === "leagues" &&

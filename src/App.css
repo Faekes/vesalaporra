@@ -3141,7 +3141,7 @@ button:focus-visible {
 }
 
 .ranking-page .ranking-tabs:not(.private-league-ranking-tabs) {
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
 }
 
 .ranking-jornada-navigation {
@@ -10463,3 +10463,17 @@ border-color: #f5c542 !important;
 .app-shell .coe-era-xavi { background:repeating-linear-gradient(146deg,#e3ba37 0 18px,#b72b3b 18px 23px,#e3ba37 23px 37px); }
 .app-shell .coe-era-flick { background:linear-gradient(90deg,#a41f43 0 19%,#09224f 19% 28%,#1452aa 28% 40%,#c62b4b 40% 51%,#8a173b 51% 62%,#0a204b 62% 74%,#1851a1 74% 88%,#a51d42 88%); }
 @media(max-width:600px) { .app-shell .coe-page { padding:10px 10px 48px; } .app-shell .coe-catalog-panel { padding:15px; } .app-shell .coe-team-grid { grid-template-columns:1fr; } .app-shell .coe-team { min-height:110px; gap:12px; padding:12px; } .app-shell .coe-team strong { font-size:18px; } }
+
+/* Every earned medal remains visible, including multiple copies on mobile. */
+.app-shell .ranking-achievement-icons { overflow: visible; flex-wrap: wrap; }
+.app-shell .ranking-achievement-multiplier { display: none; }
+.ranking-page .ranking-tabs:not(.private-league-ranking-tabs) { width: min(100%, 620px); }
+.ranking-page .ranking-tabs:not(.private-league-ranking-tabs) .ranking-tab { padding-inline: 6px; letter-spacing: .04em; }
+.competition-archives { margin-bottom: 20px; padding: 20px; border: 1px solid #ffffff20; border-radius: 18px; background: #10182b; }
+.competition-archives h3 { color: #f4d04b; font-size: 14px; }
+.competition-archives p { color: #bdc7d9; line-height: 1.6; }
+.competition-archives summary { cursor: pointer; padding: 12px 0; font-weight: 800; }
+.competition-archive-table { overflow-x: auto; max-height: 65vh; }
+.competition-archives table { width: 100%; border-collapse: collapse; text-align: left; }
+.competition-archives th, .competition-archives td { padding: 10px; border-bottom: 1px solid #ffffff18; }
+.chrome-bumblebee-icon { width: 100%; height: 100%; }
