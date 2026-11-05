@@ -2584,15 +2584,27 @@ function AchievementIconCopies({ achievement, iconClassName }) {
 
 function RankingAchievementMedal({ achievement }) {
   const count = getAchievementCopyCount(achievement);
-  return Array.from({ length: count }, (_, index) => (
-    <span key={`${achievement.id}-${index}`} className="ranking-achievement-unit"
-      title={count > 1 ? `${achievement.title} · ${index + 1} de ${count}` : achievement.title}
-      aria-label={count > 1 ? `${achievement.title} · ${index + 1} de ${count}` : achievement.title}>
+  const accessibleLabel = count > 1
+    ? `${achievement.title} · aconseguida ${count} vegades`
+    : achievement.title;
+
+  return (
+    <span
+      className="ranking-achievement-unit"
+      title={accessibleLabel}
+      aria-label={accessibleLabel}
+    >
       <span className="ranking-achievement-icon" aria-hidden="true">
         <AchievementIconGraphic achievement={achievement} />
       </span>
+
+      {count > 1 && (
+        <span className="ranking-achievement-multiplier" aria-hidden="true">
+          x{count}
+        </span>
+      )}
     </span>
-  ));
+  );
 }
 
 function RankingAchievementIcons({ achievements, className = "" }) {
