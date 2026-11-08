@@ -3689,7 +3689,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
     useState([]);
   const [privateLeagueMembersLoading, setPrivateLeagueMembersLoading] =
     useState(false);
-  const privateLeagueRankingTab = "general";
+  const [privateLeagueRankingTab, setPrivateLeagueRankingTab] = useState("general");
 
   const [officialMatchState, setOfficialMatchState] = useState(() =>
     createEmptyOfficialMatchState(null),
@@ -14244,10 +14244,13 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                     {visibleRankingRows.map((user, index) => {
                                             const position = index + 1;
                       const points = user[rankingTab === "phase" ? "general" : rankingTab];
+                      // Phase ranking comes from its own RPC: never reuse full-season movement.
                       const movement =
-                        (rankingTab === "general" || rankingTab === "phase")
-                          ? user.generalMovement
-                          : null;
+                        rankingTab === "phase"
+                          ? phaseRankingUsers.find((phaseUser) => phaseUser.id === user.id)?.generalMovement ?? null
+                          : rankingTab === "general"
+                            ? user.generalMovement
+                            : null;
                       const showMovement =
                         Number.isFinite(movement) && movement !== 0;
                       const medal =
@@ -15671,7 +15674,9 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                             <header className="ranking-board-heading">
                               <div>
                                 <span>
-                                  CLASSIFICACIÓ GENERAL
+                                  {privateLeagueRankingTab === "jornada"
+                                    ? `CLASSIFICACIÓ JORNADA${rankingJornadaNumber ? ` ${rankingJornadaNumber}` : ""}`
+                                    : "CLASSIFICACIÓ GENERAL"}
                                 </span>
                                 <strong>{selectedPrivateLeague.name}</strong>
                               </div>
@@ -15683,6 +15688,23 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                               </small>
                             </header>
 
+                            <div className="ranking-tabs" role="tablist" aria-label="Classificació de la lliga privada">
+                              {[
+                                ["general", "GENERAL"],
+                                ["jornada", "JORNADA"],
+                              ].map(([key, label]) => (
+                                <button
+                                  key={key}
+                                  type="button"
+                                  role="tab"
+                                  aria-selected={privateLeagueRankingTab === key}
+                                  className={privateLeagueRankingTab === key ? "ranking-tab active" : "ranking-tab"}
+                                  onClick={() => setPrivateLeagueRankingTab(key)}
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
                             {privateLeagueMembersLoading ? (
                               <div
                                 className="real-data-state empty"
