@@ -14247,7 +14247,9 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                       // Phase ranking comes from its own RPC: never reuse full-season movement.
                       const movement =
                         rankingTab === "phase"
-                          ? phaseRankingUsers.find((phaseUser) => phaseUser.id === user.id)?.generalMovement ?? null
+                          ? (competitionPhase === "apertura"
+                              ? rankingUsers.find((generalUser) => generalUser.id === user.id)?.generalMovement ?? null
+                              : phaseRankingUsers.find((phaseUser) => phaseUser.id === user.id)?.generalMovement ?? null)
                           : rankingTab === "general"
                             ? user.generalMovement
                             : null;
