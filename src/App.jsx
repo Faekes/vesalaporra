@@ -1926,13 +1926,13 @@ const ACHIEVEMENT_CATALOG = [
     icon: "winter-snowflake",
     title: "Campió de l’Apertura 26/27",
     description:
-      "Guanya l’Apertura 2026/27, fins a l’Osasuna–Barça del 10 de gener inclòs.",
+      "Guanya l’Apertura 2026/27, fins al Barça–Reial Societat previst per al 20 de desembre inclòs.",
   },
   {
     id: "clausura_champion_2026_27",
     icon: "chrome-bumblebee",
     title: "Campió del Clausura 26/27",
-    description: "Guanya el Clausura 2026/27, des del Barça–Elche del 17 de gener.",
+    description: "Guanya el Clausura 2026/27, des del partit posterior al Barça–Reial Societat que tanca l’Apertura.",
   },
   {
     id: "winner",
@@ -14950,7 +14950,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                     <section className="competition-archives">
                       <h3>HISTORIAL DE TORNEIGS</h3>
                       {competitionArchiveError && <p role="alert">{competitionArchiveError}</p>}
-                      {!competitionArchiveError && competitionArchives.length === 0 && <p>L’Apertura 26/27 quedarà guardat aquí quan es tanqui després de l’Osasuna–Barça.</p>}
+                      {!competitionArchiveError && competitionArchives.length === 0 && <p>L’Apertura 26/27 quedarà guardat aquí quan es tanqui després del Barça–Reial Societat previst per al 20 de desembre.</p>}
                       {competitionArchives.map((archive) => (
                         <details key={`${archive.season_key}-${archive.phase}`}>
                           <summary>{archive.phase === "apertura" ? "Apertura" : "Clausura"} · {archive.season_key.replace("TEMPORADA_", "").replace("_", "/")}</summary>
@@ -16216,4 +16216,5 @@ function App() {
 }
 
 export default App;
+
 
