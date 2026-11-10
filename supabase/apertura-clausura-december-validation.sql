@@ -12,11 +12,13 @@ DECLARE
  winner_id uuid;
  test_user uuid;
  exact_matches uuid[];
+ preseason_awards_before bigint;
 BEGIN
  IF public.vesalaporra_public_competition_state()->>'phase'<>'apertura' THEN
    RAISE EXCEPTION 'Run this simulation before the actual phase transition';
  END IF;
  SELECT array_agg(id) INTO ids FROM public.profiles;
+ SELECT count(*) INTO preseason_awards_before FROM public.vesalaporra_user_achievements WHERE achievement_key='preseason_champion_2026';
  SELECT final_match_id INTO final_id FROM vp_competition.phases WHERE season_key=sk AND phase='apertura';
  IF NOT EXISTS (SELECT 1 FROM public.vesalaporra_matches WHERE id=final_id AND barcelona_first AND opponent_team_key='real-sociedad') THEN
    RAISE EXCEPTION 'The final fixture must be the home match against Real Sociedad';
@@ -57,20 +59,20 @@ BEGIN
    RAISE EXCEPTION 'Clausura medal progress did not reset to zero';
  END IF;
  IF EXISTS (SELECT 1 FROM public.vesalaporra_public_achievement_multipliers(ids)
-   WHERE achievement_key NOT IN ('preseason_champion_2026','winter_champion_2026')) THEN
+   WHERE achievement_key NOT IN ('winter_champion_2026')) THEN
    RAISE EXCEPTION 'An Apertura ordinary medal leaked into the Clausura';
  END IF;
  IF (SELECT count(*) FROM public.vesalaporra_public_achievement_multipliers(ids)
-   WHERE achievement_key IN ('preseason_champion_2026','winter_champion_2026'))<>2 THEN
-   RAISE EXCEPTION 'Both championship medals must survive the reset';
+   WHERE achievement_key IN ('winter_champion_2026'))<>1 THEN
+   RAISE EXCEPTION 'Only the Apertura championship medal must survive the reset';
  END IF;
  IF EXISTS (SELECT 1 FROM public.profiles p CROSS JOIN LATERAL public.vesalaporra_public_user_achievements(p.id) a
-   WHERE a.achievement_key NOT IN ('preseason_champion_2026','winter_champion_2026')) THEN
+   WHERE a.achievement_key NOT IN ('winter_champion_2026')) THEN
    RAISE EXCEPTION 'Profile medal visibility did not reset';
  END IF;
  IF EXISTS (SELECT 1 FROM public.vesalaporra_public_ranking('general',null,1000) r
    CROSS JOIN LATERAL unnest(r.achievement_keys) a(akey)
-   WHERE a.akey NOT IN ('preseason_champion_2026','winter_champion_2026')) THEN
+   WHERE a.akey NOT IN ('winter_champion_2026')) THEN
    RAISE EXCEPTION 'General ranking still displays old ordinary medals';
  END IF;
  IF EXISTS (SELECT 1 FROM public.vesalaporra_public_ranking('clausura',null,1000) WHERE total_points<>0) THEN
@@ -79,6 +81,9 @@ BEGIN
  SELECT jsonb_agg(jsonb_build_array(user_id,result_points,xi_points,protagonist_points,total_points) ORDER BY user_id)
  INTO points_after FROM public.vesalaporra_public_ranking('general',null,1000);
  IF points_after IS DISTINCT FROM points_before THEN RAISE EXCEPTION 'General season points changed during the reset'; END IF;
+ IF (SELECT count(*) FROM public.vesalaporra_user_achievements WHERE achievement_key='preseason_champion_2026')<>preseason_awards_before THEN
+   RAISE EXCEPTION 'The historical preseason championship award was removed';
+ END IF;
 
  -- Re-earn an ordinary medal using only matches assigned to the new phase.
  SELECT sc.user_id,array_agg(DISTINCT sc.match_id ORDER BY sc.match_id)

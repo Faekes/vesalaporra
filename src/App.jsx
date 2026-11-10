@@ -1945,7 +1945,7 @@ const ACHIEVEMENT_CATALOG = [
     icon: "preseason-sun-sunglasses",
     title: "Campió de la pretemporada 2026",
     description:
-      "Guanya la classificació general definitiva de la pretemporada 2026.",
+      "Guanya la classificació general definitiva de la pretemporada 2026. La medalla es conserva fins al final de l’Apertura.",
   },
   {
     id: "nostradamus",
@@ -4332,7 +4332,9 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
 
   const selectedProfileData = buildRealProfileData(
     profileHistory,
-    profileAchievements.map((achievement) => ({
+    profileAchievements.filter((achievement) =>
+      competitionPhase !== "clausura" || achievement.id !== "preseason_champion_2026",
+    ).map((achievement) => ({
       ...achievement,
       multiplier: achievementMultipliersByUser[selectedProfileUser?.id]?.[achievement.id] || 1,
     })),
@@ -4589,6 +4591,7 @@ const [expandedProfilePrediction, setExpandedProfilePrediction] =
 
 const getRankingAchievements = (user) =>
     ACHIEVEMENT_CATALOG.filter((achievement) =>
+      (competitionPhase !== "clausura" || achievement.id !== "preseason_champion_2026") &&
       (user?.achievementIds || []).includes(achievement.id),
     ).map((achievement) => ({
       ...achievement,
@@ -14048,7 +14051,7 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
 
                       <div className="section-info-points-row">
                         <span>
-                          Amb el mateix nombre de medalles: Temporada · Apertura/Clausura (mateix valor) · Jornada · Pretemporada · Nostradamus · Llegeix Flick · Yoyalodije · Candidat · Kamikaze · Xop xop Salinas
+                          Amb el mateix nombre de medalles: Temporada · Apertura/Clausura (mateix valor) · Jornada{competitionPhase !== "clausura" ? " · Pretemporada" : ""} · Nostradamus · Llegeix Flick · Yoyalodije · Candidat · Kamikaze · Xop xop Salinas
                         </span>
                         <strong>ORDRE</strong>
                       </div>
