@@ -5,6 +5,7 @@ const LazyClashOfErasCatalog = lazy(() => import("./components/ClashOfErasCatalo
 const LazyQuiz14 = lazy(() => import("./components/Quiz14"));
 const LazyQuizAdmin = lazy(() => import("./components/QuizAdmin"));
 import NotificationPreferencesCard from "./components/NotificationPreferencesCard";
+import CompetitionArchiveRanking from "./components/CompetitionArchiveRanking";
 const LazyVesalaporraDemo = lazy(() => import("./components/VesalaporraDemoV3.jsx"));
 import instructionsHtml from "./content/instruccions.html?raw";
 import "./App.css";
@@ -14955,15 +14956,14 @@ const loadRealRanking = async ({ quiet = false, matchId = null } = {}) => {
                       {competitionArchiveError && <p role="alert">{competitionArchiveError}</p>}
                       {!competitionArchiveError && competitionArchives.length === 0 && <p>L’Apertura 26/27 quedarà guardat aquí quan es tanqui després del Barça–Reial Societat previst per al 20 de desembre.</p>}
                       {competitionArchives.map((archive) => (
-                        <details key={`${archive.season_key}-${archive.phase}`}>
-                          <summary>{archive.phase === "apertura" ? "Apertura" : "Clausura"} · {archive.season_key.replace("TEMPORADA_", "").replace("_", "/")}</summary>
-                          <div className="competition-archive-table"><table>
-                            <thead><tr><th>Posició</th><th>Participant</th><th>Punts</th></tr></thead>
-                            <tbody>{archive.standings.map(row => <tr key={row.user_id}>
-                              <td>{row.ranking_position}</td><td>{row.display_name}</td><td>{row.total_points}</td>
-                            </tr>)}</tbody>
-                          </table></div>
-                        </details>
+                        <CompetitionArchiveRanking
+                          key={`${archive.season_key}-${archive.phase}`}
+                          archive={archive}
+                          currentUserId={authUser?.id}
+                          catalog={ACHIEVEMENT_CATALOG}
+                          Avatar={RankingAvatar}
+                          AchievementIcons={RankingAchievementIcons}
+                        />
                       ))}
                     </section>
                   <section className="profile-history-card">

@@ -1,0 +1,77 @@
+.competition-archive-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid #ffffff20;
+  border-radius: 12px;
+  background: #ffffff08;
+  color: #f3f5fa;
+  text-align: left;
+  cursor: pointer;
+}
+.competition-archive-link:hover { border-color: #f4d04b88; background: #f4d04b0c; }
+.competition-archive-link strong, .competition-archive-link small { display: block; }
+.competition-archive-link strong { font-size: 15px; }
+.competition-archive-link small { margin-top: 5px; color: #bdc7d9; }
+.competition-archive-link > span:last-child { color: #f4d04b; font-size: 24px; }
+.competition-archive-dialog {
+  width: min(1180px, calc(100vw - 32px));
+  max-width: none;
+  height: calc(100dvh - 48px);
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  border: 1px solid #ffffff30;
+  border-radius: 20px;
+  background: #0b1120;
+  color: #edf0f7;
+  overflow: auto;
+  overscroll-behavior: contain;
+  box-shadow: 0 24px 100px #000a;
+}
+.competition-archive-dialog::backdrop { background: #030712dc; }
+.competition-archive-dialog .competition-archive-content { width: 100%; padding: 0 0 24px; }
+.competition-archive-heading {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 28px;
+  border-bottom: 1px solid #ffffff18;
+  background: #10182b;
+}
+.competition-archive-heading h2 { margin: 5px 0 0; color: #f4d04b; font-size: 32px; }
+.competition-archive-heading p { margin: 7px 0 0; color: #bdc7d9; font-size: 13px; line-height: 1.5; }
+.competition-archive-close {
+  flex-shrink: 0;
+  padding: 12px 14px;
+  border: 1px solid #f4d04b66;
+  border-radius: 10px;
+  background: #f4d04b12;
+  color: #f4d04b;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.competition-archive-close:focus-visible, .competition-archive-link:focus-visible { outline: 2px solid #f4d04b; outline-offset: 3px; }
+.competition-archive-dialog .ranking-board { width: calc(100% - 40px); margin: 20px auto 0; }
+.competition-archive-dialog .ranking-row:hover { transform: none; }
+.competition-archive-dialog .ranking-name-text { white-space: normal; overflow-wrap: anywhere; }
+.competition-archive-dialog .ranking-identity-copy > strong { flex-wrap: wrap; overflow: visible; white-space: normal; }
+.competition-archive-dialog .ranking-row-medals { flex-wrap: wrap; }
+@media (max-width: 600px) {
+  .competition-archive-dialog { width: calc(100vw - 12px); height: calc(100dvh - 16px); border-radius: 14px; }
+  .competition-archive-heading { align-items: flex-start; flex-direction: column; gap: 12px; padding: 18px 16px; }
+  .competition-archive-heading h2 { font-size: 27px; }
+  .competition-archive-close { padding: 9px 12px; }
+  .competition-archive-dialog .ranking-board { width: calc(100% - 16px); margin-top: 12px; }
+  .competition-archive-dialog .ranking-board-heading { gap: 10px; padding-inline: 12px; }
+  .competition-archive-dialog .ranking-board-heading small { font-size: 8px; }
+}
